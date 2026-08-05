@@ -1,60 +1,82 @@
 package employee.model;
 
-import java.util.Date;
-
-// 사원 급여 계좌
+//사원 급여 계좌 및 정산/지급일 설정
 public class EmployeeSalaryAccount {
-	private Integer accountId;
-	private Integer companyId;
-	private String bankName;
-	private String accountNumber;
-	private String depositStocks;
-	private Date salaryCalculation1;
-	private Date salaryCalculation2;
-	private Date salaryPaymentDate;
+	private Integer employeeId;
+	private Integer salaryCalculation1; // 정산 시작일 (Integer)
+	private Integer salaryCalculation2; // 정산 종료일 (Integer)
+	private Integer salaryPaymentDate; // 급여 지급일 (Integer)
+	private String calc1MonthType; // 신규
+	private String calc2MonthType; // 신규
+	private String paymentMonthType; // 신규
 
-	public EmployeeSalaryAccount(Integer accountId, Integer companyId, String bankName, String accountNumber,
-		String depositStocks, Date salaryCalculation1, Date salaryCalculation2, Date salaryPaymentDate) {
-		this.accountId = accountId;
-		this.companyId = companyId;
-		this.bankName = bankName;
-		this.accountNumber = accountNumber;
-		this.depositStocks = depositStocks;
+	public EmployeeSalaryAccount() {
+	}
+
+	public EmployeeSalaryAccount(Integer employeeId, Integer salaryCalculation1, Integer salaryCalculation2,
+			Integer salaryPaymentDate, String calc1MonthType, String calc2MonthType, String paymentMonthType) {
+		this.employeeId = employeeId;
 		this.salaryCalculation1 = salaryCalculation1;
 		this.salaryCalculation2 = salaryCalculation2;
 		this.salaryPaymentDate = salaryPaymentDate;
+		this.calc1MonthType = calc1MonthType;
+		this.calc2MonthType = calc2MonthType;
+		this.paymentMonthType = paymentMonthType;
 	}
 
-	public Integer getAccountId() {
-		return accountId;
+	public Integer getEmployeeId() {
+		return employeeId;
 	}
 
-	public Integer getCompanyId() {
-		return companyId;
+	public void setEmployeeId(Integer employeeId) {
+		this.employeeId = employeeId;
 	}
 
-	public String getBankName() {
-		return bankName;
-	}
-
-	public String getAccountNumber() {
-		return accountNumber;
-	}
-
-	public String getDepositStocks() {
-		return depositStocks;
-	}
-
-	public Date getSalaryCalculation1() {
+	public Integer getSalaryCalculation1() {
 		return salaryCalculation1;
 	}
 
-	public Date getSalaryCalculation2() {
+	public void setSalaryCalculation1(Integer salaryCalculation1) {
+		this.salaryCalculation1 = salaryCalculation1;
+	}
+
+	public Integer getSalaryCalculation2() {
 		return salaryCalculation2;
 	}
 
-	public Date getSalaryPaymentDate() {
+	public void setSalaryCalculation2(Integer salaryCalculation2) {
+		this.salaryCalculation2 = salaryCalculation2;
+	}
+
+	public Integer getSalaryPaymentDate() {
 		return salaryPaymentDate;
 	}
 
+	public void setSalaryPaymentDate(Integer salaryPaymentDate) {
+		this.salaryPaymentDate = salaryPaymentDate;
+	}
+
+	public String getCalc1MonthType() {
+		return calc1MonthType;
+	}
+
+	public void setCalc1MonthType(String calc1MonthType) {
+		this.calc1MonthType = calc1MonthType;
+	}
+
+	public String getCalc2MonthType() {
+		return calc2MonthType;
+	}
+
+	public void setCalc2MonthType(String calc2MonthType) {
+		this.calc2MonthType = calc2MonthType;
+	}
+
+	public String getPaymentMonthType() {
+		return paymentMonthType;
+	}
+
+	public void setPaymentMonthType(String paymentMonthType) {
+		this.paymentMonthType = paymentMonthType;
+	}
 }
