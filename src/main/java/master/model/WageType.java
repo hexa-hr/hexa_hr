@@ -1,19 +1,25 @@
 package master.model;
 
-//급여 항목 구분 (수당/공제)
+// 급여 종류
 public class WageType {
 	private Integer wageTypeId;
 	private String wageTypeName;
-	private String itemType; // 'P' (지급) / 'D' (공제)
-	private String taxableYn; // 'Y' / 'N' (과세 여부)
-	private Long taxFreeLimit; // 비과세 한도
+	private String numberCut;
+	private String attendanceOrLumpsum;
+	private String attendanceOrLumpsumContent;
+	private String usage; // CHAR(1)
+	private String itemType;
+	private String taxableYn;
+	private Long taxFreeLimit;
 
-	public WageType() {
-	}
-
-	public WageType(Integer wageTypeId, String wageTypeName, String itemType, String taxableYn, Long taxFreeLimit) {
+	public WageType(Integer wageTypeId, String wageTypeName, String numberCut, String attendanceOrLumpsum,
+			String attendanceOrLumpsumContent, String usage, String itemType, String taxableYn, Long taxFreeLimit) {
 		this.wageTypeId = wageTypeId;
 		this.wageTypeName = wageTypeName;
+		this.numberCut = numberCut;
+		this.attendanceOrLumpsum = attendanceOrLumpsum;
+		this.attendanceOrLumpsumContent = attendanceOrLumpsumContent;
+		this.usage = usage;
 		this.itemType = itemType;
 		this.taxableYn = taxableYn;
 		this.taxFreeLimit = taxFreeLimit;
@@ -23,39 +29,36 @@ public class WageType {
 		return wageTypeId;
 	}
 
-	public void setWageTypeId(Integer wageTypeId) {
-		this.wageTypeId = wageTypeId;
-	}
-
 	public String getWageTypeName() {
 		return wageTypeName;
 	}
 
-	public void setWageTypeName(String wageTypeName) {
-		this.wageTypeName = wageTypeName;
+	public String getNumberCut() {
+		return numberCut;
+	}
+
+	public String getAttendanceOrLumpsum() {
+		return attendanceOrLumpsum;
+	}
+
+	public String getAttendanceOrLumpsumContent() {
+		return attendanceOrLumpsumContent;
+	}
+
+	public String getUsage() {
+		return usage;
 	}
 
 	public String getItemType() {
 		return itemType;
 	}
 
-	public void setItemType(String itemType) {
-		this.itemType = itemType;
-	}
-
 	public String getTaxableYn() {
 		return taxableYn;
-	}
-
-	public void setTaxableYn(String taxableYn) {
-		this.taxableYn = taxableYn;
 	}
 
 	public Long getTaxFreeLimit() {
 		return taxFreeLimit;
 	}
 
-	public void setTaxFreeLimit(Long taxFreeLimit) {
-		this.taxFreeLimit = taxFreeLimit;
-	}
 }
