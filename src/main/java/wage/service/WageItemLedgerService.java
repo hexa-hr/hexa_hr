@@ -50,6 +50,11 @@ public class WageItemLedgerService {
 				"시작 월은 종료 월보다 늦을 수 없습니다.");
 		}
 
+		if (start.plusMonths(11).isBefore(end)) {
+			throw new IllegalArgumentException(
+				"조회 기간은 최대 12개월까지 선택할 수 있습니다.");
+		}
+
 		List<String> months = createMonths(start, end);
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
@@ -76,6 +81,7 @@ public class WageItemLedgerService {
 				if (employeeRow == null) {
 					employeeRow = new WageItemLedgerEmployeeRow(
 						row.getEmployeeId(),
+						row.getEmploymentType(),
 						row.getKoreanName(),
 						row.getDepartmentName(),
 						row.getPositionName(),

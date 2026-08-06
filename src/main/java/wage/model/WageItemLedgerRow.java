@@ -4,16 +4,18 @@ package wage.model;
 public class WageItemLedgerRow {
 
 	private Integer employeeId;
+	private String employmentType;
 	private String koreanName;
 	private String departmentName;
 	private String positionName;
 	private String wageMonth;
 	private Long wageValue;
 
-	public WageItemLedgerRow(Integer employeeId, String koreanName,
+	public WageItemLedgerRow(Integer employeeId, String employmentType, String koreanName,
 		String departmentName, String positionName,
 		String wageMonth, Long wageValue) {
 		this.employeeId = employeeId;
+		this.employmentType = employmentType;
 		this.koreanName = koreanName;
 		this.departmentName = departmentName;
 		this.positionName = positionName;
@@ -23,6 +25,10 @@ public class WageItemLedgerRow {
 
 	public Integer getEmployeeId() {
 		return employeeId;
+	}
+
+	public String getEmploymentType() {
+		return employmentType;
 	}
 
 	public String getKoreanName() {

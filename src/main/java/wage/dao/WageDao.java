@@ -16,6 +16,7 @@ public class WageDao {
 		throws SQLException {
 
 		String sql = "SELECT e.employee_id, "
+			+ "       e.employment_type, "
 			+ "       e.korean_name, "
 			+ "       d.department_name, "
 			+ "       p.position_name, "
@@ -31,6 +32,7 @@ public class WageDao {
 			+ "WHERE w.wage_type_id = ? "
 			+ "  AND w.wage_month BETWEEN ? AND ? "
 			+ "GROUP BY e.employee_id, "
+			+ "         e.employment_type, "
 			+ "         e.korean_name, "
 			+ "         d.department_name, "
 			+ "         p.position_name, "
@@ -48,6 +50,7 @@ public class WageDao {
 				while (rs.next()) {
 					WageItemLedgerRow row = new WageItemLedgerRow(
 						rs.getInt("employee_id"),
+						rs.getString("employment_type"),
 						rs.getString("korean_name"),
 						rs.getString("department_name"),
 						rs.getString("position_name"),

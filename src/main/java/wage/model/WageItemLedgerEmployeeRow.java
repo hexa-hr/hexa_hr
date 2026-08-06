@@ -8,16 +8,18 @@ import java.util.Map;
 public class WageItemLedgerEmployeeRow {
 
 	private Integer employeeId;
+	private String employmentType;
 	private String koreanName;
 	private String departmentName;
 	private String positionName;
 	private Map<String, Long> monthlyValues;
 	private Long totalValue;
 
-	public WageItemLedgerEmployeeRow(Integer employeeId, String koreanName,
+	public WageItemLedgerEmployeeRow(Integer employeeId, String employmentType, String koreanName,
 		String departmentName, String positionName, List<String> months) {
 
 		this.employeeId = employeeId;
+		this.employmentType = employmentType;
 		this.koreanName = koreanName;
 		this.departmentName = departmentName;
 		this.positionName = positionName;
@@ -46,6 +48,10 @@ public class WageItemLedgerEmployeeRow {
 		return employeeId;
 	}
 
+	public String getEmploymentType() {
+		return employmentType;
+	}
+
 	public String getKoreanName() {
 		return koreanName;
 	}
@@ -65,4 +71,5 @@ public class WageItemLedgerEmployeeRow {
 	public Long getTotalValue() {
 		return totalValue;
 	}
+
 }
