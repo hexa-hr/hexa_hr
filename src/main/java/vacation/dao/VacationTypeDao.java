@@ -86,4 +86,13 @@ public class VacationTypeDao {
 			return pstmt.executeUpdate();
 		}
 	}
+
+	public int delete(Connection conn, int vacationTypeId) throws SQLException {
+		String sql = "DELETE FROM vacation_type WHERE vacation_type_id = ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, vacationTypeId);
+			return pstmt.executeUpdate();
+		}
+	}
 }
