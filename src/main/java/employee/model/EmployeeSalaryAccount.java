@@ -1,7 +1,5 @@
 package employee.model;
 
-import java.util.Date;
-
 // 사원 급여 계좌
 public class EmployeeSalaryAccount {
 	private Integer accountId;
@@ -9,12 +7,16 @@ public class EmployeeSalaryAccount {
 	private String bankName;
 	private String accountNumber;
 	private String depositStocks;
-	private Date salaryCalculation1;
-	private Date salaryCalculation2;
-	private Date salaryPaymentDate;
+	private Integer salaryCalculation1;
+	private Integer salaryCalculation2;
+	private Integer salaryPaymentDate;
+	private String calc1MonthType; //  'C' 당월 / 'P' 전월
+	private String calc2MonthType; //  'C' 당월 / 'P' 전월 
+	private String paymentMonthType; //  'C' 당월 / 'N' 익월 
 
 	public EmployeeSalaryAccount(Integer accountId, Integer companyId, String bankName, String accountNumber,
-		String depositStocks, Date salaryCalculation1, Date salaryCalculation2, Date salaryPaymentDate) {
+		String depositStocks, Integer salaryCalculation1, Integer salaryCalculation2, Integer salaryPaymentDate,
+		String calc1MonthType, String calc2MonthType, String paymentMonthType) {
 		this.accountId = accountId;
 		this.companyId = companyId;
 		this.bankName = bankName;
@@ -23,6 +25,9 @@ public class EmployeeSalaryAccount {
 		this.salaryCalculation1 = salaryCalculation1;
 		this.salaryCalculation2 = salaryCalculation2;
 		this.salaryPaymentDate = salaryPaymentDate;
+		this.calc1MonthType = calc1MonthType;
+		this.calc2MonthType = calc2MonthType;
+		this.paymentMonthType = paymentMonthType;
 	}
 
 	public Integer getAccountId() {
@@ -45,16 +50,28 @@ public class EmployeeSalaryAccount {
 		return depositStocks;
 	}
 
-	public Date getSalaryCalculation1() {
+	public Integer getSalaryCalculation1() {
 		return salaryCalculation1;
 	}
 
-	public Date getSalaryCalculation2() {
+	public Integer getSalaryCalculation2() {
 		return salaryCalculation2;
 	}
 
-	public Date getSalaryPaymentDate() {
+	public Integer getSalaryPaymentDate() {
 		return salaryPaymentDate;
+	}
+
+	public String getCalc1MonthType() {
+		return calc1MonthType;
+	}
+
+	public String getCalc2MonthType() {
+		return calc2MonthType;
+	}
+
+	public String getPaymentMonthType() {
+		return paymentMonthType;
 	}
 
 }
