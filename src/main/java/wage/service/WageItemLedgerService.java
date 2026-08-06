@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import jdbc.connection.ConnectionProvider;
+import master.dao.WageTypeDao;
+import master.model.WageTypeOption;
 import wage.dao.WageDao;
 import wage.model.WageItemLedgerEmployeeRow;
 import wage.model.WageItemLedgerResult;
@@ -19,6 +21,7 @@ import wage.model.WageItemLedgerRow;
 public class WageItemLedgerService {
 
 	private WageDao wageDao = new WageDao();
+	private WageTypeDao wageTypeDao = new WageTypeDao();
 
 	public WageItemLedgerResult getItemLedger(Integer wageTypeId,
 		String startMonth, String endMonth) {
@@ -113,6 +116,19 @@ public class WageItemLedgerService {
 		} catch (SQLException e) {
 			throw new RuntimeException(
 				"항목별 대장 조회 중 데이터베이스 오류가 발생했습니다.",
+				e);
+		}
+	}
+
+	public List<WageTypeOption> getWageTypeOptions() {
+
+		try (Connection conn = ConnectionProvider.getConnection()) {
+
+			return wageTypeDao.selectWageTypeOptions(conn);
+
+		} catch (SQLException e) {
+			throw new RuntimeException(
+				"급여항목 목록 조회 중 데이터베이스 오류가 발생했습니다.",
 				e);
 		}
 	}

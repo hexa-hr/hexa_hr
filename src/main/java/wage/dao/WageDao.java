@@ -61,4 +61,5 @@ public class WageDao {
 
 		return result;
 	}
+
 }
