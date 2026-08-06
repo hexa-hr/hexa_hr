@@ -76,4 +76,14 @@ public class AttendanceDao {
 			return pstmt.executeUpdate();
 		}
 	}
+
+	// 4. 근태 기록 삭제 (attendance_id 기준)
+	public int deleteAttendance(Connection conn, int attendanceId) throws SQLException {
+		String sql = "DELETE FROM attendance WHERE attendance_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, attendanceId);
+			return pstmt.executeUpdate(); // 삭제 성공 시 1 이상 반환
+		}
+	}
+
 }
