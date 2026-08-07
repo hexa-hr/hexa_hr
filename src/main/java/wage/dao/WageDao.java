@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wage.model.WageItemLedgerRow;
+import wage.model.WageLedgerSummary;
 
 public class WageDao {
 
@@ -58,6 +59,54 @@ public class WageDao {
 						rs.getLong("wage_value"));
 
 					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<WageLedgerSummary> selectWageLedgerSummaries(
+		Connection conn, String year) throws SQLException {
+
+		String sql = "SELECT w.wage_month, "
+			+ "       w.wage_period, "
+			+ "       MIN(w.settlement_period_start_date) AS settlement_start, "
+			+ "       MIN(w.settlement_period_end_date) AS settlement_end, "
+			+ "       MIN(w.wage_payment_date) AS payment_date, "
+			+ "       COUNT(DISTINCT w.employee_id) AS employee_count, "
+			+ "       SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_payment, "
+			+ "       SUM(CASE WHEN wt.item_type = 'D' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_deduction "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE SUBSTR(w.wage_month, 1, 4) = ? "
+			+ "GROUP BY w.wage_month, w.wage_period "
+			+ "ORDER BY w.wage_month, TO_NUMBER(w.wage_period)";
+
+		List<WageLedgerSummary> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, year);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageLedgerSummary summary = new WageLedgerSummary(
+						rs.getString("wage_month"),
+						rs.getString("wage_period"),
+						rs.getDate("settlement_start"),
+						rs.getDate("settlement_end"),
+						rs.getDate("payment_date"),
+						rs.getInt("employee_count"),
+						rs.getLong("total_payment"),
+						rs.getLong("total_deduction"));
+
+					result.add(summary);
 				}
 			}
 		}
