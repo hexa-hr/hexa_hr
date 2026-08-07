@@ -76,6 +76,12 @@ public class WageItemLedgerService {
 
 			for (WageItemLedgerRow row : rawRows) {
 
+				// DAO 조회 결과가 요청한 조회 기간을 벗어나지 않았는지 확인
+				if (!monthlyTotals.containsKey(row.getWageMonth())) {
+					throw new IllegalStateException(
+						"조회 기간을 벗어난 급여 데이터가 포함되어 있습니다.");
+				}
+
 				WageItemLedgerEmployeeRow employeeRow = employeeMap.get(row.getEmployeeId());
 
 				if (employeeRow == null) {
