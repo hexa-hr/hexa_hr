@@ -12,9 +12,10 @@ public class Wage {
 	private Date settlementPeriodStartDate;
 	private Date settlementPeriodEndDate;
 	private Date wagePaymentDate;
+	private String wageMonth;
 
 	public Wage(Integer wageId, Integer employeeId, String wagePeriod, Integer wageTypeId, Long wageValue,
-		Date settlementPeriodStartDate, Date settlementPeriodEndDate, Date wagePaymentDate) {
+		Date settlementPeriodStartDate, Date settlementPeriodEndDate, Date wagePaymentDate, String wageMonth) {
 		this.wageId = wageId;
 		this.employeeId = employeeId;
 		this.wagePeriod = wagePeriod;
@@ -23,6 +24,7 @@ public class Wage {
 		this.settlementPeriodStartDate = settlementPeriodStartDate;
 		this.settlementPeriodEndDate = settlementPeriodEndDate;
 		this.wagePaymentDate = wagePaymentDate;
+		this.wageMonth = wageMonth;
 	}
 
 	public Integer getWageId() {
@@ -55,6 +57,10 @@ public class Wage {
 
 	public Date getWagePaymentDate() {
 		return wagePaymentDate;
+	}
+
+	public String getWageMonth() {
+		return wageMonth;
 	}
 
 }
