@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wage.model.WageItemLedgerRow;
+import wage.model.WageLedgerDetailRow;
 import wage.model.WageLedgerSummary;
 
 public class WageDao {
@@ -112,6 +113,110 @@ public class WageDao {
 		}
 
 		return result;
+	}
+
+	public List<WageLedgerDetailRow> selectWageLedgerDetailRows(
+		Connection conn, String wageMonth, String wagePeriod)
+		throws SQLException {
+
+		String sql = "SELECT e.employee_id, "
+			+ "       e.employment_type, "
+			+ "       e.korean_name, "
+			+ "       e.hire_date, "
+			+ "       d.department_name, "
+			+ "       p.position_name, "
+			+ "       w.wage_type_id, "
+			+ "       SUM(NVL(w.wage_value, 0)) AS wage_value "
+			+ "FROM wage w "
+			+ "JOIN employee e "
+			+ "  ON e.employee_id = w.employee_id "
+			+ "LEFT JOIN department d " // 부서·직위가 없는 사원도 급여대장에 포함되도록 LEFT JOIN 사용
+			+ "  ON d.department_id = e.department_id "
+			+ "LEFT JOIN position p "
+			+ "  ON p.position_id = e.position_id "
+			+ "WHERE w.wage_month = ? "
+			+ "  AND w.wage_period = ? "
+			+ "GROUP BY e.employee_id, "
+			+ "         e.employment_type, "
+			+ "         e.korean_name, "
+			+ "         e.hire_date, "
+			+ "         d.department_name, "
+			+ "         p.position_name, "
+			+ "         w.wage_type_id "
+			+ "ORDER BY e.employee_id, w.wage_type_id";
+
+		List<WageLedgerDetailRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, wageMonth);
+			pstmt.setString(2, wagePeriod);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageLedgerDetailRow row = new WageLedgerDetailRow(
+						rs.getInt("employee_id"),
+						rs.getString("employment_type"),
+						rs.getString("korean_name"),
+						rs.getDate("hire_date"),
+						rs.getString("department_name"),
+						rs.getString("position_name"),
+						rs.getInt("wage_type_id"),
+						rs.getLong("wage_value"));
+
+					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public WageLedgerSummary selectWageLedgerSummary(
+		Connection conn, String wageMonth, String wagePeriod)
+		throws SQLException {
+
+		String sql = "SELECT w.wage_month, "
+			+ "       w.wage_period, "
+			+ "       MIN(w.settlement_period_start_date) AS settlement_start, "
+			+ "       MIN(w.settlement_period_end_date) AS settlement_end, "
+			+ "       MIN(w.wage_payment_date) AS payment_date, "
+			+ "       COUNT(DISTINCT w.employee_id) AS employee_count, "
+			+ "       SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_payment, "
+			+ "       SUM(CASE WHEN wt.item_type = 'D' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_deduction "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE w.wage_month = ? "
+			+ "  AND w.wage_period = ? "
+			+ "GROUP BY w.wage_month, w.wage_period";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, wageMonth);
+			pstmt.setString(2, wagePeriod);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				if (rs.next()) {
+					return new WageLedgerSummary(
+						rs.getString("wage_month"),
+						rs.getString("wage_period"),
+						rs.getDate("settlement_start"),
+						rs.getDate("settlement_end"),
+						rs.getDate("payment_date"),
+						rs.getInt("employee_count"),
+						rs.getLong("total_payment"),
+						rs.getLong("total_deduction"));
+				}
+			}
+		}
+
+		return null;
 	}
 
 }
