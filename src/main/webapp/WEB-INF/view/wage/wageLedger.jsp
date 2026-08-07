@@ -70,7 +70,9 @@
 							<c:set var="sumNetPayment"
 								value="${sumNetPayment + summary.netPayment}" />
 
-							<tr>
+							<tr
+								onclick="location.href='${pageContext.request.contextPath}/wage/ledgerDetail.do?wageMonth=${summary.wageMonth}&wagePeriod=${summary.wagePeriod}'"
+								style="cursor: pointer;">
 								<td>${summary.wageMonth}</td>
 
 								<td>급여-<fmt:formatNumber value="${summary.wagePeriod}"
