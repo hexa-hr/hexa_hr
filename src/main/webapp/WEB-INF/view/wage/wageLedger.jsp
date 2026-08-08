@@ -33,15 +33,11 @@
 
 		<c:choose>
 
-			<c:when test="${empty summaries}">
+			<c:when test="${empty ledgerSummary.summaries}">
 				<p>조회된 급여내역이 없습니다.</p>
 			</c:when>
 
 			<c:otherwise>
-
-				<c:set var="sumPayment" value="0" />
-				<c:set var="sumDeduction" value="0" />
-				<c:set var="sumNetPayment" value="0" />
 
 				<table border="1">
 					<thead>
@@ -59,16 +55,8 @@
 
 					<tbody>
 
-						<c:forEach var="summary" items="${summaries}">
+						<c:forEach var="summary" items="${ledgerSummary.summaries}">
 
-							<c:set var="sumPayment"
-								value="${sumPayment + summary.totalPayment}" />
-
-							<c:set var="sumDeduction"
-								value="${sumDeduction + summary.totalDeduction}" />
-
-							<c:set var="sumNetPayment"
-								value="${sumNetPayment + summary.netPayment}" />
 
 							<tr
 								onclick="location.href='${pageContext.request.contextPath}/wage/ledgerDetail.do?wageMonth=${summary.wageMonth}&wagePeriod=${summary.wagePeriod}'"
@@ -112,13 +100,11 @@
 							<th></th>
 							<th></th>
 
-							<th><fmt:formatNumber value="${sumPayment}" pattern="#,##0" />
-							</th>
-
-							<th><fmt:formatNumber value="${sumDeduction}"
+							<th><fmt:formatNumber value="${ledgerSummary.totalPayment}"
 									pattern="#,##0" /></th>
-
-							<th><fmt:formatNumber value="${sumNetPayment}"
+							<th><fmt:formatNumber
+									value="${ledgerSummary.totalDeduction}" pattern="#,##0" /></th>
+							<th><fmt:formatNumber value="${ledgerSummary.netPayment}"
 									pattern="#,##0" /></th>
 						</tr>
 					</tfoot>

@@ -96,18 +96,7 @@ public class WageDao {
 			try (ResultSet rs = pstmt.executeQuery()) {
 
 				while (rs.next()) {
-
-					WageLedgerSummary summary = new WageLedgerSummary(
-						rs.getString("wage_month"),
-						rs.getString("wage_period"),
-						rs.getDate("settlement_start"),
-						rs.getDate("settlement_end"),
-						rs.getDate("payment_date"),
-						rs.getInt("employee_count"),
-						rs.getLong("total_payment"),
-						rs.getLong("total_deduction"));
-
-					result.add(summary);
+					result.add(mapWageLedgerSummary(rs));
 				}
 			}
 		}
@@ -203,20 +192,26 @@ public class WageDao {
 			try (ResultSet rs = pstmt.executeQuery()) {
 
 				if (rs.next()) {
-					return new WageLedgerSummary(
-						rs.getString("wage_month"),
-						rs.getString("wage_period"),
-						rs.getDate("settlement_start"),
-						rs.getDate("settlement_end"),
-						rs.getDate("payment_date"),
-						rs.getInt("employee_count"),
-						rs.getLong("total_payment"),
-						rs.getLong("total_deduction"));
+					return mapWageLedgerSummary(rs);
 				}
 			}
 		}
 
 		return null;
+	}
+
+	private WageLedgerSummary mapWageLedgerSummary(ResultSet rs)
+		throws SQLException {
+
+		return new WageLedgerSummary(
+			rs.getString("wage_month"),
+			rs.getString("wage_period"),
+			rs.getDate("settlement_start"),
+			rs.getDate("settlement_end"),
+			rs.getDate("payment_date"),
+			rs.getInt("employee_count"),
+			rs.getLong("total_payment"),
+			rs.getLong("total_deduction"));
 	}
 
 }

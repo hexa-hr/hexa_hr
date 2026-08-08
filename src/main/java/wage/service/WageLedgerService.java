@@ -17,6 +17,7 @@ import wage.model.WageLedgerDetailResult;
 import wage.model.WageLedgerDetailRow;
 import wage.model.WageLedgerEmployeeRow;
 import wage.model.WageLedgerSummary;
+import wage.model.WageLedgerSummaryResult;
 
 // 급여대장 조회 서비스
 public class WageLedgerService {
@@ -24,7 +25,7 @@ public class WageLedgerService {
 	private WageDao wageDao = new WageDao();
 	private WageTypeDao wageTypeDao = new WageTypeDao();
 
-	public List<WageLedgerSummary> getWageLedgerSummaries(String year) {
+	public WageLedgerSummaryResult getWageLedgerSummaries(String year) {
 
 		if (year == null || !year.matches("\\d{4}")) {
 			throw new IllegalArgumentException(
@@ -33,7 +34,26 @@ public class WageLedgerService {
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
 
-			return wageDao.selectWageLedgerSummaries(conn, year);
+			List<WageLedgerSummary> summaries = wageDao.selectWageLedgerSummaries(conn, year);
+
+			long totalPayment = 0L;
+			long totalDeduction = 0L;
+
+			for (WageLedgerSummary summary : summaries) {
+
+				if (summary.getTotalPayment() != null) {
+					totalPayment += summary.getTotalPayment();
+				}
+
+				if (summary.getTotalDeduction() != null) {
+					totalDeduction += summary.getTotalDeduction();
+				}
+			}
+
+			return new WageLedgerSummaryResult(
+				summaries,
+				totalPayment,
+				totalDeduction);
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
@@ -52,6 +72,11 @@ public class WageLedgerService {
 
 		wageMonth = wageMonth.trim();
 		wagePeriod = wagePeriod.trim();
+
+		if (wageMonth.isEmpty() || wagePeriod.isEmpty()) {
+			throw new IllegalArgumentException(
+				"귀속연월과 급여차수를 입력해야 합니다.");
+		}
 
 		try {
 			YearMonth.parse(wageMonth);

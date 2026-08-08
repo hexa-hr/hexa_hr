@@ -1,13 +1,12 @@
 package wage.command;
 
 import java.time.Year;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import mvc.command.CommandHandler;
-import wage.model.WageLedgerSummary;
+import wage.model.WageLedgerSummaryResult;
 import wage.service.WageLedgerService;
 
 // 급여대장 급여차수 목록 조회 Handler
@@ -34,9 +33,9 @@ public class WageLedgerHandler implements CommandHandler {
 
 		try {
 
-			List<WageLedgerSummary> summaries = wageLedgerService.getWageLedgerSummaries(year);
+			WageLedgerSummaryResult result = wageLedgerService.getWageLedgerSummaries(year);
 
-			req.setAttribute("summaries", summaries);
+			req.setAttribute("ledgerSummary", result);
 
 		} catch (IllegalArgumentException e) {
 
