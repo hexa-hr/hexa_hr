@@ -20,14 +20,24 @@ public class WageLedgerDetailHandler implements CommandHandler {
 
 		String wageMonth = req.getParameter("wageMonth");
 		String wagePeriod = req.getParameter("wagePeriod");
+		String employmentType = req.getParameter("employmentType");
+		String departmentId = req.getParameter("departmentId");
+		String incomeType = req.getParameter("incomeType");
 
 		req.setAttribute("wageMonth", wageMonth);
 		req.setAttribute("wagePeriod", wagePeriod);
+		req.setAttribute("employmentType", employmentType);
+		req.setAttribute("departmentId", departmentId);
+		req.setAttribute("incomeType", incomeType);
 
 		try {
 
 			WageLedgerDetailResult result = wageLedgerService.getWageLedgerDetail(
-				wageMonth, wagePeriod);
+				wageMonth,
+				wagePeriod,
+				employmentType,
+				departmentId,
+				incomeType);
 
 			req.setAttribute("ledgerDetail", result);
 

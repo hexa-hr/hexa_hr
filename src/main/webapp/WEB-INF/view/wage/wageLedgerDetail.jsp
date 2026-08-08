@@ -41,6 +41,83 @@
 
 		<div style="overflow-x: auto;">
 
+			<form method="get"
+				action="${pageContext.request.contextPath}/wage/ledgerDetail.do">
+
+				<input type="hidden" name="wageMonth"
+					value="<c:out value='${summary.wageMonth}' />"> <input
+					type="hidden" name="wagePeriod"
+					value="<c:out value='${summary.wagePeriod}' />">
+
+				<!-- 고용형태 -->
+				<select name="employmentType">
+					<option value="">전체</option>
+
+					<option value="정규직"
+						<c:if test="${employmentType eq '정규직'}">selected</c:if>>
+						정규직</option>
+
+					<option value="계약직"
+						<c:if test="${employmentType eq '계약직'}">selected</c:if>>
+						계약직</option>
+
+					<option value="임시직"
+						<c:if test="${employmentType eq '임시직'}">selected</c:if>>
+						임시직</option>
+
+					<option value="파견직"
+						<c:if test="${employmentType eq '파견직'}">selected</c:if>>
+						파견직</option>
+
+					<option value="위촉직"
+						<c:if test="${employmentType eq '위촉직'}">selected</c:if>>
+						위촉직</option>
+
+					<option value="일용직"
+						<c:if test="${employmentType eq '일용직'}">selected</c:if>>
+						일용직</option>
+				</select>
+
+
+				<!-- 부서 -->
+				<select name="departmentId">
+					<option value="">전체 부서</option>
+
+					<c:forEach var="department" items="${ledgerDetail.departments}">
+
+						<option value="${department.departmentId}"
+							<c:if test="${departmentId eq department.departmentId.toString()}">
+					selected
+				</c:if>>
+
+							<c:out value="${department.departmentName}" />
+						</option>
+
+					</c:forEach>
+				</select>
+
+
+				<!-- 소득자 구분 -->
+				<select name="incomeType">
+					<option value="">전체</option>
+
+					<option value="worker"
+						<c:if test="${incomeType eq 'worker'}">selected</c:if>>
+						근로소득자</option>
+
+					<option value="business"
+						<c:if test="${incomeType eq 'business'}">selected</c:if>>
+						사업소득자</option>
+
+					<option value="daily"
+						<c:if test="${incomeType eq 'daily'}">selected</c:if>>
+						일용근로자</option>
+				</select>
+
+				<button type="submit">조회</button>
+
+			</form>
+
 			<table border="1">
 				<thead>
 					<tr>
@@ -121,7 +198,7 @@
 									pattern="#,##0" /></th>
 						</c:forEach>
 
-						<th><fmt:formatNumber value="${summary.totalPayment}"
+						<th><fmt:formatNumber value="${ledgerDetail.totalPayment}"
 								pattern="#,##0" /></th>
 
 						<c:forEach var="type" items="${ledgerDetail.deductionTypes}">
@@ -130,10 +207,10 @@
 									pattern="#,##0" /></th>
 						</c:forEach>
 
-						<th><fmt:formatNumber value="${summary.totalDeduction}"
+						<th><fmt:formatNumber value="${ledgerDetail.totalDeduction}"
 								pattern="#,##0" /></th>
 
-						<th><fmt:formatNumber value="${summary.netPayment}"
+						<th><fmt:formatNumber value="${ledgerDetail.netPayment}"
 								pattern="#,##0" /></th>
 					</tr>
 				</tfoot>

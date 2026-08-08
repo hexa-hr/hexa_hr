@@ -108,38 +108,94 @@ public class WageDao {
 		Connection conn, String wageMonth, String wagePeriod)
 		throws SQLException {
 
-		String sql = "SELECT e.employee_id, "
-			+ "       e.employment_type, "
-			+ "       e.korean_name, "
-			+ "       e.hire_date, "
-			+ "       d.department_name, "
-			+ "       p.position_name, "
-			+ "       w.wage_type_id, "
-			+ "       SUM(NVL(w.wage_value, 0)) AS wage_value "
-			+ "FROM wage w "
-			+ "JOIN employee e "
-			+ "  ON e.employee_id = w.employee_id "
-			+ "LEFT JOIN department d " // 부서·직위가 없는 사원도 급여대장에 포함되도록 LEFT JOIN 사용
-			+ "  ON d.department_id = e.department_id "
-			+ "LEFT JOIN position p "
-			+ "  ON p.position_id = e.position_id "
-			+ "WHERE w.wage_month = ? "
-			+ "  AND w.wage_period = ? "
-			+ "GROUP BY e.employee_id, "
-			+ "         e.employment_type, "
-			+ "         e.korean_name, "
-			+ "         e.hire_date, "
-			+ "         d.department_name, "
-			+ "         p.position_name, "
-			+ "         w.wage_type_id "
-			+ "ORDER BY e.employee_id, w.wage_type_id";
+		return selectWageLedgerDetailRows(
+			conn,
+			wageMonth,
+			wagePeriod,
+			null,
+			null,
+			null);
+	}
+
+	public List<WageLedgerDetailRow> selectWageLedgerDetailRows(
+		Connection conn,
+		String wageMonth,
+		String wagePeriod,
+		String employmentType,
+		Integer departmentId,
+		String incomeType)
+		throws SQLException {
+
+		StringBuilder sql = new StringBuilder();
+
+		sql.append("SELECT e.employee_id, ");
+		sql.append("       e.employment_type, ");
+		sql.append("       e.korean_name, ");
+		sql.append("       e.hire_date, ");
+		sql.append("       d.department_name, ");
+		sql.append("       p.position_name, ");
+		sql.append("       w.wage_type_id, ");
+		sql.append("       SUM(NVL(w.wage_value, 0)) AS wage_value ");
+		sql.append("FROM wage w ");
+		sql.append("JOIN employee e ");
+		sql.append("  ON e.employee_id = w.employee_id ");
+		sql.append("LEFT JOIN department d ");
+		sql.append("  ON d.department_id = e.department_id ");
+		sql.append("LEFT JOIN position p ");
+		sql.append("  ON p.position_id = e.position_id ");
+		sql.append("WHERE w.wage_month = ? ");
+		sql.append("  AND w.wage_period = ? ");
+
+		if (employmentType != null) {
+			sql.append("  AND e.employment_type = ? ");
+		}
+
+		if (departmentId != null) {
+			sql.append("  AND e.department_id = ? ");
+		}
+
+		if ("worker".equals(incomeType)) {
+
+			sql.append(
+				"  AND e.employment_type IN "
+					+ "('정규직', '계약직', '파견직', '위촉직') ");
+
+		} else if ("business".equals(incomeType)) {
+
+			sql.append(
+				"  AND e.employment_type = '임시직' ");
+
+		} else if ("daily".equals(incomeType)) {
+
+			sql.append(
+				"  AND e.employment_type = '일용직' ");
+		}
+
+		sql.append("GROUP BY e.employee_id, ");
+		sql.append("         e.employment_type, ");
+		sql.append("         e.korean_name, ");
+		sql.append("         e.hire_date, ");
+		sql.append("         d.department_name, ");
+		sql.append("         p.position_name, ");
+		sql.append("         w.wage_type_id ");
+		sql.append("ORDER BY e.employee_id, w.wage_type_id");
 
 		List<WageLedgerDetailRow> result = new ArrayList<>();
 
-		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+		try (PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
 
-			pstmt.setString(1, wageMonth);
-			pstmt.setString(2, wagePeriod);
+			int parameterIndex = 1;
+
+			pstmt.setString(parameterIndex++, wageMonth);
+			pstmt.setString(parameterIndex++, wagePeriod);
+
+			if (employmentType != null) {
+				pstmt.setString(parameterIndex++, employmentType);
+			}
+
+			if (departmentId != null) {
+				pstmt.setInt(parameterIndex++, departmentId);
+			}
 
 			try (ResultSet rs = pstmt.executeQuery()) {
 

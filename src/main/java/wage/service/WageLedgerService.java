@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 import jdbc.connection.ConnectionProvider;
+import master.dao.DepartmentDao;
 import master.dao.WageTypeDao;
+import master.model.Department;
 import master.model.WageTypeOption;
 import wage.dao.WageDao;
 import wage.model.WageLedgerDetailResult;
@@ -24,6 +26,7 @@ public class WageLedgerService {
 
 	private WageDao wageDao = new WageDao();
 	private WageTypeDao wageTypeDao = new WageTypeDao();
+	private DepartmentDao departmentDao = new DepartmentDao();
 
 	public WageLedgerSummaryResult getWageLedgerSummaries(String year) {
 
@@ -65,6 +68,21 @@ public class WageLedgerService {
 	public WageLedgerDetailResult getWageLedgerDetail(
 		String wageMonth, String wagePeriod) {
 
+		return getWageLedgerDetail(
+			wageMonth,
+			wagePeriod,
+			null,
+			null,
+			null);
+	}
+
+	public WageLedgerDetailResult getWageLedgerDetail(
+		String wageMonth,
+		String wagePeriod,
+		String employmentType,
+		String departmentId,
+		String incomeType) {
+
 		if (wageMonth == null || wagePeriod == null) {
 			throw new IllegalArgumentException(
 				"귀속연월과 급여차수를 입력해야 합니다.");
@@ -101,6 +119,35 @@ public class WageLedgerService {
 
 		wagePeriod = String.valueOf(period);
 
+		employmentType = normalizeOptionalValue(employmentType);
+		departmentId = normalizeOptionalValue(departmentId);
+		incomeType = normalizeOptionalValue(incomeType);
+
+		Integer parsedDepartmentId = null;
+
+		if (departmentId != null) {
+			try {
+				parsedDepartmentId = Integer.valueOf(departmentId);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException(
+					"부서 정보가 올바르지 않습니다.");
+			}
+
+			if (parsedDepartmentId <= 0) {
+				throw new IllegalArgumentException(
+					"부서 정보가 올바르지 않습니다.");
+			}
+		}
+
+		if (incomeType != null
+			&& !"worker".equals(incomeType)
+			&& !"business".equals(incomeType)
+			&& !"daily".equals(incomeType)) {
+
+			throw new IllegalArgumentException(
+				"소득자 구분이 올바르지 않습니다.");
+		}
+
 		try (Connection conn = ConnectionProvider.getConnection()) {
 
 			// 선택한 급여차수의 기본 정보
@@ -111,6 +158,8 @@ public class WageLedgerService {
 				throw new IllegalArgumentException(
 					"해당 급여차수가 존재하지 않습니다.");
 			}
+
+			List<Department> departments = departmentDao.selectDepartments(conn);
 
 			// usage 여부와 관계없이 전체 급여항목 조회
 			List<WageTypeOption> wageTypes = wageTypeDao.selectWageTypeOptions(conn);
@@ -148,7 +197,12 @@ public class WageLedgerService {
 
 			// 사원 × 급여항목 세로형 원본 조회
 			List<WageLedgerDetailRow> rawRows = wageDao.selectWageLedgerDetailRows(
-				conn, wageMonth, wagePeriod);
+				conn,
+				wageMonth,
+				wagePeriod,
+				employmentType,
+				parsedDepartmentId,
+				incomeType);
 
 			Map<Integer, WageLedgerEmployeeRow> employeeMap = new LinkedHashMap<>();
 
@@ -210,17 +264,45 @@ public class WageLedgerService {
 				}
 			}
 
+			long totalPayment = 0L;
+			long totalDeduction = 0L;
+
+			for (WageLedgerEmployeeRow employeeRow : employeeRows) {
+
+				if (employeeRow.getTotalPayment() != null) {
+					totalPayment += employeeRow.getTotalPayment();
+				}
+
+				if (employeeRow.getTotalDeduction() != null) {
+					totalDeduction += employeeRow.getTotalDeduction();
+				}
+			}
+
 			return new WageLedgerDetailResult(
 				summary,
 				paymentTypes,
 				deductionTypes,
 				employeeRows,
-				itemTotals);
+				itemTotals,
+				totalPayment,
+				totalDeduction,
+				departments);
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
 				"급여대장 상세 조회 중 데이터베이스 오류가 발생했습니다.",
 				e);
 		}
+	}
+
+	private String normalizeOptionalValue(String value) {
+
+		if (value == null) {
+			return null;
+		}
+
+		value = value.trim();
+
+		return value.isEmpty() ? null : value;
 	}
 }
