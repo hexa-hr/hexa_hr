@@ -56,4 +56,22 @@ public class AttendanceService {
 			JdbcUtil.close(conn);
 		}
 	}
+
+	// 근태항목 삭제
+	public void removeAttendance(int attendanceTypeId) {
+		Connection conn = null;
+		try {
+			conn = ConnectionProvider.getConnection();
+			conn.setAutoCommit(false);
+
+			attendanceDao.delete(conn, attendanceTypeId);
+
+			conn.commit();
+		} catch (SQLException e) {
+			JdbcUtil.rollback(conn);
+			throw new RuntimeException("근태항목 삭제 오류", e);
+		} finally {
+			JdbcUtil.close(conn);
+		}
+	}
 }

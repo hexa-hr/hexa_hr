@@ -104,4 +104,18 @@ public class AttendanceDao {
 			JdbcUtil.close(pstmt);
 		}
 	}
+
+	// 근태항목 삭제 (Delete)
+	public void delete(Connection conn, int attendanceTypeId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql = "DELETE FROM attendance_type WHERE attendance_type_id = ?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, attendanceTypeId);
+			pstmt.executeUpdate();
+		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
 }
