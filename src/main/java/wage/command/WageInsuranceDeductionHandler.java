@@ -24,9 +24,9 @@ public class WageInsuranceDeductionHandler implements CommandHandler {
 		String wageMonth = trim(req.getParameter("wageMonth"));
 		String wagePeriod = trim(req.getParameter("wagePeriod"));
 
-		// 최초 진입 시 현재 귀속연월과 1차를 기본값으로 사용
+		// 최초 진입 시 전월 귀속연월과 1차를 기본값으로 사용
 		if (wageMonth == null) {
-			wageMonth = YearMonth.now().toString();
+			wageMonth = YearMonth.now().minusMonths(1).toString();
 		}
 
 		if (wagePeriod == null) {
