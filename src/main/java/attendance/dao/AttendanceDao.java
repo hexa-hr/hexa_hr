@@ -138,8 +138,10 @@ public class AttendanceDao {
 		throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String sql = "SELECT e.*, a.attendance_days "
+		String sql = "SELECT e.*, d.department_name, p.position_name, a.attendance_days "
 			+ "FROM employee e "
+			+ "LEFT JOIN department d ON e.department_id = d.department_id "
+			+ "LEFT JOIN position p ON e.position_id = p.position_id "
 			+ "LEFT JOIN attendance a ON e.employee_id = a.employee_id AND a.attendance_type_id = ? "
 			+ "ORDER BY e.employee_id ASC";
 
@@ -178,6 +180,8 @@ public class AttendanceDao {
 
 				Map<String, Object> map = new HashMap<>();
 				map.put("emp", emp);
+				map.put("departmentName", rs.getString("department_name"));
+				map.put("positionName", rs.getString("position_name"));
 				map.put("attendanceDays", attendanceDays);
 				list.add(map);
 			}

@@ -41,22 +41,25 @@
             </tr>
         </thead>
         <tbody>
-            <c:forEach var="item" items="${empVacationList}">
-                <tr>
-                    <td>${item.emp.employmentType}</td>
-                    <td>
-                        No-${item.emp.employeeId}
-                        <input type="hidden" name="employeeId" value="${item.emp.employeeId}">
-                    </td>
-                    <td>${item.emp.koreanName}</td>
-                    <td>${item.emp.departmentId}</td>
-                    <td>${item.emp.positionId}</td>
-                    <td><fmt:formatDate value="${item.emp.hireDate}" pattern="yyyy-MM-dd"/></td>
-                    <td>
-                        <input type="number" name="vacationDays" value="${item.attendanceDays}" style="width: 60px; text-align: right;"> 일
-                    </td>
-                </tr>
-            </c:forEach>
+          <c:forEach var="item" items="${empVacationList}">
+    <tr>
+        <td>${item.emp.employmentType}</td>
+        <td>
+            No-${item.emp.employeeId}
+            <input type="hidden" name="employeeId" value="${item.emp.employeeId}">
+        </td>
+        <td>${item.emp.koreanName}</td>
+        
+        <!-- 숫자 ID 대신 조회된 명칭 출력 -->
+        <td>${empty item.departmentName ? '-' : item.departmentName}</td>
+        <td>${empty item.positionName ? '-' : item.positionName}</td>
+        
+        <td><fmt:formatDate value="${item.emp.hireDate}" pattern="yyyy-MM-dd"/></td>
+        <td>
+            <input type="number" name="vacationDays" value="${item.attendanceDays}" style="width: 60px; text-align: right;"> 일
+        </td>
+    </tr>
+</c:forEach>
         </tbody>
     </table>
 
