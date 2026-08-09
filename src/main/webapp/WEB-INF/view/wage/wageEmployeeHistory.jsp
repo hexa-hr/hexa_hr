@@ -194,7 +194,7 @@ button {
 
 			<button type="button" id="openEmployeeModal">사원선택</button>
 
-			<button type="submit">급여내역 조회</button>
+			<button type="submit" name="search" value="true">급여내역 조회</button>
 
 		</div>
 

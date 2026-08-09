@@ -28,6 +28,7 @@ public class WageEmployeeHistoryHandler implements CommandHandler {
 		String startMonth = trim(req.getParameter("startMonth"));
 		String endMonth = trim(req.getParameter("endMonth"));
 		String employeeIdParam = trim(req.getParameter("employeeId"));
+		boolean searchRequested = "true".equals(req.getParameter("search"));
 
 		// 최초 진입 시 현재 연도의 1월부터 현재 월까지를 기본 조회기간으로 사용
 		YearMonth currentMonth = YearMonth.now();
@@ -45,15 +46,21 @@ public class WageEmployeeHistoryHandler implements CommandHandler {
 		req.setAttribute("selectedEmployeeId", employeeIdParam);
 
 		// 사원 선택 화면에 사용할 전체 사원 목록
-		List<EmployeeSelectRow> employeeRows = employeeSelectService.getEmployeeRows(
-			null,
-			null,
-			null);
+		List<EmployeeSelectRow> employeeRows = employeeSelectService.getEmployeeRows(null, null, null);
 
 		req.setAttribute("employeeRows", employeeRows);
 
-		// 최초 진입 또는 사원 미선택 상태에서는 급여내역을 조회하지 않음
-		if (employeeIdParam == null) {
+		// 최초 진입 시에는 조회하지 않음
+		if (!searchRequested && employeeIdParam == null) {
+			return FORM_VIEW;
+		}
+
+		// 조회 버튼을 눌렀지만 사원을 선택하지 않은 경우
+		if (searchRequested && employeeIdParam == null) {
+			req.setAttribute(
+				"errorMessage",
+				"사원을 선택해야 합니다.");
+
 			return FORM_VIEW;
 		}
 
