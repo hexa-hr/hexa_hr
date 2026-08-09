@@ -14,9 +14,8 @@ public class AttendanceDao {
 
 	// 1. 전체 사원 목록 조회 (JOIN department, position)
 	public List<EmployeeVO> selectAllEmployees(Connection conn) throws SQLException {
-		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, "
-				+ "       d.department_name, p.position_name " + "FROM employee e "
-				+ "LEFT JOIN department d ON e.department_id = d.department_id "
+		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, " + "d.department_name, p.position_name "
+				+ "FROM employee e " + "LEFT JOIN department d ON e.department_id = d.department_id "
 				+ "LEFT JOIN position p ON e.position_id = p.position_id " + "ORDER BY e.employee_id ASC";
 
 		List<EmployeeVO> list = new ArrayList<>();
@@ -32,10 +31,9 @@ public class AttendanceDao {
 	// 2. 특정 사원의 근태 기록 조회 (모달용)
 	public List<AttendanceVO> selectAttendanceByEmpId(Connection conn, int employeeId) throws SQLException {
 		String sql = "SELECT a.attendance_id, a.employee_id, a.input_date, "
-				+ "       t.attendance_type_name, a.start_date, a.end_date, "
-				+ "       a.attendance_days, a.amount, a.summary " + "FROM attendance a "
-				+ "JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id " + "WHERE a.employee_id = ? "
-				+ "ORDER BY a.input_date DESC, a.attendance_id DESC";
+				+ "t.attendance_type_name, a.start_date, a.end_date, " + "a.attendance_days, a.amount, a.summary "
+				+ "FROM attendance a " + "JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id "
+				+ "WHERE a.employee_id = ? " + "ORDER BY a.input_date DESC, a.attendance_id DESC";
 
 		List<AttendanceVO> list = new ArrayList<>();
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -62,7 +60,7 @@ public class AttendanceDao {
 	// 3. 근태 기록 저장 (신규 등록)
 	public int insertAttendance(Connection conn, AttendanceVO vo) throws SQLException {
 		String sql = "INSERT INTO attendance (attendance_id, employee_id, input_date, attendance_type_id, "
-				+ "                        start_date, end_date, attendance_days, amount, summary) "
+				+ "start_date, end_date, attendance_days, amount, summary) "
 				+ "VALUES (attendance_seq.NEXTVAL, ?, SYSDATE, ?, ?, ?, ?, ?, ?)";
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -82,8 +80,39 @@ public class AttendanceDao {
 		String sql = "DELETE FROM attendance WHERE attendance_id = ?";
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setInt(1, attendanceId);
-			return pstmt.executeUpdate(); // 삭제 성공 시 1 이상 반환
+			return pstmt.executeUpdate();
 		}
+	}
+
+	// 5. 월별 전체 사원 근태 기록 조회 (YYYY-MM 기준)
+	public List<AttendanceVO> selectMonthlyAttendance(Connection conn, String yearMonth) throws SQLException {
+		String sql = "SELECT a.attendance_id, a.employee_id, a.input_date, "
+				+ "t.attendance_type_name, a.start_date, a.end_date, " + "a.attendance_days, a.amount, a.summary "
+				+ "FROM attendance a " + "JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id "
+				+ "WHERE TO_CHAR(a.start_date, 'YYYY-MM') <= ? " + "AND TO_CHAR(a.end_date, 'YYYY-MM') >= ? "
+				+ "ORDER BY a.employee_id ASC, a.start_date ASC";
+
+		List<AttendanceVO> list = new ArrayList<>();
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, yearMonth);
+			pstmt.setString(2, yearMonth);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					AttendanceVO vo = new AttendanceVO();
+					vo.setAttendanceId(rs.getInt("attendance_id"));
+					vo.setEmployeeId(rs.getInt("employee_id"));
+					vo.setInputDate(rs.getDate("input_date"));
+					vo.setAttendanceTypeName(rs.getString("attendance_type_name"));
+					vo.setStartDate(rs.getDate("start_date"));
+					vo.setEndDate(rs.getDate("end_date"));
+					vo.setAttendanceDays(rs.getDouble("attendance_days"));
+					vo.setAmount(rs.getInt("amount"));
+					vo.setSummary(rs.getString("summary"));
+					list.add(vo);
+				}
+			}
+		}
+		return list;
 	}
 
 }
