@@ -159,6 +159,17 @@ tr:hover {
 .btn-secondary {
 	background-color: #9ca3af;
 }
+
+.btn-manage {
+	display: inline-block;
+	padding: 4px 10px;
+	background: #4e73df;
+	color: #fff !important;
+	text-decoration: none;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: bold;
+}
 </style>
 </head>
 <body>
@@ -187,9 +198,12 @@ tr:hover {
 							value="vacationTypeSetting.do?selectedVacationId=${vacation.vacationTypeId}&vacationTypeName=${vacation.vacationTypeName}&applyPeriod1=${vacation.applyPeriod1}&applyPeriod2=${vacation.applyPeriod2}&usage=${vacation.usage}" />
 						<tr>
 							<td><a href="${vacUrl}">${vacation.vacationTypeName}</a></td>
-							<td><a href="${vacUrl}">${vacation.applyPeriod1} ~
-									${vacation.applyPeriod2}</a></td>
-							<td><a href="${vacUrl}">${vacation.vacationDays}일</a></td>
+							<td><a href="${vacUrl}">${vacation.applyPeriod1} ~ ${vacation.applyPeriod2}</a></td>
+							<!-- 순수 HTML로 새 창 띄우는 관리 버튼 -->
+							<td style="padding: 5px 0;">
+								<a href="vacationDaysManage.do?attendanceTypeId=${vacation.vacationTypeId}" 
+								   target="_blank" class="btn-manage">관리</a>
+							</td>
 							<td><a href="${vacUrl}">${vacation.usage == 'Y' ? '사용' : '사용안함'}</a></td>
 						</tr>
 					</c:forEach>
@@ -259,42 +273,37 @@ tr:hover {
 					</tr>
 				</thead>
 				<tbody>
-    <c:forEach var="att" items="${attendanceList}">
-        <c:set var="attUrl" value="vacationTypeSetting.do?selectedAttId=${att.attendanceTypeId}&attName=${att.attendanceTypeName}&attUnit=${att.unit}&attGroupId=${att.attendanceGroupId}&attVacationId=${att.vacationTypeId}&attUsage=${att.usage}" />
-        <tr>
-            <td><a href="${attUrl}">${att.attendanceTypeName}</a></td>
-            <td><a href="${attUrl}">${att.unit}</a></td>
-            
-            <!-- 1. 근태그룹 ID에 해당하는 그룹명 찾기 -->
-            <td>
-                <a href="${attUrl}">
-                    <c:set var="groupName" value="" />
-                    <c:forEach var="group" items="${attendanceGroupList}">
-                        <c:if var="isMatch" test="${group.attendanceGroupId == att.attendanceGroupId}">
-                            <c:set var="groupName" value="${group.attendanceGroupName}" />
-                        </c:if>
-                    </c:forEach>
-                    ${empty groupName ? '-' : groupName}
-                </a>
-            </td>
-            
-            <!-- 2. 휴가공제 ID에 해당하는 휴가항목명 찾기 -->
-            <td>
-                <a href="${attUrl}">
-                    <c:set var="vacName" value="" />
-                    <c:forEach var="vac" items="${vacationList}">
-                        <c:if var="isMatch" test="${vac.vacationTypeId == att.vacationTypeId}">
-                            <c:set var="vacName" value="${vac.vacationTypeName}" />
-                        </c:if>
-                    </c:forEach>
-                    ${empty vacName ? '-' : vacName}
-                </a>
-            </td>
-            
-            <td><a href="${attUrl}">${att.usage == 'Y' ? '사용' : '사용안함'}</a></td>
-        </tr>
-    </c:forEach>
-</tbody>
+					<c:forEach var="att" items="${attendanceList}">
+						<c:set var="attUrl" value="vacationTypeSetting.do?selectedAttId=${att.attendanceTypeId}&attName=${att.attendanceTypeName}&attUnit=${att.unit}&attGroupId=${att.attendanceGroupId}&attVacationId=${att.vacationTypeId}&attUsage=${att.usage}" />
+						<tr>
+							<td><a href="${attUrl}">${att.attendanceTypeName}</a></td>
+							<td><a href="${attUrl}">${att.unit}</a></td>
+							<td>
+								<a href="${attUrl}">
+									<c:set var="groupName" value="" />
+									<c:forEach var="group" items="${attendanceGroupList}">
+										<c:if test="${group.attendanceGroupId == att.attendanceGroupId}">
+											<c:set var="groupName" value="${group.attendanceGroupName}" />
+										</c:if>
+									</c:forEach>
+									${empty groupName ? '-' : groupName}
+								</a>
+							</td>
+							<td>
+								<a href="${attUrl}">
+									<c:set var="vacName" value="" />
+									<c:forEach var="vac" items="${vacationList}">
+										<c:if test="${vac.vacationTypeId == att.vacationTypeId}">
+											<c:set var="vacName" value="${vac.vacationTypeName}" />
+										</c:if>
+									</c:forEach>
+									${empty vacName ? '-' : vacName}
+								</a>
+							</td>
+							<td><a href="${attUrl}">${att.usage == 'Y' ? '사용' : '사용안함'}</a></td>
+						</tr>
+					</c:forEach>
+				</tbody>
 			</table>
 		</div>
 
@@ -358,5 +367,6 @@ tr:hover {
 			</form>
 		</div>
 	</div>
+
 </body>
 </html>
