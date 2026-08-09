@@ -12,14 +12,10 @@ public class AttendanceGroupResetHandler implements CommandHandler {
 
 	@Override
 	public String process(HttpServletRequest req, HttpServletResponse res) throws Exception {
-		if (!req.getMethod().equalsIgnoreCase("POST")) {
-			res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-			return null;
-		}
-
 		groupService.resetGroups();
 
-		res.setStatus(HttpServletResponse.SC_OK);
+		// 초기화 후 목록 화면으로 리다이렉트
+		res.sendRedirect(req.getContextPath() + "/attendanceGroupManage.do");
 		return null;
 	}
 }

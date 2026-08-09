@@ -12,11 +12,6 @@ public class AttendanceGroupUpdateHandler implements CommandHandler {
 
 	@Override
 	public String process(HttpServletRequest req, HttpServletResponse res) throws Exception {
-		if (!req.getMethod().equalsIgnoreCase("POST")) {
-			res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-			return null;
-		}
-
 		req.setCharacterEncoding("UTF-8");
 		String idStr = req.getParameter("attendanceGroupId");
 		String groupName = req.getParameter("groupName");
@@ -26,7 +21,8 @@ public class AttendanceGroupUpdateHandler implements CommandHandler {
 			groupService.updateGroup(id, groupName.trim());
 		}
 
-		res.setStatus(HttpServletResponse.SC_OK);
+		// 수정 후 목록 화면으로 리다이렉트
+		res.sendRedirect(req.getContextPath() + "/attendanceGroupManage.do");
 		return null;
 	}
 }

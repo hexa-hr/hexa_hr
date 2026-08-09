@@ -1,4 +1,4 @@
-package vacation.command;
+package attendance.command;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import mvc.command.CommandHandler;
 import vacation.model.VacationType;
 import vacation.service.VacationTypeService;
 
-public class VacationTypeSettingHandler implements CommandHandler {
+public class AttendanceTypeSettingHandler implements CommandHandler {
 
 	private VacationTypeService vacationService = new VacationTypeService();
 	private AttendanceService attendanceService = new AttendanceService();
@@ -28,10 +28,9 @@ public class VacationTypeSettingHandler implements CommandHandler {
 		// 2. 근태항목 목록 조회
 		List<AttendanceType> attendanceList = attendanceService.getAttendanceList();
 
-		// 3. 근태그룹 목록 조회 (드롭다운 용)
+		// 3. 근태그룹 목록 조회
 		List<AttendanceGroup> attendanceGroupList = groupService.getGroupList();
 
-		// 4. Request 전달 영역 저장
 		req.setAttribute("vacationList", vacationList);
 		req.setAttribute("attendanceList", attendanceList);
 		req.setAttribute("attendanceGroupList", attendanceGroupList);

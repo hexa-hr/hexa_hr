@@ -12,11 +12,6 @@ public class AttendanceGroupSaveHandler implements CommandHandler {
 
 	@Override
 	public String process(HttpServletRequest req, HttpServletResponse res) throws Exception {
-		if (!req.getMethod().equalsIgnoreCase("POST")) {
-			res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-			return null;
-		}
-
 		req.setCharacterEncoding("UTF-8");
 		String groupName = req.getParameter("groupName");
 
@@ -24,8 +19,8 @@ public class AttendanceGroupSaveHandler implements CommandHandler {
 			groupService.addGroup(groupName.trim());
 		}
 
-		// AJAX 응답 처리 (성공 200 OK)
-		res.setStatus(HttpServletResponse.SC_OK);
+		// 저장 후 목록 화면으로 리다이렉트
+		res.sendRedirect(req.getContextPath() + "/attendanceGroupManage.do");
 		return null;
 	}
 }
