@@ -12,6 +12,7 @@ import wage.model.WageInsuranceDeductionRow;
 import wage.model.WageItemLedgerRow;
 import wage.model.WageLedgerDetailRow;
 import wage.model.WageLedgerSummary;
+import wage.model.WageMonthlyTotalStatisticsRow;
 
 public class WageDao {
 
@@ -406,6 +407,46 @@ public class WageDao {
 						rs.getLong("health_insurance"),
 						rs.getLong("long_term_care_insurance"),
 						rs.getLong("employment_insurance"));
+
+					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<WageMonthlyTotalStatisticsRow> selectMonthlyTotalStatisticsRows(
+		Connection conn,
+		String year)
+		throws SQLException {
+
+		String sql = "SELECT w.wage_month, "
+			+ "       SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                THEN NVL(w.wage_value, 0) "
+			+ "                ELSE 0 END) AS total_payment, "
+			+ "       COUNT(DISTINCT w.employee_id) AS employee_count "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE SUBSTR(w.wage_month, 1, 4) = ? "
+			+ "GROUP BY w.wage_month "
+			+ "ORDER BY w.wage_month";
+
+		List<WageMonthlyTotalStatisticsRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, year);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageMonthlyTotalStatisticsRow row = new WageMonthlyTotalStatisticsRow(
+						rs.getString("wage_month"),
+						rs.getLong("total_payment"),
+						rs.getInt("employee_count"));
 
 					result.add(row);
 				}
