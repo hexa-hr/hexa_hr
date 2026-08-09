@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wage.model.WageEmployeeHistoryRow;
+import wage.model.WageInsuranceDeductionRow;
 import wage.model.WageItemLedgerRow;
 import wage.model.WageLedgerDetailRow;
 import wage.model.WageLedgerSummary;
@@ -335,6 +336,76 @@ public class WageDao {
 						rs.getLong("employment_insurance"),
 						rs.getLong("income_tax"),
 						rs.getLong("local_income_tax"));
+
+					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<WageInsuranceDeductionRow> selectWageInsuranceDeductionRows(
+		Connection conn,
+		String wageMonth,
+		String wagePeriod)
+		throws SQLException {
+
+		String sql = "SELECT e.employee_id, "
+			+ "       e.employment_type, "
+			+ "       e.korean_name, "
+			+ "       e.hire_date, "
+			+ "       d.department_name, "
+			+ "       p.position_name, "
+			+ "       SUM(CASE WHEN wt.wage_type_name = '국민연금' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS national_pension, "
+			+ "       SUM(CASE WHEN wt.wage_type_name = '건강보험' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS health_insurance, "
+			+ "       SUM(CASE WHEN wt.wage_type_name = '장기요양보험' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS long_term_care_insurance, "
+			+ "       SUM(CASE WHEN wt.wage_type_name = '고용보험' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS employment_insurance "
+			+ "FROM wage w "
+			+ "JOIN employee e "
+			+ "  ON e.employee_id = w.employee_id "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "LEFT JOIN department d "
+			+ "  ON d.department_id = e.department_id "
+			+ "LEFT JOIN position p "
+			+ "  ON p.position_id = e.position_id "
+			+ "WHERE w.wage_month = ? "
+			+ "  AND w.wage_period = ? "
+			+ "GROUP BY e.employee_id, "
+			+ "         e.employment_type, "
+			+ "         e.korean_name, "
+			+ "         e.hire_date, "
+			+ "         d.department_name, "
+			+ "         p.position_name "
+			+ "ORDER BY e.employee_id";
+
+		List<WageInsuranceDeductionRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, wageMonth);
+			pstmt.setString(2, wagePeriod);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageInsuranceDeductionRow row = new WageInsuranceDeductionRow(
+						rs.getInt("employee_id"),
+						rs.getString("employment_type"),
+						rs.getString("korean_name"),
+						rs.getDate("hire_date"),
+						rs.getString("department_name"),
+						rs.getString("position_name"),
+						rs.getLong("national_pension"),
+						rs.getLong("health_insurance"),
+						rs.getLong("long_term_care_insurance"),
+						rs.getLong("employment_insurance"));
 
 					result.add(row);
 				}
