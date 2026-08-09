@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import wage.model.WageEmployeeHistoryRow;
 import wage.model.WageItemLedgerRow;
 import wage.model.WageLedgerDetailRow;
 import wage.model.WageLedgerSummary;
@@ -268,6 +269,79 @@ public class WageDao {
 			rs.getInt("employee_count"),
 			rs.getLong("total_payment"),
 			rs.getLong("total_deduction"));
+	}
+
+	public List<WageEmployeeHistoryRow> selectWageEmployeeHistoryRows(
+		Connection conn,
+		Integer employeeId,
+		String startMonth,
+		String endMonth)
+		throws SQLException {
+
+		String sql = "SELECT w.wage_month, "
+			+ "       w.wage_period, "
+			+ "       SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) "
+			+ "       - SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                       AND wt.taxable_yn = 'N' "
+			+ "                  THEN LEAST(NVL(w.wage_value, 0), "
+			+ "                             NVL(wt.tax_free_limit, 0)) "
+			+ "                  ELSE 0 END) AS monthly_remuneration, "
+			+ "       SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_payment, "
+			+ "       SUM(CASE WHEN wt.item_type = 'D' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_deduction, "
+			+ "       SUM(CASE WHEN wt.wage_type_name = '국민연금' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS national_pension, "
+			+ "       SUM(CASE WHEN wt.wage_type_name = '건강보험' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS health_insurance, "
+			+ "       SUM(CASE WHEN wt.wage_type_name = '장기요양보험' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS long_term_care_insurance, "
+			+ "       SUM(CASE WHEN wt.wage_type_name = '고용보험' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS employment_insurance, "
+			+ "       SUM(CASE WHEN wt.wage_type_name = '소득세' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS income_tax, "
+			+ "       SUM(CASE WHEN wt.wage_type_name = '지방소득세' "
+			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS local_income_tax "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE w.employee_id = ? "
+			+ "  AND w.wage_month BETWEEN ? AND ? "
+			+ "GROUP BY w.wage_month, w.wage_period "
+			+ "ORDER BY w.wage_month, TO_NUMBER(w.wage_period)";
+
+		List<WageEmployeeHistoryRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, employeeId);
+			pstmt.setString(2, startMonth);
+			pstmt.setString(3, endMonth);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageEmployeeHistoryRow row = new WageEmployeeHistoryRow(
+						rs.getString("wage_month"),
+						rs.getString("wage_period"),
+						rs.getLong("monthly_remuneration"),
+						rs.getLong("total_payment"),
+						rs.getLong("total_deduction"),
+						rs.getLong("national_pension"),
+						rs.getLong("health_insurance"),
+						rs.getLong("long_term_care_insurance"),
+						rs.getLong("employment_insurance"),
+						rs.getLong("income_tax"),
+						rs.getLong("local_income_tax"));
+
+					result.add(row);
+				}
+			}
+		}
+
+		return result;
 	}
 
 }
