@@ -1,0 +1,419 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>4대보험 공제내역</title>
+
+<style>
+body {
+	font-family: Arial, sans-serif;
+	margin: 30px;
+}
+
+.search-form {
+	border: 1px solid #ccc;
+	padding: 20px;
+	width: 900px;
+}
+
+.search-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+label {
+	font-weight: bold;
+}
+
+input, select, button {
+	padding: 7px;
+}
+
+button {
+	cursor: pointer;
+}
+
+.error-message {
+	margin-top: 15px;
+	color: red;
+	font-weight: bold;
+}
+
+.summary-info {
+	margin-top: 20px;
+	display: flex;
+	gap: 30px;
+}
+
+.result-container {
+	margin-top: 25px;
+	overflow-x: auto;
+}
+
+.result-table {
+	border-collapse: collapse;
+	min-width: 1900px;
+	white-space: nowrap;
+}
+
+.result-table th, .result-table td {
+	border: 1px solid #aaa;
+	padding: 8px 10px;
+}
+
+.result-table th {
+	background-color: #f2f2f2;
+	text-align: center;
+}
+
+.result-table td {
+	text-align: right;
+}
+
+.result-table td.employee-info {
+	text-align: center;
+}
+
+.result-table .group-pension {
+	background-color: #eef8fb;
+}
+
+.result-table .group-health {
+	background-color: #f3f8ee;
+}
+
+.result-table .group-care {
+	background-color: #fff8e8;
+}
+
+.result-table .group-employment {
+	background-color: #fff3ef;
+}
+
+.result-table .group-total {
+	background-color: #f5efff;
+}
+
+.result-table tfoot th {
+	background-color: #fffde0;
+	font-weight: bold;
+}
+
+.no-data {
+	margin-top: 25px;
+}
+</style>
+</head>
+
+<body>
+
+	<h1>4대보험 공제내역</h1>
+
+	<p>귀속연월 및 급여차수를 기준으로 근로자와 사업주의 4대보험 부담내역을 조회합니다.</p>
+
+	<form class="search-form" method="get"
+		action="${pageContext.request.contextPath}/wage/insuranceDeduction.do">
+
+		<div class="search-row">
+
+			<label for="wageMonth">귀속연월</label> <input type="month"
+				id="wageMonth" name="wageMonth"
+				value="<c:out value='${selectedWageMonth}' />" required> <label
+				for="wagePeriod">급여차수</label> <select id="wagePeriod"
+				name="wagePeriod" required>
+
+				<c:forEach var="period" begin="1" end="10">
+
+					<option value="${period}"
+						<c:if test="${selectedWagePeriod == period}">
+							selected
+						</c:if>>
+						급여-
+						<fmt:formatNumber value="${period}" pattern="00" />차
+					</option>
+
+				</c:forEach>
+
+			</select>
+
+			<button type="submit">공제내역 조회</button>
+
+		</div>
+
+		<c:if test="${not empty errorMessage}">
+			<div class="error-message">
+				<c:out value="${errorMessage}" />
+			</div>
+		</c:if>
+
+	</form>
+
+
+	<c:if test="${not empty insuranceDeduction}">
+
+		<c:choose>
+
+			<c:when test="${empty insuranceDeduction.rows}">
+
+				<div class="no-data">4대보험 공제내역 데이터가 없습니다.</div>
+
+			</c:when>
+
+			<c:otherwise>
+
+				<div class="summary-info">
+
+					<div>
+						<strong>정산기간:</strong>
+
+						<fmt:formatDate
+							value="${insuranceDeduction.summary.settlementPeriodStartDate}"
+							pattern="yyyy-MM-dd" />
+
+						~
+
+						<fmt:formatDate
+							value="${insuranceDeduction.summary.settlementPeriodEndDate}"
+							pattern="yyyy-MM-dd" />
+					</div>
+
+					<div>
+						<strong>급여지급일:</strong>
+
+						<fmt:formatDate
+							value="${insuranceDeduction.summary.wagePaymentDate}"
+							pattern="yyyy-MM-dd" />
+					</div>
+
+				</div>
+
+
+				<div class="result-container">
+
+					<table class="result-table">
+
+						<thead>
+
+							<tr>
+
+								<th colspan="5">사원정보</th>
+
+								<th colspan="3" class="group-pension">국민연금</th>
+
+								<th colspan="3" class="group-health">건강보험</th>
+
+								<th colspan="3" class="group-care">노인장기요양보험</th>
+
+								<th colspan="3" class="group-employment">고용보험</th>
+
+								<th colspan="3" class="group-total">총 합계</th>
+
+							</tr>
+
+							<tr>
+
+								<th>구분</th>
+								<th>성명</th>
+								<th>입사일</th>
+								<th>부서</th>
+								<th>직위</th>
+
+								<th>사업주</th>
+								<th>근로자</th>
+								<th>합계</th>
+
+								<th>사업주</th>
+								<th>근로자</th>
+								<th>합계</th>
+
+								<th>사업주</th>
+								<th>근로자</th>
+								<th>합계</th>
+
+								<th>사업주</th>
+								<th>근로자</th>
+								<th>합계</th>
+
+								<th>사업주</th>
+								<th>근로자</th>
+								<th>합계</th>
+
+							</tr>
+
+						</thead>
+
+
+						<tbody>
+
+							<c:forEach var="row" items="${insuranceDeduction.rows}">
+
+								<tr>
+
+									<td class="employee-info"><c:out
+											value="${row.employmentType}" /></td>
+
+									<td class="employee-info"><c:out value="${row.koreanName}" />
+									</td>
+
+									<td class="employee-info"><fmt:formatDate
+											value="${row.hireDate}" pattern="yyyy-MM-dd" /></td>
+
+									<td class="employee-info"><c:out
+											value="${row.departmentName}" /></td>
+
+									<td class="employee-info"><c:out
+											value="${row.positionName}" /></td>
+
+
+									<td><fmt:formatNumber
+											value="${row.nationalPensionEmployer}" pattern="#,##0" /></td>
+
+									<td><fmt:formatNumber
+											value="${row.nationalPensionEmployee}" pattern="#,##0" /></td>
+
+									<td><fmt:formatNumber value="${row.nationalPensionTotal}"
+											pattern="#,##0" /></td>
+
+
+									<td><fmt:formatNumber
+											value="${row.healthInsuranceEmployer}" pattern="#,##0" /></td>
+
+									<td><fmt:formatNumber
+											value="${row.healthInsuranceEmployee}" pattern="#,##0" /></td>
+
+									<td><fmt:formatNumber value="${row.healthInsuranceTotal}"
+											pattern="#,##0" /></td>
+
+
+									<td><fmt:formatNumber
+											value="${row.longTermCareInsuranceEmployer}" pattern="#,##0" />
+									</td>
+
+									<td><fmt:formatNumber
+											value="${row.longTermCareInsuranceEmployee}" pattern="#,##0" />
+									</td>
+
+									<td><fmt:formatNumber
+											value="${row.longTermCareInsuranceTotal}" pattern="#,##0" />
+									</td>
+
+
+									<td><fmt:formatNumber
+											value="${row.employmentInsuranceEmployer}" pattern="#,##0" />
+									</td>
+
+									<td><fmt:formatNumber
+											value="${row.employmentInsuranceEmployee}" pattern="#,##0" />
+									</td>
+
+									<td><fmt:formatNumber
+											value="${row.employmentInsuranceTotal}" pattern="#,##0" /></td>
+
+
+									<td><fmt:formatNumber value="${row.employerTotal}"
+											pattern="#,##0" /></td>
+
+									<td><fmt:formatNumber value="${row.employeeTotal}"
+											pattern="#,##0" /></td>
+
+									<td><fmt:formatNumber value="${row.grandTotal}"
+											pattern="#,##0" /></td>
+
+								</tr>
+
+							</c:forEach>
+
+						</tbody>
+
+
+						<tfoot>
+
+							<tr>
+
+								<th colspan="5">합계</th>
+
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalNationalPensionEmployer}"
+										pattern="#,##0" /></th>
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalNationalPensionEmployee}"
+										pattern="#,##0" /></th>
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalNationalPension}"
+										pattern="#,##0" /></th>
+
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalHealthInsuranceEmployer}"
+										pattern="#,##0" /></th>
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalHealthInsuranceEmployee}"
+										pattern="#,##0" /></th>
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalHealthInsurance}"
+										pattern="#,##0" /></th>
+
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalLongTermCareInsuranceEmployer}"
+										pattern="#,##0" /></th>
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalLongTermCareInsuranceEmployee}"
+										pattern="#,##0" /></th>
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalLongTermCareInsurance}"
+										pattern="#,##0" /></th>
+
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalEmploymentInsuranceEmployer}"
+										pattern="#,##0" /></th>
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalEmploymentInsuranceEmployee}"
+										pattern="#,##0" /></th>
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalEmploymentInsurance}"
+										pattern="#,##0" /></th>
+
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalEmployer}" pattern="#,##0" />
+								</th>
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.totalEmployee}" pattern="#,##0" />
+								</th>
+
+								<th><fmt:formatNumber
+										value="${insuranceDeduction.grandTotal}" pattern="#,##0" /></th>
+
+							</tr>
+
+						</tfoot>
+
+					</table>
+
+				</div>
+
+			</c:otherwise>
+
+		</c:choose>
+
+	</c:if>
+
+</body>
+</html>
