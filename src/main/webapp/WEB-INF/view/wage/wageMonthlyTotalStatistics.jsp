@@ -8,6 +8,12 @@
 <meta charset="UTF-8">
 <title>월별 전체급여 통계</title>
 
+<script
+	src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
+<script
+	src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
 <style>
 body {
 	font-family: Arial, sans-serif;
@@ -19,8 +25,9 @@ body {
 }
 
 .search-form {
-	border: 1px solid #ccc;
-	padding: 20px;
+	background-color: #f7f8fa;
+	border: 1px solid #e3e8ef;
+	padding: 14px 20px;
 }
 
 .search-row {
@@ -30,11 +37,19 @@ body {
 }
 
 label {
-	font-weight: bold;
+	color: #333;
 }
 
-input, button {
-	padding: 7px;
+.required-mark {
+	color: #d9534f;
+}
+
+select, button {
+	padding: 6px 10px;
+}
+
+select {
+	border: 1px solid #b9c2cf;
 }
 
 button {
@@ -47,6 +62,13 @@ button {
 	font-weight: bold;
 }
 
+.chart-container {
+	position: relative;
+	width: 100%;
+	height: 430px;
+	margin-top: 30px;
+}
+
 .result-container {
 	margin-top: 30px;
 	overflow-x: auto;
@@ -54,37 +76,45 @@ button {
 
 .result-table {
 	border-collapse: collapse;
-	min-width: 1400px;
+	table-layout: fixed;
 	width: 100%;
 	white-space: nowrap;
+	font-size: 13px;
+	border-top: 2px solid #4a80c0;
+}
+
+.result-table .col-title {
+	width: 120px;
 }
 
 .result-table th, .result-table td {
-	border: 1px solid #aaa;
-	padding: 9px 12px;
+	border: 1px solid #dde3ea;
+	padding: 8px 12px;
 	text-align: right;
+	color: #33639c;
 }
 
 .result-table th {
-	background-color: #f2f2f2;
+	background-color: #eef2f8;
 	text-align: center;
+	color: #333;
 }
 
 .result-table .row-title {
 	text-align: left;
-	font-weight: bold;
-	background-color: #f8f8f8;
+	background-color: #f5f7fa;
+	color: #333;
+	white-space: normal;
+	word-break: keep-all;
 }
 
 .result-table .growth-title {
 	text-align: left;
 	padding-left: 25px;
-	background-color: #fafafa;
-}
-
-.result-table .total-column {
-	background-color: #fffde0;
-	font-weight: bold;
+	background-color: #f5f7fa;
+	color: #333;
+	white-space: normal;
+	word-break: keep-all;
 }
 
 .positive {
@@ -93,6 +123,10 @@ button {
 
 .negative {
 	color: blue;
+}
+
+.neutral {
+	color: #333;
 }
 </style>
 </head>
@@ -103,16 +137,30 @@ button {
 
 	<p class="description">귀속년도를 선택하면 월별 전체 급여액과 인원현황을 확인할 수 있습니다.</p>
 
+	<jsp:useBean id="today" class="java.util.Date" />
+
+	<fmt:formatDate value="${today}" pattern="yyyy" var="currentYear" />
+
 	<form class="search-form" method="get"
 		action="${pageContext.request.contextPath}/wage/monthlyTotalStatistics.do">
 
 		<div class="search-row">
 
-			<label for="year">귀속년도</label> <input type="number" id="year"
-				name="year" min="1000" max="9999"
-				value="<c:out value='${selectedYear}' />" required>
+			<label for="year"><span class="required-mark">*</span> 귀속년도를
+				선택해 주세요.</label> <select id="year" name="year"
+				onchange="this.form.submit();">
 
-			<button type="submit">조회</button>
+				<c:forEach begin="0" end="9" var="offset">
+
+					<c:set var="yearOption" value="${currentYear - 9 + offset}" />
+
+					<option value="${yearOption}"
+						<c:if test="${yearOption == selectedYear}">selected</c:if>>${yearOption}
+						년</option>
+
+				</c:forEach>
+
+			</select>
 
 		</div>
 
@@ -127,9 +175,23 @@ button {
 
 	<c:if test="${not empty monthlyTotalStatistics}">
 
+		<div class="chart-container">
+			<canvas id="monthlyTotalChart"></canvas>
+		</div>
+
 		<div class="result-container">
 
 			<table class="result-table">
+
+				<colgroup>
+
+					<col class="col-title" />
+
+					<c:forEach begin="1" end="13">
+						<col />
+					</c:forEach>
+
+				</colgroup>
 
 				<thead>
 					<tr>
@@ -150,18 +212,18 @@ button {
 				<tbody>
 
 					<tr>
-						<td class="row-title">전체 급여액 (원)</td>
+						<td class="row-title">전체 급여액 (천원)</td>
 
 						<c:forEach var="row" items="${monthlyTotalStatistics.rows}">
 
-							<td><fmt:formatNumber value="${row.totalPayment}"
+							<td><fmt:formatNumber value="${row.totalPayment / 1000}"
 									pattern="#,##0" /></td>
 
 						</c:forEach>
 
 						<td class="total-column"><fmt:formatNumber
-								value="${monthlyTotalStatistics.totalPayment}" pattern="#,##0" />
-						</td>
+								value="${monthlyTotalStatistics.totalPayment / 1000}"
+								pattern="#,##0" /></td>
 					</tr>
 
 
@@ -172,9 +234,7 @@ button {
 
 							<td><c:choose>
 
-									<c:when test="${row.paymentGrowthRate == null}">
-										-
-									</c:when>
+									<c:when test="${row.paymentGrowthRate == null}"></c:when>
 
 									<c:when test="${row.paymentGrowthRate > 0}">
 										<span class="positive"> <fmt:formatNumber
@@ -189,8 +249,9 @@ button {
 									</c:when>
 
 									<c:otherwise>
-										<fmt:formatNumber value="${row.paymentGrowthRate}"
-											pattern="0.0" />%
+										<span class="neutral"> <fmt:formatNumber
+												value="${row.paymentGrowthRate}" pattern="0.0" />%
+										</span>
 									</c:otherwise>
 
 								</c:choose></td>
@@ -223,9 +284,7 @@ button {
 
 							<td><c:choose>
 
-									<c:when test="${row.employeeGrowthRate == null}">
-										-
-									</c:when>
+									<c:when test="${row.employeeGrowthRate == null}"></c:when>
 
 									<c:when test="${row.employeeGrowthRate > 0}">
 										<span class="positive"> <fmt:formatNumber
@@ -240,8 +299,9 @@ button {
 									</c:when>
 
 									<c:otherwise>
-										<fmt:formatNumber value="${row.employeeGrowthRate}"
-											pattern="0.0" />%
+										<span class="neutral"> <fmt:formatNumber
+												value="${row.employeeGrowthRate}" pattern="0.0" />%
+										</span>
 									</c:otherwise>
 
 								</c:choose></td>
@@ -258,6 +318,266 @@ button {
 		</div>
 
 	</c:if>
+
+	<script>
+		const monthlyPaymentData = [
+			<c:forEach var="row" items="${monthlyTotalStatistics.rows}"
+				varStatus="status">
+
+				${row.totalPayment / 1000}
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		const monthlyEmployeeData = [
+			<c:forEach var="row" items="${monthlyTotalStatistics.rows}"
+				varStatus="status">
+
+				${row.employeeCount}
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		const monthLabels = [ "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월",
+				"9월", "10월", "11월", "12월" ];
+
+		const axisColor = "#5b7096";
+
+		const chartCanvas = document.getElementById("monthlyTotalChart");
+
+		if (chartCanvas) {
+
+			new Chart(chartCanvas, {
+
+				data : {
+
+					labels : monthLabels,
+
+					datasets : [
+
+							{
+								type : "bar",
+
+								label : "전체 급여액 (천원)",
+
+								data : monthlyPaymentData,
+
+								yAxisID : "paymentAxis",
+
+								backgroundColor : "#4472C4",
+
+								borderColor : "#4472C4",
+
+								borderWidth : 1,
+
+								barPercentage : 0.92,
+
+								categoryPercentage : 0.9,
+
+								order : 2,
+
+								datalabels : {
+									color : "#ffffff",
+									anchor : "center",
+									align : "center",
+
+									font : {
+										size : 12
+									},
+
+									formatter : function(value) {
+										return Math.round(value).toLocaleString();
+									}
+								}
+							},
+
+							{
+								type : "line",
+
+								label : "인원 (명)",
+
+								data : monthlyEmployeeData,
+
+								yAxisID : "employeeAxis",
+
+								borderColor : "#ED7D31",
+
+								backgroundColor : "#ED7D31",
+
+								pointBackgroundColor : "#ED7D31",
+
+								pointBorderColor : "#ED7D31",
+
+								pointRadius : 4,
+
+								pointHoverRadius : 6,
+
+								borderWidth : 2,
+
+								tension : 0,
+
+								order : 1,
+
+								datalabels : {
+									color : "#ED7D31",
+									anchor : "end",
+									align : "top",
+									offset : 2,
+
+									font : {
+										size : 12
+									},
+
+									formatter : function(value) {
+										return value;
+									}
+								}
+							} ]
+				},
+
+				plugins : [ ChartDataLabels ],
+
+				options : {
+
+					responsive : true,
+
+					maintainAspectRatio : false,
+
+					layout : {
+						padding : {
+							top : 24
+						}
+					},
+
+					interaction : {
+						mode : "index",
+						intersect : false
+					},
+
+					plugins : {
+
+						legend : {
+							position : "bottom",
+
+							reverse : true,
+
+							labels : {
+								boxWidth : 12,
+								boxHeight : 12,
+								color : axisColor
+							}
+						},
+
+						tooltip : {
+
+							mode : "index",
+
+							intersect : false,
+
+							callbacks : {
+
+								title : function(items) {
+
+									if (items.length === 0) {
+										return "";
+									}
+
+									return items[0].label;
+								},
+
+								label : function(context) {
+
+									const value = context.parsed.y;
+
+									if (context.dataset.yAxisID === "paymentAxis") {
+
+										return context.dataset.label + "  "
+												+ Math.round(value).toLocaleString();
+									}
+
+									return context.dataset.label + "  " + value;
+								}
+							}
+						}
+					},
+
+					scales : {
+
+						x : {
+							grid : {
+								display : false
+							},
+
+							ticks : {
+								color : axisColor
+							}
+						},
+
+						paymentAxis : {
+
+							type : "linear",
+
+							position : "left",
+
+							beginAtZero : true,
+
+							grid : {
+								display : false
+							},
+
+							title : {
+								display : true,
+								text : "전체 급여액 (천원)",
+								color : axisColor
+							},
+
+							ticks : {
+
+								color : axisColor,
+
+								callback : function(value) {
+									return Number(value).toLocaleString();
+								}
+							}
+						},
+
+						employeeAxis : {
+
+							type : "linear",
+
+							position : "right",
+
+							beginAtZero : true,
+
+							title : {
+								display : true,
+								text : "인원 (명)",
+								color : axisColor
+							},
+
+							grid : {
+								drawOnChartArea : false
+							},
+
+							ticks : {
+								color : axisColor,
+								precision : 0,
+								maxTicksLimit : 4
+							}
+						}
+					}
+				}
+			});
+		}
+	</script>
 
 </body>
 </html>
