@@ -1,4 +1,6 @@
+
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> <!-- ★ JSTL 라이브러리 추가 -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -102,18 +104,30 @@
                         <th style="width: 100px;"><span class="required">*</span>성명</th>
                         <td><input type="text" name="managerName" value="김동현"></td>
                     </tr>
+                    <!-- ★ 부서 영역 수정: 목록 연동 및 관리 버튼 팝업 연결 ★ -->
                     <tr>
                         <th>부서</th>
                         <td>
-                            <select name="department" style="width: 120px;"><option>기획전략팀</option></select>
-                            <button type="button" class="btn">관리</button>
+                            <select name="department" style="width: 120px;">
+                                <option value="">선택하세요</option>
+                                <c:forEach var="dept" items="${departmentList}">
+                                    <option value="${dept.departmentId}">${dept.departmentName}</option>
+                                </c:forEach>
+                            </select>
+                            <button type="button" class="btn" onclick="window.open('departmentManage.do', 'departmentPopup', 'width=400,height=500,scrollbars=yes');">관리</button>
                         </td>
                     </tr>
+                    <!-- ★ 직위 영역 수정: 목록 연동 및 관리 버튼 팝업 연결 ★ -->
                     <tr>
                         <th>직위</th>
                         <td>
-                            <select name="position" style="width: 120px;"><option>과장</option></select>
-                            <button type="button" class="btn">관리</button>
+                            <select name="position" style="width: 120px;">
+                                <option value="">선택하세요</option>
+                                <c:forEach var="pos" items="${positionList}">
+                                    <option value="${pos.positionId}">${pos.positionName}</option>
+                                </c:forEach>
+                            </select>
+                            <button type="button" class="btn" onclick="window.open('positionManage.do', 'positionPopup', 'width=400,height=500,scrollbars=yes');">관리</button>
                         </td>
                     </tr>
                     <tr>
