@@ -1,4 +1,3 @@
-
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> <!-- ★ JSTL 라이브러리 추가 -->
 <!DOCTYPE html>
@@ -35,8 +34,12 @@
 
 <div style="width: 1100px; margin: 0 auto; padding-bottom: 50px;">
     
-    <form action="saveCompanyInfo.do" method="post" enctype="multipart/form-data">
-        
+<form action="saveCompanyInfo.do" method="post">  
+<input type="file" id="mainLogoInput" name="logoFile" hidden>
+        <input type="file" id="mainStampInput" name="stampFile" hidden>
+        <input type="hidden" id="deleteLogoFlag" name="deleteLogo" value="false">
+        <input type="hidden" id="deleteStampFlag" name="deleteStamp" value="false">
+              
         <!-- ================= 상단 영역 (회사정보 & 담당자정보 나란히) ================= -->
         <div style="display: flex; gap: 30px; align-items: flex-start;">
             
@@ -46,52 +49,52 @@
                 <table class="form-table">
                     <tr>
                         <th style="width: 110px;"><span class="required">*</span>상호</th>
-                        <td><input type="text" name="companyName" value="(주)예스폼" class="full-width"></td>
+                        <td><input type="text" name="companyName" value="${company.companyName}" class="full-width"></td>
                         <th style="width: 130px;"><span class="required">*</span>대표자직급/대표자</th>
                         <td>
-                            <input type="text" name="ceoTitle" value="대표이사" style="width: 70px;"> / 
-                            <input type="text" name="ceoName" value="이용열" style="width: 70px;">
+                            <input type="text" name="ceoTitle" value="${company.ceoTitle}" style="width: 70px;"> / 
+                            <input type="text" name="ceoName" value="${company.ceoName}" style="width: 70px;">
                         </td>
                     </tr>
                     <tr>
                         <th><span class="required">*</span>사업자번호</th>
-                        <td><input type="text" name="businessNumber" value="120-86-50680"></td>
+                        <td><input type="text" name="businessNumber" value="${company.businessNumber}"></td>
                         <th>법인등록번호</th>
-                        <td><input type="text" name="corpNumber" value="110111-275101"></td>
+                        <td><input type="text" name="corpNumber" value="${company.corpNumber}"></td>
                     </tr>
                     <tr>
                         <th>설립일</th>
-                        <td><input type="date" name="foundingDate" value="2000-01-03"></td>
+                        <td><input type="date" name="foundingDate" value="${company.foundingDate}"></td>
                         <th>홈페이지</th>
-                        <td><input type="text" name="homepage" value="www.yesform.com" class="full-width"></td>
+                        <td><input type="text" name="homepage" value="${company.homepage}" class="full-width"></td>
                     </tr>
                     <tr>
                         <th><span class="required">*</span>사업장 주소</th>
                         <td colspan="3">
-                            <input type="text" name="zipCode" value="00133" style="width: 60px; text-align: center; background-color:#f9f9f9;" readonly>
+                            <input type="text" name="zipCode" value="${company.zipCode}" style="width: 60px; text-align: center; background-color:#f9f9f9;" readonly>
                             <button type="button" class="btn-gray" style="background-color: #eee; color: #333; border: 1px solid #ccc;">우편번호</button>
-                            <input type="text" name="address" value="서울특별시 성동구 성수동1가 14-18 코오롱디지털3차 901호" style="width: 320px;">
+                            <input type="text" name="address" value="${company.address}" style="width: 320px;">
                         </td>
                     </tr>
                     <tr>
                         <th><span class="required">*</span>전화번호</th>
                         <td>
                             <select name="phone1"><option>대표(없음)</option></select> - 
-                            <input type="text" name="phone2" value="1588" style="width: 45px; text-align: center;"> - 
-                            <input type="text" name="phone3" value="2390" style="width: 45px; text-align: center;">
+                            <input type="text" name="phone2" value="${company.phone2}" style="width: 45px; text-align: center;"> - 
+                            <input type="text" name="phone3" value="${company.phone3}" style="width: 45px; text-align: center;">
                         </td>
                         <th>팩스번호</th>
                         <td>
                             <select name="fax1"><option>서울(02)</option></select> - 
-                            <input type="text" name="fax2" value="2117" style="width: 45px; text-align: center;"> - 
-                            <input type="text" name="fax3" value="0691" style="width: 45px; text-align: center;">
+                            <input type="text" name="fax2" value="${company.fax2}" style="width: 45px; text-align: center;"> - 
+                            <input type="text" name="fax3" value="${company.fax3}" style="width: 45px; text-align: center;">
                         </td>
                     </tr>
                     <tr>
                         <th>업태</th>
-                        <td><input type="text" name="businessCondition" value="사업서비스업"></td>
+                        <td><input type="text" name="businessCondition" value="${company.businessCondition}"></td>
                         <th>종목</th>
-                        <td><input type="text" name="businessType" value="온라인정보제공"></td>
+                        <td><input type="text" name="businessType" value="${company.businessType}"></td>
                     </tr>
                 </table>
             </div>
@@ -102,9 +105,8 @@
                 <table class="form-table">
                     <tr>
                         <th style="width: 100px;"><span class="required">*</span>성명</th>
-                        <td><input type="text" name="managerName" value="김동현"></td>
+                        <td><input type="text" name="managerName" value="${company.managerName}"></td>
                     </tr>
-                    <!-- ★ 부서 영역 수정: 목록 연동 및 관리 버튼 팝업 연결 ★ -->
                     <tr>
                         <th>부서</th>
                         <td>
@@ -117,7 +119,6 @@
                             <button type="button" class="btn" onclick="window.open('departmentManage.do', 'departmentPopup', 'width=400,height=500,scrollbars=yes');">관리</button>
                         </td>
                     </tr>
-                    <!-- ★ 직위 영역 수정: 목록 연동 및 관리 버튼 팝업 연결 ★ -->
                     <tr>
                         <th>직위</th>
                         <td>
@@ -134,21 +135,21 @@
                         <th>전화번호</th>
                         <td>
                             <select name="mgrPhone1"><option>대표(없음)</option></select> - 
-                            <input type="text" name="mgrPhone2" value="1588" style="width: 45px; text-align: center;"> - 
-                            <input type="text" name="mgrPhone3" value="1588" style="width: 45px; text-align: center;">
+                            <input type="text" name="mgrPhone2" value="${company.mgrPhone2}" style="width: 45px; text-align: center;"> - 
+                            <input type="text" name="mgrPhone3" value="${company.mgrPhone3}" style="width: 45px; text-align: center;">
                         </td>
                     </tr>
                     <tr>
                         <th>휴대폰번호</th>
                         <td>
                             <select name="mgrMobile1"><option>010</option></select> - 
-                            <input type="text" name="mgrMobile2" value="1588" style="width: 45px; text-align: center;"> - 
-                            <input type="text" name="mgrMobile3" value="2390" style="width: 45px; text-align: center;">
+                            <input type="text" name="mgrMobile2" value="${company.mgrMobile2}" style="width: 45px; text-align: center;"> - 
+                            <input type="text" name="mgrMobile3" value="${company.mgrMobile3}" style="width: 45px; text-align: center;">
                         </td>
                     </tr>
                     <tr>
                         <th>이메일</th>
-                        <td><input type="text" name="mgrEmail" value="kim_2016@payzon.co.kr" class="full-width"></td>
+                        <td><input type="text" name="mgrEmail" value="${company.mgrEmail}" class="full-width"></td>
                     </tr>
                 </table>
             </div>
@@ -180,9 +181,9 @@
                     <select name="bank"><option>기업은행</option></select>
                 </td>
                 <th style="width: 80px; text-align: center;">계좌번호</th>
-                <td><input type="text" name="accountNumber" value="123-123456-12-123" style="width: 150px;"></td>
+                <td><input type="text" name="accountNumber" value="${company.accountNumber}" style="width: 150px;"></td>
                 <th style="width: 80px; text-align: center;">예금주</th>
-                <td><input type="text" name="accountHolder" value="(주)예스폼" style="width: 100px;"></td>
+                <td><input type="text" name="accountHolder" value="${company.accountHolder}" style="width: 100px;"></td>
             </tr>
             <tr>
                 <th>급여이체뱅킹</th>
@@ -250,7 +251,7 @@
         <!-- ================= 최하단 저장/취소 버튼 ================= -->
         <div style="text-align: center; margin-top: 50px;">
             <button type="submit" class="btn btn-large" style="background-color: #3b74b8;">저장</button>
-            <button type="button" class="btn-gray btn-large">취소</button>
+            <button type="button" class="btn-gray btn-large" onclick="location.href='companyInfo.do'">취소</button>
         </div>
 
     </form>
