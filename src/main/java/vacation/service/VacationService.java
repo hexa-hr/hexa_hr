@@ -45,4 +45,28 @@ public class VacationService {
 			JdbcUtil.close(conn);
 		}
 	}
+
+	// 선택된 사원의 휴가일수 삭제 (초기화)
+	public void resetVacationDays(int attendanceTypeId, String[] employeeIds) {
+		Connection conn = null;
+		try {
+			conn = ConnectionProvider.getConnection();
+			conn.setAutoCommit(false);
+
+			if (employeeIds != null) {
+				for (String empIdStr : employeeIds) {
+					int empId = Integer.parseInt(empIdStr);
+					// MERGE 대신 DELETE 호출로 외래키 문제 회피
+					attendanceDao.deleteEmployeeVacationDays(conn, attendanceTypeId, empId);
+				}
+			}
+
+			conn.commit();
+		} catch (SQLException e) {
+			JdbcUtil.rollback(conn);
+			throw new RuntimeException("휴가일수 삭제 처리 오류", e);
+		} finally {
+			JdbcUtil.close(conn);
+		}
+	}
 }

@@ -162,7 +162,8 @@ tr:hover {
 
 .btn-manage {
 	display: inline-block;
-	padding: 4px 10px;
+	width: auto;
+	padding: 5px 12px;
 	background: #4e73df;
 	color: #fff !important;
 	text-decoration: none;
@@ -198,11 +199,13 @@ tr:hover {
 							value="vacationTypeSetting.do?selectedVacationId=${vacation.vacationTypeId}&vacationTypeName=${vacation.vacationTypeName}&applyPeriod1=${vacation.applyPeriod1}&applyPeriod2=${vacation.applyPeriod2}&usage=${vacation.usage}" />
 						<tr>
 							<td><a href="${vacUrl}">${vacation.vacationTypeName}</a></td>
-							<td><a href="${vacUrl}">${vacation.applyPeriod1} ~ ${vacation.applyPeriod2}</a></td>
+							<td><a href="${vacUrl}">${vacation.applyPeriod1} ~
+									${vacation.applyPeriod2}</a></td>
 							<!-- 순수 HTML로 새 창 띄우는 관리 버튼 -->
 							<td style="padding: 5px 0;">
-								<a href="vacationDaysManage.do?attendanceTypeId=${vacation.vacationTypeId}" 
-								   target="_blank" class="btn-manage">관리</a>
+								<!-- vacationTypeSetting.jsp 내 링크 부분 --> <a
+								href="vacationDaysManage.do?attendanceTypeId=${att.attendanceTypeId}"
+								target="_blank" class="btn-manage">관리</a>
 							</td>
 							<td><a href="${vacUrl}">${vacation.usage == 'Y' ? '사용' : '사용안함'}</a></td>
 						</tr>
@@ -274,32 +277,26 @@ tr:hover {
 				</thead>
 				<tbody>
 					<c:forEach var="att" items="${attendanceList}">
-						<c:set var="attUrl" value="vacationTypeSetting.do?selectedAttId=${att.attendanceTypeId}&attName=${att.attendanceTypeName}&attUnit=${att.unit}&attGroupId=${att.attendanceGroupId}&attVacationId=${att.vacationTypeId}&attUsage=${att.usage}" />
+						<c:set var="attUrl"
+							value="vacationTypeSetting.do?selectedAttId=${att.attendanceTypeId}&attName=${att.attendanceTypeName}&attUnit=${att.unit}&attGroupId=${att.attendanceGroupId}&attVacationId=${att.vacationTypeId}&attUsage=${att.usage}" />
 						<tr>
 							<td><a href="${attUrl}">${att.attendanceTypeName}</a></td>
 							<td><a href="${attUrl}">${att.unit}</a></td>
-							<td>
-								<a href="${attUrl}">
-									<c:set var="groupName" value="" />
+							<td><a href="${attUrl}"> <c:set var="groupName" value="" />
 									<c:forEach var="group" items="${attendanceGroupList}">
-										<c:if test="${group.attendanceGroupId == att.attendanceGroupId}">
+										<c:if
+											test="${group.attendanceGroupId == att.attendanceGroupId}">
 											<c:set var="groupName" value="${group.attendanceGroupName}" />
 										</c:if>
-									</c:forEach>
-									${empty groupName ? '-' : groupName}
-								</a>
-							</td>
-							<td>
-								<a href="${attUrl}">
-									<c:set var="vacName" value="" />
+									</c:forEach> ${empty groupName ? '-' : groupName}
+							</a></td>
+							<td><a href="${attUrl}"> <c:set var="vacName" value="" />
 									<c:forEach var="vac" items="${vacationList}">
 										<c:if test="${vac.vacationTypeId == att.vacationTypeId}">
 											<c:set var="vacName" value="${vac.vacationTypeName}" />
 										</c:if>
-									</c:forEach>
-									${empty vacName ? '-' : vacName}
-								</a>
-							</td>
+									</c:forEach> ${empty vacName ? '-' : vacName}
+							</a></td>
 							<td><a href="${attUrl}">${att.usage == 'Y' ? '사용' : '사용안함'}</a></td>
 						</tr>
 					</c:forEach>

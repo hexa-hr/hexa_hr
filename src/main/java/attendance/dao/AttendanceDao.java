@@ -217,4 +217,19 @@ public class AttendanceDao {
 			JdbcUtil.close(pstmt);
 		}
 	}
+
+	// 선택된 사원의 휴가일수 삭제 (DELETE 처리)
+	public void deleteEmployeeVacationDays(Connection conn, int attendanceTypeId, int employeeId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql = "DELETE FROM attendance WHERE employee_id = ? AND attendance_type_id = ?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, employeeId);
+			pstmt.setInt(2, attendanceTypeId);
+			pstmt.executeUpdate();
+		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
 }
