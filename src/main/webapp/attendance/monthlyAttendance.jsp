@@ -10,6 +10,18 @@
     
     .container { background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     
+    /* 상단 타이틀 및 탭 영역 */
+    .page-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+    .page-title-icon { font-size: 35px; }
+    .page-title-text h1 { margin: 0; font-size: 22px; color: #333; letter-spacing: -1px; }
+    .page-title-text p { margin: 5px 0 0 0; font-size: 13px; color: #777; }
+    
+    .tab-menu { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+    .tab-btn { padding: 10px 30px; font-size: 14px; font-weight: bold; border: none; cursor: pointer; border-radius: 4px; }
+    .tab-active { background-color: #599b9a; color: white; } /* 활성화 탭 (청록색) */
+    .tab-inactive { background-color: #a5a5a5; color: white; } /* 비활성화 탭 (회색) */
+    .tab-inactive:hover { background-color: #888; }
+    
     /* 검색 필터 영역 */
     .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; background: #f8f9fa; padding: 10px 15px; border: 1px solid #e9ecef; border-radius: 4px; }
     .filter-bar select, .filter-bar button { padding: 5px 10px; font-size: 12px; border: 1px solid #ccc; border-radius: 3px; }
@@ -19,26 +31,20 @@
     .grid-main-table { width: 100%; border-collapse: collapse; text-align: center; background: white; }
     .grid-main-table th, .grid-main-table td { border: 1px solid #d1d5db; padding: 6px 4px; }
     .grid-main-table th { background-color: #f3f4f6; font-weight: bold; }
+    .emp-row:hover td { background-color: #f0f7ff !important; transition: background-color 0.2s; } /* 행 호버 효과 */
     
     /* 달력 내부 소형 그리드 테이블 */
     .calendar-sub-table { width: 100%; border-collapse: collapse; margin: 0; }
     .calendar-sub-table td, .calendar-sub-table th { border: 1px solid #e5e7eb; height: 22px; width: 6.25%; text-align: center; padding: 0; font-size: 11px; }
     
     /* 토요일 / 일요일 색상 정의 */
-    .sat-header { color: #2563eb !important; font-weight: bold; background-color: #eff6ff; } /* 토요일: 파란색 */
-    .sun-header { color: #dc2626 !important; font-weight: bold; background-color: #fef2f2; } /* 일요일: 빨간색 */
-    
+    .sat-header { color: #2563eb !important; font-weight: bold; background-color: #eff6ff; }
+    .sun-header { color: #dc2626 !important; font-weight: bold; background-color: #fef2f2; }
     .sat-bg { background-color: #f0f7ff; }
     .sun-bg { background-color: #fff5f5; }
 
     /* 빨간 점 스타일 */
-    .attendance-dot {
-        display: inline-block;
-        width: 7px;
-        height: 7px;
-        background-color: #dc2626;
-        border-radius: 50%;
-    }
+    .attendance-dot { display: inline-block; width: 7px; height: 7px; background-color: #dc2626; border-radius: 50%; }
     
     /* 오른쪽 요약 텍스트 */
     .summary-text { text-align: left; font-size: 11px; line-height: 1.4; padding-left: 5px; }
@@ -47,7 +53,19 @@
 <body>
 
 <div class="container">
-    <h2>월별 근태 현황 조회</h2>
+    <!-- 상단 타이틀 및 탭 메뉴 -->
+    <div class="page-header">
+        
+        <div class="page-title-text">
+            <h1>근태조회</h1>
+            
+        </div>
+    </div>
+    
+    <div class="tab-menu">
+        <button class="tab-btn tab-active" onclick="location.href='${pageContext.request.contextPath}/attendance/monthly.do'">월별 조회</button>
+        <button class="tab-btn tab-inactive" onclick="location.href='${pageContext.request.contextPath}/attendance/detail.do'">상세 조회</button>
+    </div>
     
     <!-- 상단 연/월 필터 영역 -->
     <div class="filter-bar">
@@ -55,6 +73,7 @@
         <select id="selectYear"></select> 년
         <select id="selectMonth"></select> 월
         <button type="button" class="btn-search" onclick="loadMonthlyGrid()">조회</button>
+    <!--     <span style="margin-left:auto; color:#d9534f; font-weight:bold;">※ 사원 목록을 클릭하면 해당 사원의 상세 조회 창으로 이동합니다.</span> -->
     </div>
 
     <!-- 월별 근태 그리드 영역 -->
@@ -84,7 +103,7 @@
 <script>
     window.onload = function() {
         initYearMonthSelect();
-        loadMonthlyGrid(); // 페이지 진입 시 자동 조회
+        loadMonthlyGrid();
     };
 
     function initYearMonthSelect() {
@@ -112,6 +131,12 @@
         }
     }
 
+    // 사원 행 클릭 시 상세조회 페이지로 이동 및 이름 파라미터 전달
+    function goToDetail(empName) {
+        if(!empName) return;
+        location.href = '${pageContext.request.contextPath}/attendance/detail.do?targetName=' + encodeURIComponent(empName);
+    }
+
     function loadMonthlyGrid() {
         var year = document.getElementById("selectYear").value;
         var month = document.getElementById("selectMonth").value;
@@ -120,25 +145,25 @@
         tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;">데이터를 불러오는 중입니다...</td></tr>';
 
         fetch("${pageContext.request.contextPath}/attendance/monthly.do?year=" + year + "&month=" + month)
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            renderGridTable(year, parseInt(month, 10), data.employees, data.attendances);
-        })
-        .catch(function(err) {
-            tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; color:red;">조회 중 오류가 발생했습니다.</td></tr>';
-        });
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                renderGridTable(year, parseInt(month, 10), data.employees, data.attendances);
+            })
+            .catch(function(err) {
+                tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; color:red;">조회 중 오류가 발생했습니다.</td></tr>';
+            });
     }
 
     function renderGridTable(year, month, employees, attendances) {
         var tbody = document.getElementById("monthlyGridBody");
         tbody.innerHTML = "";
 
-        var lastDay = new Date(year, month, 0).getDate(); // 해당 월의 마지막 날짜 (28~31)
+        var lastDay = new Date(year, month, 0).getDate();
 
-        // 1. 헤더 날짜 영역 (1~16일 / 17~31일) 생성
+        // 1. 헤더 날짜 영역
         var headerHtml = "<tr>";
         for (var d = 1; d <= 16; d++) {
-            var dayOfWeek = new Date(year, month - 1, d).getDay(); // 0:일, 6:토
+            var dayOfWeek = new Date(year, month - 1, d).getDay();
             var colorClass = dayOfWeek === 6 ? 'sat-header' : (dayOfWeek === 0 ? 'sun-header' : '');
             headerHtml += '<th class="' + colorClass + '">' + d + '</th>';
         }
@@ -160,10 +185,9 @@
             return;
         }
 
-        // YYYY-MM-DD 포맷 변환 도우미 함수
         var formatZero = function(num) { return num < 10 ? '0' + num : num; };
 
-        // 2. 사원 목록 및 근태 셀 rendering
+        // 2. 사원 목록 및 근태 셀 rendering (행에 onclick 추가)
         employees.forEach(function(emp) {
             var empAtts = attendances.filter(function(a) { return a.employeeId === emp.employeeId; });
             var dayAttendanceMap = {};
@@ -173,7 +197,6 @@
                 var typeName = att.attendanceTypeName;
                 typeSummaryMap[typeName] = (typeSummaryMap[typeName] || 0) + att.attendanceDays;
 
-                // 날짜 비교 (JSP EL 충돌 방지를 위해 일반 문자열 더하기 연산자 사용)
                 for (var d = 1; d <= lastDay; d++) {
                     var curDateStr = year + '-' + formatZero(month) + '-' + formatZero(d);
                     if (curDateStr >= att.startDate && curDateStr <= att.endDate) {
@@ -182,18 +205,18 @@
                 }
             });
 
-            // 행 생성
-            var rowHtml = '<tr>' +
+            var empNameStr = emp.koreanName || '';
+            // 마우스 오버 커서 변경 및 클릭 이벤트 부여
+            var rowHtml = '<tr class="emp-row" style="cursor:pointer;" onclick="goToDetail(\'' + empNameStr + '\')">' +
                 '<td>' + (emp.employmentType || '') + '</td>' +
                 '<td>No-' + emp.employeeId + '</td>' +
-                '<td>' + (emp.koreanName || '') + '</td>' +
+                '<td>' + empNameStr + '</td>' +
                 '<td>' + (emp.departmentName || '') + '</td>' +
                 '<td>' + (emp.positionName || '') + '</td>' +
                 '<td style="padding:0;">' +
                     '<table class="calendar-sub-table">' +
                         '<tr>';
 
-            // 상단 (1~16일 데이터)
             for (var d = 1; d <= 16; d++) {
                 var dayOfWeek = new Date(year, month - 1, d).getDay();
                 var bgClass = dayOfWeek === 6 ? 'sat-bg' : (dayOfWeek === 0 ? 'sun-bg' : '');
@@ -203,7 +226,6 @@
 
             rowHtml += '</tr><tr>';
 
-            // 하단 (17~31일 데이터)
             for (var d = 17; d <= 31; d++) {
                 if (d <= lastDay) {
                     var dayOfWeek = new Date(year, month - 1, d).getDay();
@@ -217,7 +239,6 @@
 
             rowHtml += '</tr></table></td>';
 
-            // 오른쪽 집계 요약
             var summaryHtml = '<td class="summary-text">';
             for (var key in typeSummaryMap) {
                 if (typeSummaryMap.hasOwnProperty(key)) {
