@@ -9,6 +9,7 @@ import java.util.List;
 
 import wage.model.WageEmployeeHistoryRow;
 import wage.model.WageInsuranceDeductionRow;
+import wage.model.WageItemCompositionStatisticsRow;
 import wage.model.WageItemLedgerRow;
 import wage.model.WageLedgerDetailRow;
 import wage.model.WageLedgerSummary;
@@ -582,6 +583,47 @@ public class WageDao {
 						rs.getString("wage_month"),
 						rs.getLong("total_payment"),
 						rs.getLong("total_deduction"));
+
+					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<WageItemCompositionStatisticsRow> selectItemCompositionStatisticsRows(
+		Connection conn,
+		Integer employeeId,
+		String wageMonth)
+		throws SQLException {
+
+		String sql = "SELECT wt.wage_type_name, "
+			+ "       wt.item_type, "
+			+ "       SUM(NVL(w.wage_value, 0)) AS amount "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE w.employee_id = ? "
+			+ "  AND w.wage_month = ? "
+			+ "GROUP BY wt.wage_type_name, wt.item_type "
+			+ "ORDER BY wt.item_type DESC, wt.wage_type_name";
+
+		List<WageItemCompositionStatisticsRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, employeeId);
+			pstmt.setString(2, wageMonth);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageItemCompositionStatisticsRow row = new WageItemCompositionStatisticsRow(
+						rs.getString("wage_type_name"),
+						rs.getString("item_type"),
+						rs.getLong("amount"));
 
 					result.add(row);
 				}
