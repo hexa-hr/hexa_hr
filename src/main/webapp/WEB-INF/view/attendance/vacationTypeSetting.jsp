@@ -199,13 +199,10 @@ tr:hover {
 							value="vacationTypeSetting.do?selectedVacationId=${vacation.vacationTypeId}&vacationTypeName=${vacation.vacationTypeName}&applyPeriod1=${vacation.applyPeriod1}&applyPeriod2=${vacation.applyPeriod2}&usage=${vacation.usage}" />
 						<tr>
 							<td><a href="${vacUrl}">${vacation.vacationTypeName}</a></td>
-							<td><a href="${vacUrl}">${vacation.applyPeriod1} ~
-									${vacation.applyPeriod2}</a></td>
-							<!-- 순수 HTML로 새 창 띄우는 관리 버튼 -->
+							<td><a href="${vacUrl}">${vacation.applyPeriod1} ~ ${vacation.applyPeriod2}</a></td>
 							<td style="padding: 5px 0;">
-								<!-- vacationTypeSetting.jsp 내 링크 부분 --> <a
-								href="vacationDaysManage.do?attendanceTypeId=${att.attendanceTypeId}"
-								target="_blank" class="btn-manage">관리</a>
+								<a href="vacationDaysManage.do?attendanceTypeId=${vacation.vacationTypeId}"
+								   target="_blank" class="btn-manage">관리</a>
 							</td>
 							<td><a href="${vacUrl}">${vacation.usage == 'Y' ? '사용' : '사용안함'}</a></td>
 						</tr>
