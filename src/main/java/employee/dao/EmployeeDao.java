@@ -79,4 +79,29 @@ public class EmployeeDao {
 
 		return result;
 	}
+
+	// 사원의 고용형태 조회
+	public String selectEmploymentType(
+		Connection conn,
+		Integer employeeId)
+		throws SQLException {
+
+		String sql = "SELECT employment_type "
+			+ "FROM employee "
+			+ "WHERE employee_id = ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, employeeId);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				if (rs.next()) {
+					return rs.getString("employment_type");
+				}
+			}
+		}
+
+		return null;
+	}
 }
