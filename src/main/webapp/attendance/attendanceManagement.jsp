@@ -78,9 +78,12 @@
 
     <!-- 우측 폼 영역 -->
     <div class="right-panel">
-        <form id="attendanceForm" action="${pageContext.request.contextPath}/attendance/manage.do" method="post" onsubmit="return validateForm();">
-            <!-- 선택된 사원의 순수 사번(숫자)을 저장할 hidden 영역 -->
-            <input type="hidden" id="selectedEmpNo" name="empNo">
+        <!-- [수정됨 1] 폼 데이터가 attendanceSaveProcess.jsp로 넘어가도록 action 주소 변경 -->
+        <form id="attendanceForm" action="attendanceSaveProcess.jsp" method="post" onsubmit="return validateForm();">
+            
+            <input type="hidden" id="selectedEmpNo" name="employee_id">
+            <input type="hidden" id="attendanceId" name="attendance_id"> <!-- 수정할 때 사용할 근태기록 ID -->
+            <input type="hidden" id="inputDate" name="input_date" value="2026-08-06"> <!-- 고정 입력일자 -->
             
             <div id="selectedEmpInfoDisplay" style="margin-bottom: 10px; font-weight: bold; color: #5c7cba;">
                 [사원을 먼저 좌측 체크박스에서 선택하세요]
@@ -94,18 +97,19 @@
                 <tr>
                     <th>근태항목</th>
                     <td>
-                        <select id="attendanceType" name="attendanceType" onchange="toggleVacationPeriod()" required>
+                        <select id="attendanceType" name="attendance_type_id" onchange="toggleVacationPeriod()" required>
                             <option value="">선택하세요.</option>
-                            <option value="연차">연차</option>
-                            <option value="반차">반차</option>
-                            <option value="지각">지각</option>
-                            <option value="조퇴">조퇴</option>
-                            <option value="외근">외근</option>
-                            <option value="휴일근무">휴일근무</option>
-                            <option value="연장근무">연장근무</option>
-                            <option value="포상휴가">포상휴가</option>
-                            <option value="야간근무">야간근무</option>
-                            <option value="청원휴가">청원휴가</option>
+                            <!-- [수정됨 2] 백엔드에서 에러가 나지 않도록 value를 고유 숫자로 변경 -->
+                            <option value="1">연차</option>
+                            <option value="2">반차</option>
+                            <option value="3">지각</option>
+                            <option value="4">조퇴</option>
+                            <option value="5">외근</option>
+                            <option value="6">휴일근무</option>
+                            <option value="7">연장근무</option>
+                            <option value="8">포상휴가</option>
+                            <option value="9">야간근무</option>
+                            <option value="10">청원휴가</option>
                         </select>
                     </td>
                 </tr>
@@ -118,21 +122,21 @@
                 <tr>
                     <th>기간</th>
                     <td>
-                        <input type="date" id="startDate" name="startDate" required> ~ 
-                        <input type="date" id="endDate" name="endDate" required>
+                        <input type="date" id="startDate" name="start_date" required> ~ 
+                        <input type="date" id="endDate" name="end_date" required>
                     </td>
                 </tr>
                 <tr>
                     <th>근태일수</th>
-                    <td><input type="number" id="attendanceDays" name="attendanceDays" min="0" step="0.5" value="1" required> 일</td>
+                    <td><input type="number" id="attendanceDays" name="attendance_days" min="0" step="0.5" value="1" required> 일</td>
                 </tr>
                 <tr>
                     <th>금액(수당)</th>
-                    <td><input type="number" id="wageAmount" name="wageAmount" value="0"> 원</td>
+                    <td><input type="number" id="wageAmount" name="amount" value="0"> 원</td>
                 </tr>
                 <tr>
                     <th>적요</th>
-                    <td><input type="text" id="remark" name="remark" style="width: 80%;"></td>
+                    <td><input type="text" id="remark" name="summary" style="width: 80%;"></td>
                 </tr>
             </table>
             <div style="text-align: center; margin-top: 20px;">
@@ -207,6 +211,19 @@
     // 3. 폼 리셋
     function resetForm() {
         document.getElementById('attendanceForm').reset();
+        document.getElementById('attendanceId').value = ''; // 수정 모드 해제
+        
+        // 체크박스 상태에 따라 상단 텍스트 복구
+        var checkedBox = document.querySelector('.emp-checkbox:checked');
+        if(checkedBox) {
+            document.getElementById('selectedEmpInfoDisplay').innerText = '선택된 사원: ' + checkedBox.dataset.name + ' (No-' + checkedBox.value + ')';
+            document.getElementById('selectedEmpInfoDisplay').style.color = '#5c7cba';
+        } else {
+            document.getElementById('selectedEmpNo').value = '';
+            document.getElementById('selectedEmpInfoDisplay').innerText = "[사원을 먼저 좌측 체크박스에서 선택하세요]";
+            document.getElementById('selectedEmpInfoDisplay').style.color = '#5c7cba';
+        }
+        
         toggleVacationPeriod();
     }
 
@@ -254,7 +271,7 @@
                         '<td>' + amount + '</td>' +
                         '<td>' + summary + '</td>' +
                         '<td>' +
-                            '<button type="button" class="btn-manage" onclick="editRecord(\'' + attendanceTypeName + '\', \'' + startDate + '\', \'' + endDate + '\', ' + attendanceDays + ', ' + amount + ', \'' + summary + '\')">🔄수정</button> ' +
+                            '<button type="button" class="btn-manage" onclick="editRecord(' + attendanceId + ', \'' + attendanceTypeName + '\', \'' + startDate + '\', \'' + endDate + '\', ' + attendanceDays + ', ' + amount + ', \'' + summary + '\')">🔄수정</button> ' +
                             '<button type="button" class="btn-delete" onclick="deleteRecord(' + attendanceId + ')">🗑️삭제</button>' +
                         '</td>';
                         
@@ -272,10 +289,28 @@
     }
 
     // 7. 모달 내 '수정' 클릭 시 우측 폼으로 데이터 전달
-    function editRecord(type, start, end, days, amount, remark) {
+    function editRecord(attId, type, start, end, days, amount, remark) {
         closeModal();
         
-        document.getElementById('attendanceType').value = type;
+        // 데이터 ID 및 사원 번호 강제 세팅
+        document.getElementById('attendanceId').value = attId;
+        document.getElementById('selectedEmpNo').value = currentModalEmpNo;
+        
+        // 모달창 텍스트에서 이름만 추출하여 표시
+        var modalTitle = document.getElementById('modalEmpInfo').innerText;
+        var empName = modalTitle.split('• 성명: ')[1].split(' (')[0];
+        document.getElementById('selectedEmpInfoDisplay').innerText = '[수정 모드] 선택된 사원: ' + empName + ' (No-' + currentModalEmpNo + ')';
+        document.getElementById('selectedEmpInfoDisplay').style.color = '#e53935'; // 빨간색으로 변경
+        
+        // [수정됨 3] 드롭다운 값이 숫자로 바뀌었으므로, 한글 이름(type)과 일치하는 항목을 찾아 선택되도록 수정
+        var selectEl = document.getElementById('attendanceType');
+        for(var i=0; i<selectEl.options.length; i++) {
+            if(selectEl.options[i].text === type) {
+                selectEl.selectedIndex = i;
+                break;
+            }
+        }
+        
         document.getElementById('startDate').value = start;
         document.getElementById('endDate').value = end;
         document.getElementById('attendanceDays').value = days;
@@ -284,7 +319,7 @@
         
         toggleVacationPeriod();
         
-        document.querySelector('.right-panel').style.outline = "2px solid #5c7cba";
+        document.querySelector('.right-panel').style.outline = "2px solid #e53935";
         setTimeout(function() { document.querySelector('.right-panel').style.outline = "none"; }, 1000);
     }
 
@@ -311,7 +346,8 @@
         var typeSelect = document.getElementById('attendanceType');
         var vacationRow = document.getElementById('vacationPeriodRow');
         
-        if (typeSelect.value === '포상휴가') {
+        // [수정됨 4] value가 숫자로 바뀌었으므로 텍스트명으로 조건 검사하도록 수정
+        if (typeSelect.options[typeSelect.selectedIndex].text === '포상휴가') {
             vacationRow.style.display = 'table-row';
         } else {
             vacationRow.style.display = 'none';
