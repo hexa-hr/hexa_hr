@@ -8,6 +8,12 @@
 <meta charset="UTF-8">
 <title>월별 개인급여 통계</title>
 
+<script
+	src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
+<script
+	src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
 <style>
 body {
 	font-family: Arial, sans-serif;
@@ -19,8 +25,9 @@ body {
 }
 
 .search-form {
-	border: 1px solid #ccc;
-	padding: 20px;
+	background-color: #f7f8fa;
+	border: 1px solid #e3e8ef;
+	padding: 14px 20px;
 }
 
 .search-row {
@@ -30,11 +37,19 @@ body {
 }
 
 label {
-	font-weight: bold;
+	color: #333;
+}
+
+.required-mark {
+	color: #d9534f;
 }
 
 input, button, select {
-	padding: 7px;
+	padding: 6px 10px;
+}
+
+select, .employee-name {
+	border: 1px solid #b9c2cf;
 }
 
 .employee-name {
@@ -52,6 +67,13 @@ button {
 	font-weight: bold;
 }
 
+.chart-container {
+	position: relative;
+	width: 100%;
+	height: 430px;
+	margin-top: 30px;
+}
+
 .result-container {
 	margin-top: 30px;
 	overflow-x: auto;
@@ -59,37 +81,45 @@ button {
 
 .result-table {
 	border-collapse: collapse;
-	min-width: 1400px;
+	table-layout: fixed;
 	width: 100%;
 	white-space: nowrap;
+	font-size: 13px;
+	border-top: 2px solid #4a80c0;
+}
+
+.result-table .col-title {
+	width: 120px;
 }
 
 .result-table th, .result-table td {
-	border: 1px solid #aaa;
-	padding: 9px 12px;
+	border: 1px solid #dde3ea;
+	padding: 8px 12px;
 	text-align: right;
+	color: #33639c;
 }
 
 .result-table th {
-	background-color: #f2f2f2;
+	background-color: #eef2f8;
 	text-align: center;
+	color: #333;
 }
 
 .result-table .row-title {
 	text-align: left;
-	font-weight: bold;
-	background-color: #f8f8f8;
+	background-color: #f5f7fa;
+	color: #333;
+	white-space: normal;
+	word-break: keep-all;
 }
 
 .result-table .sub-title {
 	text-align: left;
 	padding-left: 25px;
-	background-color: #fafafa;
-}
-
-.result-table .total-column {
-	background-color: #fffde0;
-	font-weight: bold;
+	background-color: #f5f7fa;
+	color: #333;
+	white-space: normal;
+	word-break: keep-all;
 }
 
 /* 사원 선택 모달 */
@@ -177,16 +207,30 @@ button {
 
 	<p class="description">귀속년도와 사원을 선택하면 해당 사원의 월별 급여현황을 확인할 수 있습니다.</p>
 
+	<jsp:useBean id="today" class="java.util.Date" />
+
+	<fmt:formatDate value="${today}" pattern="yyyy" var="currentYear" />
+
 	<form class="search-form" method="get"
 		action="${pageContext.request.contextPath}/wage/monthlyPersonalStatistics.do">
 
 		<div class="search-row">
 
-			<label for="year">귀속년도</label> <input type="number" id="year"
-				name="year" min="1000" max="9999"
-				value="<c:out value='${selectedYear}' />" required> <label
-				for="selectedEmployeeName">대상자</label> <input type="hidden"
-				id="employeeId" name="employeeId"
+			<label for="year"><span class="required-mark">*</span> 귀속년도를
+				선택해 주세요.</label> <select id="year" name="year">
+
+				<c:forEach begin="0" end="9" var="offset">
+
+					<c:set var="yearOption" value="${currentYear - 9 + offset}" />
+
+					<option value="${yearOption}"
+						<c:if test="${yearOption == selectedYear}">selected</c:if>>${yearOption}
+						년</option>
+
+				</c:forEach>
+
+			</select> <label for="selectedEmployeeName">대상자를 선택해 주세요.</label> <input
+				type="hidden" id="employeeId" name="employeeId"
 				value="<c:out value='${selectedEmployeeId}' />"> <input
 				type="text" id="selectedEmployeeName" class="employee-name"
 				value="<c:out value='${selectedEmployeeName}' />"
@@ -294,9 +338,25 @@ button {
 	<!-- 월별 개인급여 통계 -->
 	<c:if test="${not empty monthlyPersonalStatistics}">
 
+		<div class="chart-container">
+			<canvas id="monthlyPersonalChart"></canvas>
+		</div>
+
 		<div class="result-container">
 
 			<table class="result-table">
+
+				<colgroup>
+
+					<col class="col-title" />
+
+					<c:forEach var="row" items="${monthlyPersonalStatistics.rows}">
+						<col />
+					</c:forEach>
+
+					<col />
+
+				</colgroup>
 
 				<thead>
 					<tr>
@@ -320,17 +380,17 @@ button {
 
 					<tr>
 
-						<td class="row-title">월급여액 (원)</td>
+						<td class="row-title">월급여액 (천원)</td>
 
 						<c:forEach var="row" items="${monthlyPersonalStatistics.rows}">
 
-							<td><fmt:formatNumber value="${row.totalPayment}"
+							<td><fmt:formatNumber value="${row.totalPayment / 1000}"
 									pattern="#,##0" /></td>
 
 						</c:forEach>
 
 						<td class="total-column"><fmt:formatNumber
-								value="${monthlyPersonalStatistics.totalPayment}"
+								value="${monthlyPersonalStatistics.totalPayment / 1000}"
 								pattern="#,##0" /></td>
 
 					</tr>
@@ -338,17 +398,17 @@ button {
 
 					<tr>
 
-						<td class="sub-title">└ 공제액 (원)</td>
+						<td class="sub-title">└ 공제액 (천원)</td>
 
 						<c:forEach var="row" items="${monthlyPersonalStatistics.rows}">
 
-							<td><fmt:formatNumber value="${row.totalDeduction}"
+							<td><fmt:formatNumber value="${row.totalDeduction / 1000}"
 									pattern="#,##0" /></td>
 
 						</c:forEach>
 
 						<td class="total-column"><fmt:formatNumber
-								value="${monthlyPersonalStatistics.totalDeduction}"
+								value="${monthlyPersonalStatistics.totalDeduction / 1000}"
 								pattern="#,##0" /></td>
 
 					</tr>
@@ -356,18 +416,18 @@ button {
 
 					<tr>
 
-						<td class="sub-title">└ 실지급액 (원)</td>
+						<td class="sub-title">└ 실지급액 (천원)</td>
 
 						<c:forEach var="row" items="${monthlyPersonalStatistics.rows}">
 
-							<td><fmt:formatNumber value="${row.netPayment}"
+							<td><fmt:formatNumber value="${row.netPayment / 1000}"
 									pattern="#,##0" /></td>
 
 						</c:forEach>
 
 						<td class="total-column"><fmt:formatNumber
-								value="${monthlyPersonalStatistics.netPayment}" pattern="#,##0" />
-						</td>
+								value="${monthlyPersonalStatistics.netPayment / 1000}"
+								pattern="#,##0" /></td>
 
 					</tr>
 
@@ -539,6 +599,269 @@ button {
 			});
 
 		});
+	</script>
+
+	<script>
+		const monthLabels = [ "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월",
+				"9월", "10월", "11월", "12월" ];
+
+		const deductionData = [
+			<c:forEach var="row" items="${monthlyPersonalStatistics.rows}"
+				varStatus="status">
+
+				${row.totalDeduction / 1000}
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		const netPaymentData = [
+			<c:forEach var="row" items="${monthlyPersonalStatistics.rows}"
+				varStatus="status">
+
+				${row.netPayment / 1000}
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		// 월급여액은 dataset 이 아니라 Tooltip 표시용으로만 쓴다.
+		const monthlyPaymentData = [
+			<c:forEach var="row" items="${monthlyPersonalStatistics.rows}"
+				varStatus="status">
+
+				${row.totalPayment / 1000}
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		const axisColor = "#5b7096";
+
+		// 천원 환산 값은 표와 동일하게 소수점 없이 반올림해서 표시한다.
+		function formatThousandWon(value) {
+
+			return Math.round(Number(value)).toLocaleString("ko-KR");
+		}
+
+		const monthlyPersonalCanvas = document
+				.getElementById("monthlyPersonalChart");
+
+		if (monthlyPersonalCanvas) {
+
+			new Chart(monthlyPersonalCanvas, {
+
+				type : "bar",
+
+				data : {
+
+					labels : monthLabels,
+
+					datasets : [
+
+							{
+								label : "공제액 (천원)",
+
+								data : deductionData,
+
+								stack : "payment",
+
+								backgroundColor : "#F4A582",
+
+								borderColor : "#F4A582",
+
+								borderWidth : 1,
+
+								barPercentage : 0.92,
+
+								categoryPercentage : 0.9,
+
+								datalabels : {
+									color : "#333333",
+									anchor : "center",
+									align : "center",
+
+									font : {
+										size : 12
+									},
+
+									// 급여 데이터가 없는 달은 0 이므로 라벨을 그리지 않는다
+									display : function(context) {
+										return Number(context.dataset.data[context.dataIndex]) > 0;
+									},
+
+									formatter : function(value) {
+										return formatThousandWon(value);
+									}
+								}
+							},
+
+							{
+								label : "실지급액 (천원)",
+
+								data : netPaymentData,
+
+								stack : "payment",
+
+								backgroundColor : "#9FA8DA",
+
+								borderColor : "#9FA8DA",
+
+								borderWidth : 1,
+
+								barPercentage : 0.92,
+
+								categoryPercentage : 0.9,
+
+								datalabels : {
+									color : "#333333",
+									anchor : "center",
+									align : "center",
+
+									font : {
+										size : 12
+									},
+
+									display : function(context) {
+										return Number(context.dataset.data[context.dataIndex]) > 0;
+									},
+
+									formatter : function(value) {
+										return formatThousandWon(value);
+									}
+								}
+							} ]
+				},
+
+				plugins : [ ChartDataLabels ],
+
+				options : {
+
+					responsive : true,
+
+					maintainAspectRatio : false,
+
+					layout : {
+						padding : {
+							top : 24
+						}
+					},
+
+					interaction : {
+						mode : "index",
+						intersect : false
+					},
+
+					plugins : {
+
+						legend : {
+							position : "bottom",
+
+							labels : {
+								boxWidth : 12,
+								boxHeight : 12,
+								color : axisColor
+							}
+						},
+
+						tooltip : {
+
+							mode : "index",
+
+							intersect : false,
+
+							callbacks : {
+
+								title : function(items) {
+
+									if (items.length === 0) {
+										return "";
+									}
+
+									return items[0].label;
+								},
+
+								beforeBody : function(items) {
+
+									if (items.length === 0) {
+										return "";
+									}
+
+									const payment = monthlyPaymentData[items[0].dataIndex];
+
+									if (payment === null || payment === undefined) {
+										return "";
+									}
+
+									return "월급여액 (천원)  " + formatThousandWon(payment);
+								},
+
+								label : function(context) {
+
+									return context.dataset.label + "  "
+											+ formatThousandWon(context.parsed.y);
+								}
+							}
+						}
+					},
+
+					scales : {
+
+						x : {
+
+							stacked : true,
+
+							grid : {
+								display : false
+							},
+
+							ticks : {
+								color : axisColor
+							}
+						},
+
+						y : {
+
+							type : "linear",
+
+							position : "left",
+
+							stacked : true,
+
+							beginAtZero : true,
+
+							grid : {
+								display : false
+							},
+
+							title : {
+								display : true,
+								text : "월급여액 (천원)",
+								color : axisColor
+							},
+
+							ticks : {
+
+								color : axisColor,
+
+								callback : function(value) {
+									return Number(value).toLocaleString();
+								}
+							}
+						}
+					}
+				}
+			});
+		}
 	</script>
 
 </body>
