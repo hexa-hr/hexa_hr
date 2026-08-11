@@ -9,6 +9,12 @@
 <meta charset="UTF-8">
 <title>급여항목 구성 통계</title>
 
+<script
+	src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
+<script
+	src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
 <style>
 body {
 	font-family: Arial, sans-serif;
@@ -20,8 +26,9 @@ body {
 }
 
 .search-form {
-	border: 1px solid #ccc;
-	padding: 20px;
+	background-color: #f7f8fa;
+	border: 1px solid #e3e8ef;
+	padding: 14px 20px;
 }
 
 .search-row {
@@ -31,11 +38,19 @@ body {
 }
 
 label {
-	font-weight: bold;
+	color: #333;
+}
+
+.required-mark {
+	color: #d9534f;
 }
 
 input, button, select {
-	padding: 7px;
+	padding: 6px 10px;
+}
+
+select, .employee-name {
+	border: 1px solid #b9c2cf;
 }
 
 .employee-name {
@@ -58,27 +73,18 @@ button {
 	overflow-x: auto;
 }
 
-.summary-table-container {
-	margin-bottom: 30px;
+.donut-container {
+	display: flex;
+	gap: 20px;
+	margin-top: 30px;
+	margin-bottom: 10px;
 }
 
-.summary-table {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-.summary-table th, .summary-table td {
-	border: 1px solid #aaa;
-	padding: 12px;
-	text-align: center;
-}
-
-.summary-table th {
-	background-color: #f2f2f2;
-}
-
-.summary-table td {
-	font-weight: bold;
+.donut-box {
+	flex: 1;
+	position: relative;
+	height: 400px;
+	min-width: 260px;
 }
 
 .composition-table {
@@ -247,16 +253,56 @@ button {
 	<p class="description">귀속년월과 사원을 선택하면 해당 사원의 급여항목 구성표를 확인할 수 있습니다.
 	</p>
 
+	<jsp:useBean id="today" class="java.util.Date" />
+
+	<fmt:formatDate value="${today}" pattern="yyyy" var="currentYear" />
+
+	<fmt:formatDate value="${today}" pattern="MM" var="currentMonth" />
+
+	<%-- selectedWageMonth 는 'YYYY-MM' 형식이라 연/월로 잘라 드롭다운 선택값으로 쓴다 --%>
+	<c:set var="selectedYearValue"
+		value="${empty selectedWageMonth ? currentYear : fn:substring(selectedWageMonth, 0, 4)}" />
+
+	<c:set var="selectedMonthValue"
+		value="${empty selectedWageMonth ? currentMonth : fn:substring(selectedWageMonth, 5, 7)}" />
+
 	<form class="search-form" method="get"
 		action="${pageContext.request.contextPath}/wage/itemCompositionStatistics.do">
 
 		<div class="search-row">
 
-			<label for="wageMonth">귀속년월</label> <input type="month"
-				id="wageMonth" name="wageMonth"
-				value="<c:out value='${selectedWageMonth}' />" required> <label
-				for="selectedEmployeeName">대상자</label> <input type="hidden"
-				id="employeeId" name="employeeId"
+			<label for="wageYear"><span class="required-mark">*</span>
+				귀속년월을 선택해 주세요.</label> <select id="wageYear">
+
+				<c:forEach begin="0" end="9" var="offset">
+
+					<c:set var="yearOption" value="${currentYear - 9 + offset}" />
+
+					<option value="${yearOption}"
+						<c:if test="${yearOption == selectedYearValue}">selected</c:if>>${yearOption}
+						년</option>
+
+				</c:forEach>
+
+			</select> <select id="wageMonthValue">
+
+				<c:forEach begin="1" end="12" var="month">
+
+					<fmt:formatNumber value="${month}" pattern="00" var="monthOption" />
+
+					<option value="${monthOption}"
+						<c:if test="${monthOption == selectedMonthValue}">selected</c:if>>${monthOption}
+						월</option>
+
+				</c:forEach>
+
+			</select>
+
+			<%-- Handler 가 받는 파라미터는 그대로 wageMonth 이므로 제출 직전에 연-월을 합쳐 넣는다 --%>
+			<input type="hidden" id="wageMonth" name="wageMonth"
+				value="${selectedYearValue}-${selectedMonthValue}"> <label
+				for="selectedEmployeeName">대상자를 선택해 주세요.</label> <input
+				type="hidden" id="employeeId" name="employeeId"
 				value="<c:out value='${selectedEmployeeId}' />"> <input
 				type="text" id="selectedEmployeeName" class="employee-name"
 				value="<c:out value='${selectedEmployeeName}' />"
@@ -371,35 +417,19 @@ button {
 
 				<c:when test="${itemCompositionStatistics.hasData}">
 
-					<div class="summary-table-container">
+					<div class="donut-container">
 
-						<table class="summary-table">
+						<div class="donut-box">
+							<canvas id="summaryDonut"></canvas>
+						</div>
 
-							<thead>
-								<tr>
-									<th>지급합계</th>
-									<th>공제합계</th>
-									<th>실지급액</th>
-								</tr>
-							</thead>
+						<div class="donut-box">
+							<canvas id="paymentDonut"></canvas>
+						</div>
 
-							<tbody>
-								<tr>
-									<td><fmt:formatNumber
-											value="${itemCompositionStatistics.totalPayment}"
-											pattern="#,##0" />원</td>
-
-									<td><fmt:formatNumber
-											value="${itemCompositionStatistics.totalDeduction}"
-											pattern="#,##0" />원</td>
-
-									<td><fmt:formatNumber
-											value="${itemCompositionStatistics.netPayment}"
-											pattern="#,##0" />원</td>
-								</tr>
-							</tbody>
-
-						</table>
+						<div class="donut-box">
+							<canvas id="deductionDonut"></canvas>
+						</div>
 
 					</div>
 
@@ -594,6 +624,32 @@ button {
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
 
+			// 연/월 드롭다운 값을 Handler 가 받는 wageMonth(YYYY-MM) 형식으로 합쳐 넣는다
+			const wageYearSelect = document.getElementById("wageYear");
+
+			const wageMonthSelect = document.getElementById("wageMonthValue");
+
+			const wageMonthInput = document.getElementById("wageMonth");
+
+			function syncWageMonth() {
+
+				if (wageYearSelect && wageMonthSelect && wageMonthInput) {
+
+					wageMonthInput.value = wageYearSelect.value + "-"
+							+ wageMonthSelect.value;
+				}
+			}
+
+			if (wageYearSelect) {
+				wageYearSelect.addEventListener("change", syncWageMonth);
+			}
+
+			if (wageMonthSelect) {
+				wageMonthSelect.addEventListener("change", syncWageMonth);
+			}
+
+			syncWageMonth();
+
 			const modal = document.getElementById("employeeModal");
 
 			const openButton = document.getElementById("openEmployeeModal");
@@ -750,6 +806,281 @@ button {
 			});
 
 		});
+	</script>
+
+	<script>
+		const totalPayment = ${empty itemCompositionStatistics ? 0 : itemCompositionStatistics.totalPayment};
+
+		const totalDeduction = ${empty itemCompositionStatistics ? 0 : itemCompositionStatistics.totalDeduction};
+
+		const paymentItems = [
+			<c:forEach var="item" items="${itemCompositionStatistics.paymentItems}"
+				varStatus="status">
+
+				{
+					name : "${item.wageTypeName}",
+					amount : ${item.amount},
+					rate : ${item.compositionRate}
+				}
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		const deductionItems = [
+			<c:forEach var="item" items="${itemCompositionStatistics.deductionItems}"
+				varStatus="status">
+
+				{
+					name : "${item.wageTypeName}",
+					amount : ${item.amount},
+					rate : ${item.compositionRate}
+				}
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		const axisColor = "#5b7096";
+
+		// 짙은 색에서 옅은 색 순서. 항목 10개 + '기타' 까지 커버한다.
+		const bluePalette = [ "#1F4E79", "#215E92", "#246EAB", "#2A80C0",
+				"#3592D2", "#4BA3DD", "#69B5E5", "#8AC7EC", "#ACD8F3",
+				"#CBE7F8", "#E3F2FC" ];
+
+		const orangePalette = [ "#C74A0B", "#DC5A0E", "#EA6C18", "#F27F2C",
+				"#F79245", "#F9A461", "#FBB681", "#FCC8A2", "#FDD9C1",
+				"#FEE7DA", "#FEF2EB" ];
+
+		const MAX_DONUT_ITEMS = 10;
+
+		// 조각이 이 비율보다 얇으면 퍼센트 라벨을 그리지 않는다. 참고 화면도 얇은 조각에는 라벨이 없다.
+		const MIN_LABEL_RATIO = 0.05;
+
+		function formatRate(rate) {
+			return Number(rate).toFixed(1) + "%";
+		}
+
+		/*
+		 * 항목이 10개를 넘으면 금액 내림차순 상위 10개만 남기고 나머지를 '기타'로 합친다.
+		 * 차트에만 적용하며 아래 표는 실제 항목을 전부 그대로 보여준다.
+		 */
+		function groupDonutItems(items) {
+
+			if (items.length <= MAX_DONUT_ITEMS) {
+				return items;
+			}
+
+			const sorted = items.slice().sort(function(a, b) {
+				return b.amount - a.amount;
+			});
+
+			const kept = sorted.slice(0, MAX_DONUT_ITEMS);
+
+			const rest = sorted.slice(MAX_DONUT_ITEMS);
+
+			kept.push({
+				name : "기타",
+
+				amount : rest.reduce(function(sum, item) {
+					return sum + item.amount;
+				}, 0),
+
+				rate : rest.reduce(function(sum, item) {
+					return sum + item.rate;
+				}, 0)
+			});
+
+			return kept;
+		}
+
+		// 도넛 가운데 제목을 그리는 플러그인
+		const centerTextPlugin = {
+
+			id : "centerText",
+
+			afterDatasetsDraw : function(chart) {
+
+				const config = chart.options.plugins.centerText;
+
+				if (!config || !config.text) {
+					return;
+				}
+
+				const ctx = chart.ctx;
+
+				const area = chart.chartArea;
+
+				const centerX = (area.left + area.right) / 2;
+
+				const centerY = (area.top + area.bottom) / 2;
+
+				const lines = config.text.split("\n");
+
+				const lineHeight = 21;
+
+				const startY = centerY - ((lines.length - 1) * lineHeight) / 2;
+
+				ctx.save();
+
+				ctx.fillStyle = "#333333";
+				ctx.font = "bold 15px Arial";
+				ctx.textAlign = "center";
+				ctx.textBaseline = "middle";
+
+				lines.forEach(function(line, index) {
+					ctx.fillText(line, centerX, startY + index * lineHeight);
+				});
+
+				ctx.restore();
+			}
+		};
+
+		function createDonutChart(canvasId, centerText, sourceItems, palette) {
+
+			const canvas = document.getElementById(canvasId);
+
+			if (!canvas) {
+				return;
+			}
+
+			const items = groupDonutItems(sourceItems);
+
+			// 총액이 0이면 비율 계산에서 NaN 이 나오므로 라벨 판정에 그대로 쓰지 않는다.
+			const total = items.reduce(function(sum, item) {
+				return sum + Number(item.amount);
+			}, 0);
+
+			new Chart(canvas, {
+
+				type : "doughnut",
+
+				data : {
+
+					labels : items.map(function(item) {
+						return item.name;
+					}),
+
+					datasets : [ {
+
+						data : items.map(function(item) {
+							return Number(item.amount);
+						}),
+
+						backgroundColor : items.map(function(item, index) {
+							return palette[index % palette.length];
+						}),
+
+						borderColor : "#ffffff",
+
+						borderWidth : 2
+					} ]
+				},
+
+				plugins : [ ChartDataLabels, centerTextPlugin ],
+
+				options : {
+
+					responsive : true,
+
+					maintainAspectRatio : false,
+
+					cutout : "58%",
+
+					layout : {
+						padding : {
+							top : 10,
+							bottom : 10
+						}
+					},
+
+					plugins : {
+
+						centerText : {
+							text : centerText
+						},
+
+						legend : {
+							position : "bottom",
+
+							labels : {
+								boxWidth : 12,
+								boxHeight : 12,
+								color : axisColor,
+								padding : 8,
+
+								font : {
+									size : 11
+								}
+							}
+						},
+
+						tooltip : {
+
+							callbacks : {
+
+								label : function(context) {
+
+									return context.label + "  "
+											+ formatRate(items[context.dataIndex].rate);
+								}
+							}
+						},
+
+						datalabels : {
+
+							color : "#ffffff",
+
+							font : {
+								size : 12,
+								weight : "bold"
+							},
+
+							display : function(context) {
+
+								if (total <= 0) {
+									return false;
+								}
+
+								const value = Number(context.dataset.data[context.dataIndex]);
+
+								return value > 0 && value / total >= MIN_LABEL_RATIO;
+							},
+
+							formatter : function(value, context) {
+								return formatRate(items[context.dataIndex].rate);
+							}
+						}
+					}
+				}
+			});
+		}
+
+		const summaryTotal = totalPayment + totalDeduction;
+
+		const summaryItems = [ {
+			name : "지급항목",
+			amount : totalPayment,
+			rate : summaryTotal > 0 ? (totalPayment * 100) / summaryTotal : 0
+		}, {
+			name : "공제항목",
+			amount : totalDeduction,
+			rate : summaryTotal > 0 ? (totalDeduction * 100) / summaryTotal : 0
+		} ];
+
+		createDonutChart("summaryDonut", "지급항목\n+\n공제항목", summaryItems, [
+				"#1CA9E8", "#F5900C" ]);
+
+		createDonutChart("paymentDonut", "지급\n세부항목", paymentItems, bluePalette);
+
+		createDonutChart("deductionDonut", "공제\n세부항목", deductionItems,
+				orangePalette);
 	</script>
 
 </body>
