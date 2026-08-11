@@ -8,9 +8,9 @@ public class WageType {
 	private String attendanceOrLumpsum;
 	private String attendanceOrLumpsumContent;
 	private String usage; // CHAR(1)
-	private String itemType; // 'P' / 'D' 
-	private String taxableYn; // 'Y' / 'N' 
-	private Long taxFreeLimit; // 비과세 한도
+	private String itemType;
+	private String taxableYn;
+	private Long taxFreeLimit;
 
 	public WageType(Integer wageTypeId, String wageTypeName, String numberCut, String attendanceOrLumpsum,
 		String attendanceOrLumpsumContent, String usage, String itemType, String taxableYn, Long taxFreeLimit) {

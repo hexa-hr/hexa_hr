@@ -10,9 +10,9 @@ public class EmployeeSalaryAccount {
 	private Integer salaryCalculation1;
 	private Integer salaryCalculation2;
 	private Integer salaryPaymentDate;
-	private String calc1MonthType; //  'C' 당월 / 'P' 전월
-	private String calc2MonthType; //  'C' 당월 / 'P' 전월 
-	private String paymentMonthType; //  'C' 당월 / 'N' 익월 
+	private String calc1MonthType;
+	private String calc2MonthType;
+	private String paymentMonthType;
 
 	public EmployeeSalaryAccount(Integer accountId, Integer companyId, String bankName, String accountNumber,
 		String depositStocks, Integer salaryCalculation1, Integer salaryCalculation2, Integer salaryPaymentDate,
