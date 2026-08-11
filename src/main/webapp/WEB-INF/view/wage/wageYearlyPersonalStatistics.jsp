@@ -8,6 +8,12 @@
 <meta charset="UTF-8">
 <title>연도별 개인연봉 통계</title>
 
+<script
+	src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
+<script
+	src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
 <style>
 body {
 	font-family: Arial, sans-serif;
@@ -52,6 +58,13 @@ button {
 	font-weight: bold;
 }
 
+.chart-container {
+	position: relative;
+	width: 100%;
+	height: 430px;
+	margin-top: 30px;
+}
+
 .result-container {
 	margin-top: 30px;
 	overflow-x: auto;
@@ -59,37 +72,45 @@ button {
 
 .result-table {
 	border-collapse: collapse;
-	min-width: 1400px;
+	table-layout: fixed;
 	width: 100%;
 	white-space: nowrap;
+	font-size: 13px;
+	border-top: 2px solid #4a80c0;
+}
+
+.result-table .col-title {
+	width: 120px;
 }
 
 .result-table th, .result-table td {
-	border: 1px solid #aaa;
-	padding: 9px 12px;
+	border: 1px solid #dde3ea;
+	padding: 8px 12px;
 	text-align: right;
+	color: #33639c;
 }
 
 .result-table th {
-	background-color: #f2f2f2;
+	background-color: #eef2f8;
 	text-align: center;
+	color: #333;
 }
 
 .result-table .row-title {
 	text-align: left;
-	font-weight: bold;
-	background-color: #f8f8f8;
+	background-color: #f5f7fa;
+	color: #333;
+	white-space: normal;
+	word-break: keep-all;
 }
 
-.result-table .sub-title {
+.result-table .growth-title {
 	text-align: left;
 	padding-left: 25px;
-	background-color: #fafafa;
-}
-
-.result-table .total-column {
-	background-color: #fffde0;
-	font-weight: bold;
+	background-color: #f5f7fa;
+	color: #333;
+	white-space: normal;
+	word-break: keep-all;
 }
 
 /* 사원 선택 모달 */
@@ -169,18 +190,16 @@ button {
 	margin: 0 5px;
 }
 
-.result-table .growth-title {
-	text-align: left;
-	padding-left: 25px;
-	background-color: #fafafa;
-}
-
 .positive {
 	color: red;
 }
 
 .negative {
 	color: blue;
+}
+
+.neutral {
+	color: #333;
 }
 </style>
 </head>
@@ -305,9 +324,23 @@ button {
 
 	<c:if test="${not empty yearlyPersonalStatistics}">
 
+		<div class="chart-container">
+			<canvas id="yearlyPersonalChart"></canvas>
+		</div>
+
 		<div class="result-container">
 
 			<table class="result-table">
+
+				<colgroup>
+
+					<col class="col-title" />
+
+					<c:forEach var="row" items="${yearlyPersonalStatistics.rows}">
+						<col />
+					</c:forEach>
+
+				</colgroup>
 
 				<thead>
 					<tr>
@@ -328,7 +361,7 @@ button {
 
 					<tr>
 
-						<td class="row-title">연봉액 (원)</td>
+						<td class="row-title">연봉액 (천원)</td>
 
 						<c:forEach var="row" items="${yearlyPersonalStatistics.rows}">
 
@@ -339,7 +372,8 @@ button {
 								</c:when>
 
 									<c:otherwise>
-										<fmt:formatNumber value="${row.annualSalary}" pattern="#,##0" />
+										<fmt:formatNumber value="${row.annualSalary / 1000}"
+											pattern="#,##0" />
 									</c:otherwise>
 
 								</c:choose></td>
@@ -357,9 +391,7 @@ button {
 
 							<td><c:choose>
 
-									<c:when test="${row.salaryGrowthRate == null}">
-									-
-								</c:when>
+									<c:when test="${row.salaryGrowthRate == null}"></c:when>
 
 									<c:when test="${row.salaryGrowthRate > 0}">
 										<span class="positive"> <fmt:formatNumber
@@ -374,9 +406,10 @@ button {
 									</c:when>
 
 									<c:otherwise>
-										<fmt:formatNumber value="${row.salaryGrowthRate}"
-											pattern="0.0" />%
-								</c:otherwise>
+										<span class="neutral"> <fmt:formatNumber
+												value="${row.salaryGrowthRate}" pattern="0.0" />%
+										</span>
+									</c:otherwise>
 
 								</c:choose></td>
 
@@ -387,7 +420,7 @@ button {
 
 					<tr>
 
-						<td class="row-title">공제금액 (원)</td>
+						<td class="row-title">공제금액 (천원)</td>
 
 						<c:forEach var="row" items="${yearlyPersonalStatistics.rows}">
 
@@ -398,7 +431,7 @@ button {
 								</c:when>
 
 									<c:otherwise>
-										<fmt:formatNumber value="${row.totalDeduction}"
+										<fmt:formatNumber value="${row.totalDeduction / 1000}"
 											pattern="#,##0" />
 									</c:otherwise>
 
@@ -411,7 +444,7 @@ button {
 
 					<tr>
 
-						<td class="row-title">실지급액 (원)</td>
+						<td class="row-title">실지급액 (천원)</td>
 
 						<c:forEach var="row" items="${yearlyPersonalStatistics.rows}">
 
@@ -422,7 +455,8 @@ button {
 								</c:when>
 
 									<c:otherwise>
-										<fmt:formatNumber value="${row.netPayment}" pattern="#,##0" />
+										<fmt:formatNumber value="${row.netPayment / 1000}"
+											pattern="#,##0" />
 									</c:otherwise>
 
 								</c:choose></td>
@@ -598,6 +632,294 @@ button {
 			});
 
 		});
+	</script>
+
+	<script>
+		const yearLabels = [
+			<c:forEach var="row" items="${yearlyPersonalStatistics.rows}"
+				varStatus="status">
+
+				"${row.year}년"
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		// 데이터가 없는 연도는 0이 아니라 null 이다. 막대를 그리지 않기 위함이다.
+		const deductionData = [
+			<c:forEach var="row" items="${yearlyPersonalStatistics.rows}"
+				varStatus="status">
+
+				<c:choose>
+					<c:when test="${row.hasData}">${row.totalDeduction / 1000}</c:when>
+					<c:otherwise>null</c:otherwise>
+				</c:choose>
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		const netPaymentData = [
+			<c:forEach var="row" items="${yearlyPersonalStatistics.rows}"
+				varStatus="status">
+
+				<c:choose>
+					<c:when test="${row.hasData}">${row.netPayment / 1000}</c:when>
+					<c:otherwise>null</c:otherwise>
+				</c:choose>
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		// 연봉액은 dataset 이 아니라 Tooltip 표시용으로만 쓴다.
+		const annualSalaryData = [
+			<c:forEach var="row" items="${yearlyPersonalStatistics.rows}"
+				varStatus="status">
+
+				<c:choose>
+					<c:when test="${row.hasData}">${row.annualSalary / 1000}</c:when>
+					<c:otherwise>null</c:otherwise>
+				</c:choose>
+
+				<c:if test="${!status.last}">
+					,
+				</c:if>
+
+			</c:forEach>
+		];
+
+		const axisColor = "#5b7096";
+
+		// 차트 데이터는 원본 그대로 두고 화면에 찍을 때만 정수 천원으로 반올림한다.
+		function formatThousandWon(value) {
+
+			return Math.round(Number(value)).toLocaleString("ko-KR");
+		}
+
+		const personalChartCanvas = document
+				.getElementById("yearlyPersonalChart");
+
+		if (personalChartCanvas) {
+
+			new Chart(personalChartCanvas, {
+
+				type : "bar",
+
+				data : {
+
+					labels : yearLabels,
+
+					datasets : [
+
+							{
+								label : "공제금액 (천원)",
+
+								data : deductionData,
+
+								stack : "salary",
+
+								backgroundColor : "#F4A582",
+
+								borderColor : "#F4A582",
+
+								borderWidth : 1,
+
+								barPercentage : 0.92,
+
+								categoryPercentage : 0.9,
+
+								datalabels : {
+									color : "#333333",
+									anchor : "center",
+									align : "center",
+
+									font : {
+										size : 12
+									},
+
+									display : function(context) {
+
+										const value = context.dataset.data[context.dataIndex];
+
+										return value !== null && Number(value) > 0;
+									},
+
+									formatter : function(value) {
+										return formatThousandWon(value);
+									}
+								}
+							},
+
+							{
+								label : "실지급액 (천원)",
+
+								data : netPaymentData,
+
+								stack : "salary",
+
+								backgroundColor : "#9FA8DA",
+
+								borderColor : "#9FA8DA",
+
+								borderWidth : 1,
+
+								barPercentage : 0.92,
+
+								categoryPercentage : 0.9,
+
+								datalabels : {
+									color : "#333333",
+									anchor : "center",
+									align : "center",
+
+									font : {
+										size : 12
+									},
+
+									display : function(context) {
+
+										const value = context.dataset.data[context.dataIndex];
+
+										return value !== null && Number(value) > 0;
+									},
+
+									formatter : function(value) {
+										return formatThousandWon(value);
+									}
+								}
+							} ]
+				},
+
+				plugins : [ ChartDataLabels ],
+
+				options : {
+
+					responsive : true,
+
+					maintainAspectRatio : false,
+
+					layout : {
+						padding : {
+							top : 24
+						}
+					},
+
+					interaction : {
+						mode : "index",
+						intersect : false
+					},
+
+					plugins : {
+
+						legend : {
+							position : "bottom",
+
+							labels : {
+								boxWidth : 12,
+								boxHeight : 12,
+								color : axisColor
+							}
+						},
+
+						tooltip : {
+
+							mode : "index",
+
+							intersect : false,
+
+							callbacks : {
+
+								title : function(items) {
+
+									if (items.length === 0) {
+										return "";
+									}
+
+									return items[0].label;
+								},
+
+								beforeBody : function(items) {
+
+									if (items.length === 0) {
+										return "";
+									}
+
+									const salary = annualSalaryData[items[0].dataIndex];
+
+									if (salary === null || salary === undefined) {
+										return "";
+									}
+
+									return "연봉액 (천원)  " + formatThousandWon(salary);
+								},
+
+								label : function(context) {
+
+									return context.dataset.label + "  "
+											+ formatThousandWon(context.parsed.y);
+								}
+							}
+						}
+					},
+
+					scales : {
+
+						x : {
+
+							stacked : true,
+
+							grid : {
+								display : false
+							},
+
+							ticks : {
+								color : axisColor
+							}
+						},
+
+						y : {
+
+							type : "linear",
+
+							position : "left",
+
+							stacked : true,
+
+							beginAtZero : true,
+
+							grid : {
+								display : false
+							},
+
+							title : {
+								display : true,
+								text : "연봉액 (천원)",
+								color : axisColor
+							},
+
+							ticks : {
+
+								color : axisColor,
+
+								callback : function(value) {
+									return Number(value).toLocaleString();
+								}
+							}
+						}
+					}
+				}
+			});
+		}
 	</script>
 
 </body>
