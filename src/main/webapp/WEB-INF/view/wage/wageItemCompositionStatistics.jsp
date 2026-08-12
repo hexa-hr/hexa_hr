@@ -90,12 +90,15 @@ button {
 .composition-table {
 	border-collapse: collapse;
 	white-space: nowrap;
+	font-size: 13px;
+	border-top: 2px solid #4a80c0;
 }
 
 .composition-table th, .composition-table td {
-	border: 1px solid #aaa;
-	padding: 9px 12px;
+	border: 1px solid #dde3ea;
+	padding: 8px 12px;
 	text-align: right;
+	color: #33639c;
 }
 
 /* 왼쪽 구분 열 - 지급항목 / 공제항목 */
@@ -103,6 +106,7 @@ button {
 	background-color: #eef2f8;
 	text-align: left;
 	font-weight: bold;
+	color: #333;
 }
 
 /* 왼쪽 구분 열 - 금액 / 구성비율 */
@@ -110,6 +114,7 @@ button {
 	background-color: #fff;
 	text-align: left;
 	font-weight: normal;
+	color: #333;
 }
 
 /* 급여항목명 헤더 */
@@ -117,6 +122,7 @@ button {
 	background-color: #eef2f8;
 	text-align: center;
 	font-weight: bold;
+	color: #333;
 }
 
 .composition-table .total {

@@ -25,8 +25,9 @@ body {
 }
 
 .search-form {
-	border: 1px solid #ccc;
-	padding: 20px;
+	background-color: #f7f8fa;
+	border: 1px solid #e3e8ef;
+	padding: 14px 20px;
 }
 
 .search-row {
@@ -36,11 +37,19 @@ body {
 }
 
 label {
-	font-weight: bold;
+	color: #333;
+}
+
+.required-mark {
+	color: #d9534f;
 }
 
 input, button, select {
-	padding: 7px;
+	padding: 6px 10px;
+}
+
+select, .employee-name {
+	border: 1px solid #b9c2cf;
 }
 
 .employee-name {
@@ -210,16 +219,30 @@ button {
 	<p class="description">귀속년도와 사원을 선택하면 해당 사원의 최근 10개년 연봉현황을 확인할 수
 		있습니다.</p>
 
+	<jsp:useBean id="today" class="java.util.Date" />
+
+	<fmt:formatDate value="${today}" pattern="yyyy" var="currentYear" />
+
 	<form class="search-form" method="get"
 		action="${pageContext.request.contextPath}/wage/yearlyPersonalStatistics.do">
 
 		<div class="search-row">
 
-			<label for="year">귀속년도</label> <input type="number" id="year"
-				name="year" min="1000" max="9999"
-				value="<c:out value='${selectedYear}' />" required> <label
-				for="selectedEmployeeName">대상자</label> <input type="hidden"
-				id="employeeId" name="employeeId"
+			<label for="year"><span class="required-mark">*</span> 귀속년도를
+				선택해 주세요.</label> <select id="year" name="year">
+
+				<c:forEach begin="0" end="9" var="offset">
+
+					<c:set var="yearOption" value="${currentYear - 9 + offset}" />
+
+					<option value="${yearOption}"
+						<c:if test="${yearOption == selectedYear}">selected</c:if>>${yearOption}
+						년</option>
+
+				</c:forEach>
+
+			</select> <label for="selectedEmployeeName">대상자를 선택해 주세요.</label> <input
+				type="hidden" id="employeeId" name="employeeId"
 				value="<c:out value='${selectedEmployeeId}' />"> <input
 				type="text" id="selectedEmployeeName" class="employee-name"
 				value="<c:out value='${selectedEmployeeName}' />"
