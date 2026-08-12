@@ -1,0 +1,359 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>근태기록/관리</title>
+<style>
+    body { font-family: 'Malgun Gothic', dotum, sans-serif; font-size: 13px; color: #333; margin: 0; padding: 20px; background-color: #f5f5f5;}
+    
+    /* Layout */
+    .container { display: flex; gap: 30px; background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .left-panel { flex: 6; overflow-y: auto; max-height: 600px; }
+    .right-panel { flex: 4; border-left: 1px solid #ddd; padding-left: 30px; }
+
+    /* Table Styles */
+    table { width: 100%; border-collapse: collapse; text-align: center; }
+    th, td { border: 1px solid #e2e2e2; padding: 10px; }
+    th { background-color: #f4f4f4; }
+    .selected-row { background-color: #e8f0fe !important; font-weight: bold; }
+
+    /* Button Styles */
+    .btn-manage { background: white; border: 1px solid #ccc; padding: 4px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; }
+    .btn-manage:hover { background: #eee; }
+    .btn-delete { background: #ff4d4f; color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; }
+    .btn-delete:hover { background: #ff7875; }
+    .btn-submit { background-color: #5c7cba; color: white; border: none; padding: 6px 20px; border-radius: 3px; cursor: pointer; }
+    .btn-reset { background-color: #999; color: white; border: none; padding: 6px 15px; border-radius: 3px; cursor: pointer; }
+
+    /* Modal Styles */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+    .modal-content { background: white; width: 850px; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .modal-header { font-size: 18px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; }
+    .btn-close-modal { cursor: pointer; font-size: 20px; background: none; border: none; }
+    
+    /* Form Styles */
+    .form-table th { width: 120px; text-align: left; background-color: #fbfbfb; }
+    .form-table td { text-align: left; }
+    input[type="date"], input[type="text"], input[type="number"], select { padding: 3px; border: 1px solid #ccc; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 좌측 리스트 영역 -->
+    <div class="left-panel">
+        <h2>근태기록/관리</h2>
+        <table id="employeeTable">
+            <thead>
+                <tr>
+                    <th>선택</th>
+                    <th>구분</th>
+                    <th>사원번호</th>
+                    <th>성명</th>
+                    <th>부서</th>
+                    <th>직위</th>
+                    <th>근태기록</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- DB 동적 목록 조회를 위한 JSTL 반복문 -->
+                <c:forEach var="emp" items="${empList}">
+                    <tr>
+                        <td><input type="checkbox" class="emp-checkbox" value="${emp.employeeId}" data-name="${emp.koreanName}"></td>
+                        <td>${emp.employmentType}</td>
+                        <td>No-${emp.employeeId}</td>
+                        <td>${emp.koreanName}</td>
+                        <td>${emp.departmentName}</td>
+                        <td>${emp.positionName}</td>
+                        <td>
+                            <button type="button" class="btn-manage" onclick="openModal('${emp.employeeId}', '${emp.koreanName}', '${emp.departmentName}', '${emp.positionName}')">관리</button>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 우측 폼 영역 -->
+    <div class="right-panel">
+        <!-- [수정됨 1] 폼 데이터가 attendanceSaveProcess.jsp로 넘어가도록 action 주소 변경 -->
+        <form id="attendanceForm" action="attendanceSaveProcess.jsp" method="post" onsubmit="return validateForm();">
+            
+            <input type="hidden" id="selectedEmpNo" name="employee_id">
+            <input type="hidden" id="attendanceId" name="attendance_id"> <!-- 수정할 때 사용할 근태기록 ID -->
+            <input type="hidden" id="inputDate" name="input_date" value="2026-08-06"> <!-- 고정 입력일자 -->
+            
+            <div id="selectedEmpInfoDisplay" style="margin-bottom: 10px; font-weight: bold; color: #5c7cba;">
+                [사원을 먼저 좌측 체크박스에서 선택하세요]
+            </div>
+
+            <table class="form-table">
+                <tr style="border-top: 2px solid #000;">
+                    <th>입력일자</th>
+                    <td id="currentDateDisplay">2026-08-06</td>
+                </tr>
+                <tr>
+                    <th>근태항목</th>
+                    <td>
+                        <select id="attendanceType" name="attendance_type_id" onchange="toggleVacationPeriod()" required>
+                            <option value="">선택하세요.</option>
+                            <!-- [수정됨 2] 백엔드에서 에러가 나지 않도록 value를 고유 숫자로 변경 -->
+                            <option value="1">연차</option>
+                            <option value="2">반차</option>
+                            <option value="3">지각</option>
+                            <option value="4">조퇴</option>
+                            <option value="5">외근</option>
+                            <option value="6">휴일근무</option>
+                            <option value="7">연장근무</option>
+                            <option value="8">포상휴가</option>
+                            <option value="9">야간근무</option>
+                            <option value="10">청원휴가</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr id="vacationPeriodRow" style="display: none;">
+                    <th style="color: #e53935;">휴가적용기간</th>
+                    <td style="color: #e53935; font-weight: bold;">
+                        2026-01-01 ~ 2026-12-31
+                    </td>
+                </tr>        
+                <tr>
+                    <th>기간</th>
+                    <td>
+                        <input type="date" id="startDate" name="start_date" required> ~ 
+                        <input type="date" id="endDate" name="end_date" required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>근태일수</th>
+                    <td><input type="number" id="attendanceDays" name="attendance_days" min="0" step="0.5" value="1" required> 일</td>
+                </tr>
+                <tr>
+                    <th>금액(수당)</th>
+                    <td><input type="number" id="wageAmount" name="amount" value="0"> 원</td>
+                </tr>
+                <tr>
+                    <th>적요</th>
+                    <td><input type="text" id="remark" name="summary" style="width: 80%;"></td>
+                </tr>
+            </table>
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="submit" class="btn-submit">저장</button>
+                <button type="button" class="btn-reset" onclick="resetForm();">내용 지우기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 모달 팝업 영역 -->
+<div id="recordModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>사원별 근태기록</span>
+            <button class="btn-close-modal" onclick="closeModal()">×</button>
+        </div>
+        <div style="margin-bottom: 10px; font-weight: bold;" id="modalEmpInfo">
+            <!-- JS로 이름, 부서, 직위 입력 -->
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>번호</th>
+                    <th>입력일자</th>
+                    <th>근태항목</th>
+                    <th>근태기간</th>
+                    <th>근태일수</th>
+                    <th>금액</th>
+                    <th>적요</th>
+                    <th>수정/삭제</th>
+                </tr>
+            </thead>
+            <tbody id="modalTableBody">
+                <!-- 동적 렌더링 영역 -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    var currentModalEmpNo = '';
+
+    // 1. 체크박스 선택 시 사번 저장 및 UI 표시
+    var checkboxes = document.querySelectorAll('.emp-checkbox');
+    checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            checkboxes.forEach(function(otherCb) { if(otherCb !== cb) otherCb.checked = false; });
+            document.querySelectorAll('#employeeTable tbody tr').forEach(function(tr) { tr.classList.remove('selected-row'); });
+            
+            if(this.checked) {
+                this.closest('tr').classList.add('selected-row');
+                document.getElementById('selectedEmpNo').value = this.value; 
+                document.getElementById('selectedEmpInfoDisplay').innerText = '선택된 사원: ' + this.dataset.name + ' (No-' + this.value + ')';
+            } else {
+                document.getElementById('selectedEmpNo').value = "";
+                document.getElementById('selectedEmpInfoDisplay').innerText = "[사원을 먼저 좌측 체크박스에서 선택하세요]";
+            }
+        });
+    });
+
+    // 2. 저장 전 사원 선택 여부 검증
+    function validateForm() {
+        var selectedEmpNo = document.getElementById('selectedEmpNo').value;
+        if (!selectedEmpNo) {
+            alert('좌측 목록에서 근태를 등록할 사원을 체크(선택)해 주세요.');
+            return false;
+        }
+        return true;
+    }
+
+    // 3. 폼 리셋
+    function resetForm() {
+        document.getElementById('attendanceForm').reset();
+        document.getElementById('attendanceId').value = ''; // 수정 모드 해제
+        
+        // 체크박스 상태에 따라 상단 텍스트 복구
+        var checkedBox = document.querySelector('.emp-checkbox:checked');
+        if(checkedBox) {
+            document.getElementById('selectedEmpInfoDisplay').innerText = '선택된 사원: ' + checkedBox.dataset.name + ' (No-' + checkedBox.value + ')';
+            document.getElementById('selectedEmpInfoDisplay').style.color = '#5c7cba';
+        } else {
+            document.getElementById('selectedEmpNo').value = '';
+            document.getElementById('selectedEmpInfoDisplay').innerText = "[사원을 먼저 좌측 체크박스에서 선택하세요]";
+            document.getElementById('selectedEmpInfoDisplay').style.color = '#5c7cba';
+        }
+        
+        toggleVacationPeriod();
+    }
+
+    // 4. 모달 열기 및 Ajax 데이터 동적 로드
+    function openModal(empNo, name, dept, position) {
+        currentModalEmpNo = empNo;
+        document.getElementById('recordModal').style.display = 'flex';
+        document.getElementById('modalEmpInfo').innerText = '• 성명: ' + name + ' (No-' + empNo + ') • 부서: ' + dept + ' • 직위: ' + position;
+        
+        loadAttendanceList(empNo);
+    }
+
+    // 5. 서버에서 특정 사원의 근태 목록 가져오기
+    function loadAttendanceList(empNo) {
+        var tbody = document.getElementById('modalTableBody');
+        tbody.innerHTML = '<tr><td colspan="8">데이터를 불러오는 중입니다...</td></tr>';
+
+        fetch('${pageContext.request.contextPath}/attendance/list.do?empNo=' + empNo)
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                tbody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8">등록된 근태 기록이 없습니다.</td></tr>';
+                    return;
+                }
+
+                data.forEach(function(item, index) {
+                    var tr = document.createElement('tr');
+                    
+                    var inputDate = item.inputDate || '';
+                    var attendanceTypeName = item.attendanceTypeName || '';
+                    var startDate = item.startDate || '';
+                    var endDate = item.endDate || '';
+                    var attendanceDays = item.attendanceDays || 0;
+                    var amount = item.amount || 0;
+                    var summary = item.summary || '';
+                    var attendanceId = item.attendanceId;
+
+                    tr.innerHTML = 
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + inputDate + '</td>' +
+                        '<td>' + attendanceTypeName + '</td>' +
+                        '<td>' + startDate + ' ~ ' + endDate + '</td>' +
+                        '<td>' + attendanceDays + '</td>' +
+                        '<td>' + amount + '</td>' +
+                        '<td>' + summary + '</td>' +
+                        '<td>' +
+                            '<button type="button" class="btn-manage" onclick="editRecord(' + attendanceId + ', \'' + attendanceTypeName + '\', \'' + startDate + '\', \'' + endDate + '\', ' + attendanceDays + ', ' + amount + ', \'' + summary + '\')">🔄수정</button> ' +
+                            '<button type="button" class="btn-delete" onclick="deleteRecord(' + attendanceId + ')">🗑️삭제</button>' +
+                        '</td>';
+                        
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(function(err) {
+                tbody.innerHTML = '<tr><td colspan="8">데이터 조회 중 오류가 발생했습니다.</td></tr>';
+            });
+    }
+
+    // 6. 모달 닫기
+    function closeModal() {
+        document.getElementById('recordModal').style.display = 'none';
+    }
+
+    // 7. 모달 내 '수정' 클릭 시 우측 폼으로 데이터 전달
+    function editRecord(attId, type, start, end, days, amount, remark) {
+        closeModal();
+        
+        // 데이터 ID 및 사원 번호 강제 세팅
+        document.getElementById('attendanceId').value = attId;
+        document.getElementById('selectedEmpNo').value = currentModalEmpNo;
+        
+        // 모달창 텍스트에서 이름만 추출하여 표시
+        var modalTitle = document.getElementById('modalEmpInfo').innerText;
+        var empName = modalTitle.split('• 성명: ')[1].split(' (')[0];
+        document.getElementById('selectedEmpInfoDisplay').innerText = '[수정 모드] 선택된 사원: ' + empName + ' (No-' + currentModalEmpNo + ')';
+        document.getElementById('selectedEmpInfoDisplay').style.color = '#e53935'; // 빨간색으로 변경
+        
+        // [수정됨 3] 드롭다운 값이 숫자로 바뀌었으므로, 한글 이름(type)과 일치하는 항목을 찾아 선택되도록 수정
+        var selectEl = document.getElementById('attendanceType');
+        for(var i=0; i<selectEl.options.length; i++) {
+            if(selectEl.options[i].text === type) {
+                selectEl.selectedIndex = i;
+                break;
+            }
+        }
+        
+        document.getElementById('startDate').value = start;
+        document.getElementById('endDate').value = end;
+        document.getElementById('attendanceDays').value = days;
+        document.getElementById('wageAmount').value = amount;
+        document.getElementById('remark').value = remark;
+        
+        toggleVacationPeriod();
+        
+        document.querySelector('.right-panel').style.outline = "2px solid #e53935";
+        setTimeout(function() { document.querySelector('.right-panel').style.outline = "none"; }, 1000);
+    }
+
+    // 8. 모달 내 '삭제' 버튼 클릭 시 실시간 DB 삭제 처리
+    function deleteRecord(attendanceId) {
+        if (!confirm('해당 근태 기록을 정말 삭제하시겠습니까?')) return;
+
+        fetch('${pageContext.request.contextPath}/attendance/delete.do?attendanceId=' + attendanceId, {
+            method: 'POST'
+        })
+        .then(function(response) {
+            if (response.ok) {
+                alert('정상적으로 삭제되었습니다.');
+                loadAttendanceList(currentModalEmpNo);
+            } else {
+                alert('삭제 처리에 실패했습니다.');
+            }
+        })
+        .catch(function(err) { alert('서버 통신 오류가 발생했습니다.'); });
+    }
+
+    // 9. 포상휴가 선택 시 휴가기간 표시 토글
+    function toggleVacationPeriod() {
+        var typeSelect = document.getElementById('attendanceType');
+        var vacationRow = document.getElementById('vacationPeriodRow');
+        
+        // [수정됨 4] value가 숫자로 바뀌었으므로 텍스트명으로 조건 검사하도록 수정
+        if (typeSelect.options[typeSelect.selectedIndex].text === '포상휴가') {
+            vacationRow.style.display = 'table-row';
+        } else {
+            vacationRow.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
