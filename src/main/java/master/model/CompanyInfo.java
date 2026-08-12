@@ -27,6 +27,29 @@ public class CompanyInfo {
 	private String accountNumber;
 	private String accountHolder;
 
+	// CompanyInfo.java 파일 내부에 추가할 코드
+
+	// 1. 파일명을 담을 변수 추가
+	private String logoFileName;
+	private String stampFileName;
+
+	// 2. Getter / Setter 메서드 추가
+	public String getLogoFileName() {
+		return logoFileName;
+	}
+
+	public void setLogoFileName(String logoFileName) {
+		this.logoFileName = logoFileName;
+	}
+
+	public String getStampFileName() {
+		return stampFileName;
+	}
+
+	public void setStampFileName(String stampFileName) {
+		this.stampFileName = stampFileName;
+	}
+
 	// 2. Getter / Setter 메서드 (클래스 괄호 안에 정상적으로 위치)
 	public String getCompanyName() {
 		return companyName;

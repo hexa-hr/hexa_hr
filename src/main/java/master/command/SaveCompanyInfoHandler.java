@@ -18,8 +18,31 @@ public class SaveCompanyInfoHandler implements CommandHandler {
 			req.setCharacterEncoding("utf-8");
 
 			CompanyInfo newInfo = new CompanyInfo();
+
+			// ★ 생략했던 파라미터들을 전부 가져와서 바구니에 담아주는 필수 코드입니다.
 			newInfo.setCompanyName(req.getParameter("companyName"));
-			// (나머지 텍스트 파라미터 세팅 생략)
+			newInfo.setCeoTitle(req.getParameter("ceoTitle"));
+			newInfo.setCeoName(req.getParameter("ceoName"));
+			newInfo.setBusinessNumber(req.getParameter("businessNumber"));
+			newInfo.setCorpNumber(req.getParameter("corpNumber"));
+			newInfo.setFoundingDate(req.getParameter("foundingDate"));
+			newInfo.setHomepage(req.getParameter("homepage"));
+			newInfo.setZipCode(req.getParameter("zipCode"));
+			newInfo.setAddress(req.getParameter("address"));
+			newInfo.setPhone2(req.getParameter("phone2"));
+			newInfo.setPhone3(req.getParameter("phone3"));
+			newInfo.setFax2(req.getParameter("fax2"));
+			newInfo.setFax3(req.getParameter("fax3"));
+			newInfo.setBusinessCondition(req.getParameter("businessCondition"));
+			newInfo.setBusinessType(req.getParameter("businessType"));
+			newInfo.setManagerName(req.getParameter("managerName"));
+			newInfo.setMgrPhone2(req.getParameter("mgrPhone2"));
+			newInfo.setMgrPhone3(req.getParameter("mgrPhone3"));
+			newInfo.setMgrMobile2(req.getParameter("mgrMobile2"));
+			newInfo.setMgrMobile3(req.getParameter("mgrMobile3"));
+			newInfo.setMgrEmail(req.getParameter("mgrEmail"));
+			newInfo.setAccountNumber(req.getParameter("accountNumber"));
+			newInfo.setAccountHolder(req.getParameter("accountHolder"));
 
 			CompanyInfo oldInfo = companyService.getCompanyInfo();
 
@@ -47,7 +70,7 @@ public class SaveCompanyInfoHandler implements CommandHandler {
 
 			if (stampPart != null && stampPart.getSize() > 0) {
 				String fileName = getFileName(stampPart);
-				stampPart.write("C:\\upload\\" + fileName); //
+				stampPart.write("C:\\upload\\" + fileName);
 				newInfo.setStampFileName(fileName);
 			} else if ("true".equals(deleteStampFlag)) {
 				newInfo.setStampFileName(null);
