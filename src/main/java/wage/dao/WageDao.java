@@ -9,9 +9,12 @@ import java.util.List;
 
 import wage.model.WageEmployeeHistoryRow;
 import wage.model.WageInsuranceDeductionRow;
+import wage.model.WageItemCompositionStatisticsRow;
 import wage.model.WageItemLedgerRow;
 import wage.model.WageLedgerDetailRow;
 import wage.model.WageLedgerSummary;
+import wage.model.WageMonthlyPersonalStatisticsRow;
+import wage.model.WageMonthlyTotalStatisticsRow;
 
 public class WageDao {
 
@@ -406,6 +409,221 @@ public class WageDao {
 						rs.getLong("health_insurance"),
 						rs.getLong("long_term_care_insurance"),
 						rs.getLong("employment_insurance"));
+
+					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<WageMonthlyTotalStatisticsRow> selectMonthlyTotalStatisticsRows(
+		Connection conn,
+		String year)
+		throws SQLException {
+
+		String sql = "SELECT w.wage_month, "
+			+ "       SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                THEN NVL(w.wage_value, 0) "
+			+ "                ELSE 0 END) AS total_payment, "
+			+ "       COUNT(DISTINCT w.employee_id) AS employee_count "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE SUBSTR(w.wage_month, 1, 4) = ? "
+			+ "GROUP BY w.wage_month "
+			+ "ORDER BY w.wage_month";
+
+		List<WageMonthlyTotalStatisticsRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, year);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageMonthlyTotalStatisticsRow row = new WageMonthlyTotalStatisticsRow(
+						rs.getString("wage_month"),
+						rs.getLong("total_payment"),
+						rs.getInt("employee_count"));
+
+					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<WageMonthlyTotalStatisticsRow> selectMonthlyTotalStatisticsRows(
+		Connection conn,
+		String startYear,
+		String endYear)
+		throws SQLException {
+
+		String sql = "SELECT w.wage_month, "
+			+ "       SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                THEN NVL(w.wage_value, 0) "
+			+ "                ELSE 0 END) AS total_payment, "
+			+ "       COUNT(DISTINCT w.employee_id) AS employee_count "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE SUBSTR(w.wage_month, 1, 4) BETWEEN ? AND ? "
+			+ "GROUP BY w.wage_month "
+			+ "ORDER BY w.wage_month";
+
+		List<WageMonthlyTotalStatisticsRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, startYear);
+			pstmt.setString(2, endYear);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageMonthlyTotalStatisticsRow row = new WageMonthlyTotalStatisticsRow(
+						rs.getString("wage_month"),
+						rs.getLong("total_payment"),
+						rs.getInt("employee_count"));
+
+					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<WageMonthlyPersonalStatisticsRow> selectMonthlyPersonalStatisticsRows(
+		Connection conn,
+		Integer employeeId,
+		String year)
+		throws SQLException {
+
+		String sql = "SELECT w.wage_month, "
+			+ "       SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                THEN NVL(w.wage_value, 0) "
+			+ "                ELSE 0 END) AS total_payment, "
+			+ "       SUM(CASE WHEN wt.item_type = 'D' "
+			+ "                THEN NVL(w.wage_value, 0) "
+			+ "                ELSE 0 END) AS total_deduction "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE w.employee_id = ? "
+			+ "  AND SUBSTR(w.wage_month, 1, 4) = ? "
+			+ "GROUP BY w.wage_month "
+			+ "ORDER BY w.wage_month";
+
+		List<WageMonthlyPersonalStatisticsRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, employeeId);
+			pstmt.setString(2, year);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageMonthlyPersonalStatisticsRow row = new WageMonthlyPersonalStatisticsRow(
+						rs.getString("wage_month"),
+						rs.getLong("total_payment"),
+						rs.getLong("total_deduction"));
+
+					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<WageMonthlyPersonalStatisticsRow> selectMonthlyPersonalStatisticsRows(
+		Connection conn,
+		Integer employeeId,
+		String startYear,
+		String endYear)
+		throws SQLException {
+
+		String sql = "SELECT w.wage_month, "
+			+ "       SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                THEN NVL(w.wage_value, 0) "
+			+ "                ELSE 0 END) AS total_payment, "
+			+ "       SUM(CASE WHEN wt.item_type = 'D' "
+			+ "                THEN NVL(w.wage_value, 0) "
+			+ "                ELSE 0 END) AS total_deduction "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE w.employee_id = ? "
+			+ "  AND SUBSTR(w.wage_month, 1, 4) BETWEEN ? AND ? "
+			+ "GROUP BY w.wage_month "
+			+ "ORDER BY w.wage_month";
+
+		List<WageMonthlyPersonalStatisticsRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, employeeId);
+			pstmt.setString(2, startYear);
+			pstmt.setString(3, endYear);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageMonthlyPersonalStatisticsRow row = new WageMonthlyPersonalStatisticsRow(
+						rs.getString("wage_month"),
+						rs.getLong("total_payment"),
+						rs.getLong("total_deduction"));
+
+					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public List<WageItemCompositionStatisticsRow> selectItemCompositionStatisticsRows(
+		Connection conn,
+		Integer employeeId,
+		String wageMonth)
+		throws SQLException {
+
+		String sql = "SELECT wt.wage_type_name, "
+			+ "       wt.item_type, "
+			+ "       SUM(NVL(w.wage_value, 0)) AS amount "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE w.employee_id = ? "
+			+ "  AND w.wage_month = ? "
+			+ "GROUP BY wt.wage_type_name, wt.item_type "
+			+ "ORDER BY wt.item_type DESC, wt.wage_type_name";
+
+		List<WageItemCompositionStatisticsRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, employeeId);
+			pstmt.setString(2, wageMonth);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					WageItemCompositionStatisticsRow row = new WageItemCompositionStatisticsRow(
+						rs.getString("wage_type_name"),
+						rs.getString("item_type"),
+						rs.getLong("amount"));
 
 					result.add(row);
 				}
