@@ -13,7 +13,7 @@ public class WageType {
 	private Long taxFreeLimit;
 
 	public WageType(Integer wageTypeId, String wageTypeName, String numberCut, String attendanceOrLumpsum,
-			String attendanceOrLumpsumContent, String usage, String itemType, String taxableYn, Long taxFreeLimit) {
+		String attendanceOrLumpsumContent, String usage, String itemType, String taxableYn, Long taxFreeLimit) {
 		this.wageTypeId = wageTypeId;
 		this.wageTypeName = wageTypeName;
 		this.numberCut = numberCut;

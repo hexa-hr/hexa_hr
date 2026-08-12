@@ -15,8 +15,8 @@ public class EmployeeSalaryAccount {
 	private String paymentMonthType;
 
 	public EmployeeSalaryAccount(Integer accountId, Integer companyId, String bankName, String accountNumber,
-			String depositStocks, Integer salaryCalculation1, Integer salaryCalculation2, Integer salaryPaymentDate,
-			String calc1MonthType, String calc2MonthType, String paymentMonthType) {
+		String depositStocks, Integer salaryCalculation1, Integer salaryCalculation2, Integer salaryPaymentDate,
+		String calc1MonthType, String calc2MonthType, String paymentMonthType) {
 		this.accountId = accountId;
 		this.companyId = companyId;
 		this.bankName = bankName;
