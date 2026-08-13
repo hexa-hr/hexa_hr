@@ -114,7 +114,7 @@
         var yearSelect = document.getElementById("selectYear");
         var monthSelect = document.getElementById("selectMonth");
 
-        for (var y = curYear - 2; y <= curYear + 2; y++) {
+        for (var y = curYear - 10; y <= curYear + 2; y++) {
             var opt = document.createElement("option");
             opt.value = y;
             opt.innerText = y;
