@@ -15,7 +15,7 @@ public class Wage {
 	private String wageMonth;
 
 	public Wage(Integer wageId, Integer employeeId, String wagePeriod, Integer wageTypeId, Long wageValue,
-			Date settlementPeriodStartDate, Date settlementPeriodEndDate, Date wagePaymentDate, String wageMonth) {
+		Date settlementPeriodStartDate, Date settlementPeriodEndDate, Date wagePaymentDate, String wageMonth) {
 		this.wageId = wageId;
 		this.employeeId = employeeId;
 		this.wagePeriod = wagePeriod;
