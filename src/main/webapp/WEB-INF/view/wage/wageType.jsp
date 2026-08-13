@@ -20,7 +20,33 @@ table.data-table th { background-color: #f8fafc; border: 1px solid #e2e8f0; padd
 table.data-table td { border: 1px solid #e2e8f0; padding: 0; }
 table.data-table td a { display: block; padding: 10px 6px; color: inherit; text-decoration: none; width: 100%; box-sizing: border-box; }
 table.data-table tr:hover { background-color: #f1f5f9; }
-.badge-use { display: inline-block; width: 16px; height: 16px; background-color: #f43f5e; color: #fff; font-size: 10px; font-weight: bold; line-height: 16px; border-radius: 3px; }
+
+/* 사용 'O' 배지 스타일 (기존 분홍색) */
+.badge-use {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	background-color: #f43f5e;
+	color: #fff;
+	font-size: 10px;
+	font-weight: bold;
+	line-height: 16px;
+	border-radius: 3px;
+}
+
+/* 사용안함 'X' 배지 스타일 (요청하신 파란색 박스 X 모양) */
+.badge-off {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	background-color: #60a5fa;
+	color: #fff;
+	font-size: 10px;
+	font-weight: bold;
+	line-height: 16px;
+	border-radius: 3px;
+}
+
 .form-section { flex: 1; border-top: 2px solid #333; padding-top: 10px; }
 .form-table { width: 100%; border-collapse: collapse; }
 .form-table th { text-align: left; padding: 10px 8px; font-size: 13px; font-weight: bold; color: #444; width: 30%; vertical-align: middle; }
@@ -30,7 +56,6 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 .select-box { width: 100%; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 13px; }
 .radio-label { margin-right: 15px; cursor: pointer; }
 
-/* 일괄지급 행 기본 숨김 처리 (JS 클래스로 제어) */
 .lump-sum-row { display: none; }
 
 .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 25px; }
@@ -105,9 +130,14 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 							</td>
 							<td>
 								<a href="${wageUrl}">
-									<c:if test="${wage.usage == 'Y'}">
-										<span class="badge-use">O</span>
-									</c:if>
+									<c:choose>
+										<c:when test="${wage.usage == 'Y'}">
+											<span class="badge-use">O</span>
+										</c:when>
+										<c:otherwise>
+											<span class="badge-off">X</span>
+										</c:otherwise>
+									</c:choose>
 								</a>
 							</td>
 						</tr>
@@ -165,9 +195,17 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 						<td>
 							<select name="attendanceOrLumpsum" id="attendanceOrLumpsumSelect" class="select-box" onchange="toggleLumpSum()">
 								<option value="">선택하세요.</option>
-								<option value="일괄지급" ${param.attendanceOrLumpsum == '일괄지급' ? 'selected' : ''}>일괄지급</option>
-								<option value="연장근무" ${param.attendanceOrLumpsum == '연장근무' ? 'selected' : ''}>연장근무</option>
+								<option value="연차" ${param.attendanceOrLumpsum == '연차' ? 'selected' : ''}>연차</option>
+								<option value="반차" ${param.attendanceOrLumpsum == '반차' ? 'selected' : ''}>반차</option>
+								<option value="지각" ${param.attendanceOrLumpsum == '지각' ? 'selected' : ''}>지각</option>
+								<option value="조퇴" ${param.attendanceOrLumpsum == '조퇴' ? 'selected' : ''}>조퇴</option>
+								<option value="외근" ${param.attendanceOrLumpsum == '외근' ? 'selected' : ''}>외근</option>
 								<option value="휴일근무" ${param.attendanceOrLumpsum == '휴일근무' ? 'selected' : ''}>휴일근무</option>
+								<option value="연장근무" ${param.attendanceOrLumpsum == '연장근무' ? 'selected' : ''}>연장근무</option>
+								<option value="포상휴가" ${param.attendanceOrLumpsum == '포상휴가' ? 'selected' : ''}>포상휴가</option>
+								<option value="야간근무" ${param.attendanceOrLumpsum == '야간근무' ? 'selected' : ''}>야간근무</option>
+								<option value="청원휴가" ${param.attendanceOrLumpsum == '청원휴가' ? 'selected' : ''}>청원휴가</option>
+								<option value="일괄지급" ${param.attendanceOrLumpsum == '일괄지급' ? 'selected' : ''}>일괄지급</option>
 							</select>
 						</td>
 					</tr>
@@ -206,7 +244,6 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 
 	<!-- 화면 제어 스크립트 -->
 	<script>
-		// 과세여부 관련 제어
 		function toggleTaxFree() {
 			const isNotTaxable = document.querySelector('input[name="taxableYn"][value="N"]').checked;
 			const taxFreeNameInput = document.getElementById('taxFreeNameInput');
@@ -223,27 +260,24 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 			}
 		}
 
-		// 근태연결/일괄지급 선택에 따른 일괄지급액 행 노출 및 값 제어
 		function toggleLumpSum() {
 			const selectVal = document.getElementById('attendanceOrLumpsumSelect').value;
 			const lumpSumRow = document.getElementById('lumpSumRow');
 			const lumpSumInput = document.getElementById('lumpSumInput');
 
 			if (selectVal === '일괄지급') {
-				lumpSumRow.style.display = 'table-row'; // 행 노출
+				lumpSumRow.style.display = 'table-row';
 			} else {
-				lumpSumRow.style.display = 'none';    // 행 숨김
-				lumpSumInput.value = '';              // 일괄지급이 아니면 입력된 금액 초기화
+				lumpSumRow.style.display = 'none';
+				lumpSumInput.value = '';
 			}
 		}
 
-		// 폼 전송 전 disabled 필드 일시 해제
 		function enableInputsBeforeSubmit() {
 			document.getElementById('taxFreeNameInput').disabled = false;
 			document.getElementById('taxFreeLimitInput').disabled = false;
 		}
 
-		// 페이지 로드 시 초기 상태 세팅
 		window.onload = function() {
 			toggleTaxFree();
 			toggleLumpSum();
