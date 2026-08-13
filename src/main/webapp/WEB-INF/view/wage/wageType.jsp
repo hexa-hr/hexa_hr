@@ -13,7 +13,11 @@ body { font-family: 'Malgun Gothic', sans-serif; margin: 20px; color: #333; }
 .page-header p { font-size: 13px; color: #666; margin: 0; }
 .section-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; }
 .section-title .count { font-size: 13px; color: #888; font-weight: normal; }
-.container { display: flex; gap: 30px; align-items: flex-start; min-width: 1100px;}
+
+/* 전체 컨테이너 및 섹션 간격 설정 */
+.container { display: flex; gap: 30px; align-items: flex-start; min-width: 1100px; margin-bottom: 40px; }
+.section-divider { border: 0; border-top: 1px solid #cbd5e1; margin: 40px 0; }
+
 .table-section { flex: 1.3; }
 table.data-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
 table.data-table th { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 6px; color: #475569; font-weight: bold; }
@@ -21,31 +25,8 @@ table.data-table td { border: 1px solid #e2e8f0; padding: 0; }
 table.data-table td a { display: block; padding: 10px 6px; color: inherit; text-decoration: none; width: 100%; box-sizing: border-box; }
 table.data-table tr:hover { background-color: #f1f5f9; }
 
-/* 사용 'O' 배지 스타일 (기존 분홍색) */
-.badge-use {
-	display: inline-block;
-	width: 16px;
-	height: 16px;
-	background-color: #f43f5e;
-	color: #fff;
-	font-size: 10px;
-	font-weight: bold;
-	line-height: 16px;
-	border-radius: 3px;
-}
-
-/* 사용안함 'X' 배지 스타일 (요청하신 파란색 박스 X 모양) */
-.badge-off {
-	display: inline-block;
-	width: 16px;
-	height: 16px;
-	background-color: #60a5fa;
-	color: #fff;
-	font-size: 10px;
-	font-weight: bold;
-	line-height: 16px;
-	border-radius: 3px;
-}
+.badge-use { display: inline-block; width: 16px; height: 16px; background-color: #f43f5e; color: #fff; font-size: 10px; font-weight: bold; line-height: 16px; border-radius: 3px; }
+.badge-off { display: inline-block; width: 16px; height: 16px; background-color: #60a5fa; color: #fff; font-size: 10px; font-weight: bold; line-height: 16px; border-radius: 3px; }
 
 .form-section { flex: 1; border-top: 2px solid #333; padding-top: 10px; }
 .form-table { width: 100%; border-collapse: collapse; }
@@ -73,8 +54,8 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 		<p>급여와 연관된 지급 및 공제 항목을 설정하는 메뉴입니다. 회사실정에 맞추어 설정하실 수 있습니다.</p>
 	</div>
 
+	<!-- [상단] 지급항목 설정 영역 -->
 	<div class="container">
-		<!-- [1] 좌측: 목록 테이블 -->
 		<div class="table-section">
 			<div class="section-title">
 				지급항목 설정 <span class="count">(항목 수: ${wageList != null ? wageList.size() : 0}개)</span>
@@ -146,7 +127,7 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 			</table>
 		</div>
 
-		<!-- [2] 우측: 입력/수정 폼 -->
+		<!-- 지급항목 입력/수정 폼 -->
 		<div class="form-section">
 			<form id="wageForm" method="post" onsubmit="enableInputsBeforeSubmit()">
 				<input type="hidden" name="wageTypeId" value="${param.selectedWageId}">
@@ -210,7 +191,6 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 						</td>
 					</tr>
 
-					<!-- 일괄지급 선택 시 아래 행 노출 -->
 					<tr class="lump-sum-row" id="lumpSumRow">
 						<th>일괄지급액</th>
 						<td>
@@ -231,7 +211,6 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 					</tr>
 				</table>
 
-				<!-- 하단 버튼 그룹 -->
 				<div class="btn-group">
 					<button type="submit" class="btn btn-blue" formaction="${pageContext.request.contextPath}/wageTypeSave.do">추가</button>
 					<button type="submit" class="btn btn-blue" formaction="${pageContext.request.contextPath}/wageTypeUpdate.do">수정</button>
@@ -242,7 +221,134 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 		</div>
 	</div>
 
-	<!-- 화면 제어 스크립트 -->
+	<!-- 섹션 구분선 -->
+	<hr class="section-divider">
+
+	<!-- [하단] 공제항목 설정 영역 -->
+	<div class="container">
+		<div class="table-section">
+			<div class="section-title">
+				공제항목 설정 <span class="count">(항목 수: 8개)</span>
+			</div>
+
+			<table class="data-table">
+				<thead>
+					<tr>
+						<th style="width: 30%;">공제항목</th>
+						<th style="width: 20%;">절사단위</th>
+						<th style="width: 15%;">사용여부</th>
+						<th style="width: 35%;">비고</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><a href="#">국민연금</a></td>
+						<td><a href="#">없음</a></td>
+						<td><a href="#"><span class="badge-use">O</span></a></td>
+						<td><a href="#">기본항목</a></td>
+					</tr>
+					<tr>
+						<td><a href="#">건강보험</a></td>
+						<td><a href="#">1원 단위</a></td>
+						<td><a href="#"><span class="badge-use">O</span></a></td>
+						<td><a href="#">기본항목</a></td>
+					</tr>
+					<tr>
+						<td><a href="#">장기요양보험</a></td>
+						<td><a href="#">1원 단위</a></td>
+						<td><a href="#"><span class="badge-use">O</span></a></td>
+						<td><a href="#">기본항목</a></td>
+					</tr>
+					<tr>
+						<td><a href="#">고용보험</a></td>
+						<td><a href="#">1원 단위</a></td>
+						<td><a href="#"><span class="badge-use">O</span></a></td>
+						<td><a href="#">기본항목</a></td>
+					</tr>
+					<tr>
+						<td><a href="#">소득세</a></td>
+						<td><a href="#">1원 단위</a></td>
+						<td><a href="#"><span class="badge-use">O</span></a></td>
+						<td><a href="#">기본항목</a></td>
+					</tr>
+					<tr>
+						<td><a href="#">지방소득세</a></td>
+						<td><a href="#">1원 단위</a></td>
+						<td><a href="#"><span class="badge-use">O</span></a></td>
+						<td><a href="#">기본항목</a></td>
+					</tr>
+					<tr>
+						<td><a href="#">상조회비</a></td>
+						<td><a href="#">없음</a></td>
+						<td><a href="#"><span class="badge-use">O</span></a></td>
+						<td><a href="#">사용자 추가항목</a></td>
+					</tr>
+					<tr>
+						<td><a href="#">연말정산</a></td>
+						<td><a href="#">1원 단위</a></td>
+						<td><a href="#"><span class="badge-off">X</span></a></td>
+						<td><a href="#">사용자 추가항목</a></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<!-- 공제항목 입력/수정 폼 -->
+		<div class="form-section">
+			<form id="deductionForm" method="post">
+				<table class="form-table">
+					<tr>
+						<th>공제항목</th>
+						<td><input type="text" name="deductionName" value="국민연금" class="input-text" placeholder="공제항목을 입력해주세요."></td>
+					</tr>
+					<tr>
+						<th>계산방법</th>
+						<td>
+							<input type="text" name="calcMethod" class="input-text" placeholder="계산방법을 입력해주세요.">
+							<div style="font-size: 11px; color: #666; margin-top: 4px;">
+								<input type="checkbox"> 예시) (기준소득월액 또는 과세대상임금) × 4.75%
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<th>절사단위</th>
+						<td>
+							<select name="deductionNumberCut" class="select-box">
+								<option value="없음" selected>없음</option>
+								<option value="1원">1원 단위</option>
+								<option value="10원">10원 단위</option>
+								<option value="100원">100원 단위</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th>비고</th>
+						<td><input type="text" name="note" value="기본항목" class="input-text"></td>
+					</tr>
+					<tr>
+						<th>사용여부</th>
+						<td>
+							<label class="radio-label">
+								<input type="radio" name="deductionUsage" value="Y" checked> 사용
+							</label> 
+							<label class="radio-label"> 
+								<input type="radio" name="deductionUsage" value="N"> 사용안함
+							</label>
+						</td>
+					</tr>
+				</table>
+
+				<div class="btn-group">
+					<button type="button" class="btn btn-blue">추가</button>
+					<button type="button" class="btn btn-blue">수정</button>
+					<button type="button" class="btn btn-gray">삭제</button>
+					<button type="button" class="btn btn-gray">내용 지우기</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- 자바스크립트 제어 영역 -->
 	<script>
 		function toggleTaxFree() {
 			const isNotTaxable = document.querySelector('input[name="taxableYn"][value="N"]').checked;
