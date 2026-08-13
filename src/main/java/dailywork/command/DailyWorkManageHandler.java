@@ -22,7 +22,7 @@ public class DailyWorkManageHandler implements CommandHandler {
 
 		// 1. 좌측 사원 목록 가져오기 (AttendanceDao 활용)
 		try (Connection conn = ConnectionProvider.getConnection()) {
-			List<EmployeeVO> empList = attendanceDao.selectAllEmployees(conn);
+			List<EmployeeVO> empList = attendanceDao.selectDailyWorkers(conn);
 			req.setAttribute("empList", empList);
 		} catch (Exception e) {
 			e.printStackTrace();
