@@ -41,6 +41,7 @@ public class WageTypeUpdateHandler implements CommandHandler {
 		String numberCut = req.getParameter("numberCut");
 		String attendanceOrLumpsum = req.getParameter("attendanceOrLumpsum");
 		String usage = req.getParameter("usage");
+		String taxFreeName = req.getParameter("taxFreeName");
 
 		WageType wageType = new WageType(
 			wageTypeId,
@@ -51,7 +52,8 @@ public class WageTypeUpdateHandler implements CommandHandler {
 			usage,
 			itemType,
 			taxableYn,
-			taxFreeLimit);
+			taxFreeLimit,
+			taxFreeName);
 
 		// 수정 처리
 		wageService.modifyWageType(wageType);

@@ -18,7 +18,7 @@ public class WageTypeDao {
 		ResultSet rs = null;
 		List<WageType> list = new ArrayList<>();
 		String sql = "SELECT wage_type_id, wage_type_name, number_cut, attendance_or_lumpsum, "
-			+ "attendance_or_lumpsum_content, usage, item_type, taxable_yn, tax_free_limit "
+			+ "attendance_or_lumpsum_content, usage, item_type, taxable_yn, tax_free_limit, tax_free_name "
 			+ "FROM wage_type ORDER BY wage_type_id DESC";
 
 		try {
@@ -34,7 +34,8 @@ public class WageTypeDao {
 					rs.getString("usage"),
 					rs.getString("item_type"),
 					rs.getString("taxable_yn"),
-					rs.getLong("tax_free_limit"));
+					rs.getLong("tax_free_limit"),
+					rs.getString("tax_free_name"));
 				list.add(wage);
 			}
 			return list;
@@ -44,12 +45,11 @@ public class WageTypeDao {
 		}
 	}
 
-	// 신규 등록 (DB 시퀀스 미사용 / MAX + 1 처리)
+	// 신규 등록
 	public void insert(Connection conn, WageType wageType) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		// 1. 현재 가장 큰 wage_type_id + 1 계산 (데이터 없으면 1)
 		int nextId = 1;
 		String selectMaxSql = "SELECT NVL(MAX(wage_type_id), 0) + 1 FROM wage_type";
 
@@ -64,11 +64,10 @@ public class WageTypeDao {
 			JdbcUtil.close(pstmt);
 		}
 
-		// 2. 계산한 nextId로 INSERT 실행
 		String sql = "INSERT INTO wage_type ("
 			+ "wage_type_id, wage_type_name, number_cut, attendance_or_lumpsum, "
-			+ "attendance_or_lumpsum_content, usage, item_type, taxable_yn, tax_free_limit"
-			+ ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			+ "attendance_or_lumpsum_content, usage, item_type, taxable_yn, tax_free_limit, tax_free_name"
+			+ ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try {
 			pstmt = conn.prepareStatement(sql);
@@ -86,6 +85,7 @@ public class WageTypeDao {
 			} else {
 				pstmt.setLong(9, 0L);
 			}
+			pstmt.setString(10, wageType.getTaxFreeName());
 
 			pstmt.executeUpdate();
 		} finally {
@@ -93,14 +93,13 @@ public class WageTypeDao {
 		}
 	}
 
-	// 기존 insert 메서드 아래에 추가
-
+	// 정보 수정
 	public void update(Connection conn, WageType wageType) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql = "UPDATE wage_type SET "
 			+ "wage_type_name = ?, number_cut = ?, attendance_or_lumpsum = ?, "
 			+ "attendance_or_lumpsum_content = ?, usage = ?, item_type = ?, "
-			+ "taxable_yn = ?, tax_free_limit = ? "
+			+ "taxable_yn = ?, tax_free_limit = ?, tax_free_name = ? "
 			+ "WHERE wage_type_id = ?";
 
 		try {
@@ -118,8 +117,8 @@ public class WageTypeDao {
 			} else {
 				pstmt.setLong(8, 0L);
 			}
-
-			pstmt.setInt(9, wageType.getWageTypeId());
+			pstmt.setString(9, wageType.getTaxFreeName());
+			pstmt.setInt(10, wageType.getWageTypeId());
 
 			pstmt.executeUpdate();
 		} finally {

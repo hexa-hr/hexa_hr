@@ -13,7 +13,7 @@ public class WageTypeSaveHandler implements CommandHandler {
 
 	@Override
 	public String process(HttpServletRequest req, HttpServletResponse res) throws Exception {
-		// POST 요청 파라미터 한글 처리 (필요시)
+		// POST 요청 파라미터 한글 처리
 		req.setCharacterEncoding("UTF-8");
 
 		// 폼 입력값 추출
@@ -36,6 +36,9 @@ public class WageTypeSaveHandler implements CommandHandler {
 		String attendanceOrLumpsum = req.getParameter("attendanceOrLumpsum");
 		String usage = req.getParameter("usage");
 
+		// 비과세 항목명 수신 처리
+		String taxFreeName = req.getParameter("taxFreeName");
+
 		// DTO 객체 생성 (wageTypeId는 Auto Increment 또는 DB 시퀀스 처리)
 		WageType wageType = new WageType(
 			null,
@@ -46,7 +49,8 @@ public class WageTypeSaveHandler implements CommandHandler {
 			usage,
 			itemType,
 			taxableYn,
-			taxFreeLimit);
+			taxFreeLimit,
+			taxFreeName);
 
 		// 서비스 호출 (저장 실행)
 		wageService.addWageType(wageType);
