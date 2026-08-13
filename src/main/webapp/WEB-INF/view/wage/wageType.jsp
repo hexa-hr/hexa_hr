@@ -13,7 +13,7 @@ body { font-family: 'Malgun Gothic', sans-serif; margin: 20px; color: #333; }
 .page-header p { font-size: 13px; color: #666; margin: 0; }
 .section-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; }
 .section-title .count { font-size: 13px; color: #888; font-weight: normal; }
-.container { display: flex; gap: 30px; align-items: flex-start; }
+.container { display: flex; gap: 30px; align-items: flex-start; min-width: 1100px;}
 .table-section { flex: 1.3; }
 table.data-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
 table.data-table th { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 6px; color: #475569; font-weight: bold; }
