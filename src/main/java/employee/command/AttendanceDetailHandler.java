@@ -56,7 +56,7 @@ public class AttendanceDetailHandler implements CommandHandler {
 				req.setAttribute("attTypeList", dao.getAttendanceTypes(conn));
 				req.setAttribute("vacTypeList", dao.getVacationTypes(conn));
 
-				return "/attendance/attendanceDetail.jsp";
+				return "/WEB-INF/view/attendance/attendanceDetail.jsp";
 			}
 		}
 	}

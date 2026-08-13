@@ -37,7 +37,7 @@ public class AttendanceManagementHandler implements CommandHandler {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return "/attendance/attendanceManagement.jsp"; // 본인 JSP 파일 경로에 맞게 수정
+		return "/WEB-INF/view/attendance/attendanceManagement.jsp";
 	}
 
 	// 근태 기록 저장 (POST)

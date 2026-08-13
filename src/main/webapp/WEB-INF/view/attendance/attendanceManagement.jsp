@@ -79,7 +79,7 @@
     <!-- 우측 폼 영역 -->
     <div class="right-panel">
         <!-- [수정됨 1] 폼 데이터가 attendanceSaveProcess.jsp로 넘어가도록 action 주소 변경 -->
-        <form id="attendanceForm" action="attendanceSaveProcess.jsp" method="post" onsubmit="return validateForm();">
+			<form id="attendanceForm" action="${pageContext.request.contextPath}/attendance/save.do" method="post" onsubmit="return validateForm();">
             
             <input type="hidden" id="selectedEmpNo" name="employee_id">
             <input type="hidden" id="attendanceId" name="attendance_id"> <!-- 수정할 때 사용할 근태기록 ID -->

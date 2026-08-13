@@ -75,7 +75,7 @@
 </head>
 <body>
 
-<form id="attendanceForm" action="attendanceSaveProcess.jsp" method="post">
+<form id="attendanceForm" action="${pageContext.request.contextPath}/attendance/save.do" method="post">
     <table class="form-table">
         <tr class="top-border">
             <th>입력일자</th>

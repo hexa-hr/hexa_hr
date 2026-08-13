@@ -23,7 +23,7 @@ public class MonthlyAttendanceHandler implements CommandHandler {
 
 		// 1. 단순 페이지 접속 시 JSP 화면으로 포워딩
 		if (year == null || month == null || year.trim().isEmpty() || month.trim().isEmpty()) {
-			return "/attendance/monthlyAttendance.jsp";
+			return "/WEB-INF/view/attendance/monthlyAttendance.jsp";
 		}
 
 		// 2. 월 두 자리 포맷팅 (예: "8" -> "08")

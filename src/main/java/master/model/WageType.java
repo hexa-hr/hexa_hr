@@ -11,9 +11,10 @@ public class WageType {
 	private String itemType;
 	private String taxableYn;
 	private Long taxFreeLimit;
+	private String taxFreeName;
 
 	public WageType(Integer wageTypeId, String wageTypeName, String numberCut, String attendanceOrLumpsum,
-		String attendanceOrLumpsumContent, String usage, String itemType, String taxableYn, Long taxFreeLimit) {
+			String attendanceOrLumpsumContent, String usage, String itemType, String taxableYn, Long taxFreeLimit) {
 		this.wageTypeId = wageTypeId;
 		this.wageTypeName = wageTypeName;
 		this.numberCut = numberCut;
@@ -23,6 +24,7 @@ public class WageType {
 		this.itemType = itemType;
 		this.taxableYn = taxableYn;
 		this.taxFreeLimit = taxFreeLimit;
+		this.taxFreeName = taxFreeName; // 비과세명 데이터를 저장하는 코드
 	}
 
 	public Integer getWageTypeId() {
@@ -59,6 +61,14 @@ public class WageType {
 
 	public Long getTaxFreeLimit() {
 		return taxFreeLimit;
+	}
+
+	public String getTaxFreeName() {
+		return taxFreeName;
+	}
+
+	public void setTaxFreeName(String taxFreeName) {
+		this.taxFreeName = taxFreeName;
 	}
 
 }
