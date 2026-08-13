@@ -177,6 +177,24 @@ public class AttendanceDao {
 		}
 	}
 
+	// 3. 근태 기록 수정 (UPDATE) - 나(에스더) 코드 추가
+	public int updateAttendance(Connection conn, AttendanceVO vo) throws SQLException {
+		String sql = "UPDATE attendance SET " + "attendance_type_id = ?, " + "start_date = ?, " + "end_date = ?, "
+				+ "attendance_days = ?, " + "amount = ?, " + "summary = ? " + "WHERE attendance_id = ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, vo.getAttendanceTypeId());
+			pstmt.setDate(2, vo.getStartDate()); // java.sql.Date로 처리됨
+			pstmt.setDate(3, vo.getEndDate());
+			pstmt.setDouble(4, vo.getAttendanceDays());
+			pstmt.setInt(5, vo.getAmount());
+			pstmt.setString(6, vo.getSummary());
+			pstmt.setInt(7, vo.getAttendanceId());
+
+			return pstmt.executeUpdate();
+		}
+	}
+
 	// 4. 근태항목 삭제 (Delete) - 유진님 코드
 	public void delete(Connection conn, int attendanceTypeId) throws SQLException {
 		PreparedStatement pstmt = null;

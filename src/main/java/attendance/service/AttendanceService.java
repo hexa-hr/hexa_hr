@@ -75,4 +75,34 @@ public class AttendanceService {
 		}
 	}
 
+	// 근태 기록 저장 및 수정 (에스더 코드)
+	public boolean saveAttendance(attendance.model.AttendanceVO vo) {
+		Connection conn = null;
+		try {
+			conn = ConnectionProvider.getConnection();
+			conn.setAutoCommit(false);
+			int result = 0;
+
+			// attendanceId가 존재하면 수정, 아니면 신규 등록
+			if (vo.getAttendanceId() > 0) {
+				result = attendanceDao.updateAttendance(conn, vo);
+			} else {
+				result = attendanceDao.insertAttendance(conn, vo);
+			}
+
+			if (result > 0) {
+				conn.commit();
+				return true;
+			} else {
+				JdbcUtil.rollback(conn);
+				return false;
+			}
+		} catch (SQLException e) {
+			JdbcUtil.rollback(conn);
+			throw new RuntimeException("근태 기록 저장 중 오류 발생", e);
+		} finally {
+			JdbcUtil.close(conn);
+		}
+	}
+
 }
