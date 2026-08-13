@@ -123,7 +123,7 @@ table.data-table tr:hover { background-color: #f1f5f9; }
 											일괄지급_<fmt:formatNumber value="${wage.attendanceOrLumpsumContent}" pattern="#,##0" />
 										</c:when>
 										<c:otherwise>
-											${wage.attendanceOrLumpsumContent}
+											${wage.attendanceOrLumpsum}
 										</c:otherwise>
 									</c:choose>
 								</a>
