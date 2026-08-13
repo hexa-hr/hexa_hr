@@ -15,41 +15,51 @@ public class DailyWorkSaveHandler implements CommandHandler {
 
 	@Override
 	public String process(HttpServletRequest req, HttpServletResponse res) throws Exception {
-		if (!req.getMethod().equalsIgnoreCase("POST")) {
-			res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-			return null;
-		}
-
 		req.setCharacterEncoding("UTF-8");
 		res.setContentType("text/html; charset=UTF-8");
 		PrintWriter out = res.getWriter();
 
 		try {
-			// 실제 파라미터 이름에 맞춰 수정해야 합니다. (폼 input의 name 속성 기준)
-			int employeeId = Integer.parseInt(req.getParameter("employee_id"));
-			Date workDate = Date.valueOf(req.getParameter("work_date"));
-			int fieldProjectId = Integer.parseInt(req.getParameter("field_or_project_id"));
+			// 1. 파라미터 안전한 파싱 (빈 값 에러 방지)
+			String empIdStr = req.getParameter("employee_id");
+			if (empIdStr == null || empIdStr.isEmpty()) {
+				out.println("<script>alert('사원이 선택되지 않았습니다.'); history.back();</script>");
+				return null;
+			}
+			int employeeId = Integer.parseInt(empIdStr);
 
-			// 콤마(,) 제거 후 파싱
-			Long dailyWage = Long.parseLong(req.getParameter("daily_wage").replaceAll(",", ""));
-			Double paymentRate = Double.parseDouble(req.getParameter("payment_rate"));
-			Long incomeTax = Long.parseLong(req.getParameter("income_tax").replaceAll(",", ""));
-			Long localTax = Long.parseLong(req.getParameter("local_tax").replaceAll(",", ""));
-			Long actualPayment = Long.parseLong(req.getParameter("actual_payment").replaceAll(",", ""));
+			String dateStr = req.getParameter("work_date");
+			Date workDate = (dateStr != null && !dateStr.isEmpty()) ? Date.valueOf(dateStr)
+					: new Date(System.currentTimeMillis());
 
-			// Model 객체 생성 (Setter 없이 생성자로 주입)
-			DailyWorkVO vo = new DailyWorkVO(null, employeeId, workDate, fieldProjectId, dailyWage, paymentRate,
+			String projIdStr = req.getParameter("field_or_project_id");
+			int fieldProjectId = (projIdStr != null && !projIdStr.isEmpty()) ? Integer.parseInt(projIdStr) : 0;
+
+			// 콤마 제거 및 숫자 파싱
+			Long dailyWage = parseLongSafe(req.getParameter("daily_wage"));
+			Double paymentRate = parseDoubleSafe(req.getParameter("payment_rate"));
+			Long incomeTax = parseLongSafe(req.getParameter("income_tax"));
+			Long localTax = parseLongSafe(req.getParameter("local_tax"));
+			Long actualPayment = parseLongSafe(req.getParameter("actual_payment"));
+
+			// 수정(UPDATE)을 위한 work_id 수집 (신규 등록이면 0)
+			String workIdStr = req.getParameter("work_id");
+			Integer workId = (workIdStr != null && !workIdStr.trim().isEmpty()) ? Integer.parseInt(workIdStr) : null;
+
+			// 2. VO 객체 생성
+			DailyWorkVO vo = new DailyWorkVO(workId, employeeId, workDate, fieldProjectId, dailyWage, paymentRate,
 					incomeTax, localTax, actualPayment);
 
-			// Service 호출
+			// 3. Service 호출
 			boolean isSuccess = workService.saveDailyWork(vo);
 
-			String redirectUrl = req.getContextPath() + "/dailywork/manage.do";
-
+			// 4. 결과 출력
 			if (isSuccess) {
-				out.println("<script>alert('일용직 근무 기록이 등록되었습니다.'); location.href='" + redirectUrl + "';</script>");
+				String msg = (workId != null && workId > 0) ? "근무 기록이 수정되었습니다." : "근무 기록이 등록되었습니다.";
+				out.println("<script>alert('" + msg + "'); location.href='" + req.getContextPath()
+						+ "/dailywork/manage.do';</script>");
 			} else {
-				out.println("<script>alert('등록 실패.'); history.back();</script>");
+				out.println("<script>alert('저장에 실패했습니다.'); history.back();</script>");
 			}
 
 		} catch (Exception e) {
@@ -58,7 +68,19 @@ public class DailyWorkSaveHandler implements CommandHandler {
 		} finally {
 			out.flush();
 		}
-
 		return null;
+	}
+
+	// 콤마(,)가 포함되었거나 비어있는 문자열을 안전하게 Long으로 변환하는 메서드
+	private Long parseLongSafe(String val) {
+		if (val == null || val.trim().isEmpty())
+			return 0L;
+		return Long.parseLong(val.replaceAll(",", ""));
+	}
+
+	private Double parseDoubleSafe(String val) {
+		if (val == null || val.trim().isEmpty())
+			return 1.0;
+		return Double.parseDouble(val);
 	}
 }

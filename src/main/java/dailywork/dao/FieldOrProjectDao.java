@@ -19,7 +19,7 @@ public class FieldOrProjectDao {
 		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
 				list.add(new FieldOrProjectVO(rs.getInt("field_or_project_id"), rs.getString("name"), "Y" // displayYn
-																											// 임시 값
+
 				));
 			}
 			return list;
