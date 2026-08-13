@@ -35,4 +35,13 @@ public class WageService {
 			throw new RuntimeException("급여 항목 수정 오류", e);
 		}
 	}
+
+	public int deleteWageType(Integer wageTypeId) {
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			WageTypeDao wageDao = new WageTypeDao();
+			return wageDao.delete(conn, wageTypeId);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

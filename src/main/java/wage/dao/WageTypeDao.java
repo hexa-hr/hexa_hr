@@ -125,4 +125,19 @@ public class WageTypeDao {
 			JdbcUtil.close(pstmt);
 		}
 	}
+
+	// 삭제 기능 추가
+	public int delete(Connection conn, Integer wageTypeId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql = "DELETE FROM wage_type WHERE wage_type_id = ?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, wageTypeId);
+			return pstmt.executeUpdate();
+		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
+
 }
