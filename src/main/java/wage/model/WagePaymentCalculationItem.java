@@ -6,17 +6,20 @@ public class WagePaymentCalculationItem {
 	private Integer wageTypeId;
 	private String wageTypeName;
 	private String itemType;
+	private String taxableYn;
 	private Long wageValue;
 
 	public WagePaymentCalculationItem(
 		Integer wageTypeId,
 		String wageTypeName,
 		String itemType,
+		String taxableYn,
 		Long wageValue) {
 
 		this.wageTypeId = wageTypeId;
 		this.wageTypeName = wageTypeName;
 		this.itemType = itemType;
+		this.taxableYn = taxableYn;
 		this.wageValue = wageValue;
 	}
 
@@ -30,6 +33,10 @@ public class WagePaymentCalculationItem {
 
 	public String getItemType() {
 		return itemType;
+	}
+
+	public String getTaxableYn() {
+		return taxableYn;
 	}
 
 	public Long getWageValue() {
