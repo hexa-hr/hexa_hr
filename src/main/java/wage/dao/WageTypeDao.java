@@ -140,4 +140,38 @@ public class WageTypeDao {
 		}
 	}
 
+	// 지급 또는 공제 구분별 목록 조회 (item_type: 'WAGE' 또는 'DEDUCTION')
+	public List<WageType> selectByType(Connection conn, String itemType) throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<WageType> list = new ArrayList<>();
+		String sql = "SELECT wage_type_id, wage_type_name, number_cut, attendance_or_lumpsum, "
+			+ "attendance_or_lumpsum_content, usage, item_type, taxable_yn, tax_free_limit, tax_free_name "
+			+ "FROM wage_type WHERE item_type = ? ORDER BY wage_type_id DESC";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, itemType);
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				WageType wage = new WageType(
+					rs.getInt("wage_type_id"),
+					rs.getString("wage_type_name"),
+					rs.getString("number_cut"),
+					rs.getString("attendance_or_lumpsum"),
+					rs.getString("attendance_or_lumpsum_content"),
+					rs.getString("usage"),
+					rs.getString("item_type"),
+					rs.getString("taxable_yn"),
+					rs.getLong("tax_free_limit"),
+					rs.getString("tax_free_name"));
+				list.add(wage);
+			}
+			return list;
+		} finally {
+			JdbcUtil.close(rs);
+			JdbcUtil.close(pstmt);
+		}
+	}
+
 }
