@@ -1,56 +1,52 @@
 package master.model;
 
+import java.util.Date;
+
 public class CompanyInfo {
-
-	// 1. 변수 선언부
+	private Integer companyId;
 	private String companyName;
-	private String ceoTitle;
-	private String ceoName;
+	private String representativeTitle;
+	private String representativeName;
 	private String businessNumber;
-	private String corpNumber;
-	private String foundingDate;
-	private String homepage;
-	private String zipCode;
-	private String address;
-	private String phone2;
-	private String phone3;
-	private String fax2;
-	private String fax3;
-	private String businessCondition;
+	private String corporationNumber;
+	private Date establishmentDate; // java.util.Date 사용
+	private String website;
+	private String officeAddress;
+	private String phoneNumber;
+	private String faxNumber;
 	private String businessType;
-	private String managerName;
-	private String mgrPhone2;
-	private String mgrPhone3;
-	private String mgrMobile2;
-	private String mgrMobile3;
-	private String mgrEmail;
-	private String accountNumber;
-	private String accountHolder;
+	private String businessItem;
 
-	// CompanyInfo.java 파일 내부에 추가할 코드
+	// 생성자 (기본 생성자 & 모든 필드를 포함하는 생성자)
+	public CompanyInfo() {}
 
-	// 1. 파일명을 담을 변수 추가
-	private String logoFileName;
-	private String stampFileName;
-
-	// 2. Getter / Setter 메서드 추가
-	public String getLogoFileName() {
-		return logoFileName;
+	public CompanyInfo(Integer companyId, String companyName, String representativeTitle, String representativeName,
+		String businessNumber, String corporationNumber, Date establishmentDate, String website,
+		String officeAddress, String phoneNumber, String faxNumber, String businessType, String businessItem) {
+		this.companyId = companyId;
+		this.companyName = companyName;
+		this.representativeTitle = representativeTitle;
+		this.representativeName = representativeName;
+		this.businessNumber = businessNumber;
+		this.corporationNumber = corporationNumber;
+		this.establishmentDate = establishmentDate;
+		this.website = website;
+		this.officeAddress = officeAddress;
+		this.phoneNumber = phoneNumber;
+		this.faxNumber = faxNumber;
+		this.businessType = businessType;
+		this.businessItem = businessItem;
 	}
 
-	public void setLogoFileName(String logoFileName) {
-		this.logoFileName = logoFileName;
+	// Getter & Setter (모든 필드에 대해 생성)
+	public Integer getCompanyId() {
+		return companyId;
 	}
 
-	public String getStampFileName() {
-		return stampFileName;
+	public void setCompanyId(Integer companyId) {
+		this.companyId = companyId;
 	}
 
-	public void setStampFileName(String stampFileName) {
-		this.stampFileName = stampFileName;
-	}
-
-	// 2. Getter / Setter 메서드 (클래스 괄호 안에 정상적으로 위치)
 	public String getCompanyName() {
 		return companyName;
 	}
@@ -59,20 +55,20 @@ public class CompanyInfo {
 		this.companyName = companyName;
 	}
 
-	public String getCeoTitle() {
-		return ceoTitle;
+	public String getRepresentativeTitle() {
+		return representativeTitle;
 	}
 
-	public void setCeoTitle(String ceoTitle) {
-		this.ceoTitle = ceoTitle;
+	public void setRepresentativeTitle(String representativeTitle) {
+		this.representativeTitle = representativeTitle;
 	}
 
-	public String getCeoName() {
-		return ceoName;
+	public String getRepresentativeName() {
+		return representativeName;
 	}
 
-	public void setCeoName(String ceoName) {
-		this.ceoName = ceoName;
+	public void setRepresentativeName(String representativeName) {
+		this.representativeName = representativeName;
 	}
 
 	public String getBusinessNumber() {
@@ -83,84 +79,52 @@ public class CompanyInfo {
 		this.businessNumber = businessNumber;
 	}
 
-	public String getCorpNumber() {
-		return corpNumber;
+	public String getCorporationNumber() {
+		return corporationNumber;
 	}
 
-	public void setCorpNumber(String corpNumber) {
-		this.corpNumber = corpNumber;
+	public void setCorporationNumber(String corporationNumber) {
+		this.corporationNumber = corporationNumber;
 	}
 
-	public String getFoundingDate() {
-		return foundingDate;
+	public Date getEstablishmentDate() {
+		return establishmentDate;
 	}
 
-	public void setFoundingDate(String foundingDate) {
-		this.foundingDate = foundingDate;
+	public void setEstablishmentDate(Date establishmentDate) {
+		this.establishmentDate = establishmentDate;
 	}
 
-	public String getHomepage() {
-		return homepage;
+	public String getWebsite() {
+		return website;
 	}
 
-	public void setHomepage(String homepage) {
-		this.homepage = homepage;
+	public void setWebsite(String website) {
+		this.website = website;
 	}
 
-	public String getZipCode() {
-		return zipCode;
+	public String getOfficeAddress() {
+		return officeAddress;
 	}
 
-	public void setZipCode(String zipCode) {
-		this.zipCode = zipCode;
+	public void setOfficeAddress(String officeAddress) {
+		this.officeAddress = officeAddress;
 	}
 
-	public String getAddress() {
-		return address;
+	public String getPhoneNumber() {
+		return phoneNumber;
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
-	public String getPhone2() {
-		return phone2;
+	public String getFaxNumber() {
+		return faxNumber;
 	}
 
-	public void setPhone2(String phone2) {
-		this.phone2 = phone2;
-	}
-
-	public String getPhone3() {
-		return phone3;
-	}
-
-	public void setPhone3(String phone3) {
-		this.phone3 = phone3;
-	}
-
-	public String getFax2() {
-		return fax2;
-	}
-
-	public void setFax2(String fax2) {
-		this.fax2 = fax2;
-	}
-
-	public String getFax3() {
-		return fax3;
-	}
-
-	public void setFax3(String fax3) {
-		this.fax3 = fax3;
-	}
-
-	public String getBusinessCondition() {
-		return businessCondition;
-	}
-
-	public void setBusinessCondition(String businessCondition) {
-		this.businessCondition = businessCondition;
+	public void setFaxNumber(String faxNumber) {
+		this.faxNumber = faxNumber;
 	}
 
 	public String getBusinessType() {
@@ -171,67 +135,11 @@ public class CompanyInfo {
 		this.businessType = businessType;
 	}
 
-	public String getManagerName() {
-		return managerName;
+	public String getBusinessItem() {
+		return businessItem;
 	}
 
-	public void setManagerName(String managerName) {
-		this.managerName = managerName;
-	}
-
-	public String getMgrPhone2() {
-		return mgrPhone2;
-	}
-
-	public void setMgrPhone2(String mgrPhone2) {
-		this.mgrPhone2 = mgrPhone2;
-	}
-
-	public String getMgrPhone3() {
-		return mgrPhone3;
-	}
-
-	public void setMgrPhone3(String mgrPhone3) {
-		this.mgrPhone3 = mgrPhone3;
-	}
-
-	public String getMgrMobile2() {
-		return mgrMobile2;
-	}
-
-	public void setMgrMobile2(String mgrMobile2) {
-		this.mgrMobile2 = mgrMobile2;
-	}
-
-	public String getMgrMobile3() {
-		return mgrMobile3;
-	}
-
-	public void setMgrMobile3(String mgrMobile3) {
-		this.mgrMobile3 = mgrMobile3;
-	}
-
-	public String getMgrEmail() {
-		return mgrEmail;
-	}
-
-	public void setMgrEmail(String mgrEmail) {
-		this.mgrEmail = mgrEmail;
-	}
-
-	public String getAccountNumber() {
-		return accountNumber;
-	}
-
-	public void setAccountNumber(String accountNumber) {
-		this.accountNumber = accountNumber;
-	}
-
-	public String getAccountHolder() {
-		return accountHolder;
-	}
-
-	public void setAccountHolder(String accountHolder) {
-		this.accountHolder = accountHolder;
+	public void setBusinessItem(String businessItem) {
+		this.businessItem = businessItem;
 	}
 }
