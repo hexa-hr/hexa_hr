@@ -44,7 +44,6 @@ body {
 	font-weight: normal;
 }
 
-/* 전체 컨테이너 및 섹션 간격 설정 */
 .container {
 	display: flex;
 	gap: 30px;
@@ -267,7 +266,7 @@ table.data-table tr:hover {
 												value="${wage.attendanceOrLumpsumContent}" pattern="#,##0" />
 										</c:when>
 										<c:otherwise>
-											${wage.attendanceOrLumpsum}
+											${wage.attendanceOrLumpsumContent}
 										</c:otherwise>
 									</c:choose>
 							</a></td>
@@ -292,7 +291,7 @@ table.data-table tr:hover {
 				onsubmit="enableInputsBeforeSubmit()">
 				<input type="hidden" name="wageTypeId"
 					value="${param.selectedWageId}"> <input type="hidden"
-					name="itemType" value="W">
+					name="itemType" value="P">
 
 				<table class="form-table">
 					<tr>
@@ -401,7 +400,8 @@ table.data-table tr:hover {
 					<button type="submit" class="btn btn-blue"
 						formaction="${pageContext.request.contextPath}/wageTypeUpdate.do">수정</button>
 					<button type="submit" class="btn btn-gray"
-						formaction="${pageContext.request.contextPath}/wageTypeDelete.do">삭제</button>
+						formaction="${pageContext.request.contextPath}/wageTypeDelete.do"
+						onclick="return confirmWageDelete('${param.wageTypeName}');">삭제</button>
 					<a href="${pageContext.request.contextPath}/wageTypeSetting.do"
 						class="btn btn-gray">내용 지우기</a>
 				</div>
@@ -515,7 +515,8 @@ table.data-table tr:hover {
 					<button type="submit" class="btn btn-blue"
 						formaction="${pageContext.request.contextPath}/wageTypeUpdate.do">수정</button>
 					<button type="submit" class="btn btn-gray"
-						formaction="${pageContext.request.contextPath}/wageTypeDelete.do">삭제</button>
+						formaction="${pageContext.request.contextPath}/wageTypeDelete.do"
+						onclick="return confirmDeductDelete('${param.dedName}');">삭제</button>
 					<a href="${pageContext.request.contextPath}/wageTypeSetting.do"
 						class="btn btn-gray">내용 지우기</a>
 				</div>
@@ -525,6 +526,29 @@ table.data-table tr:hover {
 
 	<!-- 자바스크립트 제어 영역 -->
 	<script>
+		// 지급항목 삭제 전 경고창 기능
+		function confirmWageDelete(wageName) {
+			if (wageName === '기본급') {
+				alert('기본급은 필수 항목이므로 삭제할 수 없습니다.');
+				return false;
+			}
+			return confirm('정말 삭제하시겠습니까?');
+		}
+
+		// 공제항목 삭제 전 경고창 기능
+		function confirmDeductDelete(dedName) {
+			const fixedItems = [
+				'국민연금', '건강보험', '장기요양보험', '고용보험', 
+				'소득세', '지방소득세', '사업소득', '일용급여'
+			];
+			
+			if (fixedItems.includes(dedName)) {
+				alert(dedName + ' 항목은 필수 공제항목이므로 삭제할 수 없습니다.');
+				return false;
+			}
+			return confirm('정말 삭제하시겠습니까?');
+		}
+
 		function toggleTaxFree() {
 			const isNotTaxable = document
 					.querySelector('input[name="taxableYn"][value="N"]').checked;
