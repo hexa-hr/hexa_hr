@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import employee.dao.EmployeeDao;
 import jdbc.connection.ConnectionProvider;
 import master.dao.WageTypeDao;
 import master.model.WageType;
@@ -23,6 +24,7 @@ import wage.model.WagePaymentItemInput;
 public class WagePaymentCalculationService {
 
 	private WageTypeDao wageTypeDao = new WageTypeDao();
+	private EmployeeDao employeeDao = new EmployeeDao();
 
 	public WagePaymentCalculationResult calculate(
 		WagePaymentCalculationRequest request) {
@@ -30,6 +32,19 @@ public class WagePaymentCalculationService {
 		validateRequest(request);
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
+
+			// 사원의 고용형태 조회
+			String employmentType = employeeDao.selectEmploymentType(
+				conn,
+				request.getEmployeeId());
+
+			if (employmentType == null) {
+				throw new IllegalArgumentException(
+					"존재하지 않는 사원입니다.");
+			}
+
+			// 고용형태에 따른 급여 유형 판정
+			String wageCategory = determineWageCategory(employmentType);
 
 			List<WageType> wageTypes = wageTypeDao.selectActiveWageTypes(conn);
 
@@ -50,6 +65,7 @@ public class WagePaymentCalculationService {
 			long totalPayment = 0L;
 			long taxFreeAmount = 0L;
 			long totalDeduction = 0L;
+			long businessIncome = 0L;
 
 			for (WagePaymentItemInput input : request.getItemInputs()) {
 
@@ -83,6 +99,20 @@ public class WagePaymentCalculationService {
 						"급여금액은 0원 이상이어야 합니다.");
 				}
 
+				// 사업소득자의 허용 급여항목 검증
+				if ("BUSINESS".equals(wageCategory)
+					&& !isBusinessWageType(wageType)) {
+
+					// 화면에서 0원 항목까지 전달되는 경우는 무시
+					if (wageValue == 0L) {
+						continue;
+					}
+
+					throw new IllegalArgumentException(
+						"사업소득자에게 사용할 수 없는 급여항목입니다: "
+							+ wageType.getWageTypeName());
+				}
+
 				WagePaymentCalculationItem item = new WagePaymentCalculationItem(
 					wageType.getWageTypeId(),
 					wageType.getWageTypeName(),
@@ -94,6 +124,12 @@ public class WagePaymentCalculationService {
 
 					paymentItems.add(item);
 					totalPayment += wageValue;
+
+					if ("BUSINESS".equals(wageCategory)
+						&& "사업소득".equals(wageType.getWageTypeName())) {
+
+						businessIncome = wageValue;
+					}
 
 					if ("N".equals(wageType.getTaxableYn())) {
 
@@ -108,6 +144,13 @@ public class WagePaymentCalculationService {
 
 				} else if ("D".equals(wageType.getItemType())) {
 
+					if ("BUSINESS".equals(wageCategory)
+						&& ("소득세".equals(wageType.getWageTypeName())
+							|| "지방소득세".equals(wageType.getWageTypeName()))) {
+
+						continue;
+					}
+
 					deductionItems.add(item);
 					totalDeduction += wageValue;
 
@@ -116,6 +159,43 @@ public class WagePaymentCalculationService {
 					throw new IllegalStateException(
 						"급여항목의 지급·공제 구분이 올바르지 않습니다.");
 				}
+			}
+
+			if ("BUSINESS".equals(wageCategory)) {
+
+				WageType incomeTaxType = findWageTypeByName(
+					wageTypes,
+					"소득세",
+					"D");
+
+				WageType localTaxType = findWageTypeByName(
+					wageTypes,
+					"지방소득세",
+					"D");
+
+				// 사업소득 소득세 3%
+				long incomeTax = businessIncome * 3 / 100;
+
+				// 지방소득세 = 소득세의 10%
+				long localTax = roundToTen(incomeTax * 0.1);
+
+				deductionItems.add(
+					new WagePaymentCalculationItem(
+						incomeTaxType.getWageTypeId(),
+						incomeTaxType.getWageTypeName(),
+						incomeTaxType.getItemType(),
+						incomeTaxType.getTaxableYn(),
+						incomeTax));
+
+				deductionItems.add(
+					new WagePaymentCalculationItem(
+						localTaxType.getWageTypeId(),
+						localTaxType.getWageTypeName(),
+						localTaxType.getItemType(),
+						localTaxType.getTaxableYn(),
+						localTax));
+
+				totalDeduction += incomeTax + localTax;
 			}
 
 			long monthlyRemuneration = totalPayment - taxFreeAmount;
@@ -136,6 +216,65 @@ public class WagePaymentCalculationService {
 				"급여 자동계산 중 데이터베이스 오류가 발생했습니다.",
 				e);
 		}
+	}
+
+	// 고용형태에 따른 급여 유형 판정
+	private String determineWageCategory(
+		String employmentType) {
+
+		if ("임시직".equals(employmentType)) {
+			return "BUSINESS";
+		}
+
+		if ("일용직".equals(employmentType)) {
+			return "DAILY";
+		}
+
+		return "WORKER";
+	}
+
+	// 10원 단위 반올림
+	private long roundToTen(double value) {
+		return Math.round(value / 10.0) * 10L;
+	}
+
+	private boolean isBusinessWageType(
+		WageType wageType) {
+
+		String itemType = wageType.getItemType();
+		String wageTypeName = wageType.getWageTypeName();
+
+		if ("P".equals(itemType)) {
+			return "사업소득".equals(wageTypeName);
+		}
+
+		if ("D".equals(itemType)) {
+			return "소득세".equals(wageTypeName)
+				|| "지방소득세".equals(wageTypeName);
+		}
+
+		return false;
+	}
+
+	private WageType findWageTypeByName(
+		List<WageType> wageTypes,
+		String wageTypeName,
+		String itemType) {
+
+		for (WageType wageType : wageTypes) {
+
+			if (wageTypeName.equals(
+				wageType.getWageTypeName())
+				&& itemType.equals(
+					wageType.getItemType())) {
+
+				return wageType;
+			}
+		}
+
+		throw new IllegalStateException(
+			"필수 급여항목이 존재하지 않습니다: "
+				+ wageTypeName);
 	}
 
 	private void validateRequest(
