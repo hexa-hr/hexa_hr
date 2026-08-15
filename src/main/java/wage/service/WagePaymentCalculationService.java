@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 
 import employee.dao.EmployeeDao;
+import employee.dao.InsuranceDao;
+import employee.model.EmployeeInsurance;
 import jdbc.connection.ConnectionProvider;
 import master.dao.WageTypeDao;
 import master.model.WageType;
@@ -30,6 +32,7 @@ public class WagePaymentCalculationService {
 
 	private WageTypeDao wageTypeDao = new WageTypeDao();
 	private EmployeeDao employeeDao = new EmployeeDao();
+	private InsuranceDao insuranceDao = new InsuranceDao();
 
 	public WagePaymentCalculationResult calculate(
 		WagePaymentCalculationRequest request) {
@@ -226,80 +229,136 @@ public class WagePaymentCalculationService {
 				totalDeduction += incomeTax + localTax;
 			}
 
+			long healthInsurance = 0L;
+
 			if ("WORKER".equals(wageCategory)) {
 
-				WageType nationalPensionType = findWageTypeByName(
-					wageTypes,
-					"국민연금",
-					"D");
+				List<EmployeeInsurance> employeeInsurances = insuranceDao.selectByEmployeeId(
+					conn,
+					request.getEmployeeId());
 
-				WageType healthInsuranceType = findWageTypeByName(
-					wageTypes,
-					"건강보험",
-					"D");
+				Map<String, Long> insuranceAmountMap = new LinkedHashMap<>();
 
-				WageType longTermCareType = findWageTypeByName(
-					wageTypes,
-					"장기요양보험",
-					"D");
+				for (EmployeeInsurance insurance : employeeInsurances) {
 
-				WageType employmentInsuranceType = findWageTypeByName(
-					wageTypes,
-					"고용보험",
-					"D");
+					String insuranceAgency = insurance.getInsuranceAgency();
 
-				long nationalPension = roundToTen(
-					monthlyRemuneration
-						* NATIONAL_PENSION_RATE);
+					if (insuranceAmountMap.containsKey(
+						insuranceAgency)) {
 
-				long healthInsurance = roundToTen(
-					monthlyRemuneration
-						* HEALTH_INSURANCE_RATE);
+						throw new IllegalStateException(
+							"중복된 보험 가입정보가 존재합니다: "
+								+ insuranceAgency);
+					}
 
-				long longTermCare = roundToTen(
-					healthInsurance
-						* LONG_TERM_CARE_RATE);
+					insuranceAmountMap.put(
+						insuranceAgency,
+						insurance.getInsuranceAmount());
+				}
 
-				long employmentInsurance = roundToTen(
-					monthlyRemuneration
-						* EMPLOYMENT_INSURANCE_RATE);
+				// 국민연금
+				if (insuranceAmountMap.containsKey("국민연금")) {
 
-				deductionItems.add(
-					new WagePaymentCalculationItem(
-						nationalPensionType.getWageTypeId(),
-						nationalPensionType.getWageTypeName(),
-						nationalPensionType.getItemType(),
-						nationalPensionType.getTaxableYn(),
-						nationalPension));
+					WageType nationalPensionType = findWageTypeByName(
+						wageTypes,
+						"국민연금",
+						"D");
 
-				deductionItems.add(
-					new WagePaymentCalculationItem(
-						healthInsuranceType.getWageTypeId(),
-						healthInsuranceType.getWageTypeName(),
-						healthInsuranceType.getItemType(),
-						healthInsuranceType.getTaxableYn(),
-						healthInsurance));
+					long nationalPensionBase = resolveInsuranceBaseAmount(
+						insuranceAmountMap.get("국민연금"),
+						monthlyRemuneration);
 
-				deductionItems.add(
-					new WagePaymentCalculationItem(
-						longTermCareType.getWageTypeId(),
-						longTermCareType.getWageTypeName(),
-						longTermCareType.getItemType(),
-						longTermCareType.getTaxableYn(),
-						longTermCare));
+					long nationalPension = roundToTen(
+						nationalPensionBase
+							* NATIONAL_PENSION_RATE);
 
-				deductionItems.add(
-					new WagePaymentCalculationItem(
-						employmentInsuranceType.getWageTypeId(),
-						employmentInsuranceType.getWageTypeName(),
-						employmentInsuranceType.getItemType(),
-						employmentInsuranceType.getTaxableYn(),
-						employmentInsurance));
+					deductionItems.add(
+						new WagePaymentCalculationItem(
+							nationalPensionType.getWageTypeId(),
+							nationalPensionType.getWageTypeName(),
+							nationalPensionType.getItemType(),
+							nationalPensionType.getTaxableYn(),
+							nationalPension));
 
-				totalDeduction += nationalPension
-					+ healthInsurance
-					+ longTermCare
-					+ employmentInsurance;
+					totalDeduction += nationalPension;
+				}
+
+				// 건강보험
+				if (insuranceAmountMap.containsKey("건강보험")) {
+
+					WageType healthInsuranceType = findWageTypeByName(
+						wageTypes,
+						"건강보험",
+						"D");
+
+					long healthInsuranceBase = resolveInsuranceBaseAmount(
+						insuranceAmountMap.get("건강보험"),
+						monthlyRemuneration);
+
+					healthInsurance = roundToTen(
+						healthInsuranceBase
+							* HEALTH_INSURANCE_RATE);
+
+					deductionItems.add(
+						new WagePaymentCalculationItem(
+							healthInsuranceType.getWageTypeId(),
+							healthInsuranceType.getWageTypeName(),
+							healthInsuranceType.getItemType(),
+							healthInsuranceType.getTaxableYn(),
+							healthInsurance));
+
+					totalDeduction += healthInsurance;
+				}
+
+				// 장기요양보험
+				if (insuranceAmountMap.containsKey("장기요양보험")) {
+
+					WageType longTermCareType = findWageTypeByName(
+						wageTypes,
+						"장기요양보험",
+						"D");
+
+					long longTermCare = roundToTen(
+						healthInsurance
+							* LONG_TERM_CARE_RATE);
+
+					deductionItems.add(
+						new WagePaymentCalculationItem(
+							longTermCareType.getWageTypeId(),
+							longTermCareType.getWageTypeName(),
+							longTermCareType.getItemType(),
+							longTermCareType.getTaxableYn(),
+							longTermCare));
+
+					totalDeduction += longTermCare;
+				}
+
+				// 고용보험
+				if (insuranceAmountMap.containsKey("고용보험")) {
+
+					WageType employmentInsuranceType = findWageTypeByName(
+						wageTypes,
+						"고용보험",
+						"D");
+
+					long employmentInsuranceBase = resolveInsuranceBaseAmount(
+						insuranceAmountMap.get("고용보험"),
+						monthlyRemuneration);
+
+					long employmentInsurance = roundToTen(
+						employmentInsuranceBase
+							* EMPLOYMENT_INSURANCE_RATE);
+
+					deductionItems.add(
+						new WagePaymentCalculationItem(
+							employmentInsuranceType.getWageTypeId(),
+							employmentInsuranceType.getWageTypeName(),
+							employmentInsuranceType.getItemType(),
+							employmentInsuranceType.getTaxableYn(),
+							employmentInsurance));
+
+					totalDeduction += employmentInsurance;
+				}
 			}
 
 			long netPayment = totalPayment - totalDeduction;
@@ -338,6 +397,20 @@ public class WagePaymentCalculationService {
 	// 10원 단위 반올림
 	private long roundToTen(double value) {
 		return Math.round(value / 10.0) * 10L;
+	}
+
+	// 보험별 기준금액 결정
+	private long resolveInsuranceBaseAmount(
+		Long insuranceAmount,
+		long monthlyRemuneration) {
+
+		if (insuranceAmount != null
+			&& insuranceAmount > 0L) {
+
+			return insuranceAmount;
+		}
+
+		return monthlyRemuneration;
 	}
 
 	private boolean isBusinessWageType(
