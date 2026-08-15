@@ -23,6 +23,11 @@ import wage.model.WagePaymentItemInput;
 // 급여 자동계산 서비스
 public class WagePaymentCalculationService {
 
+	private static final double NATIONAL_PENSION_RATE = 0.0475;
+	private static final double HEALTH_INSURANCE_RATE = 0.03595;
+	private static final double LONG_TERM_CARE_RATE = 0.13136;
+	private static final double EMPLOYMENT_INSURANCE_RATE = 0.009;
+
 	private WageTypeDao wageTypeDao = new WageTypeDao();
 	private EmployeeDao employeeDao = new EmployeeDao();
 
@@ -99,6 +104,21 @@ public class WagePaymentCalculationService {
 						"급여금액은 0원 이상이어야 합니다.");
 				}
 
+				// 일반 근로소득자의 허용되지 않는 지급항목 검증
+				if ("WORKER".equals(wageCategory)
+					&& "P".equals(wageType.getItemType())
+					&& ("사업소득".equals(wageType.getWageTypeName())
+						|| "일용급여".equals(wageType.getWageTypeName()))) {
+
+					if (wageValue == 0L) {
+						continue;
+					}
+
+					throw new IllegalArgumentException(
+						"일반급여 대상자에게 사용할 수 없는 지급항목입니다: "
+							+ wageType.getWageTypeName());
+				}
+
 				// 사업소득자의 허용 급여항목 검증
 				if ("BUSINESS".equals(wageCategory)
 					&& !isBusinessWageType(wageType)) {
@@ -151,6 +171,12 @@ public class WagePaymentCalculationService {
 						continue;
 					}
 
+					if ("WORKER".equals(wageCategory)
+						&& isWorkerInsuranceType(wageType)) {
+
+						continue;
+					}
+
 					deductionItems.add(item);
 					totalDeduction += wageValue;
 
@@ -160,6 +186,8 @@ public class WagePaymentCalculationService {
 						"급여항목의 지급·공제 구분이 올바르지 않습니다.");
 				}
 			}
+
+			long monthlyRemuneration = totalPayment - taxFreeAmount;
 
 			if ("BUSINESS".equals(wageCategory)) {
 
@@ -198,7 +226,81 @@ public class WagePaymentCalculationService {
 				totalDeduction += incomeTax + localTax;
 			}
 
-			long monthlyRemuneration = totalPayment - taxFreeAmount;
+			if ("WORKER".equals(wageCategory)) {
+
+				WageType nationalPensionType = findWageTypeByName(
+					wageTypes,
+					"국민연금",
+					"D");
+
+				WageType healthInsuranceType = findWageTypeByName(
+					wageTypes,
+					"건강보험",
+					"D");
+
+				WageType longTermCareType = findWageTypeByName(
+					wageTypes,
+					"장기요양보험",
+					"D");
+
+				WageType employmentInsuranceType = findWageTypeByName(
+					wageTypes,
+					"고용보험",
+					"D");
+
+				long nationalPension = roundToTen(
+					monthlyRemuneration
+						* NATIONAL_PENSION_RATE);
+
+				long healthInsurance = roundToTen(
+					monthlyRemuneration
+						* HEALTH_INSURANCE_RATE);
+
+				long longTermCare = roundToTen(
+					healthInsurance
+						* LONG_TERM_CARE_RATE);
+
+				long employmentInsurance = roundToTen(
+					monthlyRemuneration
+						* EMPLOYMENT_INSURANCE_RATE);
+
+				deductionItems.add(
+					new WagePaymentCalculationItem(
+						nationalPensionType.getWageTypeId(),
+						nationalPensionType.getWageTypeName(),
+						nationalPensionType.getItemType(),
+						nationalPensionType.getTaxableYn(),
+						nationalPension));
+
+				deductionItems.add(
+					new WagePaymentCalculationItem(
+						healthInsuranceType.getWageTypeId(),
+						healthInsuranceType.getWageTypeName(),
+						healthInsuranceType.getItemType(),
+						healthInsuranceType.getTaxableYn(),
+						healthInsurance));
+
+				deductionItems.add(
+					new WagePaymentCalculationItem(
+						longTermCareType.getWageTypeId(),
+						longTermCareType.getWageTypeName(),
+						longTermCareType.getItemType(),
+						longTermCareType.getTaxableYn(),
+						longTermCare));
+
+				deductionItems.add(
+					new WagePaymentCalculationItem(
+						employmentInsuranceType.getWageTypeId(),
+						employmentInsuranceType.getWageTypeName(),
+						employmentInsuranceType.getItemType(),
+						employmentInsuranceType.getTaxableYn(),
+						employmentInsurance));
+
+				totalDeduction += nationalPension
+					+ healthInsurance
+					+ longTermCare
+					+ employmentInsurance;
+			}
 
 			long netPayment = totalPayment - totalDeduction;
 
@@ -275,6 +377,21 @@ public class WagePaymentCalculationService {
 		throw new IllegalStateException(
 			"필수 급여항목이 존재하지 않습니다: "
 				+ wageTypeName);
+	}
+
+	private boolean isWorkerInsuranceType(
+		WageType wageType) {
+
+		if (!"D".equals(wageType.getItemType())) {
+			return false;
+		}
+
+		String wageTypeName = wageType.getWageTypeName();
+
+		return "국민연금".equals(wageTypeName)
+			|| "건강보험".equals(wageTypeName)
+			|| "장기요양보험".equals(wageTypeName)
+			|| "고용보험".equals(wageTypeName);
 	}
 
 	private void validateRequest(
