@@ -15,6 +15,7 @@ import master.dao.WageTypeDao;
 import master.model.WageType;
 import wage.dao.WageDao;
 import wage.model.WagePaymentCalculationItem;
+import wage.model.WagePaymentInputViewItem;
 
 public class WagePaymentInputService {
 
@@ -144,6 +145,87 @@ public class WagePaymentInputService {
 
 			throw new RuntimeException(
 				"급여입력 항목 조회 중 데이터베이스 오류가 발생했습니다.",
+				e);
+		}
+	}
+
+	public List<WagePaymentInputViewItem> getViewItems(
+		Integer employeeId,
+		String wageMonth,
+		String wagePeriod,
+		Date settlementStartDate,
+		Date settlementEndDate) {
+
+		/*
+		 * 신규/기존 여부에 따라 실제 화면에 표시할
+		 * 급여항목과 금액을 먼저 조회한다.
+		 */
+		List<WagePaymentCalculationItem> items = getItems(
+			employeeId,
+			wageMonth,
+			wagePeriod,
+			settlementStartDate,
+			settlementEndDate);
+
+		try (Connection conn = ConnectionProvider.getConnection()) {
+
+			String employmentType = employeeDao.selectEmploymentType(
+				conn,
+				employeeId);
+
+			if (employmentType == null) {
+				throw new IllegalArgumentException(
+					"존재하지 않는 사원입니다.");
+			}
+
+			String wageCategory = determineWageCategory(employmentType);
+
+			/*
+			 * 현재 사용 중인 급여항목을 ID 기준으로 구성한다.
+			 * 이 Map에 없으면 현재 usage='N'인 항목이다.
+			 */
+			List<WageType> activeWageTypes = wageTypeDao.selectActiveWageTypes(conn);
+
+			Map<Integer, WageType> activeWageTypeMap = new LinkedHashMap<>();
+
+			for (WageType wageType : activeWageTypes) {
+
+				activeWageTypeMap.put(
+					wageType.getWageTypeId(),
+					wageType);
+			}
+
+			List<WagePaymentInputViewItem> result = new ArrayList<>();
+
+			for (WagePaymentCalculationItem item : items) {
+
+				WageType activeWageType = activeWageTypeMap.get(
+					item.getWageTypeId());
+
+				boolean active = activeWageType != null;
+
+				boolean calculable = active
+					&& isAvailableWageType(
+						wageCategory,
+						activeWageType);
+
+				result.add(
+					new WagePaymentInputViewItem(
+						item.getWageTypeId(),
+						item.getWageTypeName(),
+						item.getItemType(),
+						item.getTaxableYn(),
+						item.getWageValue(),
+						active,
+						calculable));
+			}
+
+			return result;
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException(
+				"급여입력 화면 항목 조회 중 데이터베이스 오류가 발생했습니다.",
 				e);
 		}
 	}
