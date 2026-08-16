@@ -15,6 +15,7 @@ import wage.model.WageLedgerDetailRow;
 import wage.model.WageLedgerSummary;
 import wage.model.WageMonthlyPersonalStatisticsRow;
 import wage.model.WageMonthlyTotalStatisticsRow;
+import wage.model.WagePaymentCalculationItem;
 
 public class WageDao {
 
@@ -626,6 +627,62 @@ public class WageDao {
 						rs.getLong("amount"));
 
 					result.add(row);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	// 급여입력용 - 사원별 저장된 급여항목 조회
+	public List<WagePaymentCalculationItem> selectEmployeeWageItems(
+		Connection conn,
+		Integer employeeId,
+		String wageMonth,
+		String wagePeriod)
+		throws SQLException {
+
+		String sql = "SELECT wt.wage_type_id, "
+			+ "       wt.wage_type_name, "
+			+ "       wt.item_type, "
+			+ "       wt.taxable_yn, "
+			+ "       SUM(NVL(w.wage_value, 0)) AS wage_value "
+			+ "FROM wage w "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "WHERE w.employee_id = ? "
+			+ "  AND w.wage_month = ? "
+			+ "  AND w.wage_period = ? "
+			+ "GROUP BY wt.wage_type_id, "
+			+ "         wt.wage_type_name, "
+			+ "         wt.item_type, "
+			+ "         wt.taxable_yn "
+			+ "ORDER BY CASE wt.item_type "
+			+ "           WHEN 'P' THEN 1 "
+			+ "           WHEN 'D' THEN 2 "
+			+ "           ELSE 3 "
+			+ "         END, "
+			+ "         wt.wage_type_id";
+
+		List<WagePaymentCalculationItem> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, employeeId);
+			pstmt.setString(2, wageMonth);
+			pstmt.setString(3, wagePeriod);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					result.add(
+						new WagePaymentCalculationItem(
+							rs.getInt("wage_type_id"),
+							rs.getString("wage_type_name"),
+							rs.getString("item_type"),
+							rs.getString("taxable_yn"),
+							rs.getLong("wage_value")));
 				}
 			}
 		}
