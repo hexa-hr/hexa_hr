@@ -228,14 +228,11 @@ public class WagePaymentAutoCalculationService {
 		}
 
 		/*
-		 * 계산 Service가 화면에 존재하지 않는
-		 * 급여항목을 반환한 경우는 비정상 상태.
+		 * 계산 Service가 현재 화면에 없는 급여항목을 반환할 수 있다.
+		 *
+		 * 기존 저장 급여는 저장 당시의 급여항목 구성을 유지해야 하므로,
+		 * 화면 스냅샷에 존재하지 않는 계산 결과는 반영하지 않는다.
 		 */
-		if (!calculatedValueMap.isEmpty()) {
-
-			throw new IllegalStateException(
-				"자동계산 결과에 알 수 없는 급여항목이 포함되어 있습니다.");
-		}
 
 		long netPayment = totalPayment - totalDeduction;
 
