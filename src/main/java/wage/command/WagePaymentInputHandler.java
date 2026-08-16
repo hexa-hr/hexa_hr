@@ -11,6 +11,7 @@ import employee.service.EmployeeSelectService;
 import mvc.command.CommandHandler;
 import wage.model.WageLedgerSummary;
 import wage.model.WagePaymentInputViewItem;
+import wage.model.WagePaymentPeriodDefault;
 import wage.service.WagePaymentInputService;
 
 // 급여입력 화면 조회 Handler
@@ -189,24 +190,32 @@ public class WagePaymentInputHandler implements CommandHandler {
 				/*
 				 * 신규 급여차수
 				 *
-				 * 근태연결 초기값 계산을 위해
-				 * 정산기간이 반드시 필요하다.
+				 * 회사의 급여지급정보 설정을 기준으로
+				 * 정산기간과 급여지급일 기본값을 생성한다.
 				 */
-				settlementStartDate = parseRequiredDate(
-					settlementStartDateParam,
-					"정산 시작일");
+				WagePaymentPeriodDefault defaultPeriod = wagePaymentInputService.getDefaultPeriod(
+					wageMonth);
 
-				settlementEndDate = parseRequiredDate(
-					settlementEndDateParam,
-					"정산 종료일");
+				settlementStartDate = defaultPeriod.getSettlementStartDate();
 
-				// 지급일이 입력된 경우 형식만 검증
-				if (wagePaymentDate != null) {
+				settlementEndDate = defaultPeriod.getSettlementEndDate();
 
-					parseRequiredDate(
-						wagePaymentDate,
-						"급여 지급일");
-				}
+				Date defaultPaymentDate = defaultPeriod.getWagePaymentDate();
+
+				req.setAttribute(
+					"settlementStartDate",
+					toDateString(
+						settlementStartDate));
+
+				req.setAttribute(
+					"settlementEndDate",
+					toDateString(
+						settlementEndDate));
+
+				req.setAttribute(
+					"wagePaymentDate",
+					toDateString(
+						defaultPaymentDate));
 
 				req.setAttribute(
 					"existingPeriod",

@@ -3,6 +3,9 @@ package wage.service;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +13,8 @@ import java.util.Map;
 
 import attendance.dao.AttendanceDao;
 import employee.dao.EmployeeDao;
+import employee.dao.EmployeeSalaryAccountDao;
+import employee.model.EmployeeSalaryAccount;
 import jdbc.connection.ConnectionProvider;
 import master.dao.WageTypeDao;
 import master.model.WageType;
@@ -17,6 +22,7 @@ import wage.dao.WageDao;
 import wage.model.WageLedgerSummary;
 import wage.model.WagePaymentCalculationItem;
 import wage.model.WagePaymentInputViewItem;
+import wage.model.WagePaymentPeriodDefault;
 
 public class WagePaymentInputService {
 
@@ -24,6 +30,8 @@ public class WagePaymentInputService {
 	private AttendanceDao attendanceDao = new AttendanceDao();
 	private EmployeeDao employeeDao = new EmployeeDao();
 	private WageDao wageDao = new WageDao();
+	private EmployeeSalaryAccountDao employeeSalaryAccountDao = new EmployeeSalaryAccountDao();
+	private static final int COMPANY_ID = 1;
 
 	public List<WagePaymentCalculationItem> getInitialItems(
 		Integer employeeId,
@@ -231,6 +239,76 @@ public class WagePaymentInputService {
 		}
 	}
 
+	public WagePaymentPeriodDefault getDefaultPeriod(
+		String wageMonth) {
+
+		if (wageMonth == null
+			|| wageMonth.trim().isEmpty()) {
+
+			throw new IllegalArgumentException(
+				"귀속연월을 입력해야 합니다.");
+		}
+
+		YearMonth baseMonth;
+
+		try {
+
+			baseMonth = YearMonth.parse(
+				wageMonth.trim());
+
+		} catch (DateTimeException e) {
+
+			throw new IllegalArgumentException(
+				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+		}
+
+		try (Connection conn = ConnectionProvider.getConnection()) {
+
+			EmployeeSalaryAccount account = employeeSalaryAccountDao.selectByCompanyId(
+				conn,
+				COMPANY_ID);
+
+			if (account == null) {
+
+				throw new IllegalStateException(
+					"급여지급정보가 등록되어 있지 않습니다.");
+			}
+
+			LocalDate settlementStartDate = resolveCalculationDate(
+				baseMonth,
+				account.getCalc1MonthType(),
+				account.getSalaryCalculation1());
+
+			LocalDate settlementEndDate = resolveCalculationDate(
+				baseMonth,
+				account.getCalc2MonthType(),
+				account.getSalaryCalculation2());
+
+			LocalDate wagePaymentDate = resolvePaymentDate(
+				baseMonth,
+				account.getPaymentMonthType(),
+				account.getSalaryPaymentDate());
+
+			if (settlementStartDate.isAfter(
+				settlementEndDate)) {
+
+				throw new IllegalStateException(
+					"급여지급정보의 정산기간 설정이 올바르지 않습니다.");
+			}
+
+			return new WagePaymentPeriodDefault(
+				Date.valueOf(settlementStartDate),
+				Date.valueOf(settlementEndDate),
+				Date.valueOf(wagePaymentDate));
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException(
+				"급여 기본 날짜 조회 중 데이터베이스 오류가 발생했습니다.",
+				e);
+		}
+	}
+
 	private List<WagePaymentCalculationItem> buildItems(
 		Connection conn,
 		Integer employeeId,
@@ -403,5 +481,100 @@ public class WagePaymentInputService {
 		 * 별도 처리한다.
 		 */
 		return false;
+	}
+
+	private LocalDate resolveCalculationDate(
+		YearMonth baseMonth,
+		String monthType,
+		Integer day) {
+
+		if (monthType == null) {
+
+			throw new IllegalStateException(
+				"정산월 구분이 설정되어 있지 않습니다.");
+		}
+
+		YearMonth targetMonth;
+
+		if ("C".equals(monthType)) {
+
+			targetMonth = baseMonth;
+
+		} else if ("P".equals(monthType)) {
+
+			targetMonth = baseMonth.minusMonths(1);
+
+		} else {
+
+			throw new IllegalStateException(
+				"올바르지 않은 정산월 구분입니다: "
+					+ monthType);
+		}
+
+		return resolveDay(
+			targetMonth,
+			day);
+	}
+
+	private LocalDate resolvePaymentDate(
+		YearMonth baseMonth,
+		String monthType,
+		Integer day) {
+
+		if (monthType == null) {
+
+			throw new IllegalStateException(
+				"지급월 구분이 설정되어 있지 않습니다.");
+		}
+
+		YearMonth targetMonth;
+
+		if ("C".equals(monthType)) {
+
+			targetMonth = baseMonth;
+
+		} else if ("N".equals(monthType)) {
+
+			targetMonth = baseMonth.plusMonths(1);
+
+		} else {
+
+			throw new IllegalStateException(
+				"올바르지 않은 지급월 구분입니다: "
+					+ monthType);
+		}
+
+		return resolveDay(
+			targetMonth,
+			day);
+	}
+
+	private LocalDate resolveDay(
+		YearMonth targetMonth,
+		Integer day) {
+
+		if (day == null) {
+
+			throw new IllegalStateException(
+				"급여 날짜가 설정되어 있지 않습니다.");
+		}
+
+		/*
+		 * DB 설정값 0은 해당 월의 말일을 의미한다.
+		 */
+		if (day == 0) {
+
+			return targetMonth.atEndOfMonth();
+		}
+
+		if (day < 1
+			|| day > targetMonth.lengthOfMonth()) {
+
+			throw new IllegalStateException(
+				"급여 날짜 설정이 올바르지 않습니다: "
+					+ day);
+		}
+
+		return targetMonth.atDay(day);
 	}
 }
