@@ -100,47 +100,14 @@ public class WagePaymentInputService {
 
 			/*
 			 * 기존 급여인 경우
-			 * 현재 사용 가능한 급여항목은 모두 0원으로 구성한다.
-			 * 근태연결·일괄지급은 다시 계산하지 않는다.
+			 *
+			 * 저장 당시 실제 존재했던 급여항목만 반환한다.
+			 * 현재 활성 급여항목을 추가하지 않는다.
+			 *
+			 * wage 행의 집합 자체가
+			 * 해당 사원의 당시 급여항목 스냅샷이다.
 			 */
-			List<WagePaymentCalculationItem> currentItems = buildItems(
-				conn,
-				employeeId,
-				null,
-				null,
-				false);
-
-			Map<Integer, WagePaymentCalculationItem> savedItemMap = new LinkedHashMap<>();
-
-			for (WagePaymentCalculationItem savedItem : savedItems) {
-
-				savedItemMap.put(
-					savedItem.getWageTypeId(),
-					savedItem);
-			}
-
-			List<WagePaymentCalculationItem> result = new ArrayList<>();
-
-			// 현재 활성 급여항목에 저장값 덮어쓰기
-			for (WagePaymentCalculationItem currentItem : currentItems) {
-
-				WagePaymentCalculationItem savedItem = savedItemMap.remove(
-					currentItem.getWageTypeId());
-
-				if (savedItem != null) {
-					result.add(savedItem);
-				} else {
-					result.add(currentItem);
-				}
-			}
-
-			/*
-			 * 현재 사용안함이 되었더라도
-			 * 과거 급여에 실제 저장된 항목은 유지한다.
-			 */
-			result.addAll(savedItemMap.values());
-
-			return result;
+			return savedItems;
 
 		} catch (SQLException e) {
 
