@@ -13,6 +13,10 @@ public class Insurance {
 	private Date insuranceEndDate;
 	private String remarks4;
 
+	// 🌟 1. 빈 상자를 만들기 위한 기본 생성자 추가!
+	public Insurance() {}
+
+	// 2. 기존 전체 필드 생성자
 	public Insurance(Integer insuranceId, Integer employeeId, String insuranceAgency, String insuranceNumber,
 		Long insuranceAmount, Date insuranceStartDate, Date insuranceEndDate, String remarks4) {
 		this.insuranceId = insuranceId;
@@ -25,6 +29,7 @@ public class Insurance {
 		this.remarks4 = remarks4;
 	}
 
+	// 3. Getter 메서드들
 	public Integer getInsuranceId() {
 		return insuranceId;
 	}
@@ -57,4 +62,36 @@ public class Insurance {
 		return remarks4;
 	}
 
+	// 🌟 4. 값을 집어넣기 위한 Setter 메서드들 추가! (이게 없으면 또 에러 나!)
+	public void setInsuranceId(Integer insuranceId) {
+		this.insuranceId = insuranceId;
+	}
+
+	public void setEmployeeId(Integer employeeId) {
+		this.employeeId = employeeId;
+	}
+
+	public void setInsuranceAgency(String insuranceAgency) {
+		this.insuranceAgency = insuranceAgency;
+	}
+
+	public void setInsuranceNumber(String insuranceNumber) {
+		this.insuranceNumber = insuranceNumber;
+	}
+
+	public void setInsuranceAmount(Long insuranceAmount) {
+		this.insuranceAmount = insuranceAmount;
+	}
+
+	public void setInsuranceStartDate(Date insuranceStartDate) {
+		this.insuranceStartDate = insuranceStartDate;
+	}
+
+	public void setInsuranceEndDate(Date insuranceEndDate) {
+		this.insuranceEndDate = insuranceEndDate;
+	}
+
+	public void setRemarks4(String remarks4) {
+		this.remarks4 = remarks4;
+	}
 }
