@@ -165,65 +165,116 @@ th {
 		</div>
 
 
-		<table>
+		<form method="post"
+			action="${pageContext.request.contextPath}/wage/paymentInputCalculate.do">
 
-			<thead>
-
-				<tr>
-					<th>ID</th>
-					<th>구분</th>
-					<th>급여항목</th>
-					<th>과세구분</th>
-					<th>금액</th>
-					<th>active</th>
-					<th>calculable</th>
-				</tr>
-
-			</thead>
+			<input type="hidden" name="employeeId"
+				value="<c:out value='${selectedEmployeeId}' />"> <input
+				type="hidden" name="wageMonth"
+				value="<c:out value='${wageMonth}' />"> <input type="hidden"
+				name="wagePeriod" value="<c:out value='${wagePeriod}' />"> <input
+				type="hidden" name="settlementStartDate"
+				value="<c:out value='${settlementStartDate}' />"> <input
+				type="hidden" name="settlementEndDate"
+				value="<c:out value='${settlementEndDate}' />"> <input
+				type="hidden" name="wagePaymentDate"
+				value="<c:out value='${wagePaymentDate}' />">
 
 
-			<tbody>
+			<table>
 
-				<c:forEach var="item" items="${wageItems}">
+				<thead>
 
-					<tr class="${item.active ? '' : 'inactive'}">
-
-						<td class="center"><c:out value="${item.wageTypeId}" /></td>
-
-						<td class="center"><c:choose>
-
-								<c:when test="${item.itemType eq 'P'}">
-									지급
-								</c:when>
-
-								<c:when test="${item.itemType eq 'D'}">
-									공제
-								</c:when>
-
-								<c:otherwise>
-									<c:out value="${item.itemType}" />
-								</c:otherwise>
-
-							</c:choose></td>
-
-						<td><c:out value="${item.wageTypeName}" /></td>
-
-						<td class="center"><c:out value="${item.taxableYn}" /></td>
-
-						<td class="amount"><fmt:formatNumber
-								value="${item.wageValue}" pattern="#,##0" /></td>
-
-						<td class="center"><c:out value="${item.active}" /></td>
-
-						<td class="center"><c:out value="${item.calculable}" /></td>
-
+					<tr>
+						<th>ID</th>
+						<th>구분</th>
+						<th>급여항목</th>
+						<th>과세구분</th>
+						<th>금액</th>
+						<th>active</th>
+						<th>calculable</th>
 					</tr>
 
-				</c:forEach>
+				</thead>
 
-			</tbody>
 
-		</table>
+				<tbody>
+
+					<c:forEach var="item" items="${wageItems}">
+
+						<tr class="${item.active ? '' : 'inactive'}">
+
+							<td class="center"><c:out value="${item.wageTypeId}" /> <input
+								type="hidden" name="wageTypeId"
+								value="<c:out value='${item.wageTypeId}' />"></td>
+
+							<td class="center"><c:choose>
+
+									<c:when test="${item.itemType eq 'P'}">
+										지급
+									</c:when>
+
+									<c:when test="${item.itemType eq 'D'}">
+										공제
+									</c:when>
+
+									<c:otherwise>
+										<c:out value="${item.itemType}" />
+									</c:otherwise>
+
+								</c:choose></td>
+
+							<td><c:out value="${item.wageTypeName}" /></td>
+
+							<td class="center"><c:out value="${item.taxableYn}" /></td>
+
+							<td class="amount"><input type="number" name="wageValue"
+								min="0" step="1" value="<c:out value='${item.wageValue}' />"
+								required></td>
+
+							<td class="center"><c:out value="${item.active}" /></td>
+
+							<td class="center"><c:out value="${item.calculable}" /></td>
+
+						</tr>
+
+					</c:forEach>
+
+				</tbody>
+
+			</table>
+
+
+			<div style="margin-top: 15px;">
+
+				<button type="submit">자동계산</button>
+
+			</div>
+
+
+			<c:if test="${autoCalculated}">
+
+				<div style="margin-top: 20px;">
+
+					<strong>지급합계:</strong>
+
+					<fmt:formatNumber value="${totalPayment}" pattern="#,##0" />
+
+					원 &nbsp;&nbsp; <strong>공제합계:</strong>
+
+					<fmt:formatNumber value="${totalDeduction}" pattern="#,##0" />
+
+					원 &nbsp;&nbsp; <strong>실지급액:</strong>
+
+					<fmt:formatNumber value="${netPayment}" pattern="#,##0" />
+
+					원
+
+				</div>
+
+			</c:if>
+
+		</form>
 
 	</c:if>
 
