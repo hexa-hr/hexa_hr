@@ -18,6 +18,7 @@ import wage.model.WageMonthlyPersonalStatisticsRow;
 import wage.model.WageMonthlyTotalStatisticsRow;
 import wage.model.WagePaymentCalculationItem;
 import wage.model.WagePaymentEmployeeRow;
+import wage.model.WagePaymentPreviousSourceOption;
 
 public class WageDao {
 
@@ -636,6 +637,67 @@ public class WageDao {
 		return result;
 	}
 
+	// 지난급여 불러오기 - 원본 귀속연월/급여차수 목록 조회
+	public List<WagePaymentPreviousSourceOption> selectWagePaymentPreviousSourceOptions(
+		Connection conn,
+		String targetWageMonth,
+		String targetWagePeriod)
+		throws SQLException {
+
+		String sql = "SELECT w.wage_month, "
+			+ "       w.wage_period, "
+			+ "       COUNT(DISTINCT CASE "
+			+ "           WHEN e.employment_type IN "
+			+ "               ('정규직', '계약직', '파견직', '위촉직') "
+			+ "           THEN w.employee_id "
+			+ "       END) AS worker_employee_count, "
+			+ "       COUNT(DISTINCT CASE "
+			+ "           WHEN e.employment_type = '임시직' "
+			+ "           THEN w.employee_id "
+			+ "       END) AS business_employee_count "
+			+ "FROM wage w "
+			+ "JOIN employee e "
+			+ "  ON e.employee_id = w.employee_id "
+			+ "WHERE e.employment_type IN "
+			+ "      ('정규직', '계약직', '파견직', '위촉직', '임시직') "
+			+ "  AND NOT ( "
+			+ "      w.wage_month = ? "
+			+ "      AND w.wage_period = ? "
+			+ "  ) "
+			+ "GROUP BY w.wage_month, "
+			+ "         w.wage_period "
+			+ "ORDER BY w.wage_month DESC, "
+			+ "         TO_NUMBER(w.wage_period) DESC";
+
+		List<WagePaymentPreviousSourceOption> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(
+				1,
+				targetWageMonth);
+
+			pstmt.setString(
+				2,
+				targetWagePeriod);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					result.add(
+						new WagePaymentPreviousSourceOption(
+							rs.getString("wage_month"),
+							rs.getString("wage_period"),
+							rs.getInt("worker_employee_count"),
+							rs.getInt("business_employee_count")));
+				}
+			}
+		}
+
+		return result;
+	}
+
 	// 급여입력용 - 사원별 저장된 급여항목 조회
 	public List<WagePaymentCalculationItem> selectEmployeeWageItems(
 		Connection conn,
@@ -800,6 +862,111 @@ public class WageDao {
 		}
 
 		return null;
+	}
+
+	// 지난급여 불러오기 - 대상 월/차수의 일반·사업 급여 전체 삭제
+	public int deleteWagePaymentWorkspaceRows(
+		Connection conn,
+		String wageMonth,
+		String wagePeriod)
+		throws SQLException {
+
+		String sql = "DELETE FROM wage "
+			+ "WHERE wage_month = ? "
+			+ "  AND wage_period = ? "
+			+ "  AND employee_id IN ( "
+			+ "      SELECT employee_id "
+			+ "      FROM employee "
+			+ "      WHERE employment_type IN "
+			+ "            ('정규직', '계약직', '파견직', '위촉직', '임시직') "
+			+ "  )";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(
+				1,
+				wageMonth);
+
+			pstmt.setString(
+				2,
+				wagePeriod);
+
+			return pstmt.executeUpdate();
+		}
+	}
+
+	// 지난급여 불러오기 - 원본 월/차수 급여를 대상 작업공간으로 복사
+	public int insertWagePaymentWorkspaceFromSource(
+		Connection conn,
+		String sourceWageMonth,
+		String sourceWagePeriod,
+		String targetWageMonth,
+		String targetWagePeriod,
+		Date settlementStartDate,
+		Date settlementEndDate,
+		Date wagePaymentDate)
+		throws SQLException {
+
+		String sql = "INSERT INTO wage ( "
+			+ "    wage_id, "
+			+ "    employee_id, "
+			+ "    wage_period, "
+			+ "    wage_month, "
+			+ "    wage_type_id, "
+			+ "    wage_value, "
+			+ "    settlement_period_start_date, "
+			+ "    settlement_period_end_date, "
+			+ "    wage_payment_date "
+			+ ") "
+			+ "SELECT wage_seq.nextval, "
+			+ "       w.employee_id, "
+			+ "       ?, "
+			+ "       ?, "
+			+ "       w.wage_type_id, "
+			+ "       NVL(w.wage_value, 0), "
+			+ "       ?, "
+			+ "       ?, "
+			+ "       ? "
+			+ "FROM wage w "
+			+ "JOIN employee e "
+			+ "  ON e.employee_id = w.employee_id "
+			+ "WHERE w.wage_month = ? "
+			+ "  AND w.wage_period = ? "
+			+ "  AND e.employment_type IN "
+			+ "      ('정규직', '계약직', '파견직', '위촉직', '임시직')";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(
+				1,
+				targetWagePeriod);
+
+			pstmt.setString(
+				2,
+				targetWageMonth);
+
+			pstmt.setDate(
+				3,
+				settlementStartDate);
+
+			pstmt.setDate(
+				4,
+				settlementEndDate);
+
+			pstmt.setDate(
+				5,
+				wagePaymentDate);
+
+			pstmt.setString(
+				6,
+				sourceWageMonth);
+
+			pstmt.setString(
+				7,
+				sourceWagePeriod);
+
+			return pstmt.executeUpdate();
+		}
 	}
 
 	// 급여입력용 - 사원의 해당 귀속연월/급여차수 급여 삭제

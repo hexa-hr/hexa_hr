@@ -18,6 +18,7 @@ import wage.model.WagePaymentEmployeeRow;
 import wage.model.WagePaymentItemInput;
 import wage.service.WagePaymentAutoCalculationService;
 import wage.service.WagePaymentInputService;
+import wage.service.WagePaymentPreviousCopyService;
 
 // 급여입력 화면 자동계산 Handler
 public class WagePaymentInputCalculateHandler
@@ -30,6 +31,8 @@ public class WagePaymentInputCalculateHandler
 	private WagePaymentInputService wagePaymentInputService = new WagePaymentInputService();
 
 	private WagePaymentAutoCalculationService wagePaymentAutoCalculationService = new WagePaymentAutoCalculationService();
+
+	private WagePaymentPreviousCopyService wagePaymentPreviousCopyService = new WagePaymentPreviousCopyService();
 
 	@Override
 	public String process(
@@ -115,6 +118,12 @@ public class WagePaymentInputCalculateHandler
 					"사원, 귀속연월, 급여차수를 "
 						+ "모두 입력해야 합니다.");
 			}
+
+			req.setAttribute(
+				"previousWageSourceOptions",
+				wagePaymentPreviousCopyService.getSourceOptions(
+					wageMonth,
+					wagePeriod));
 
 			Integer employeeId;
 

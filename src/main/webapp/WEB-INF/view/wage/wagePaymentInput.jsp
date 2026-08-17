@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <!DOCTYPE html>
 <html>
@@ -70,6 +71,30 @@ th {
 
 .inactive {
 	background-color: #eeeeee;
+}
+
+.previous-wage-dialog {
+	border: 1px solid #aaa;
+	border-radius: 8px;
+	padding: 20px;
+}
+
+.previous-wage-dialog::backdrop {
+	background-color: rgba(0, 0, 0, 0.45);
+}
+
+.previous-wage-dialog h2 {
+	margin-top: 0;
+}
+
+.previous-wage-dialog select {
+	min-width: 230px;
+}
+
+.previous-wage-dialog-actions {
+	margin-top: 15px;
+	display: flex;
+	gap: 8px;
 }
 </style>
 </head>
@@ -146,7 +171,6 @@ th {
 
 		</div>
 
-
 		<c:if test="${not empty errorMessage}">
 
 			<div class="error-message">
@@ -156,6 +180,64 @@ th {
 		</c:if>
 
 	</form>
+
+	<div style="margin-bottom: 15px;">
+
+		<button type="button" id="previousWageOpenButton"
+			<c:if test="${empty previousWageSourceOptions}">
+				disabled
+			</c:if>>
+			지난급여 불러오기</button>
+
+	</div>
+
+	<dialog id="previousWageDialog" class="previous-wage-dialog">
+
+	<h2>급여연월 선택</h2>
+
+	<form id="previousWageCopyForm" method="post"
+		action="${pageContext.request.contextPath}/wage/paymentPreviousCopy.do">
+
+		<input type="hidden" id="previousCopySourceWageMonth"
+			name="sourceWageMonth"> <input type="hidden"
+			id="previousCopySourceWagePeriod" name="sourceWagePeriod"> <input
+			type="hidden" name="wageMonth" value="<c:out value='${wageMonth}' />">
+
+		<input type="hidden" name="wagePeriod"
+			value="<c:out value='${wagePeriod}' />"> <input type="hidden"
+			name="incomeType" value="<c:out value='${incomeType}' />"> <input
+			type="hidden" id="previousCopyReplaceConfirmed"
+			name="replaceConfirmed" value="false"> <select
+			id="previousWageSourceSelect" required>
+
+			<option value="">귀속연월 차수 선택</option>
+
+			<c:forEach var="source" items="${previousWageSourceOptions}">
+
+				<option value="<c:out value='${source.wageMonth}' />"
+					data-wage-month="<c:out value='${source.wageMonth}' />"
+					data-wage-period="<c:out value='${source.wagePeriod}' />">
+					<c:out value="${fn:substring(source.wageMonth, 0, 4)}" />년
+					<c:out value="${fn:substring(source.wageMonth, 5, 7)}" />월
+					<fmt:formatNumber value="${source.wagePeriod}" pattern="00" />차
+				</option>
+
+			</c:forEach>
+
+		</select>
+
+		<div class="previous-wage-dialog-actions">
+
+			<button type="button" id="previousWageSubmitButton">급여정보
+				불러오기</button>
+
+			<button type="button" id="previousWageCloseButton">취소</button>
+
+		</div>
+
+	</form>
+
+	</dialog>
 
 	<div style="margin-bottom: 15px;">
 
@@ -510,6 +592,123 @@ th {
 	<script>
 	(function() {
 
+		const openButton =
+			document.getElementById(
+				"previousWageOpenButton");
+
+		const dialog =
+			document.getElementById(
+				"previousWageDialog");
+
+		const copyForm =
+			document.getElementById(
+				"previousWageCopyForm");
+
+		const sourceSelect =
+			document.getElementById(
+				"previousWageSourceSelect");
+
+		const sourceWageMonthInput =
+			document.getElementById(
+				"previousCopySourceWageMonth");
+
+		const sourceWagePeriodInput =
+			document.getElementById(
+				"previousCopySourceWagePeriod");
+
+		const replaceConfirmedInput =
+			document.getElementById(
+				"previousCopyReplaceConfirmed");
+
+		const submitButton =
+			document.getElementById(
+				"previousWageSubmitButton");
+
+		const closeButton =
+			document.getElementById(
+				"previousWageCloseButton");
+
+		if (!openButton
+			|| !dialog
+			|| !copyForm
+			|| !sourceSelect
+			|| !sourceWageMonthInput
+			|| !sourceWagePeriodInput
+			|| !replaceConfirmedInput
+			|| !submitButton
+			|| !closeButton) {
+
+			return;
+		}
+
+		openButton.addEventListener(
+			"click",
+			function() {
+
+				sourceSelect.value = "";
+				sourceWageMonthInput.value = "";
+				sourceWagePeriodInput.value = "";
+				replaceConfirmedInput.value = "false";
+				submitButton.disabled = false;
+
+				dialog.showModal();
+			});
+
+		closeButton.addEventListener(
+			"click",
+			function() {
+
+				dialog.close();
+			});
+
+		submitButton.addEventListener(
+			"click",
+			function() {
+
+				const selectedOption =
+					sourceSelect.options[
+						sourceSelect.selectedIndex];
+
+				if (!sourceSelect.value
+					|| !selectedOption) {
+
+					window.alert(
+						"불러올 귀속연월과 급여차수를 선택해 주세요.");
+
+					return;
+				}
+
+				sourceWageMonthInput.value =
+					selectedOption.dataset.wageMonth;
+
+				sourceWagePeriodInput.value =
+					selectedOption.dataset.wagePeriod;
+
+				const confirmed =
+					window.confirm(
+						"기등록된 급여테이블은 삭제되며,\n"
+						+ "불러오기 한 급여테이블로 교체됩니다.\n\n"
+						+ "불러오기 하시겠습니까?");
+
+				if (!confirmed) {
+					return;
+				}
+
+				replaceConfirmedInput.value =
+					"true";
+
+				submitButton.disabled =
+					true;
+
+				copyForm.submit();
+			});
+
+	})();
+	</script>
+
+	<script>
+	(function() {
+
 		const searchForm =
 			document.getElementById("workspaceSearchForm");
 
@@ -645,8 +844,12 @@ th {
 		const autoCalculated =
 			${autoCalculated == true};
 
+		const previousCopied =
+			${previousCopied == true};
+
 		if (!hasPending
-			&& !autoCalculated) {
+			&& !autoCalculated
+			&& !previousCopied) {
 
 			return;
 		}

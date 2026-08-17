@@ -18,6 +18,7 @@ import wage.model.WagePaymentEmployeeRow;
 import wage.model.WagePaymentInputViewItem;
 import wage.model.WagePaymentPeriodDefault;
 import wage.service.WagePaymentInputService;
+import wage.service.WagePaymentPreviousCopyService;
 
 // 급여입력 화면 조회 Handler
 public class WagePaymentInputHandler implements CommandHandler {
@@ -27,6 +28,8 @@ public class WagePaymentInputHandler implements CommandHandler {
 	private EmployeeSelectService employeeSelectService = new EmployeeSelectService();
 
 	private WagePaymentInputService wagePaymentInputService = new WagePaymentInputService();
+
+	private WagePaymentPreviousCopyService wagePaymentPreviousCopyService = new WagePaymentPreviousCopyService();
 
 	@Override
 	public String process(
@@ -77,6 +80,14 @@ public class WagePaymentInputHandler implements CommandHandler {
 				"incomeType",
 				incomeType);
 
+			boolean previousCopied = "true".equals(
+				req.getParameter(
+					"previousCopied"));
+
+			req.setAttribute(
+				"previousCopied",
+				previousCopied);
+
 			if ("true".equals(
 				req.getParameter("saved"))) {
 
@@ -111,6 +122,12 @@ public class WagePaymentInputHandler implements CommandHandler {
 				"wagePeriod",
 				wagePeriod);
 
+			req.setAttribute(
+				"previousWageSourceOptions",
+				wagePaymentPreviousCopyService.getSourceOptions(
+					wageMonth,
+					wagePeriod));
+
 			/*
 			 * 현재 귀속연월 + 급여차수에
 			 * 실제 저장된 사원 목록
@@ -119,6 +136,34 @@ public class WagePaymentInputHandler implements CommandHandler {
 				.getSavedEmployees(
 					wageMonth,
 					wagePeriod);
+
+			if (previousCopied) {
+
+				int workerEmployeeCount = 0;
+				int businessEmployeeCount = 0;
+
+				for (WagePaymentEmployeeRow employee : allSavedEmployees) {
+
+					if (isWorkerEmploymentType(
+						employee.getEmploymentType())) {
+
+						workerEmployeeCount++;
+
+					} else if ("임시직".equals(
+						employee.getEmploymentType())) {
+
+						businessEmployeeCount++;
+					}
+				}
+
+				req.setAttribute(
+					"successMessage",
+					"[불러오기] 일반소득: "
+						+ workerEmployeeCount
+						+ "건, 사업소득: "
+						+ businessEmployeeCount
+						+ "건");
+			}
 
 			/*
 			 * 신규추가로 전달된 사원을
@@ -659,6 +704,15 @@ public class WagePaymentInputHandler implements CommandHandler {
 		}
 
 		return false;
+	}
+
+	private boolean isWorkerEmploymentType(
+		String employmentType) {
+
+		return "정규직".equals(employmentType)
+			|| "계약직".equals(employmentType)
+			|| "파견직".equals(employmentType)
+			|| "위촉직".equals(employmentType);
 	}
 
 	private Date parseRequiredDate(
