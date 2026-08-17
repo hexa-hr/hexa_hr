@@ -690,4 +690,51 @@ public class WageDao {
 		return result;
 	}
 
+	// 급여입력용 - 사원의 가장 최근 기본급 조회
+	public Long selectLatestBasicWage(
+		Connection conn,
+		Integer employeeId,
+		String wageMonth,
+		Integer wagePeriod)
+		throws SQLException {
+
+		String sql = "SELECT wage_value "
+			+ "FROM ( "
+			+ "    SELECT NVL(w.wage_value, 0) AS wage_value "
+			+ "    FROM wage w "
+			+ "    JOIN wage_type wt "
+			+ "      ON wt.wage_type_id = w.wage_type_id "
+			+ "    WHERE w.employee_id = ? "
+			+ "      AND wt.wage_type_name = '기본급' "
+			+ "      AND ( "
+			+ "            w.wage_month < ? "
+			+ "            OR ( "
+			+ "                w.wage_month = ? "
+			+ "                AND TO_NUMBER(w.wage_period) < ? "
+			+ "            ) "
+			+ "          ) "
+			+ "    ORDER BY w.wage_month DESC, "
+			+ "             TO_NUMBER(w.wage_period) DESC, "
+			+ "             w.wage_id DESC "
+			+ ") "
+			+ "WHERE ROWNUM = 1";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, employeeId);
+			pstmt.setString(2, wageMonth);
+			pstmt.setString(3, wageMonth);
+			pstmt.setInt(4, wagePeriod);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				if (rs.next()) {
+					return rs.getLong("wage_value");
+				}
+			}
+		}
+
+		return null;
+	}
+
 }

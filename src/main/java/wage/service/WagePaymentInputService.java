@@ -83,6 +83,25 @@ public class WagePaymentInputService {
 				"급여차수를 입력해야 합니다.");
 		}
 
+		int wagePeriodNumber;
+
+		try {
+
+			wagePeriodNumber = Integer.parseInt(
+				wagePeriod.trim());
+
+			if (wagePeriodNumber < 1
+				|| wagePeriodNumber > 10) {
+
+				throw new NumberFormatException();
+			}
+
+		} catch (NumberFormatException e) {
+
+			throw new IllegalArgumentException(
+				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+		}
+
 		try (Connection conn = ConnectionProvider.getConnection()) {
 
 			List<WagePaymentCalculationItem> savedItems = wageDao.selectEmployeeWageItems(
@@ -98,12 +117,22 @@ public class WagePaymentInputService {
 					settlementStartDate,
 					settlementEndDate);
 
-				return buildItems(
+				List<WagePaymentCalculationItem> initialItems = buildItems(
 					conn,
 					employeeId,
 					settlementStartDate,
 					settlementEndDate,
 					true);
+
+				Long latestBasicWage = wageDao.selectLatestBasicWage(
+					conn,
+					employeeId,
+					wageMonth.trim(),
+					wagePeriodNumber);
+
+				return applyLatestBasicWage(
+					initialItems,
+					latestBasicWage);
 			}
 
 			/*
@@ -397,6 +426,41 @@ public class WagePaymentInputService {
 		}
 
 		return result;
+	}
+
+	private List<WagePaymentCalculationItem> applyLatestBasicWage(
+		List<WagePaymentCalculationItem> items,
+		Long latestBasicWage) {
+
+		/*
+		 * 과거 기본급 이력이 없으면
+		 * buildItems()에서 생성한 0원을 그대로 사용한다.
+		 */
+		if (latestBasicWage == null) {
+			return items;
+		}
+
+		for (int i = 0; i < items.size(); i++) {
+
+			WagePaymentCalculationItem item = items.get(i);
+
+			if ("기본급".equals(
+				item.getWageTypeName())) {
+
+				items.set(
+					i,
+					new WagePaymentCalculationItem(
+						item.getWageTypeId(),
+						item.getWageTypeName(),
+						item.getItemType(),
+						item.getTaxableYn(),
+						latestBasicWage));
+
+				break;
+			}
+		}
+
+		return items;
 	}
 
 	private void validateEmployeeId(
