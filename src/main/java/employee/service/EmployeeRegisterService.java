@@ -25,6 +25,18 @@ public class EmployeeRegisterService {
 	private DegreeDao degreeDao = new DegreeDao();
 	private InsuranceDao insuranceDao = new InsuranceDao();
 
+	public Employee getEmployee(int employeeId) {
+		Connection conn = null;
+		try {
+			conn = jdbc.connection.ConnectionProvider.getConnection();
+			return employeeDao.selectById(conn, employeeId);
+		} catch (SQLException e) {
+			throw new RuntimeException("사원 상세정보 조회 오류", e);
+		} finally {
+			jdbc.JdbcUtil.close(conn);
+		}
+	}
+
 	// 🌟 반환 타입을 Integer로 변경
 	public Integer register(Employee employee, EmployeeSalaryAccount account,
 		List<Dependents> dependentsList, List<Degree> degreeList,

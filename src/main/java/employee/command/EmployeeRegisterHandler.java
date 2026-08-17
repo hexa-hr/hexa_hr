@@ -21,11 +21,17 @@ public class EmployeeRegisterHandler implements CommandHandler {
 
 	private EmployeeRegisterService registerService = new EmployeeRegisterService();
 
-	// 👇 여기서부터가 process 메서드 시작이야!
 	@Override
 	public String process(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
+		// 🌟 GET 방식: URL에 employeeId가 있으면 데이터를 조회해서 JSP로 넘김!
 		if (request.getMethod().equalsIgnoreCase("GET")) {
+			String empIdStr = request.getParameter("employeeId");
+			if (empIdStr != null && !empIdStr.trim().isEmpty()) {
+				int employeeId = parseInt(empIdStr);
+				Employee emp = registerService.getEmployee(employeeId);
+				request.setAttribute("emp", emp); // JSP에서 ${emp} 로 사용 가능!
+			}
 			return "/WEB-INF/view/employee/employeeRegister.jsp";
 		}
 
@@ -109,7 +115,6 @@ public class EmployeeRegisterHandler implements CommandHandler {
 			List<Degree> degreeList = new ArrayList<>();
 			if (graduates != null) {
 				for (int i = 0; i < graduates.length; i++) {
-					// 학교명이 입력된 경우에만 유효한 데이터로 판단
 					if (schoolNames[i] != null && !schoolNames[i].trim().isEmpty()) {
 						Degree deg = new Degree(
 							null, null, graduates[i],
@@ -137,12 +142,9 @@ public class EmployeeRegisterHandler implements CommandHandler {
 			response.setContentType("text/html; charset=UTF-8");
 			PrintWriter out = response.getWriter();
 
-			// 🌟 여기서부터 기존 try ~ catch 전체를 덮어씌워 주세요
 			try {
-				// 1. 서비스 호출 후 사원번호(newEmpId) 받아오기
 				Integer newEmpId = registerService.register(employee, account, dependentsList, degreeList, insurance);
 
-				// 2. 🌟 성공 팝업 및 이동 코드는 반드시 try 안쪽(newEmpId 밑)에 있어야 해!
 				out.println("<script>");
 				out.println("alert('사원정보 1이 성공적으로 저장되었습니다.');");
 				out.println("parent.document.getElementById('hiddenEmpId').value = '" + newEmpId + "';");
@@ -151,7 +153,6 @@ public class EmployeeRegisterHandler implements CommandHandler {
 				return null;
 
 			} catch (Exception e) {
-				// 3. 🌟 여기는 등록이 실패(에러)했을 때만 실행되는 곳이야!
 				e.printStackTrace();
 				out.println("<script>");
 				out.println("alert('사원 등록 실패: " + e.getMessage() + "');");
@@ -164,9 +165,8 @@ public class EmployeeRegisterHandler implements CommandHandler {
 
 		response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		return null;
-	} // 👆 여기까지가 process 메서드의 끝이야!
+	}
 
-	// (아래는 글자를 숫자로, 날짜로 바꿔주는 보조 도구들)
 	private Integer parseInt(String val) {
 		if (val == null || val.trim().isEmpty())
 			return null;
