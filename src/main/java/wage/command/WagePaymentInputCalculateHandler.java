@@ -2,7 +2,9 @@ package wage.command;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,6 +56,8 @@ public class WagePaymentInputCalculateHandler
 			employeeRows);
 
 		String employeeIdParam = trim(req.getParameter("employeeId"));
+
+		List<Integer> pendingEmployeeIds = parsePendingEmployeeIds(req);
 
 		String wageMonth = trim(req.getParameter("wageMonth"));
 
@@ -127,10 +131,6 @@ public class WagePaymentInputCalculateHandler
 					"올바른 사원을 선택해야 합니다.");
 			}
 
-			req.setAttribute(
-				"selectedEmployeeName",
-				selectedEmployee.getKoreanName());
-
 			List<WagePaymentEmployeeRow> savedEmployees = wagePaymentInputService.getSavedEmployees(
 				wageMonth,
 				wagePeriod);
@@ -138,6 +138,51 @@ public class WagePaymentInputCalculateHandler
 			req.setAttribute(
 				"savedEmployees",
 				savedEmployees);
+
+			List<EmployeeSelectRow> pendingEmployees = buildPendingEmployees(
+				employeeRows,
+				savedEmployees,
+				pendingEmployeeIds);
+
+			req.setAttribute(
+				"pendingEmployees",
+				pendingEmployees);
+
+			List<EmployeeSelectRow> availableEmployees = buildAvailableEmployees(
+				employeeRows,
+				savedEmployees,
+				pendingEmployees);
+
+			req.setAttribute(
+				"availableEmployees",
+				availableEmployees);
+
+			boolean selectedEmployeeSaved = containsSavedEmployee(
+				savedEmployees,
+				employeeId);
+
+			boolean selectedEmployeePending = containsEmployee(
+				pendingEmployees,
+				employeeId);
+
+			if (!selectedEmployeeSaved
+				&& !selectedEmployeePending) {
+
+				throw new IllegalArgumentException(
+					"현재 급여차수에 등록되지 않은 사원입니다.");
+			}
+
+			req.setAttribute(
+				"selectedEmployeeSaved",
+				selectedEmployeeSaved);
+
+			req.setAttribute(
+				"selectedEmployeePending",
+				selectedEmployeePending);
+
+			req.setAttribute(
+				"selectedEmployeeName",
+				selectedEmployee.getKoreanName());
 
 			/*
 			 * 기존 급여차수인지 다시 DB에서 확인한다.
@@ -319,6 +364,137 @@ public class WagePaymentInputCalculateHandler
 		}
 
 		return null;
+	}
+
+	private List<Integer> parsePendingEmployeeIds(
+		HttpServletRequest req) {
+
+		String[] values = req.getParameterValues(
+			"pendingEmployeeId");
+
+		Set<Integer> result = new LinkedHashSet<>();
+
+		if (values == null) {
+			return new ArrayList<>();
+		}
+
+		for (String value : values) {
+
+			value = trim(value);
+
+			if (value == null) {
+				continue;
+			}
+
+			try {
+
+				Integer employeeId = Integer.valueOf(value);
+
+				if (employeeId <= 0) {
+					throw new NumberFormatException();
+				}
+
+				result.add(employeeId);
+
+			} catch (NumberFormatException e) {
+
+				throw new IllegalArgumentException(
+					"pending 사원 정보가 올바르지 않습니다.");
+			}
+		}
+
+		return new ArrayList<>(result);
+	}
+
+	private List<EmployeeSelectRow> buildPendingEmployees(
+		List<EmployeeSelectRow> employeeRows,
+		List<WagePaymentEmployeeRow> savedEmployees,
+		List<Integer> pendingEmployeeIds) {
+
+		List<EmployeeSelectRow> result = new ArrayList<>();
+
+		for (Integer employeeId : pendingEmployeeIds) {
+
+			if (containsSavedEmployee(
+				savedEmployees,
+				employeeId)) {
+
+				continue;
+			}
+
+			EmployeeSelectRow employee = findEmployee(
+				employeeRows,
+				employeeId);
+
+			if (employee != null
+				&& !containsEmployee(
+					result,
+					employeeId)) {
+
+				result.add(employee);
+			}
+		}
+
+		return result;
+	}
+
+	private List<EmployeeSelectRow> buildAvailableEmployees(
+		List<EmployeeSelectRow> employeeRows,
+		List<WagePaymentEmployeeRow> savedEmployees,
+		List<EmployeeSelectRow> pendingEmployees) {
+
+		List<EmployeeSelectRow> result = new ArrayList<>();
+
+		for (EmployeeSelectRow employee : employeeRows) {
+
+			Integer employeeId = employee.getEmployeeId();
+
+			if (containsSavedEmployee(
+				savedEmployees,
+				employeeId)
+				|| containsEmployee(
+					pendingEmployees,
+					employeeId)) {
+
+				continue;
+			}
+
+			result.add(employee);
+		}
+
+		return result;
+	}
+
+	private boolean containsSavedEmployee(
+		List<WagePaymentEmployeeRow> employees,
+		Integer employeeId) {
+
+		for (WagePaymentEmployeeRow employee : employees) {
+
+			if (employeeId.equals(
+				employee.getEmployeeId())) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean containsEmployee(
+		List<EmployeeSelectRow> employees,
+		Integer employeeId) {
+
+		for (EmployeeSelectRow employee : employees) {
+
+			if (employeeId.equals(
+				employee.getEmployeeId())) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private Date parseRequiredDate(

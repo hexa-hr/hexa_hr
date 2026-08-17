@@ -135,9 +135,44 @@ th {
 
 	</form>
 
-	<c:if test="${not empty savedEmployees}">
+	<form method="get"
+		action="${pageContext.request.contextPath}/wage/paymentInput.do"
+		style="margin-bottom: 20px;">
 
-		<h2>저장된 사원 목록</h2>
+		<input type="hidden" name="wageMonth"
+			value="<c:out value='${wageMonth}' />"> <input type="hidden"
+			name="wagePeriod" value="<c:out value='${wagePeriod}' />">
+
+		<c:forEach var="pending" items="${pendingEmployees}">
+
+			<input type="hidden" name="pendingEmployeeId"
+				value="<c:out value='${pending.employeeId}' />">
+
+		</c:forEach>
+
+		<label for="addEmployeeId"> 신규추가 </label> <select id="addEmployeeId"
+			name="addEmployeeId" required>
+
+			<option value="">사원 선택</option>
+
+			<c:forEach var="employee" items="${availableEmployees}">
+
+				<option value="${employee.employeeId}">
+					<c:out value="${employee.koreanName}" /> -
+					<c:out value="${employee.employmentType}" />
+				</option>
+
+			</c:forEach>
+
+		</select>
+
+		<button type="submit">추가</button>
+
+	</form>
+
+	<c:if test="${not empty savedEmployees or not empty pendingEmployees}">
+
+		<h2>사원 목록</h2>
 
 		<div style="margin-bottom: 10px;">
 			총
@@ -180,6 +215,12 @@ th {
 
 								<c:param name="employeeId" value="${employee.employeeId}" />
 
+								<c:forEach var="pending" items="${pendingEmployees}">
+
+									<c:param name="pendingEmployeeId" value="${pending.employeeId}" />
+
+								</c:forEach>
+
 							</c:url> <a href="${employeeSelectUrl}"> <c:out
 									value="${employee.koreanName}" />
 						</a></td>
@@ -206,6 +247,52 @@ th {
 
 				</c:forEach>
 
+				<c:forEach var="employee" items="${pendingEmployees}">
+
+					<tr>
+
+						<td class="center"><c:out value="${employee.employeeId}" />
+						</td>
+
+						<td class="center"><c:out value="${employee.employmentType}" />
+						</td>
+
+						<td><c:url var="pendingEmployeeSelectUrl"
+								value="/wage/paymentInput.do">
+
+								<c:param name="wageMonth" value="${wageMonth}" />
+
+								<c:param name="wagePeriod" value="${wagePeriod}" />
+
+								<c:param name="employeeId" value="${employee.employeeId}" />
+
+								<c:forEach var="pending" items="${pendingEmployees}">
+
+									<c:param name="pendingEmployeeId" value="${pending.employeeId}" />
+
+								</c:forEach>
+
+							</c:url> <a href="${pendingEmployeeSelectUrl}"> <c:out
+									value="${employee.koreanName}" />
+						</a> (미저장)</td>
+
+						<td><c:choose>
+								<c:when test="${empty employee.departmentName}">
+									-
+								</c:when>
+								<c:otherwise>
+									<c:out value="${employee.departmentName}" />
+								</c:otherwise>
+							</c:choose></td>
+
+						<td class="amount">0</td>
+						<td class="amount">0</td>
+						<td class="amount">0</td>
+
+					</tr>
+
+				</c:forEach>
+
 			</tbody>
 
 		</table>
@@ -223,12 +310,12 @@ th {
 
 			<c:choose>
 
-				<c:when test="${existingPeriod}">
+				<c:when test="${selectedEmployeeSaved}">
 					기존 저장 급여
 				</c:when>
 
 				<c:otherwise>
-					신규 급여
+					미저장 신규 급여
 				</c:otherwise>
 
 			</c:choose>
@@ -250,6 +337,11 @@ th {
 				value="<c:out value='${settlementEndDate}' />"> <input
 				type="hidden" name="wagePaymentDate"
 				value="<c:out value='${wagePaymentDate}' />">
+
+			<c:forEach var="pending" items="${pendingEmployees}">
+				<input type="hidden" name="pendingEmployeeId"
+					value="<c:out value='${pending.employeeId}' />">
+			</c:forEach>
 
 
 			<table>
@@ -348,6 +440,58 @@ th {
 		</form>
 
 	</c:if>
+
+	<script>
+	(function() {
+
+		const hasPending =
+			${not empty pendingEmployees};
+
+		const autoCalculated =
+			${autoCalculated == true};
+
+		if (!hasPending
+			&& !autoCalculated) {
+
+			return;
+		}
+
+		const url =
+			new URL(
+				"${pageContext.request.contextPath}/wage/paymentInput.do",
+				window.location.origin);
+
+		url.searchParams.set(
+			"wageMonth",
+			"<c:out value='${wageMonth}' />");
+
+		url.searchParams.set(
+			"wagePeriod",
+			"<c:out value='${wagePeriod}' />");
+
+		const selectedEmployeeSaved =
+			${selectedEmployeeSaved == true};
+
+		if (selectedEmployeeSaved) {
+
+			url.searchParams.set(
+				"employeeId",
+				"<c:out value='${selectedEmployeeId}' />");
+		}
+
+		/*
+		 * pendingEmployeeId는 주소에 남기지 않는다.
+		 *
+		 * 따라서 현재 화면에서는 pending 목록이 유지되지만
+		 * F5 / 재진입 시에는 DB 저장 사원만 다시 조회된다.
+		 */
+		window.history.replaceState(
+			null,
+			"",
+			url.pathname + url.search);
+
+	})();
+	</script>
 
 </body>
 </html>
