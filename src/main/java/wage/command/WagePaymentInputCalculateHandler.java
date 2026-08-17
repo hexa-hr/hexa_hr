@@ -12,6 +12,7 @@ import employee.service.EmployeeSelectService;
 import mvc.command.CommandHandler;
 import wage.model.WageLedgerSummary;
 import wage.model.WagePaymentAutoCalculationResult;
+import wage.model.WagePaymentEmployeeRow;
 import wage.model.WagePaymentItemInput;
 import wage.service.WagePaymentAutoCalculationService;
 import wage.service.WagePaymentInputService;
@@ -129,6 +130,14 @@ public class WagePaymentInputCalculateHandler
 			req.setAttribute(
 				"selectedEmployeeName",
 				selectedEmployee.getKoreanName());
+
+			List<WagePaymentEmployeeRow> savedEmployees = wagePaymentInputService.getSavedEmployees(
+				wageMonth,
+				wagePeriod);
+
+			req.setAttribute(
+				"savedEmployees",
+				savedEmployees);
 
 			/*
 			 * 기존 급여차수인지 다시 DB에서 확인한다.

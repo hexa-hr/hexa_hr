@@ -1,6 +1,7 @@
 package wage.command;
 
 import java.sql.Date;
+import java.time.YearMonth;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +39,11 @@ public class WagePaymentInputHandler implements CommandHandler {
 			return null;
 		}
 
-		// 사원 선택 목록
+		/*
+		 * 신규추가 기능에서 사용할 사원 선택 목록.
+		 * 현재 단계에서는 JSP에서 직접 사용하지 않지만
+		 * 다음 단계 연결을 위해 유지한다.
+		 */
 		List<EmployeeSelectRow> employeeRows = employeeSelectService.getEmployeeRows(
 			null,
 			null,
@@ -54,19 +59,20 @@ public class WagePaymentInputHandler implements CommandHandler {
 
 		String wagePeriod = trim(req.getParameter("wagePeriod"));
 
-		String settlementStartDateParam = trim(req.getParameter(
-			"settlementStartDate"));
+		/*
+		 * 최초 진입
+		 * → 현재 귀속연월 / 1차를 기본 작업공간으로 사용
+		 */
+		if (wageMonth == null) {
 
-		String settlementEndDateParam = trim(req.getParameter(
-			"settlementEndDate"));
+			wageMonth = YearMonth.now().toString();
+		}
 
-		String wagePaymentDate = trim(req.getParameter(
-			"wagePaymentDate"));
+		if (wagePeriod == null) {
 
-		boolean searchRequested = "true".equals(
-			req.getParameter("search"));
+			wagePeriod = "1";
+		}
 
-		// 입력값을 화면에 다시 유지
 		req.setAttribute(
 			"selectedEmployeeId",
 			employeeIdParam);
@@ -79,62 +85,12 @@ public class WagePaymentInputHandler implements CommandHandler {
 			"wagePeriod",
 			wagePeriod);
 
-		req.setAttribute(
-			"settlementStartDate",
-			settlementStartDateParam);
-
-		req.setAttribute(
-			"settlementEndDate",
-			settlementEndDateParam);
-
-		req.setAttribute(
-			"wagePaymentDate",
-			wagePaymentDate);
-
-		/*
-		 * 최초 진입
-		 * 아직 사원을 선택하지 않았다면
-		 * 사원목록만 전달하고 화면 표시
-		 */
-		if (!searchRequested
-			&& employeeIdParam == null) {
-
-			return FORM_VIEW;
-		}
-
-		if (employeeIdParam == null
-			|| wageMonth == null
-			|| wagePeriod == null) {
-
-			req.setAttribute(
-				"errorMessage",
-				"사원, 귀속연월, 급여차수를 "
-					+ "모두 입력해야 합니다.");
-
-			return FORM_VIEW;
-		}
-
 		try {
 
-			Integer employeeId = Integer.valueOf(
-				employeeIdParam);
-
-			// 실제 존재하는 사원인지 확인
-			EmployeeSelectRow selectedEmployee = findEmployee(
-				employeeRows,
-				employeeId);
-
-			if (selectedEmployee == null) {
-
-				throw new IllegalArgumentException(
-					"올바른 사원을 선택해야 합니다.");
-			}
-
-			req.setAttribute(
-				"selectedEmployeeName",
-				selectedEmployee
-					.getKoreanName());
-
+			/*
+			 * 현재 귀속연월 + 급여차수에
+			 * 실제 저장된 사원 목록
+			 */
 			List<WagePaymentEmployeeRow> savedEmployees = wagePaymentInputService.getSavedEmployees(
 				wageMonth,
 				wagePeriod);
@@ -144,13 +100,12 @@ public class WagePaymentInputHandler implements CommandHandler {
 				savedEmployees);
 
 			/*
-			 * 같은 귀속연월·급여차수의
-			 * 저장된 급여차수 정보 조회
+			 * 현재 귀속연월 + 급여차수의
+			 * 저장된 기본정보 확인
 			 */
-			WageLedgerSummary periodSummary = wagePaymentInputService
-				.getPeriodSummary(
-					wageMonth,
-					wagePeriod);
+			WageLedgerSummary periodSummary = wagePaymentInputService.getPeriodSummary(
+				wageMonth,
+				wagePeriod);
 
 			Date settlementStartDate;
 			Date settlementEndDate;
@@ -159,9 +114,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 
 				/*
 				 * 기존 급여차수
-				 *
-				 * 사용자가 전달한 날짜가 아니라
-				 * DB에 저장된 정산기간을 사용한다.
+				 * → wage에 저장된 날짜 사용
 				 */
 				settlementStartDate = toSqlDate(
 					periodSummary
@@ -198,9 +151,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 
 				/*
 				 * 신규 급여차수
-				 *
-				 * 회사의 급여지급정보 설정을 기준으로
-				 * 정산기간과 급여지급일 기본값을 생성한다.
+				 * → 회사 급여지급정보의 기본 날짜 사용
 				 */
 				WagePaymentPeriodDefault defaultPeriod = wagePaymentInputService.getDefaultPeriod(
 					wageMonth);
@@ -231,23 +182,52 @@ public class WagePaymentInputHandler implements CommandHandler {
 					false);
 			}
 
-			List<WagePaymentInputViewItem> wageItems = wagePaymentInputService
-				.getViewItems(
+			/*
+			 * 사원이 선택된 경우에만
+			 * 오른쪽 급여입력 항목을 조회한다.
+			 *
+			 * employeeId는 작업공간의 필수키가 아니다.
+			 */
+			if (employeeIdParam != null) {
+
+				Integer employeeId;
+
+				try {
+
+					employeeId = Integer.valueOf(
+						employeeIdParam);
+
+				} catch (NumberFormatException e) {
+
+					throw new IllegalArgumentException(
+						"올바른 사원을 선택해야 합니다.");
+				}
+
+				EmployeeSelectRow selectedEmployee = findEmployee(
+					employeeRows,
+					employeeId);
+
+				if (selectedEmployee == null) {
+
+					throw new IllegalArgumentException(
+						"올바른 사원을 선택해야 합니다.");
+				}
+
+				req.setAttribute(
+					"selectedEmployeeName",
+					selectedEmployee.getKoreanName());
+
+				List<WagePaymentInputViewItem> wageItems = wagePaymentInputService.getViewItems(
 					employeeId,
 					wageMonth,
 					wagePeriod,
 					settlementStartDate,
 					settlementEndDate);
 
-			req.setAttribute(
-				"wageItems",
-				wageItems);
-
-		} catch (NumberFormatException e) {
-
-			req.setAttribute(
-				"errorMessage",
-				"올바른 사원을 선택해야 합니다.");
+				req.setAttribute(
+					"wageItems",
+					wageItems);
+			}
 
 		} catch (IllegalArgumentException e) {
 

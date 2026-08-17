@@ -83,31 +83,26 @@ th {
 
 		<div class="form-row">
 
-			<label for="employeeId">사원</label> <select id="employeeId"
-				name="employeeId" required>
+			<label for="wageMonth">귀속연월</label> <input type="month"
+				id="wageMonth" name="wageMonth"
+				value="<c:out value='${wageMonth}' />" required> <label
+				for="wagePeriod"> 급여차수 </label> <select id="wagePeriod"
+				name="wagePeriod" required>
 
-				<option value="">선택</option>
+				<c:forEach var="period" begin="1" end="10">
 
-				<c:forEach var="employee" items="${employeeRows}">
-
-					<option value="<c:out value='${employee.employeeId}' />"
-						<c:if test="${selectedEmployeeId eq employee.employeeId.toString()}">
+					<option value="${period}"
+						<c:if test="${wagePeriod eq period.toString()}">
 							selected
 						</c:if>>
 
-						<c:out value="${employee.koreanName}" /> -
-						<c:out value="${employee.employmentType}" />
+						<c:out value="${period}" />차
 
 					</option>
 
 				</c:forEach>
 
-			</select> <label for="wageMonth">귀속연월</label> <input type="month"
-				id="wageMonth" name="wageMonth"
-				value="<c:out value='${wageMonth}' />" required> <label
-				for="wagePeriod">급여차수</label> <input type="number" id="wagePeriod"
-				name="wagePeriod" min="1" value="<c:out value='${wagePeriod}' />"
-				required>
+			</select>
 
 		</div>
 
@@ -116,13 +111,13 @@ th {
 
 			<label for="settlementStartDate"> 정산 시작일 </label> <input type="date"
 				id="settlementStartDate" name="settlementStartDate"
-				value="<c:out value='${settlementStartDate}' />"> <label
+				value="<c:out value='${settlementStartDate}' />" readonly> <label
 				for="settlementEndDate"> 정산 종료일 </label> <input type="date"
 				id="settlementEndDate" name="settlementEndDate"
-				value="<c:out value='${settlementEndDate}' />"> <label
+				value="<c:out value='${settlementEndDate}' />" readonly> <label
 				for="wagePaymentDate"> 급여 지급일 </label> <input type="date"
 				id="wagePaymentDate" name="wagePaymentDate"
-				value="<c:out value='${wagePaymentDate}' />">
+				value="<c:out value='${wagePaymentDate}' />" readonly>
 
 		</div>
 
@@ -176,7 +171,18 @@ th {
 						<td class="center"><c:out value="${employee.employmentType}" />
 						</td>
 
-						<td><c:out value="${employee.koreanName}" /></td>
+						<td><c:url var="employeeSelectUrl"
+								value="/wage/paymentInput.do">
+
+								<c:param name="wageMonth" value="${wageMonth}" />
+
+								<c:param name="wagePeriod" value="${wagePeriod}" />
+
+								<c:param name="employeeId" value="${employee.employeeId}" />
+
+							</c:url> <a href="${employeeSelectUrl}"> <c:out
+									value="${employee.koreanName}" />
+						</a></td>
 
 						<td><c:choose>
 								<c:when test="${empty employee.departmentName}">
