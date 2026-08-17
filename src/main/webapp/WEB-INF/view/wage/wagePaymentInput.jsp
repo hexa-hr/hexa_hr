@@ -88,7 +88,7 @@ th {
 
 	</c:if>
 
-	<form class="search-form" method="get"
+	<form id="workspaceSearchForm" class="search-form" method="get"
 		action="${pageContext.request.contextPath}/wage/paymentInput.do">
 
 		<input type="hidden" name="incomeType"
@@ -96,10 +96,22 @@ th {
 
 		<div class="form-row">
 
-			<label for="wageMonth">귀속연월</label> <input type="month"
-				id="wageMonth" name="wageMonth"
-				value="<c:out value='${wageMonth}' />" required> <label
-				for="wagePeriod"> 급여차수 </label> <select id="wagePeriod"
+			<input type="hidden" id="wageMonth" name="wageMonth"
+				value="<c:out value='${wageMonth}' />"> <label
+				for="wageYear">귀속연월</label> <select id="wageYear" required>
+			</select> <select id="wageMonthPart" required>
+
+				<c:forEach var="month" begin="1" end="12">
+
+					<fmt:formatNumber var="monthValue" value="${month}" pattern="00" />
+
+					<option value="${monthValue}">
+						<c:out value="${monthValue}" />월
+					</option>
+
+				</c:forEach>
+
+			</select> <label for="wagePeriod">급여차수</label> <select id="wagePeriod"
 				name="wagePeriod" required>
 
 				<c:forEach var="period" begin="1" end="10">
@@ -133,9 +145,6 @@ th {
 				value="<c:out value='${wagePaymentDate}' />" readonly>
 
 		</div>
-
-
-		<button type="submit" name="search" value="true">조회</button>
 
 
 		<c:if test="${not empty errorMessage}">
@@ -501,6 +510,135 @@ th {
 	<script>
 	(function() {
 
+		const searchForm =
+			document.getElementById("workspaceSearchForm");
+
+		if (!searchForm) {
+			return;
+		}
+
+		const wageMonthInput =
+			document.getElementById("wageMonth");
+
+		const wageYearSelect =
+			document.getElementById("wageYear");
+
+		const wageMonthSelect =
+			document.getElementById("wageMonthPart");
+
+		const wagePeriodSelect =
+			document.getElementById("wagePeriod");
+
+		const incomeTypeInput =
+			searchForm.elements["incomeType"];
+
+		const wageMonthMatch =
+			/^(\d{4})-(0[1-9]|1[0-2])$/.exec(
+				wageMonthInput.value);
+
+		const today = new Date();
+
+		const selectedYear = wageMonthMatch
+			? Number(wageMonthMatch[1])
+			: today.getFullYear();
+
+		const currentMonthNumber =
+			today.getMonth() + 1;
+
+		const currentMonth =
+			currentMonthNumber < 10
+				? "0" + currentMonthNumber
+				: String(currentMonthNumber);
+
+		const selectedMonth = wageMonthMatch
+			? wageMonthMatch[2]
+			: currentMonth;
+
+		const firstYear = 2005;
+		const lastYear = today.getFullYear() + 1;
+
+		for (let year = firstYear;
+			year <= lastYear;
+			year++) {
+
+			const option =
+				document.createElement("option");
+
+			option.value = String(year);
+			option.textContent = year + "년";
+
+			wageYearSelect.appendChild(option);
+		}
+
+		wageYearSelect.value =
+			String(selectedYear);
+
+		wageMonthSelect.value =
+			selectedMonth;
+
+		function buildWageMonth() {
+
+			return wageYearSelect.value
+				+ "-"
+				+ wageMonthSelect.value;
+		}
+
+		function moveWorkspace() {
+
+			const nextWageMonth =
+				buildWageMonth();
+
+			wageMonthInput.value =
+				nextWageMonth;
+
+			const url = new URL(
+				searchForm.action,
+				window.location.origin);
+
+			url.search = "";
+
+			url.searchParams.set(
+				"wageMonth",
+				nextWageMonth);
+
+			url.searchParams.set(
+				"wagePeriod",
+				wagePeriodSelect.value);
+
+			url.searchParams.set(
+				"incomeType",
+				incomeTypeInput.value);
+
+			window.location.assign(
+				url.pathname + url.search);
+		}
+
+		wageYearSelect.addEventListener(
+			"change",
+			moveWorkspace);
+
+		wageMonthSelect.addEventListener(
+			"change",
+			moveWorkspace);
+
+		wagePeriodSelect.addEventListener(
+			"change",
+			moveWorkspace);
+
+		searchForm.addEventListener(
+			"submit",
+			function(event) {
+
+				event.preventDefault();
+				moveWorkspace();
+			});
+
+	})();
+	</script>
+
+	<script>
+	(function() {
+
 		const hasPending =
 			${not empty allPendingEmployees};
 
@@ -525,7 +663,7 @@ th {
 		url.searchParams.set(
 			"wagePeriod",
 			"<c:out value='${wagePeriod}' />");
-
+			
 		url.searchParams.set(
 			"incomeType",
 			"<c:out value='${incomeType}' />");
