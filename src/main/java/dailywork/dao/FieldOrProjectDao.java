@@ -28,7 +28,8 @@ public class FieldOrProjectDao {
 
 	// 2. 프로젝트 추가
 	public int insertProject(Connection conn, String projectName) throws SQLException {
-		String sql = "INSERT INTO FIELD_OR_PROJECT (field_or_project_id, name) VALUES ((SELECT NVL(MAX(field_or_project_id), 0) + 1 FROM FIELD_OR_PROJECT), ?)";
+		String sql = "INSERT INTO FIELD_OR_PROJECT (field_or_project_id, name) VALUES (field_or_project_seq.NEXTVAL, ?)";
+
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setString(1, projectName);
 			return pstmt.executeUpdate();
