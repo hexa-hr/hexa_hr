@@ -57,47 +57,55 @@ public class WagePaymentInputCalculateHandler
 
 		String employeeIdParam = trim(req.getParameter("employeeId"));
 
-		List<Integer> pendingEmployeeIds = parsePendingEmployeeIds(req);
-
-		String wageMonth = trim(req.getParameter("wageMonth"));
-
-		String wagePeriod = trim(req.getParameter("wagePeriod"));
-
-		String settlementStartDateParam = trim(req.getParameter(
-			"settlementStartDate"));
-
-		String settlementEndDateParam = trim(req.getParameter(
-			"settlementEndDate"));
-
-		String wagePaymentDate = trim(req.getParameter(
-			"wagePaymentDate"));
-
-		// 화면의 검색조건 유지
-		req.setAttribute(
-			"selectedEmployeeId",
-			employeeIdParam);
-
-		req.setAttribute(
-			"wageMonth",
-			wageMonth);
-
-		req.setAttribute(
-			"wagePeriod",
-			wagePeriod);
-
-		req.setAttribute(
-			"settlementStartDate",
-			settlementStartDateParam);
-
-		req.setAttribute(
-			"settlementEndDate",
-			settlementEndDateParam);
-
-		req.setAttribute(
-			"wagePaymentDate",
-			wagePaymentDate);
-
 		try {
+
+			List<Integer> pendingEmployeeIds = parsePendingEmployeeIds(req);
+
+			String wageMonth = trim(req.getParameter("wageMonth"));
+
+			String wagePeriod = trim(req.getParameter("wagePeriod"));
+
+			String incomeType = normalizeIncomeType(
+				req.getParameter(
+					"incomeType"));
+
+			String settlementStartDateParam = trim(req.getParameter(
+				"settlementStartDate"));
+
+			String settlementEndDateParam = trim(req.getParameter(
+				"settlementEndDate"));
+
+			String wagePaymentDate = trim(req.getParameter(
+				"wagePaymentDate"));
+
+			// 화면의 검색조건 유지
+			req.setAttribute(
+				"selectedEmployeeId",
+				employeeIdParam);
+
+			req.setAttribute(
+				"wageMonth",
+				wageMonth);
+
+			req.setAttribute(
+				"wagePeriod",
+				wagePeriod);
+
+			req.setAttribute(
+				"incomeType",
+				incomeType);
+
+			req.setAttribute(
+				"settlementStartDate",
+				settlementStartDateParam);
+
+			req.setAttribute(
+				"settlementEndDate",
+				settlementEndDateParam);
+
+			req.setAttribute(
+				"wagePaymentDate",
+				wagePaymentDate);
 
 			if (employeeIdParam == null
 				|| wageMonth == null
@@ -131,27 +139,63 @@ public class WagePaymentInputCalculateHandler
 					"올바른 사원을 선택해야 합니다.");
 			}
 
-			List<WagePaymentEmployeeRow> savedEmployees = wagePaymentInputService.getSavedEmployees(
-				wageMonth,
-				wagePeriod);
+			/*
+			 * 현재 귀속연월/급여차수의 전체 저장 사원.
+			 *
+			 * 현재 탭 표시 목록과 별도로 유지한다.
+			 */
+			List<WagePaymentEmployeeRow> allSavedEmployees = wagePaymentInputService
+				.getSavedEmployees(
+					wageMonth,
+					wagePeriod);
+
+			/*
+			 * 요청 전체에서 유지할 pending 사원.
+			 *
+			 * 전체 저장 사원과 일용직은 제외한다.
+			 */
+			List<EmployeeSelectRow> allPendingEmployees = buildAllPendingEmployees(
+				employeeRows,
+				allSavedEmployees,
+				pendingEmployeeIds);
+
+			req.setAttribute(
+				"allPendingEmployees",
+				allPendingEmployees);
+
+			/*
+			 * 현재 소득구분에 표시할 저장 사원
+			 */
+			List<WagePaymentEmployeeRow> savedEmployees = filterSavedEmployeesByIncomeType(
+				allSavedEmployees,
+				incomeType);
 
 			req.setAttribute(
 				"savedEmployees",
 				savedEmployees);
 
-			List<EmployeeSelectRow> pendingEmployees = buildPendingEmployees(
-				employeeRows,
-				savedEmployees,
-				pendingEmployeeIds);
+			/*
+			 * 현재 소득구분에 표시할 pending 사원
+			 */
+			List<EmployeeSelectRow> pendingEmployees = filterPendingEmployeesByIncomeType(
+				allPendingEmployees,
+				incomeType);
 
 			req.setAttribute(
 				"pendingEmployees",
 				pendingEmployees);
 
+			/*
+			 * 현재 소득구분의 신규추가 후보.
+			 *
+			 * 제외 판단은 현재 탭 목록이 아니라
+			 * 전체 저장/pending 목록을 기준으로 한다.
+			 */
 			List<EmployeeSelectRow> availableEmployees = buildAvailableEmployees(
 				employeeRows,
-				savedEmployees,
-				pendingEmployees);
+				allSavedEmployees,
+				allPendingEmployees,
+				incomeType);
 
 			req.setAttribute(
 				"availableEmployees",
@@ -406,9 +450,9 @@ public class WagePaymentInputCalculateHandler
 		return new ArrayList<>(result);
 	}
 
-	private List<EmployeeSelectRow> buildPendingEmployees(
+	private List<EmployeeSelectRow> buildAllPendingEmployees(
 		List<EmployeeSelectRow> employeeRows,
-		List<WagePaymentEmployeeRow> savedEmployees,
+		List<WagePaymentEmployeeRow> allSavedEmployees,
 		List<Integer> pendingEmployeeIds) {
 
 		List<EmployeeSelectRow> result = new ArrayList<>();
@@ -416,7 +460,7 @@ public class WagePaymentInputCalculateHandler
 		for (Integer employeeId : pendingEmployeeIds) {
 
 			if (containsSavedEmployee(
-				savedEmployees,
+				allSavedEmployees,
 				employeeId)) {
 
 				continue;
@@ -426,12 +470,66 @@ public class WagePaymentInputCalculateHandler
 				employeeRows,
 				employeeId);
 
-			if (employee != null
-				&& !containsEmployee(
-					result,
-					employeeId)) {
+			if (employee == null) {
+				continue;
+			}
 
-				result.add(employee);
+			/*
+			 * 일용직 급여는 별도 화면에서 처리하므로
+			 * 전체 pending 상태에도 포함하지 않는다.
+			 */
+			if ("일용직".equals(
+				employee.getEmploymentType())) {
+
+				continue;
+			}
+
+			if (!containsEmployee(
+				result,
+				employeeId)) {
+
+				result.add(
+					employee);
+			}
+		}
+
+		return result;
+	}
+
+	private List<WagePaymentEmployeeRow> filterSavedEmployeesByIncomeType(
+		List<WagePaymentEmployeeRow> allSavedEmployees,
+		String incomeType) {
+
+		List<WagePaymentEmployeeRow> result = new ArrayList<>();
+
+		for (WagePaymentEmployeeRow employee : allSavedEmployees) {
+
+			if (isAvailableEmploymentTypeForIncomeType(
+				employee.getEmploymentType(),
+				incomeType)) {
+
+				result.add(
+					employee);
+			}
+		}
+
+		return result;
+	}
+
+	private List<EmployeeSelectRow> filterPendingEmployeesByIncomeType(
+		List<EmployeeSelectRow> allPendingEmployees,
+		String incomeType) {
+
+		List<EmployeeSelectRow> result = new ArrayList<>();
+
+		for (EmployeeSelectRow employee : allPendingEmployees) {
+
+			if (isAvailableEmployeeForIncomeType(
+				employee,
+				incomeType)) {
+
+				result.add(
+					employee);
 			}
 		}
 
@@ -440,26 +538,35 @@ public class WagePaymentInputCalculateHandler
 
 	private List<EmployeeSelectRow> buildAvailableEmployees(
 		List<EmployeeSelectRow> employeeRows,
-		List<WagePaymentEmployeeRow> savedEmployees,
-		List<EmployeeSelectRow> pendingEmployees) {
+		List<WagePaymentEmployeeRow> allSavedEmployees,
+		List<EmployeeSelectRow> allPendingEmployees,
+		String incomeType) {
 
 		List<EmployeeSelectRow> result = new ArrayList<>();
 
 		for (EmployeeSelectRow employee : employeeRows) {
 
+			if (!isAvailableEmployeeForIncomeType(
+				employee,
+				incomeType)) {
+
+				continue;
+			}
+
 			Integer employeeId = employee.getEmployeeId();
 
 			if (containsSavedEmployee(
-				savedEmployees,
+				allSavedEmployees,
 				employeeId)
 				|| containsEmployee(
-					pendingEmployees,
+					allPendingEmployees,
 					employeeId)) {
 
 				continue;
 			}
 
-			result.add(employee);
+			result.add(
+				employee);
 		}
 
 		return result;
@@ -492,6 +599,60 @@ public class WagePaymentInputCalculateHandler
 
 				return true;
 			}
+		}
+
+		return false;
+	}
+
+	private String normalizeIncomeType(
+		String incomeType) {
+
+		incomeType = trim(
+			incomeType);
+
+		if (incomeType == null) {
+			return "worker";
+		}
+
+		if ("worker".equals(
+			incomeType)
+			|| "business".equals(
+				incomeType)) {
+
+			return incomeType;
+		}
+
+		throw new IllegalArgumentException(
+			"올바른 소득구분을 선택해야 합니다.");
+	}
+
+	private boolean isAvailableEmployeeForIncomeType(
+		EmployeeSelectRow employee,
+		String incomeType) {
+
+		return isAvailableEmploymentTypeForIncomeType(
+			employee.getEmploymentType(),
+			incomeType);
+	}
+
+	private boolean isAvailableEmploymentTypeForIncomeType(
+		String employmentType,
+		String incomeType) {
+
+		if ("worker".equals(
+			incomeType)) {
+
+			return !"임시직".equals(
+				employmentType)
+				&& !"일용직".equals(
+					employmentType);
+		}
+
+		if ("business".equals(
+			incomeType)) {
+
+			return "임시직".equals(
+				employmentType);
 		}
 
 		return false;

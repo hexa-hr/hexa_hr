@@ -78,8 +78,21 @@ th {
 
 	<h1>급여입력</h1>
 
+	<c:if test="${not empty successMessage}">
+
+		<div style="margin-bottom: 15px; font-weight: bold;">
+
+			<c:out value="${successMessage}" />
+
+		</div>
+
+	</c:if>
+
 	<form class="search-form" method="get"
 		action="${pageContext.request.contextPath}/wage/paymentInput.do">
+
+		<input type="hidden" name="incomeType"
+			value="<c:out value='${incomeType}' />">
 
 		<div class="form-row">
 
@@ -135,15 +148,49 @@ th {
 
 	</form>
 
+	<div style="margin-bottom: 15px;">
+
+		<c:url var="workerIncomeUrl" value="/wage/paymentInput.do">
+
+			<c:param name="wageMonth" value="${wageMonth}" />
+
+			<c:param name="wagePeriod" value="${wagePeriod}" />
+
+			<c:param name="incomeType" value="worker" />
+
+		</c:url>
+
+		<c:url var="businessIncomeUrl" value="/wage/paymentInput.do">
+
+			<c:param name="wageMonth" value="${wageMonth}" />
+
+			<c:param name="wagePeriod" value="${wagePeriod}" />
+
+			<c:param name="incomeType" value="business" />
+
+		</c:url>
+
+		<a href="${workerIncomeUrl}"
+			style="font-weight:
+				${incomeType eq 'worker' ? 'bold' : 'normal'};">
+			일반소득 </a> &nbsp; | &nbsp; <a href="${businessIncomeUrl}"
+			style="font-weight:
+				${incomeType eq 'business' ? 'bold' : 'normal'};">
+			사업소득/기타소득 </a>
+
+	</div>
+
 	<form method="get"
 		action="${pageContext.request.contextPath}/wage/paymentInput.do"
 		style="margin-bottom: 20px;">
 
 		<input type="hidden" name="wageMonth"
 			value="<c:out value='${wageMonth}' />"> <input type="hidden"
-			name="wagePeriod" value="<c:out value='${wagePeriod}' />">
+			name="wagePeriod" value="<c:out value='${wagePeriod}' />"> <input
+			type="hidden" name="incomeType"
+			value="<c:out value='${incomeType}' />">
 
-		<c:forEach var="pending" items="${pendingEmployees}">
+		<c:forEach var="pending" items="${allPendingEmployees}">
 
 			<input type="hidden" name="pendingEmployeeId"
 				value="<c:out value='${pending.employeeId}' />">
@@ -213,9 +260,11 @@ th {
 
 								<c:param name="wagePeriod" value="${wagePeriod}" />
 
+								<c:param name="incomeType" value="${incomeType}" />
+
 								<c:param name="employeeId" value="${employee.employeeId}" />
 
-								<c:forEach var="pending" items="${pendingEmployees}">
+								<c:forEach var="pending" items="${allPendingEmployees}">
 
 									<c:param name="pendingEmployeeId" value="${pending.employeeId}" />
 
@@ -264,9 +313,11 @@ th {
 
 								<c:param name="wagePeriod" value="${wagePeriod}" />
 
+								<c:param name="incomeType" value="${incomeType}" />
+
 								<c:param name="employeeId" value="${employee.employeeId}" />
 
-								<c:forEach var="pending" items="${pendingEmployees}">
+								<c:forEach var="pending" items="${allPendingEmployees}">
 
 									<c:param name="pendingEmployeeId" value="${pending.employeeId}" />
 
@@ -331,6 +382,8 @@ th {
 				type="hidden" name="wageMonth"
 				value="<c:out value='${wageMonth}' />"> <input type="hidden"
 				name="wagePeriod" value="<c:out value='${wagePeriod}' />"> <input
+				type="hidden" name="incomeType"
+				value="<c:out value='${incomeType}' />"> <input
 				type="hidden" name="settlementStartDate"
 				value="<c:out value='${settlementStartDate}' />"> <input
 				type="hidden" name="settlementEndDate"
@@ -338,7 +391,7 @@ th {
 				type="hidden" name="wagePaymentDate"
 				value="<c:out value='${wagePaymentDate}' />">
 
-			<c:forEach var="pending" items="${pendingEmployees}">
+			<c:forEach var="pending" items="${allPendingEmployees}">
 				<input type="hidden" name="pendingEmployeeId"
 					value="<c:out value='${pending.employeeId}' />">
 			</c:forEach>
@@ -412,6 +465,10 @@ th {
 
 				<button type="submit">자동계산</button>
 
+				<button type="submit"
+					formaction="${pageContext.request.contextPath}/wage/paymentInputSave.do">
+					저장</button>
+
 			</div>
 
 
@@ -445,7 +502,7 @@ th {
 	(function() {
 
 		const hasPending =
-			${not empty pendingEmployees};
+			${not empty allPendingEmployees};
 
 		const autoCalculated =
 			${autoCalculated == true};
@@ -468,6 +525,10 @@ th {
 		url.searchParams.set(
 			"wagePeriod",
 			"<c:out value='${wagePeriod}' />");
+
+		url.searchParams.set(
+			"incomeType",
+			"<c:out value='${incomeType}' />");
 
 		const selectedEmployeeSaved =
 			${selectedEmployeeSaved == true};

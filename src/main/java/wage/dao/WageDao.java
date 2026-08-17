@@ -1,6 +1,7 @@
 package wage.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -799,6 +800,103 @@ public class WageDao {
 		}
 
 		return null;
+	}
+
+	// 급여입력용 - 사원의 해당 귀속연월/급여차수 급여 삭제
+	public int deleteEmployeeWages(
+		Connection conn,
+		Integer employeeId,
+		String wageMonth,
+		String wagePeriod)
+		throws SQLException {
+
+		String sql = "DELETE FROM wage "
+			+ "WHERE employee_id = ? "
+			+ "  AND wage_month = ? "
+			+ "  AND wage_period = ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(
+				1,
+				employeeId);
+
+			pstmt.setString(
+				2,
+				wageMonth);
+
+			pstmt.setString(
+				3,
+				wagePeriod);
+
+			return pstmt.executeUpdate();
+		}
+	}
+
+	// 급여입력용 - 사원의 급여항목 한 건 저장
+	public void insertEmployeeWage(
+		Connection conn,
+		Integer employeeId,
+		String wageMonth,
+		String wagePeriod,
+		Integer wageTypeId,
+		Long wageValue,
+		Date settlementStartDate,
+		Date settlementEndDate,
+		Date wagePaymentDate)
+		throws SQLException {
+
+		String sql = "INSERT INTO wage ( "
+			+ "    wage_id, "
+			+ "    employee_id, "
+			+ "    wage_period, "
+			+ "    wage_month, "
+			+ "    wage_type_id, "
+			+ "    wage_value, "
+			+ "    settlement_period_start_date, "
+			+ "    settlement_period_end_date, "
+			+ "    wage_payment_date "
+			+ ") VALUES ( "
+			+ "    wage_seq.nextval, "
+			+ "    ?, ?, ?, ?, ?, ?, ?, ? "
+			+ ")";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(
+				1,
+				employeeId);
+
+			pstmt.setString(
+				2,
+				wagePeriod);
+
+			pstmt.setString(
+				3,
+				wageMonth);
+
+			pstmt.setInt(
+				4,
+				wageTypeId);
+
+			pstmt.setLong(
+				5,
+				wageValue);
+
+			pstmt.setDate(
+				6,
+				settlementStartDate);
+
+			pstmt.setDate(
+				7,
+				settlementEndDate);
+
+			pstmt.setDate(
+				8,
+				wagePaymentDate);
+
+			pstmt.executeUpdate();
+		}
 	}
 
 }

@@ -60,51 +60,65 @@ public class WagePaymentInputHandler implements CommandHandler {
 
 		String addEmployeeIdParam = trim(req.getParameter("addEmployeeId"));
 
-		List<Integer> pendingEmployeeIds = parsePendingEmployeeIds(req);
-
 		String wageMonth = trim(req.getParameter("wageMonth"));
 
 		String wagePeriod = trim(req.getParameter("wagePeriod"));
 
-		/*
-		 * 최초 진입
-		 * → 현재 귀속연월 / 1차를 기본 작업공간으로 사용
-		 */
-		if (wageMonth == null) {
-
-			wageMonth = YearMonth.now().toString();
-		}
-
-		if (wagePeriod == null) {
-
-			wagePeriod = "1";
-		}
-
-		req.setAttribute(
-			"selectedEmployeeId",
-			employeeIdParam);
-
-		req.setAttribute(
-			"wageMonth",
-			wageMonth);
-
-		req.setAttribute(
-			"wagePeriod",
-			wagePeriod);
-
 		try {
+
+			List<Integer> pendingEmployeeIds = parsePendingEmployeeIds(
+				req);
+
+			String incomeType = normalizeIncomeType(
+				req.getParameter(
+					"incomeType"));
+
+			req.setAttribute(
+				"incomeType",
+				incomeType);
+
+			if ("true".equals(
+				req.getParameter("saved"))) {
+
+				req.setAttribute(
+					"successMessage",
+					"급여가 저장되었습니다.");
+			}
+
+			/*
+			 * 최초 진입
+			 * → 현재 귀속연월 / 1차를 기본 작업공간으로 사용
+			 */
+			if (wageMonth == null) {
+
+				wageMonth = YearMonth.now().toString();
+			}
+
+			if (wagePeriod == null) {
+
+				wagePeriod = "1";
+			}
+
+			req.setAttribute(
+				"selectedEmployeeId",
+				employeeIdParam);
+
+			req.setAttribute(
+				"wageMonth",
+				wageMonth);
+
+			req.setAttribute(
+				"wagePeriod",
+				wagePeriod);
 
 			/*
 			 * 현재 귀속연월 + 급여차수에
 			 * 실제 저장된 사원 목록
 			 */
-			List<WagePaymentEmployeeRow> savedEmployees = wagePaymentInputService.getSavedEmployees(
-				wageMonth,
-				wagePeriod);
-
-			req.setAttribute(
-				"savedEmployees",
-				savedEmployees);
+			List<WagePaymentEmployeeRow> allSavedEmployees = wagePaymentInputService
+				.getSavedEmployees(
+					wageMonth,
+					wagePeriod);
 
 			/*
 			 * 신규추가로 전달된 사원을
@@ -137,8 +151,16 @@ public class WagePaymentInputHandler implements CommandHandler {
 						"올바른 사원을 선택해야 합니다.");
 				}
 
+				if (!isAvailableEmployeeForIncomeType(
+					addEmployee,
+					incomeType)) {
+
+					throw new IllegalArgumentException(
+						"현재 소득구분에서 추가할 수 없는 사원입니다.");
+				}
+
 				if (!containsSavedEmployee(
-					savedEmployees,
+					allSavedEmployees,
 					addEmployeeId)
 					&& !pendingEmployeeIds.contains(
 						addEmployeeId)) {
@@ -158,19 +180,52 @@ public class WagePaymentInputHandler implements CommandHandler {
 					employeeIdParam);
 			}
 
-			List<EmployeeSelectRow> pendingEmployees = buildPendingEmployees(
+			/*
+			 * 요청 전체에서 유지할 미저장 사원.
+			 *
+			 * 소득구분 탭과 관계없이 유지하되
+			 * 저장 사원과 일용직은 제외한다.
+			 */
+			List<EmployeeSelectRow> allPendingEmployees = buildAllPendingEmployees(
 				employeeRows,
-				savedEmployees,
+				allSavedEmployees,
 				pendingEmployeeIds);
+
+			req.setAttribute(
+				"allPendingEmployees",
+				allPendingEmployees);
+
+			/*
+			 * 현재 소득구분 탭에 표시할 저장 사원
+			 */
+			List<WagePaymentEmployeeRow> savedEmployees = filterSavedEmployeesByIncomeType(
+				allSavedEmployees,
+				incomeType);
+
+			req.setAttribute(
+				"savedEmployees",
+				savedEmployees);
+
+			/*
+			 * 현재 소득구분 탭에 표시할 미저장 사원
+			 */
+			List<EmployeeSelectRow> pendingEmployees = filterPendingEmployeesByIncomeType(
+				allPendingEmployees,
+				incomeType);
 
 			req.setAttribute(
 				"pendingEmployees",
 				pendingEmployees);
 
+			/*
+			 * 신규추가 후보는 현재 탭 사원 중
+			 * 전체 saved / pending 어디에도 없는 사원만 사용한다.
+			 */
 			List<EmployeeSelectRow> availableEmployees = buildAvailableEmployees(
 				employeeRows,
-				savedEmployees,
-				pendingEmployees);
+				allSavedEmployees,
+				allPendingEmployees,
+				incomeType);
 
 			req.setAttribute(
 				"availableEmployees",
@@ -398,9 +453,9 @@ public class WagePaymentInputHandler implements CommandHandler {
 		return new ArrayList<>(result);
 	}
 
-	private List<EmployeeSelectRow> buildPendingEmployees(
+	private List<EmployeeSelectRow> buildAllPendingEmployees(
 		List<EmployeeSelectRow> employeeRows,
-		List<WagePaymentEmployeeRow> savedEmployees,
+		List<WagePaymentEmployeeRow> allSavedEmployees,
 		List<Integer> pendingEmployeeIds) {
 
 		List<EmployeeSelectRow> result = new ArrayList<>();
@@ -408,7 +463,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 		for (Integer employeeId : pendingEmployeeIds) {
 
 			if (containsSavedEmployee(
-				savedEmployees,
+				allSavedEmployees,
 				employeeId)) {
 
 				continue;
@@ -418,12 +473,66 @@ public class WagePaymentInputHandler implements CommandHandler {
 				employeeRows,
 				employeeId);
 
-			if (employee != null
-				&& !containsEmployee(
-					result,
-					employeeId)) {
+			if (employee == null) {
+				continue;
+			}
 
-				result.add(employee);
+			/*
+			 * 일용직 급여는 별도 화면에서 처리하므로
+			 * 전체 pending 상태에도 포함하지 않는다.
+			 */
+			if ("일용직".equals(
+				employee.getEmploymentType())) {
+
+				continue;
+			}
+
+			if (!containsEmployee(
+				result,
+				employeeId)) {
+
+				result.add(
+					employee);
+			}
+		}
+
+		return result;
+	}
+
+	private List<WagePaymentEmployeeRow> filterSavedEmployeesByIncomeType(
+		List<WagePaymentEmployeeRow> allSavedEmployees,
+		String incomeType) {
+
+		List<WagePaymentEmployeeRow> result = new ArrayList<>();
+
+		for (WagePaymentEmployeeRow employee : allSavedEmployees) {
+
+			if (isAvailableEmploymentTypeForIncomeType(
+				employee.getEmploymentType(),
+				incomeType)) {
+
+				result.add(
+					employee);
+			}
+		}
+
+		return result;
+	}
+
+	private List<EmployeeSelectRow> filterPendingEmployeesByIncomeType(
+		List<EmployeeSelectRow> allPendingEmployees,
+		String incomeType) {
+
+		List<EmployeeSelectRow> result = new ArrayList<>();
+
+		for (EmployeeSelectRow employee : allPendingEmployees) {
+
+			if (isAvailableEmployeeForIncomeType(
+				employee,
+				incomeType)) {
+
+				result.add(
+					employee);
 			}
 		}
 
@@ -432,26 +541,35 @@ public class WagePaymentInputHandler implements CommandHandler {
 
 	private List<EmployeeSelectRow> buildAvailableEmployees(
 		List<EmployeeSelectRow> employeeRows,
-		List<WagePaymentEmployeeRow> savedEmployees,
-		List<EmployeeSelectRow> pendingEmployees) {
+		List<WagePaymentEmployeeRow> allSavedEmployees,
+		List<EmployeeSelectRow> allPendingEmployees,
+		String incomeType) {
 
 		List<EmployeeSelectRow> result = new ArrayList<>();
 
 		for (EmployeeSelectRow employee : employeeRows) {
 
+			if (!isAvailableEmployeeForIncomeType(
+				employee,
+				incomeType)) {
+
+				continue;
+			}
+
 			Integer employeeId = employee.getEmployeeId();
 
 			if (containsSavedEmployee(
-				savedEmployees,
+				allSavedEmployees,
 				employeeId)
 				|| containsEmployee(
-					pendingEmployees,
+					allPendingEmployees,
 					employeeId)) {
 
 				continue;
 			}
 
-			result.add(employee);
+			result.add(
+				employee);
 		}
 
 		return result;
@@ -484,6 +602,60 @@ public class WagePaymentInputHandler implements CommandHandler {
 
 				return true;
 			}
+		}
+
+		return false;
+	}
+
+	private String normalizeIncomeType(
+		String incomeType) {
+
+		incomeType = trim(
+			incomeType);
+
+		if (incomeType == null) {
+			return "worker";
+		}
+
+		if ("worker".equals(
+			incomeType)
+			|| "business".equals(
+				incomeType)) {
+
+			return incomeType;
+		}
+
+		throw new IllegalArgumentException(
+			"올바른 소득구분을 선택해야 합니다.");
+	}
+
+	private boolean isAvailableEmployeeForIncomeType(
+		EmployeeSelectRow employee,
+		String incomeType) {
+
+		return isAvailableEmploymentTypeForIncomeType(
+			employee.getEmploymentType(),
+			incomeType);
+	}
+
+	private boolean isAvailableEmploymentTypeForIncomeType(
+		String employmentType,
+		String incomeType) {
+
+		if ("worker".equals(
+			incomeType)) {
+
+			return !"임시직".equals(
+				employmentType)
+				&& !"일용직".equals(
+					employmentType);
+		}
+
+		if ("business".equals(
+			incomeType)) {
+
+			return "임시직".equals(
+				employmentType);
 		}
 
 		return false;
