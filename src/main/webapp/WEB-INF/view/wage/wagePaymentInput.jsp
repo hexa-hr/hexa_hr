@@ -140,6 +140,71 @@ th {
 
 	</form>
 
+	<c:if test="${not empty savedEmployees}">
+
+		<h2>저장된 사원 목록</h2>
+
+		<div style="margin-bottom: 10px;">
+			총
+			<c:out value="${savedEmployees.size()}" />
+			명
+		</div>
+
+		<table style="margin-bottom: 25px;">
+
+			<thead>
+				<tr>
+					<th>사원ID</th>
+					<th>구분</th>
+					<th>성명</th>
+					<th>부서</th>
+					<th>지급총액</th>
+					<th>공제총액</th>
+					<th>실지급액</th>
+				</tr>
+			</thead>
+
+			<tbody>
+
+				<c:forEach var="employee" items="${savedEmployees}">
+
+					<tr>
+
+						<td class="center"><c:out value="${employee.employeeId}" />
+						</td>
+
+						<td class="center"><c:out value="${employee.employmentType}" />
+						</td>
+
+						<td><c:out value="${employee.koreanName}" /></td>
+
+						<td><c:choose>
+								<c:when test="${empty employee.departmentName}">
+								-
+							</c:when>
+								<c:otherwise>
+									<c:out value="${employee.departmentName}" />
+								</c:otherwise>
+							</c:choose></td>
+
+						<td class="amount"><fmt:formatNumber
+								value="${employee.totalPayment}" pattern="#,##0" /></td>
+
+						<td class="amount"><fmt:formatNumber
+								value="${employee.totalDeduction}" pattern="#,##0" /></td>
+
+						<td class="amount"><fmt:formatNumber
+								value="${employee.netPayment}" pattern="#,##0" /></td>
+
+					</tr>
+
+				</c:forEach>
+
+			</tbody>
+
+		</table>
+
+	</c:if>
 
 	<c:if test="${not empty wageItems}">
 

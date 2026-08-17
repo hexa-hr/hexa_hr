@@ -16,6 +16,7 @@ import wage.model.WageLedgerSummary;
 import wage.model.WageMonthlyPersonalStatisticsRow;
 import wage.model.WageMonthlyTotalStatisticsRow;
 import wage.model.WagePaymentCalculationItem;
+import wage.model.WagePaymentEmployeeRow;
 
 public class WageDao {
 
@@ -683,6 +684,69 @@ public class WageDao {
 							rs.getString("item_type"),
 							rs.getString("taxable_yn"),
 							rs.getLong("wage_value")));
+				}
+			}
+		}
+
+		return result;
+	}
+
+	// 급여입력용 - 귀속연월/급여차수별 저장 사원 목록 조회
+	public List<WagePaymentEmployeeRow> selectWagePaymentEmployeeRows(
+		Connection conn,
+		String wageMonth,
+		String wagePeriod)
+		throws SQLException {
+
+		String sql = "SELECT e.employee_id, "
+			+ "       e.employment_type, "
+			+ "       e.korean_name, "
+			+ "       d.department_name, "
+			+ "       SUM(CASE WHEN wt.item_type = 'P' "
+			+ "                THEN NVL(w.wage_value, 0) "
+			+ "                ELSE 0 END) AS total_payment, "
+			+ "       SUM(CASE WHEN wt.item_type = 'D' "
+			+ "                THEN NVL(w.wage_value, 0) "
+			+ "                ELSE 0 END) AS total_deduction "
+			+ "FROM wage w "
+			+ "JOIN employee e "
+			+ "  ON e.employee_id = w.employee_id "
+			+ "JOIN wage_type wt "
+			+ "  ON wt.wage_type_id = w.wage_type_id "
+			+ "LEFT JOIN department d "
+			+ "  ON d.department_id = e.department_id "
+			+ "WHERE w.wage_month = ? "
+			+ "  AND w.wage_period = ? "
+			+ "GROUP BY e.employee_id, "
+			+ "         e.employment_type, "
+			+ "         e.korean_name, "
+			+ "         d.department_name "
+			+ "ORDER BY e.employee_id";
+
+		List<WagePaymentEmployeeRow> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, wageMonth);
+			pstmt.setString(2, wagePeriod);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					long totalPayment = rs.getLong("total_payment");
+
+					long totalDeduction = rs.getLong("total_deduction");
+
+					result.add(
+						new WagePaymentEmployeeRow(
+							rs.getInt("employee_id"),
+							rs.getString("employment_type"),
+							rs.getString("korean_name"),
+							rs.getString("department_name"),
+							totalPayment,
+							totalDeduction,
+							totalPayment - totalDeduction));
 				}
 			}
 		}

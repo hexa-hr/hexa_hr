@@ -10,6 +10,7 @@ import employee.model.EmployeeSelectRow;
 import employee.service.EmployeeSelectService;
 import mvc.command.CommandHandler;
 import wage.model.WageLedgerSummary;
+import wage.model.WagePaymentEmployeeRow;
 import wage.model.WagePaymentInputViewItem;
 import wage.model.WagePaymentPeriodDefault;
 import wage.service.WagePaymentInputService;
@@ -133,6 +134,14 @@ public class WagePaymentInputHandler implements CommandHandler {
 				"selectedEmployeeName",
 				selectedEmployee
 					.getKoreanName());
+
+			List<WagePaymentEmployeeRow> savedEmployees = wagePaymentInputService.getSavedEmployees(
+				wageMonth,
+				wagePeriod);
+
+			req.setAttribute(
+				"savedEmployees",
+				savedEmployees);
 
 			/*
 			 * 같은 귀속연월·급여차수의

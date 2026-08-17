@@ -21,6 +21,7 @@ import master.model.WageType;
 import wage.dao.WageDao;
 import wage.model.WageLedgerSummary;
 import wage.model.WagePaymentCalculationItem;
+import wage.model.WagePaymentEmployeeRow;
 import wage.model.WagePaymentInputViewItem;
 import wage.model.WagePaymentPeriodDefault;
 
@@ -264,6 +265,58 @@ public class WagePaymentInputService {
 
 			throw new RuntimeException(
 				"급여차수 기본정보 조회 중 데이터베이스 오류가 발생했습니다.",
+				e);
+		}
+	}
+
+	public List<WagePaymentEmployeeRow> getSavedEmployees(
+		String wageMonth,
+		String wagePeriod) {
+
+		if (wageMonth == null
+			|| wageMonth.trim().isEmpty()) {
+
+			throw new IllegalArgumentException(
+				"귀속연월을 입력해야 합니다.");
+		}
+
+		if (wagePeriod == null
+			|| wagePeriod.trim().isEmpty()) {
+
+			throw new IllegalArgumentException(
+				"급여차수를 입력해야 합니다.");
+		}
+
+		int wagePeriodNumber;
+
+		try {
+
+			wagePeriodNumber = Integer.parseInt(
+				wagePeriod.trim());
+
+			if (wagePeriodNumber < 1
+				|| wagePeriodNumber > 10) {
+
+				throw new NumberFormatException();
+			}
+
+		} catch (NumberFormatException e) {
+
+			throw new IllegalArgumentException(
+				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+		}
+
+		try (Connection conn = ConnectionProvider.getConnection()) {
+
+			return wageDao.selectWagePaymentEmployeeRows(
+				conn,
+				wageMonth.trim(),
+				String.valueOf(wagePeriodNumber));
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException(
+				"급여입력 사원 목록 조회 중 데이터베이스 오류가 발생했습니다.",
 				e);
 		}
 	}
