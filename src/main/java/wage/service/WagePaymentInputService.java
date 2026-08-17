@@ -211,7 +211,7 @@ public class WagePaymentInputService {
 				boolean active = activeWageType != null;
 
 				boolean calculable = active
-					&& isAvailableWageType(
+					&& isCalculableWageType(
 						wageCategory,
 						activeWageType);
 
@@ -416,7 +416,7 @@ public class WagePaymentInputService {
 
 		for (WageType wageType : wageTypes) {
 
-			if (!isAvailableWageType(
+			if (!isDisplayableWageType(
 				wageCategory,
 				wageType)) {
 
@@ -560,14 +560,15 @@ public class WagePaymentInputService {
 		return "WORKER";
 	}
 
-	private boolean isAvailableWageType(
+	private boolean isDisplayableWageType(
 		String wageCategory,
 		WageType wageType) {
 
 		String itemType = wageType.getItemType();
 		String wageTypeName = wageType.getWageTypeName();
 
-		if ("WORKER".equals(wageCategory)) {
+		if ("WORKER".equals(wageCategory)
+			|| "BUSINESS".equals(wageCategory)) {
 
 			if ("P".equals(itemType)
 				&& ("사업소득".equals(wageTypeName)
@@ -576,27 +577,44 @@ public class WagePaymentInputService {
 				return false;
 			}
 
-			return true;
-		}
-
-		if ("BUSINESS".equals(wageCategory)) {
-
-			if ("P".equals(itemType)) {
-				return "사업소득".equals(wageTypeName);
-			}
-
-			if ("D".equals(itemType)) {
-				return "소득세".equals(wageTypeName)
-					|| "지방소득세".equals(wageTypeName);
-			}
-
-			return false;
+			return "P".equals(itemType)
+				|| "D".equals(itemType);
 		}
 
 		/*
 		 * 일용직은 DAILY_WORK 연동 규칙이 확정된 후
 		 * 별도 처리한다.
 		 */
+		return false;
+	}
+
+	private boolean isCalculableWageType(
+		String wageCategory,
+		WageType wageType) {
+
+		String itemType = wageType.getItemType();
+		String wageTypeName = wageType.getWageTypeName();
+
+		if ("WORKER".equals(wageCategory)) {
+			return isDisplayableWageType(
+				wageCategory,
+				wageType);
+		}
+
+		if ("BUSINESS".equals(wageCategory)) {
+
+			if ("P".equals(itemType)) {
+
+				/*
+				 * 신규 화면에서는 사업소득 항목을 표시하지 않지만,
+				 * 기존 저장 스냅샷의 사업소득 항목은 계산 가능 상태로 유지한다.
+				 */
+				return !"일용급여".equals(wageTypeName);
+			}
+
+			return "D".equals(itemType);
+		}
+
 		return false;
 	}
 
