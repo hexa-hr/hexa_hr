@@ -4,8 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
+import dailywork.model.DailyWorkMonthlyVO;
 import dailywork.model.DailyWorkVO;
 
 public class DailyWorkDao {
@@ -91,5 +93,33 @@ public class DailyWorkDao {
 			pstmt.setInt(1, workId);
 			return pstmt.executeUpdate();
 		}
+	}
+
+	// 4. 월별 근무 요약 조회 (월별 조회 캘린더용)
+	public List<DailyWorkMonthlyVO> selectMonthlySummary(Connection conn, String yearMonth) throws SQLException {
+		String sql = "SELECT " + "    'No-' || e.employee_id AS emp_no, " + "    e.korean_name, "
+				+ "    NVL(d.department_name, '미배정') AS dept_name, "
+				+ "    LISTAGG(TO_CHAR(dw.work_date, 'FMDD'), ',') WITHIN GROUP (ORDER BY dw.work_date) AS work_days, "
+				+ "    COUNT(dw.work_id) AS total_work_days, " + "    NVL(SUM(dw.income_tax), 0) AS total_income_tax, "
+				+ "    NVL(SUM(dw.local_tax), 0) AS total_local_tax, "
+				+ "    NVL(SUM(dw.actual_payment), 0) AS total_actual_payment " + "FROM employee e "
+				+ "LEFT JOIN daily_work dw ON e.employee_id = dw.employee_id "
+				+ "                       AND TO_CHAR(dw.work_date, 'YYYY-MM') = ? "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id " + "WHERE e.employment_type = '일용직' "
+				+ "GROUP BY e.employee_id, e.korean_name, d.department_name " + "ORDER BY e.employee_id";
+
+		List<DailyWorkMonthlyVO> list = new ArrayList<>();
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, yearMonth);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					list.add(new DailyWorkMonthlyVO(rs.getString("emp_no"), rs.getString("korean_name"),
+							rs.getString("dept_name"), rs.getString("work_days"), rs.getInt("total_work_days"),
+							rs.getLong("total_income_tax"), rs.getLong("total_local_tax"),
+							rs.getLong("total_actual_payment")));
+				}
+			}
+		}
+		return list;
 	}
 }
