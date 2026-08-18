@@ -73,6 +73,19 @@ th {
 	background-color: #eeeeee;
 }
 
+.employee-select-row {
+	cursor: pointer;
+}
+
+.employee-select-row:hover {
+	background-color: #f5f5f5;
+}
+
+.employee-select-row.selected-employee-row, .employee-select-row.selected-employee-row:hover
+	{
+	background-color: #d9edf7;
+}
+
 .previous-wage-dialog {
 	border: 1px solid #aaa;
 	border-radius: 8px;
@@ -171,6 +184,7 @@ th {
 
 		</div>
 
+
 		<c:if test="${not empty errorMessage}">
 
 			<div class="error-message">
@@ -188,6 +202,31 @@ th {
 				disabled
 			</c:if>>
 			지난급여 불러오기</button>
+
+		<form id="employeeDeleteForm" method="post"
+			action="${pageContext.request.contextPath}/wage/paymentInputDelete.do"
+			style="display: inline; margin-left: 8px;">
+
+			<input type="hidden" name="employeeId"
+				value="<c:out value='${selectedEmployeeId}' />"> <input
+				type="hidden" name="wageMonth"
+				value="<c:out value='${wageMonth}' />"> <input type="hidden"
+				name="wagePeriod" value="<c:out value='${wagePeriod}' />"> <input
+				type="hidden" name="incomeType"
+				value="<c:out value='${incomeType}' />"> <input
+				type="hidden" id="employeeDeleteConfirmed" name="deleteConfirmed"
+				value="false">
+
+			<c:forEach var="pending" items="${allPendingEmployees}">
+
+				<input type="hidden" name="pendingEmployeeId"
+					value="<c:out value='${pending.employeeId}' />">
+
+			</c:forEach>
+
+			<button type="submit" id="employeeDeleteButton">선택삭제</button>
+
+		</form>
 
 	</div>
 
@@ -336,7 +375,10 @@ th {
 
 				<c:forEach var="employee" items="${savedEmployees}">
 
-					<tr>
+					<tr
+						class="employee-select-row ${selectedEmployeeSaved == true
+						and selectedEmployeeId == employee.employeeId
+							? 'selected-employee-row' : ''}">
 
 						<td class="center"><c:out value="${employee.employeeId}" />
 						</td>
@@ -389,7 +431,10 @@ th {
 
 				<c:forEach var="employee" items="${pendingEmployees}">
 
-					<tr>
+					<tr
+						class="employee-select-row ${selectedEmployeePending == true
+						and selectedEmployeeId == employee.employeeId
+							? 'selected-employee-row' : ''}">
 
 						<td class="center"><c:out value="${employee.employeeId}" />
 						</td>
@@ -588,6 +633,102 @@ th {
 		</form>
 
 	</c:if>
+
+	<script>
+	(function() {
+
+		const deleteForm =
+			document.getElementById(
+				"employeeDeleteForm");
+
+		const deleteConfirmedInput =
+			document.getElementById(
+				"employeeDeleteConfirmed");
+
+		const deleteButton =
+			document.getElementById(
+				"employeeDeleteButton");
+
+		const employeeIdInput =
+			deleteForm
+				? deleteForm.elements["employeeId"]
+				: null;
+
+		const employeeRows =
+			document.querySelectorAll(
+				".employee-select-row");
+
+		employeeRows.forEach(
+			function(employeeRow) {
+
+				employeeRow.addEventListener(
+					"click",
+					function(event) {
+
+						/*
+						 * 사원 이름 링크를 클릭한 경우에는
+						 * 기존 링크 이동을 그대로 사용한다.
+						 */
+						if (event.target.closest("a")) {
+							return;
+						}
+
+						const selectLink =
+							employeeRow.querySelector(
+								"a");
+
+						if (selectLink) {
+
+							window.location.assign(
+								selectLink.href);
+						}
+					});
+			});
+
+		if (!deleteForm
+			|| !deleteConfirmedInput
+			|| !deleteButton
+			|| !employeeIdInput) {
+
+			return;
+		}
+
+		deleteForm.addEventListener(
+			"submit",
+			function(event) {
+
+				event.preventDefault();
+
+				deleteConfirmedInput.value =
+					"false";
+
+				if (!employeeIdInput.value.trim()) {
+
+					window.alert(
+						"선택된 사원이 없습니다.");
+
+					return;
+				}
+
+				const confirmed =
+					window.confirm(
+						"선택된 사원을 삭제 하시겠습니까?");
+
+				if (!confirmed) {
+					return;
+				}
+
+				deleteConfirmedInput.value =
+					"true";
+
+				deleteButton.disabled =
+					true;
+
+				deleteForm.submit();
+			});
+
+	})();
+	</script>
 
 	<script>
 	(function() {
