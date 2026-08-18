@@ -1,31 +1,36 @@
 package vacation.command;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import mvc.command.CommandHandler; // 프로젝트의 공통 핸들러 인터페이스 경로에 맞게 조정
-// import vacation.service.VacationService; // 서비스 클래스가 있다면 임포트
+import mvc.command.CommandHandler;
+import vacation.model.VacationType;
+import vacation.service.VacationListService;
 
 public class VacationListHandler implements CommandHandler {
 
-	// private VacationService vacationService = new VacationService();
+	// 서비스 객체 생성 (주석 해제 및 알맞은 서비스 클래스 사용)
+	private VacationListService vacationService = new VacationListService();
 
 	@Override
 	public String process(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		// 1. 검색 파라미터 받기 (휴가항목 선택, 검색어 등)
+		// 1. 검색 파라미터 받기
 		String vacationTypeId = request.getParameter("vacationTypeId");
 		String keyword = request.getParameter("keyword");
 
-		// 2. 서비스 또는 DAO를 통해 데이터 조회 (예시)
-		// List<VacationDto> vacationList = vacationService.getVacationList(vacationTypeId, keyword);
-		// List<VacationTypeDto> vacationTypeList = vacationService.getVacationTypeList();
+		// 2. 셀렉트 박스용 활성화된 휴가 항목 리스트 가져오기
+		List<VacationType> activeVacationList = vacationService.getActiveVacationTypes();
 
-		// 3. request에 결과 데이터 담기
-		// request.setAttribute("vacationList", vacationList);
-		// request.setAttribute("vacationTypeList", vacationTypeList);
+		// 3. (추가) 조건에 맞는 메인 휴가 현황 리스트 가져오기
+		List<VacationType> vacationList = vacationService.getVacationList(vacationTypeId, keyword);
 
-		// 4. 보여줄 JSP 경로 리턴 (ControllerUsingURI가 forward 처리)
+		// 4. request에 바인딩
+		request.setAttribute("activeVacationTypeList", activeVacationList);
+		request.setAttribute("vacationList", vacationList); // 테이블 출력을 위해 꼭 필요함
+
 		return "/WEB-INF/view/vacation/vacationList.jsp";
 	}
 }
