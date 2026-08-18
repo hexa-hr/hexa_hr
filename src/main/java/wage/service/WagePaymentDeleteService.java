@@ -4,6 +4,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.DateTimeException;
 import java.time.YearMonth;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import jdbc.connection.ConnectionProvider;
 import wage.dao.WageDao;
@@ -18,8 +22,20 @@ public class WagePaymentDeleteService {
 		String wageMonth,
 		String wagePeriod) {
 
-		validateEmployeeId(
-			employeeId);
+		deleteEmployees(
+			Collections.singletonList(
+				employeeId),
+			wageMonth,
+			wagePeriod);
+	}
+
+	public void deleteEmployees(
+		List<Integer> employeeIds,
+		String wageMonth,
+		String wagePeriod) {
+
+		Set<Integer> normalizedEmployeeIds = normalizeEmployeeIds(
+			employeeIds);
 
 		String normalizedWageMonth = normalizeWageMonth(
 			wageMonth);
@@ -33,16 +49,19 @@ public class WagePaymentDeleteService {
 
 			try {
 
-				int deletedCount = wageDao.deleteEmployeeWages(
-					conn,
-					employeeId,
-					normalizedWageMonth,
-					normalizedWagePeriod);
+				for (Integer employeeId : normalizedEmployeeIds) {
 
-				if (deletedCount <= 0) {
+					int deletedCount = wageDao.deleteEmployeeWages(
+						conn,
+						employeeId,
+						normalizedWageMonth,
+						normalizedWagePeriod);
 
-					throw new IllegalStateException(
-						"삭제할 급여정보가 없습니다.");
+					if (deletedCount <= 0) {
+
+						throw new IllegalStateException(
+							"삭제할 급여정보가 없습니다.");
+					}
 				}
 
 				conn.commit();
@@ -69,6 +88,30 @@ public class WagePaymentDeleteService {
 				"급여 삭제 중 데이터베이스 오류가 발생했습니다.",
 				e);
 		}
+	}
+
+	private Set<Integer> normalizeEmployeeIds(
+		List<Integer> employeeIds) {
+
+		if (employeeIds == null
+			|| employeeIds.isEmpty()) {
+
+			throw new IllegalArgumentException(
+				"삭제할 사원이 없습니다.");
+		}
+
+		Set<Integer> result = new LinkedHashSet<>();
+
+		for (Integer employeeId : employeeIds) {
+
+			validateEmployeeId(
+				employeeId);
+
+			result.add(
+				employeeId);
+		}
+
+		return result;
 	}
 
 	private void validateEmployeeId(

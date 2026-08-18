@@ -207,7 +207,8 @@ th {
 			action="${pageContext.request.contextPath}/wage/paymentInputDelete.do"
 			style="display: inline; margin-left: 8px;">
 
-			<input type="hidden" name="employeeId"
+			<input type="hidden" name="deleteMode" value="selected"> <input
+				type="hidden" name="employeeId"
 				value="<c:out value='${selectedEmployeeId}' />"> <input
 				type="hidden" name="wageMonth"
 				value="<c:out value='${wageMonth}' />"> <input type="hidden"
@@ -225,6 +226,32 @@ th {
 			</c:forEach>
 
 			<button type="submit" id="employeeDeleteButton">선택삭제</button>
+
+		</form>
+
+		<form id="employeeDeleteAllForm" method="post"
+			action="${pageContext.request.contextPath}/wage/paymentInputDelete.do"
+			style="display: inline; margin-left: 8px;">
+
+			<input type="hidden" name="deleteMode" value="all"> <input
+				type="hidden" name="wageMonth"
+				value="<c:out value='${wageMonth}' />"> <input type="hidden"
+				name="wagePeriod" value="<c:out value='${wagePeriod}' />"> <input
+				type="hidden" name="incomeType"
+				value="<c:out value='${incomeType}' />"> <input
+				type="hidden" id="employeeDeleteAllConfirmed" name="deleteConfirmed"
+				value="false"> <input type="hidden"
+				id="employeeDeleteAllFinalConfirmed" name="deleteFinalConfirmed"
+				value="false">
+
+			<c:forEach var="pending" items="${allPendingEmployees}">
+
+				<input type="hidden" name="pendingEmployeeId"
+					value="<c:out value='${pending.employeeId}' />">
+
+			</c:forEach>
+
+			<button type="submit" id="employeeDeleteAllButton">전체삭제</button>
 
 		</form>
 
@@ -725,6 +752,90 @@ th {
 					true;
 
 				deleteForm.submit();
+			});
+
+	})();
+	</script>
+
+	<script>
+	(function() {
+
+		const deleteAllForm =
+			document.getElementById(
+				"employeeDeleteAllForm");
+
+		const deleteAllConfirmedInput =
+			document.getElementById(
+				"employeeDeleteAllConfirmed");
+
+		const deleteAllFinalConfirmedInput =
+			document.getElementById(
+				"employeeDeleteAllFinalConfirmed");
+
+		const deleteAllButton =
+			document.getElementById(
+				"employeeDeleteAllButton");
+
+		const hasCurrentEmployees =
+			${not empty savedEmployees or not empty pendingEmployees};
+
+		if (!deleteAllForm
+			|| !deleteAllConfirmedInput
+			|| !deleteAllFinalConfirmedInput
+			|| !deleteAllButton) {
+
+			return;
+		}
+
+		deleteAllForm.addEventListener(
+			"submit",
+			function(event) {
+
+				event.preventDefault();
+
+				deleteAllConfirmedInput.value =
+					"false";
+
+				deleteAllFinalConfirmedInput.value =
+					"false";
+
+				if (!hasCurrentEmployees) {
+
+					window.alert(
+						"추가된 사원이 없습니다.");
+
+					return;
+				}
+
+				const confirmed =
+					window.confirm(
+						"■ 주의!!\n"
+						+ "- [전체] 급여입력 정보를 삭제 하시겠습니까?");
+
+				if (!confirmed) {
+					return;
+				}
+
+				const finalConfirmed =
+					window.confirm(
+						"주의!!\n"
+						+ "삭제된 급여입력 정보는 복구할 수 없습니다.\n"
+						+ "삭제 하시겠습니까?");
+
+				if (!finalConfirmed) {
+					return;
+				}
+
+				deleteAllConfirmedInput.value =
+					"true";
+
+				deleteAllFinalConfirmedInput.value =
+					"true";
+
+				deleteAllButton.disabled =
+					true;
+
+				deleteAllForm.submit();
 			});
 
 	})();

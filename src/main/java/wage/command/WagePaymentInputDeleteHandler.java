@@ -57,6 +57,10 @@ public class WagePaymentInputDeleteHandler
 				req.getParameter(
 					"incomeType"));
 
+			String deleteMode = normalizeDeleteMode(
+				req.getParameter(
+					"deleteMode"));
+
 			boolean deleteConfirmed = "true".equals(
 				req.getParameter(
 					"deleteConfirmed"));
@@ -67,9 +71,15 @@ public class WagePaymentInputDeleteHandler
 					"삭제 확인이 필요합니다.");
 			}
 
-			Integer employeeId = parseEmployeeId(
-				req.getParameter(
-					"employeeId"));
+			if ("all".equals(
+				deleteMode)
+				&& !"true".equals(
+					req.getParameter(
+						"deleteFinalConfirmed"))) {
+
+				throw new IllegalArgumentException(
+					"최종 삭제 확인이 필요합니다.");
+			}
 
 			List<Integer> pendingEmployeeIds = parsePendingEmployeeIds(
 				req);
@@ -90,43 +100,29 @@ public class WagePaymentInputDeleteHandler
 				allSavedEmployees,
 				pendingEmployeeIds);
 
-			WagePaymentEmployeeRow selectedSavedEmployee = findSavedEmployee(
-				allSavedEmployees,
-				employeeId);
+			List<EmployeeSelectRow> remainingPendingEmployees;
 
-			EmployeeSelectRow selectedPendingEmployee = findEmployee(
-				allPendingEmployees,
-				employeeId);
+			if ("all".equals(
+				deleteMode)) {
 
-			if (selectedSavedEmployee == null
-				&& selectedPendingEmployee == null) {
+				remainingPendingEmployees = deleteAllEmployees(
+					allSavedEmployees,
+					allPendingEmployees,
+					incomeType,
+					normalizedWageMonth,
+					normalizedWagePeriod);
 
-				throw new IllegalArgumentException(
-					"현재 급여 목록에 존재하지 않는 사원입니다.");
-			}
+			} else {
 
-			String employmentType = selectedSavedEmployee != null
-				? selectedSavedEmployee.getEmploymentType()
-				: selectedPendingEmployee.getEmploymentType();
+				Integer employeeId = parseEmployeeId(
+					req.getParameter(
+						"employeeId"));
 
-			if (!isAvailableEmploymentTypeForIncomeType(
-				employmentType,
-				incomeType)) {
-
-				throw new IllegalArgumentException(
-					"현재 소득구분에서 삭제할 수 없는 사원입니다.");
-			}
-
-			/*
-			 * 저장된 사원은 DB 급여 snapshot 전체를 삭제한다.
-			 *
-			 * 미저장 사원은 DB를 변경하지 않고
-			 * pending 목록에서만 제거한다.
-			 */
-			if (selectedSavedEmployee != null) {
-
-				wagePaymentDeleteService.delete(
+				remainingPendingEmployees = deleteSelectedEmployee(
+					allSavedEmployees,
+					allPendingEmployees,
 					employeeId,
+					incomeType,
 					normalizedWageMonth,
 					normalizedWagePeriod);
 			}
@@ -160,26 +156,13 @@ public class WagePaymentInputDeleteHandler
 				encode(
 					incomeType));
 
-			/*
-			 * 선택삭제 대상만 pending에서 제거하고
-			 * 나머지 미저장 사원은 현재 요청에서 유지한다.
-			 */
-			for (EmployeeSelectRow pendingEmployee : allPendingEmployees) {
-
-				Integer pendingEmployeeId = pendingEmployee
-					.getEmployeeId();
-
-				if (employeeId.equals(
-					pendingEmployeeId)) {
-
-					continue;
-				}
+			for (EmployeeSelectRow pendingEmployee : remainingPendingEmployees) {
 
 				redirectUrl.append(
 					"&pendingEmployeeId=");
 
 				redirectUrl.append(
-					pendingEmployeeId);
+					pendingEmployee.getEmployeeId());
 			}
 
 			res.sendRedirect(
@@ -196,6 +179,143 @@ public class WagePaymentInputDeleteHandler
 
 			return null;
 		}
+	}
+
+	private List<EmployeeSelectRow> deleteSelectedEmployee(
+		List<WagePaymentEmployeeRow> allSavedEmployees,
+		List<EmployeeSelectRow> allPendingEmployees,
+		Integer employeeId,
+		String incomeType,
+		String wageMonth,
+		String wagePeriod) {
+
+		WagePaymentEmployeeRow selectedSavedEmployee = findSavedEmployee(
+			allSavedEmployees,
+			employeeId);
+
+		EmployeeSelectRow selectedPendingEmployee = findEmployee(
+			allPendingEmployees,
+			employeeId);
+
+		if (selectedSavedEmployee == null
+			&& selectedPendingEmployee == null) {
+
+			throw new IllegalArgumentException(
+				"현재 급여 목록에 존재하지 않는 사원입니다.");
+		}
+
+		String employmentType = selectedSavedEmployee != null
+			? selectedSavedEmployee.getEmploymentType()
+			: selectedPendingEmployee.getEmploymentType();
+
+		if (!isAvailableEmploymentTypeForIncomeType(
+			employmentType,
+			incomeType)) {
+
+			throw new IllegalArgumentException(
+				"현재 소득구분에서 삭제할 수 없는 사원입니다.");
+		}
+
+		if (selectedSavedEmployee != null) {
+
+			wagePaymentDeleteService.delete(
+				employeeId,
+				wageMonth,
+				wagePeriod);
+		}
+
+		List<EmployeeSelectRow> result = new ArrayList<>();
+
+		for (EmployeeSelectRow pendingEmployee : allPendingEmployees) {
+
+			if (!employeeId.equals(
+				pendingEmployee.getEmployeeId())) {
+
+				result.add(
+					pendingEmployee);
+			}
+		}
+
+		return result;
+	}
+
+	private List<EmployeeSelectRow> deleteAllEmployees(
+		List<WagePaymentEmployeeRow> allSavedEmployees,
+		List<EmployeeSelectRow> allPendingEmployees,
+		String incomeType,
+		String wageMonth,
+		String wagePeriod) {
+
+		List<Integer> savedEmployeeIds = new ArrayList<>();
+
+		for (WagePaymentEmployeeRow savedEmployee : allSavedEmployees) {
+
+			if (isAvailableEmploymentTypeForIncomeType(
+				savedEmployee.getEmploymentType(),
+				incomeType)) {
+
+				savedEmployeeIds.add(
+					savedEmployee.getEmployeeId());
+			}
+		}
+
+		List<EmployeeSelectRow> remainingPendingEmployees = new ArrayList<>();
+
+		boolean hasCurrentPendingEmployee = false;
+
+		for (EmployeeSelectRow pendingEmployee : allPendingEmployees) {
+
+			if (isAvailableEmploymentTypeForIncomeType(
+				pendingEmployee.getEmploymentType(),
+				incomeType)) {
+
+				hasCurrentPendingEmployee = true;
+				continue;
+			}
+
+			remainingPendingEmployees.add(
+				pendingEmployee);
+		}
+
+		if (savedEmployeeIds.isEmpty()
+			&& !hasCurrentPendingEmployee) {
+
+			throw new IllegalArgumentException(
+				"추가된 사원이 없습니다.");
+		}
+
+		if (!savedEmployeeIds.isEmpty()) {
+
+			wagePaymentDeleteService.deleteEmployees(
+				savedEmployeeIds,
+				wageMonth,
+				wagePeriod);
+		}
+
+		return remainingPendingEmployees;
+	}
+
+	private String normalizeDeleteMode(
+		String deleteMode) {
+
+		deleteMode = trim(
+			deleteMode);
+
+		if (deleteMode == null) {
+
+			return "selected";
+		}
+
+		if ("selected".equals(
+			deleteMode)
+			|| "all".equals(
+				deleteMode)) {
+
+			return deleteMode;
+		}
+
+		throw new IllegalArgumentException(
+			"올바른 삭제 방식을 선택해야 합니다.");
 	}
 
 	private Integer parseEmployeeId(
