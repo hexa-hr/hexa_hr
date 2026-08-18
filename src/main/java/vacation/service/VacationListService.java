@@ -29,4 +29,5 @@ public class VacationListService {
 			throw new RuntimeException("휴가 현황 조회 오류", e);
 		}
 	}
+
 }

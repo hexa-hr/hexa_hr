@@ -33,4 +33,5 @@ public class VacationListHandler implements CommandHandler {
 
 		return "/WEB-INF/view/vacation/vacationList.jsp";
 	}
+
 }

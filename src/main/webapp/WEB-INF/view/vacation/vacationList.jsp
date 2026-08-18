@@ -103,8 +103,13 @@ table.data-table td {
 	padding: 10px 8px;
 }
 
+/* 행 클릭 가능하도록 스타일 추가 */
+table.data-table tbody tr {
+	cursor: pointer;
+}
+
 table.data-table tr:hover {
-	background-color: #f8fafc;
+	background-color: #f1f5f9;
 }
 
 /* 페이징 영역 */
@@ -155,7 +160,6 @@ table.data-table tr:hover {
 					휴가항목</option>
 
 				<!-- 3. 사용여부가 'Y'인 휴가항목 리스트 출력 -->
-				<!-- [수정] wageTypeId -> vacationTypeId, wageTypeName -> vacationTypeName -->
 				<c:forEach var="vType" items="${activeVacationTypeList}">
 					<option value="${vType.vacationTypeId}"
 						${param.vacationTypeId == vType.vacationTypeId ? 'selected' : ''}>
@@ -167,10 +171,8 @@ table.data-table tr:hover {
 			<script>
 				function handleSelectChange(selectElement) {
 					if (selectElement.value === 'setting') {
-						// 사용자가 "휴가 설정하기"를 선택한 경우
 						location.href = '${pageContext.request.contextPath}/vacationTypeSetting.do';
 					} else {
-						// 일반 항목을 선택한 경우 검색 폼 제출
 						selectElement.form.submit();
 					}
 				}
@@ -203,26 +205,19 @@ table.data-table tr:hover {
 			<!-- 데이터가 없는 경우 -->
 			<c:if test="${empty vacationList}">
 				<tr>
-					<td colspan="9" style="padding: 30px; color: #888;">조회된 휴가 정보가
-						없습니다.</td>
+					<td colspan="9" style="padding: 30px; color: #888;">조회된 휴가 정보가 없습니다.</td>
 				</tr>
 			</c:if>
 
-			<!-- 데이터 반복 출력 -->
+			<!-- 데이터 반복 출력 (행 클릭 시 상세 페이지 이동) -->
 			<c:forEach var="vac" items="${vacationList}">
-				<tr>
-					<!-- [수정] DTO에 선언된 정확한 카멜케이스 필드명으로 매핑 -->
+				<tr onclick="location.href='${pageContext.request.contextPath}/vacationDetail.do?employeeId=${vac.employeeId}'">
 					<td>${vac.employmentType}</td>
 					<td>No-${vac.employeeNumber}</td>
-					<td><a
-						href="${pageContext.request.contextPath}/vacationDetail.do?employeeId=${vac.employeeId}"
-						style="color: #2563eb; text-decoration: underline;">
-							${vac.koreanName} </a></td>
+					<td style="color: #2563eb; text-decoration: underline; font-weight: bold;">${vac.koreanName}</td>
 					<td>${vac.departmentName}</td>
 					<td>${vac.positionName}</td>
 					<td>${vac.vacationTypeName}</td>
-					
-					<!-- DAO에서 만든 가상 컬럼 변수 매핑 -->
 					<td>${vac.totalDays}</td>
 					<td style="color: #2563eb; font-weight: bold;">${vac.usedDays}</td>
 					<td style="color: #e11d48; font-weight: bold;">
@@ -235,8 +230,7 @@ table.data-table tr:hover {
 
 	<!-- 하단 페이징 -->
 	<div class="pagination">
-		<a href="#">&lt; 이전페이지</a> <span class="current">1</span> <a href="#">다음페이지
-			&gt;</a>
+		<a href="#">&lt; 이전페이지</a> <span class="current">1</span> <a href="#">다음페이지 &gt;</a>
 	</div>
 
 </body>
