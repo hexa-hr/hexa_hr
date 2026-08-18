@@ -213,7 +213,7 @@ table.data-table tr:hover {
 				<tr>
 					<!-- [수정] DTO에 선언된 정확한 카멜케이스 필드명으로 매핑 -->
 					<td>${vac.employmentType}</td>
-					<td>${vac.employeeNumber}</td>
+					<td>No-${vac.employeeNumber}</td>
 					<td><a
 						href="${pageContext.request.contextPath}/vacationDetail.do?employeeId=${vac.employeeId}"
 						style="color: #2563eb; text-decoration: underline;">
