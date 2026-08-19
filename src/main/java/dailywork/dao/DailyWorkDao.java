@@ -5,7 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import dailywork.model.DailyWorkMonthlyVO;
 import dailywork.model.DailyWorkVO;
@@ -118,6 +120,59 @@ public class DailyWorkDao {
 							rs.getLong("total_income_tax"), rs.getLong("total_local_tax"),
 							rs.getLong("total_actual_payment")));
 				}
+			}
+		}
+		return list;
+	}
+
+	// 5. 상세조회 다중 조건 검색 (동적 검색 로직)
+	public List<Map<String, Object>> selectDailyWorkDetailList(Connection conn, String startDate, String endDate,
+			String empName, String deptId, String projectId) throws SQLException {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT d.work_date, 'No-' || e.employee_id AS emp_no, e.korean_name, ");
+		sql.append("       NVL(dp.department_name, '미배정') AS dept_name, ");
+		sql.append("       NVL(p.name, '삭제된 현장') AS proj_name, ");
+		sql.append("       d.daily_wage, d.payment_rate, d.income_tax, d.local_tax, d.actual_payment ");
+		sql.append("FROM DAILY_WORK d ");
+		sql.append("JOIN EMPLOYEE e ON d.employee_id = e.employee_id ");
+		sql.append("LEFT JOIN DEPARTMENT dp ON e.department_id = dp.department_id ");
+		sql.append("LEFT JOIN FIELD_OR_PROJECT p ON d.field_or_project_id = p.field_or_project_id ");
+		sql.append("WHERE e.employment_type = '일용직' ");
+
+		// 체크된 조건만 쿼리에 동적으로 추가
+		if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
+			sql.append("AND d.work_date BETWEEN TO_DATE('" + startDate + "', 'YYYY-MM-DD') AND TO_DATE('" + endDate
+					+ "', 'YYYY-MM-DD') ");
+		}
+		if (empName != null && !empName.isEmpty()) {
+			sql.append("AND e.korean_name LIKE '%" + empName + "%' ");
+		}
+		if (deptId != null && !deptId.isEmpty()) {
+			/* sql.append("AND e.department_id = " + deptId + " "); */
+			sql.append("AND dp.department_name LIKE '%" + deptId + "%' ");
+		}
+
+		if (projectId != null && !projectId.isEmpty()) {
+			sql.append("AND d.field_or_project_id = " + projectId + " ");
+		}
+
+		sql.append("ORDER BY d.work_date DESC, e.employee_id");
+
+		List<Map<String, Object>> list = new ArrayList<>();
+		try (PreparedStatement pstmt = conn.prepareStatement(sql.toString()); ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("workDate", rs.getDate("work_date"));
+				map.put("empNo", rs.getString("emp_no"));
+				map.put("empName", rs.getString("korean_name"));
+				map.put("deptName", rs.getString("dept_name"));
+				map.put("projName", rs.getString("proj_name"));
+				map.put("dailyWage", rs.getLong("daily_wage"));
+				map.put("paymentRate", rs.getDouble("payment_rate"));
+				map.put("incomeTax", rs.getLong("income_tax"));
+				map.put("localTax", rs.getLong("local_tax"));
+				map.put("actualPayment", rs.getLong("actual_payment"));
+				list.add(map);
 			}
 		}
 		return list;
