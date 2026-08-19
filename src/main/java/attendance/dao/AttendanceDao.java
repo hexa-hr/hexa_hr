@@ -29,6 +29,27 @@ public class AttendanceDao {
 		return Integer.parseInt(obj.toString());
 	}
 
+	private Long getLong(
+		ResultSet rs,
+		String columnName)
+		throws SQLException {
+
+		Object value = rs.getObject(
+			columnName);
+
+		if (value == null) {
+			return null;
+		}
+
+		if (value instanceof Number) {
+
+			return ((Number)value).longValue();
+		}
+
+		return Long.valueOf(
+			value.toString());
+	}
+
 	// 1. 전체 목록 조회 (master 패키지 DTO 수정 없이 기본 필드만 조회) - 유진님 코드
 	public List<AttendanceType> selectAll(Connection conn) throws SQLException {
 		PreparedStatement pstmt = null;
@@ -421,7 +442,7 @@ public class AttendanceDao {
 					rs.getString("foreign_or_domestic"), rs.getString("resident_number1"),
 					rs.getString("resident_number2"), rs.getString("address"), rs.getString("tel_phone"),
 					rs.getString("mobile"), rs.getString("email"), rs.getString("sns"),
-					rs.getString("other_details"), rs.getString("status"));
+					rs.getString("other_details"), rs.getString("status"), getLong(rs, "basic_pay"));
 
 				Integer days = getInteger(rs, "attendance_days");
 				int attendanceDays = (days != null) ? days : 0;

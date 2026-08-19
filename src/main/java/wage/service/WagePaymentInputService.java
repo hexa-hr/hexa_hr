@@ -125,15 +125,13 @@ public class WagePaymentInputService {
 					settlementEndDate,
 					true);
 
-				Long latestBasicWage = wageDao.selectLatestBasicWage(
+				Long employeeBasicPay = employeeDao.selectBasicPay(
 					conn,
-					employeeId,
-					wageMonth.trim(),
-					wagePeriodNumber);
+					employeeId);
 
-				return applyLatestBasicWage(
+				return applyEmployeeBasicPay(
 					initialItems,
-					latestBasicWage);
+					employeeBasicPay);
 			}
 
 			/*
@@ -481,17 +479,13 @@ public class WagePaymentInputService {
 		return result;
 	}
 
-	private List<WagePaymentCalculationItem> applyLatestBasicWage(
+	private List<WagePaymentCalculationItem> applyEmployeeBasicPay(
 		List<WagePaymentCalculationItem> items,
-		Long latestBasicWage) {
+		Long employeeBasicPay) {
 
-		/*
-		 * 과거 기본급 이력이 없으면
-		 * buildItems()에서 생성한 0원을 그대로 사용한다.
-		 */
-		if (latestBasicWage == null) {
-			return items;
-		}
+		long basicPay = employeeBasicPay == null
+			? 0L
+			: employeeBasicPay;
 
 		for (int i = 0; i < items.size(); i++) {
 
@@ -507,7 +501,7 @@ public class WagePaymentInputService {
 						item.getWageTypeName(),
 						item.getItemType(),
 						item.getTaxableYn(),
-						latestBasicWage));
+						basicPay));
 
 				break;
 			}

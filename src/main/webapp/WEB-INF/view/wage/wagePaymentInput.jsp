@@ -109,10 +109,92 @@ th {
 	display: flex;
 	gap: 8px;
 }
+
+.payroll-summary {
+	margin-top: 45px;
+}
+
+.payroll-summary h2 {
+	margin-bottom: 14px;
+	font-size: 20px;
+}
+
+.payroll-summary-grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.payroll-summary-card {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	min-height: 58px;
+	padding: 0 20px;
+	border-radius: 5px;
+	color: #ffffff;
+	box-sizing: border-box;
+}
+
+.payroll-summary-card span {
+	font-weight: bold;
+}
+
+.payroll-summary-card strong {
+	font-size: 20px;
+}
+
+.summary-count {
+	background-color: #999999;
+}
+
+.summary-payment {
+	background-color: #45b9dc;
+}
+
+.summary-deduction {
+	background-color: #ef7777;
+}
+
+.summary-net {
+	background-color: #4c4d49;
+}
+
+@media ( max-width : 900px) {
+	.payroll-summary-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media ( max-width : 560px) {
+	.payroll-summary-grid {
+		grid-template-columns: 1fr;
+	}
+}
 </style>
 </head>
 
 <body>
+
+	<c:set var="monthlyEmployeeCount"
+		value="${fn:length(savedEmployees) + fn:length(pendingEmployees)}" />
+
+	<c:set var="monthlyTotalPayment" value="${0}" />
+	<c:set var="monthlyTotalDeduction" value="${0}" />
+	<c:set var="monthlyNetPayment" value="${0}" />
+
+	<c:forEach var="employee" items="${savedEmployees}">
+
+		<c:set var="monthlyTotalPayment"
+			value="${monthlyTotalPayment + employee.totalPayment}" />
+
+		<c:set var="monthlyTotalDeduction"
+			value="${monthlyTotalDeduction + employee.totalDeduction}" />
+
+		<c:set var="monthlyNetPayment"
+			value="${monthlyNetPayment + employee.netPayment}" />
+
+	</c:forEach>
 
 	<h1>급여입력</h1>
 
@@ -380,7 +462,7 @@ th {
 
 		<div style="margin-bottom: 10px;">
 			총
-			<c:out value="${savedEmployees.size()}" />
+			<c:out value="${monthlyEmployeeCount}" />
 			명
 		</div>
 
@@ -660,6 +742,40 @@ th {
 		</form>
 
 	</c:if>
+
+	<section class="payroll-summary">
+
+		<h2>급여 종합정보</h2>
+
+		<div class="payroll-summary-grid">
+
+			<div class="payroll-summary-card summary-count">
+				<span>월 합계</span> <strong> <c:out
+						value="${monthlyEmployeeCount}" />건
+				</strong>
+			</div>
+
+			<div class="payroll-summary-card summary-payment">
+				<span>지급 총액</span> <strong> <fmt:formatNumber
+						value="${monthlyTotalPayment}" pattern="#,##0" />원
+				</strong>
+			</div>
+
+			<div class="payroll-summary-card summary-deduction">
+				<span>공제 총액</span> <strong> <fmt:formatNumber
+						value="${monthlyTotalDeduction}" pattern="#,##0" />원
+				</strong>
+			</div>
+
+			<div class="payroll-summary-card summary-net">
+				<span>실지급액</span> <strong> <fmt:formatNumber
+						value="${monthlyNetPayment}" pattern="#,##0" />원
+				</strong>
+			</div>
+
+		</div>
+
+	</section>
 
 	<script>
 	(function() {
