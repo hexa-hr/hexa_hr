@@ -49,7 +49,8 @@ input, select, button {
 
 table {
 	border-collapse: collapse;
-	min-width: 850px;
+	width: 100%;
+	table-layout: fixed;
 }
 
 th, td {
@@ -67,10 +68,6 @@ th {
 
 .center {
 	text-align: center;
-}
-
-.inactive {
-	background-color: #eeeeee;
 }
 
 .employee-select-row {
@@ -171,13 +168,189 @@ th {
 		grid-template-columns: 1fr;
 	}
 }
+
+.payroll-workspace {
+	display: grid;
+	grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+	gap: 24px;
+	align-items: start;
+}
+
+.payroll-pane {
+	min-width: 0;
+}
+
+.table-scroll {
+	width: 100%;
+	overflow-x: auto;
+}
+
+.table-scroll table {
+	margin-bottom: 0;
+}
+
+@media ( max-width : 1200px) {
+	.payroll-workspace {
+		grid-template-columns: 1fr;
+	}
+}
+
+.employee-toolbar {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+.employee-add-form {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 18px;
+}
+
+.income-tabs {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	margin-bottom: 16px;
+	border-bottom: 2px solid #333333;
+}
+
+.income-tab {
+	display: block;
+	padding: 11px 12px;
+	background-color: #aaaaaa;
+	color: #ffffff;
+	font-weight: bold;
+	text-align: center;
+	text-decoration: none;
+}
+
+.income-tab.active {
+	background-color: #009b95;
+}
+
+.wage-input-form {
+	min-width: 0;
+}
+
+.wage-item-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	border-top: 2px solid #333333;
+	border-bottom: 1px solid #dddddd;
+}
+
+.wage-item-column {
+	min-width: 0;
+}
+
+.wage-item-column:first-child {
+	border-right: 1px solid #dddddd;
+}
+
+.wage-item-column-header {
+	padding: 10px;
+	font-weight: bold;
+	text-align: center;
+}
+
+.payment-header {
+	background-color: #f3f8fb;
+	color: #0759d1;
+}
+
+.deduction-header {
+	background-color: #fff4f1;
+	color: #e44343;
+}
+
+.wage-item-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(110px, 46%);
+	align-items: center;
+	gap: 8px;
+	min-height: 42px;
+	padding: 4px 10px;
+	border-bottom: 1px solid #dddddd;
+	box-sizing: border-box;
+}
+
+.wage-item-name {
+	min-width: 0;
+}
+
+.wage-item-amount {
+	min-width: 0;
+}
+
+.wage-item-amount input {
+	width: 100%;
+	box-sizing: border-box;
+	text-align: right;
+}
+
+.tax-free-mark {
+	color: red;
+	font-size: 11px;
+}
+
+.wage-subtotals {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+}
+
+.wage-subtotal {
+	display: flex;
+	justify-content: space-between;
+	padding: 12px 16px;
+	background-color: #f7fafc;
+	border-bottom: 1px solid #dddddd;
+	box-sizing: border-box;
+}
+
+.wage-subtotal:first-child {
+	color: #0759d1;
+	border-right: 1px solid #dddddd;
+}
+
+.wage-subtotal:last-child {
+	color: #e44343;
+}
+
+.wage-net-total {
+	padding: 14px;
+	background-color: #315d7d;
+	color: #ffffff;
+	font-size: 18px;
+	font-weight: bold;
+	text-align: center;
+}
+
+.wage-form-actions {
+	margin-top: 15px;
+	text-align: center;
+}
+
+@media ( max-width : 700px) {
+	.wage-item-grid {
+		grid-template-columns: 1fr;
+	}
+	.wage-item-column:first-child {
+		border-right: 0;
+	}
+}
 </style>
 </head>
 
 <body>
 
-	<c:set var="monthlyEmployeeCount"
+	<c:set var="visibleEmployeeCount"
 		value="${fn:length(savedEmployees) + fn:length(pendingEmployees)}" />
+
+	<c:set var="monthlyEmployeeCount" value="${fn:length(savedEmployees)}" />
 
 	<c:set var="monthlyTotalPayment" value="${0}" />
 	<c:set var="monthlyTotalDeduction" value="${0}" />
@@ -195,6 +368,37 @@ th {
 			value="${monthlyNetPayment + employee.netPayment}" />
 
 	</c:forEach>
+
+	<c:set var="wageInputEnabled"
+		value="${selectedEmployeeSaved == true or selectedEmployeePending == true}" />
+
+	<c:set var="currentWageTotalPayment" value="${0}" />
+	<c:set var="currentWageTotalDeduction" value="${0}" />
+
+	<c:if test="${wageInputEnabled}">
+
+		<c:forEach var="item" items="${wageItems}">
+
+			<c:choose>
+
+				<c:when test="${item.itemType eq 'P'}">
+					<c:set var="currentWageTotalPayment"
+						value="${currentWageTotalPayment + item.wageValue}" />
+				</c:when>
+
+				<c:when test="${item.itemType eq 'D'}">
+					<c:set var="currentWageTotalDeduction"
+						value="${currentWageTotalDeduction + item.wageValue}" />
+				</c:when>
+
+			</c:choose>
+
+		</c:forEach>
+
+	</c:if>
+
+	<c:set var="currentWageNetPayment"
+		value="${currentWageTotalPayment - currentWageTotalDeduction}" />
 
 	<h1>급여입력</h1>
 
@@ -277,68 +481,6 @@ th {
 
 	</form>
 
-	<div style="margin-bottom: 15px;">
-
-		<button type="button" id="previousWageOpenButton"
-			<c:if test="${empty previousWageSourceOptions}">
-				disabled
-			</c:if>>
-			지난급여 불러오기</button>
-
-		<form id="employeeDeleteForm" method="post"
-			action="${pageContext.request.contextPath}/wage/paymentInputDelete.do"
-			style="display: inline; margin-left: 8px;">
-
-			<input type="hidden" name="deleteMode" value="selected"> <input
-				type="hidden" name="employeeId"
-				value="<c:out value='${selectedEmployeeId}' />"> <input
-				type="hidden" name="wageMonth"
-				value="<c:out value='${wageMonth}' />"> <input type="hidden"
-				name="wagePeriod" value="<c:out value='${wagePeriod}' />"> <input
-				type="hidden" name="incomeType"
-				value="<c:out value='${incomeType}' />"> <input
-				type="hidden" id="employeeDeleteConfirmed" name="deleteConfirmed"
-				value="false">
-
-			<c:forEach var="pending" items="${allPendingEmployees}">
-
-				<input type="hidden" name="pendingEmployeeId"
-					value="<c:out value='${pending.employeeId}' />">
-
-			</c:forEach>
-
-			<button type="submit" id="employeeDeleteButton">선택삭제</button>
-
-		</form>
-
-		<form id="employeeDeleteAllForm" method="post"
-			action="${pageContext.request.contextPath}/wage/paymentInputDelete.do"
-			style="display: inline; margin-left: 8px;">
-
-			<input type="hidden" name="deleteMode" value="all"> <input
-				type="hidden" name="wageMonth"
-				value="<c:out value='${wageMonth}' />"> <input type="hidden"
-				name="wagePeriod" value="<c:out value='${wagePeriod}' />"> <input
-				type="hidden" name="incomeType"
-				value="<c:out value='${incomeType}' />"> <input
-				type="hidden" id="employeeDeleteAllConfirmed" name="deleteConfirmed"
-				value="false"> <input type="hidden"
-				id="employeeDeleteAllFinalConfirmed" name="deleteFinalConfirmed"
-				value="false">
-
-			<c:forEach var="pending" items="${allPendingEmployees}">
-
-				<input type="hidden" name="pendingEmployeeId"
-					value="<c:out value='${pending.employeeId}' />">
-
-			</c:forEach>
-
-			<button type="submit" id="employeeDeleteAllButton">전체삭제</button>
-
-		</form>
-
-	</div>
-
 	<dialog id="previousWageDialog" class="previous-wage-dialog">
 
 	<h2>급여연월 선택</h2>
@@ -387,361 +529,429 @@ th {
 
 	</dialog>
 
-	<div style="margin-bottom: 15px;">
-
-		<c:url var="workerIncomeUrl" value="/wage/paymentInput.do">
-
-			<c:param name="wageMonth" value="${wageMonth}" />
-
-			<c:param name="wagePeriod" value="${wagePeriod}" />
-
-			<c:param name="incomeType" value="worker" />
-
-		</c:url>
-
-		<c:url var="businessIncomeUrl" value="/wage/paymentInput.do">
-
-			<c:param name="wageMonth" value="${wageMonth}" />
-
-			<c:param name="wagePeriod" value="${wagePeriod}" />
-
-			<c:param name="incomeType" value="business" />
-
-		</c:url>
-
-		<a href="${workerIncomeUrl}"
-			style="font-weight:
-				${incomeType eq 'worker' ? 'bold' : 'normal'};">
-			일반소득 </a> &nbsp; | &nbsp; <a href="${businessIncomeUrl}"
-			style="font-weight:
-				${incomeType eq 'business' ? 'bold' : 'normal'};">
-			사업소득/기타소득 </a>
-
-	</div>
-
-	<form method="get"
-		action="${pageContext.request.contextPath}/wage/paymentInput.do"
-		style="margin-bottom: 20px;">
-
-		<input type="hidden" name="wageMonth"
-			value="<c:out value='${wageMonth}' />"> <input type="hidden"
-			name="wagePeriod" value="<c:out value='${wagePeriod}' />"> <input
-			type="hidden" name="incomeType"
-			value="<c:out value='${incomeType}' />">
-
-		<c:forEach var="pending" items="${allPendingEmployees}">
-
-			<input type="hidden" name="pendingEmployeeId"
-				value="<c:out value='${pending.employeeId}' />">
-
-		</c:forEach>
-
-		<label for="addEmployeeId"> 신규추가 </label> <select id="addEmployeeId"
-			name="addEmployeeId" required>
-
-			<option value="">사원 선택</option>
-
-			<c:forEach var="employee" items="${availableEmployees}">
-
-				<option value="${employee.employeeId}">
-					<c:out value="${employee.koreanName}" /> -
-					<c:out value="${employee.employmentType}" />
-				</option>
-
-			</c:forEach>
-
-		</select>
-
-		<button type="submit">추가</button>
-
-	</form>
-
-	<c:if test="${not empty savedEmployees or not empty pendingEmployees}">
-
-		<h2>사원 목록</h2>
-
-		<div style="margin-bottom: 10px;">
-			총
-			<c:out value="${monthlyEmployeeCount}" />
-			명
-		</div>
-
-		<table style="margin-bottom: 25px;">
-
-			<thead>
-				<tr>
-					<th>사원ID</th>
-					<th>구분</th>
-					<th>성명</th>
-					<th>부서</th>
-					<th>지급총액</th>
-					<th>공제총액</th>
-					<th>실지급액</th>
-				</tr>
-			</thead>
-
-			<tbody>
-
-				<c:forEach var="employee" items="${savedEmployees}">
-
-					<tr
-						class="employee-select-row ${selectedEmployeeSaved == true
-						and selectedEmployeeId == employee.employeeId
-							? 'selected-employee-row' : ''}">
-
-						<td class="center"><c:out value="${employee.employeeId}" />
-						</td>
-
-						<td class="center"><c:out value="${employee.employmentType}" />
-						</td>
-
-						<td><c:url var="employeeSelectUrl"
-								value="/wage/paymentInput.do">
-
-								<c:param name="wageMonth" value="${wageMonth}" />
-
-								<c:param name="wagePeriod" value="${wagePeriod}" />
-
-								<c:param name="incomeType" value="${incomeType}" />
-
-								<c:param name="employeeId" value="${employee.employeeId}" />
-
-								<c:forEach var="pending" items="${allPendingEmployees}">
-
-									<c:param name="pendingEmployeeId" value="${pending.employeeId}" />
-
-								</c:forEach>
-
-							</c:url> <a href="${employeeSelectUrl}"> <c:out
-									value="${employee.koreanName}" />
-						</a></td>
-
-						<td><c:choose>
-								<c:when test="${empty employee.departmentName}">
-								-
-							</c:when>
-								<c:otherwise>
-									<c:out value="${employee.departmentName}" />
-								</c:otherwise>
-							</c:choose></td>
-
-						<td class="amount"><fmt:formatNumber
-								value="${employee.totalPayment}" pattern="#,##0" /></td>
-
-						<td class="amount"><fmt:formatNumber
-								value="${employee.totalDeduction}" pattern="#,##0" /></td>
-
-						<td class="amount"><fmt:formatNumber
-								value="${employee.netPayment}" pattern="#,##0" /></td>
-
-					</tr>
-
-				</c:forEach>
-
-				<c:forEach var="employee" items="${pendingEmployees}">
-
-					<tr
-						class="employee-select-row ${selectedEmployeePending == true
-						and selectedEmployeeId == employee.employeeId
-							? 'selected-employee-row' : ''}">
-
-						<td class="center"><c:out value="${employee.employeeId}" />
-						</td>
-
-						<td class="center"><c:out value="${employee.employmentType}" />
-						</td>
-
-						<td><c:url var="pendingEmployeeSelectUrl"
-								value="/wage/paymentInput.do">
-
-								<c:param name="wageMonth" value="${wageMonth}" />
-
-								<c:param name="wagePeriod" value="${wagePeriod}" />
-
-								<c:param name="incomeType" value="${incomeType}" />
-
-								<c:param name="employeeId" value="${employee.employeeId}" />
-
-								<c:forEach var="pending" items="${allPendingEmployees}">
-
-									<c:param name="pendingEmployeeId" value="${pending.employeeId}" />
-
-								</c:forEach>
-
-							</c:url> <a href="${pendingEmployeeSelectUrl}"> <c:out
-									value="${employee.koreanName}" />
-						</a> (미저장)</td>
-
-						<td><c:choose>
-								<c:when test="${empty employee.departmentName}">
-									-
-								</c:when>
-								<c:otherwise>
-									<c:out value="${employee.departmentName}" />
-								</c:otherwise>
-							</c:choose></td>
-
-						<td class="amount">0</td>
-						<td class="amount">0</td>
-						<td class="amount">0</td>
-
-					</tr>
-
-				</c:forEach>
-
-			</tbody>
-
-		</table>
-
-	</c:if>
-
-	<c:if test="${not empty wageItems}">
-
-		<div class="status-message">
-
-			선택 사원:
-			<c:out value="${selectedEmployeeName}" />
-
-			/
-
-			<c:choose>
-
-				<c:when test="${selectedEmployeeSaved}">
-					기존 저장 급여
-				</c:when>
-
-				<c:otherwise>
-					미저장 신규 급여
-				</c:otherwise>
-
-			</c:choose>
-
-		</div>
-
-
-		<form method="post"
-			action="${pageContext.request.contextPath}/wage/paymentInputCalculate.do">
-
-			<input type="hidden" name="employeeId"
-				value="<c:out value='${selectedEmployeeId}' />"> <input
-				type="hidden" name="wageMonth"
-				value="<c:out value='${wageMonth}' />"> <input type="hidden"
-				name="wagePeriod" value="<c:out value='${wagePeriod}' />"> <input
-				type="hidden" name="incomeType"
-				value="<c:out value='${incomeType}' />"> <input
-				type="hidden" name="settlementStartDate"
-				value="<c:out value='${settlementStartDate}' />"> <input
-				type="hidden" name="settlementEndDate"
-				value="<c:out value='${settlementEndDate}' />"> <input
-				type="hidden" name="wagePaymentDate"
-				value="<c:out value='${wagePaymentDate}' />">
-
-			<c:forEach var="pending" items="${allPendingEmployees}">
-				<input type="hidden" name="pendingEmployeeId"
-					value="<c:out value='${pending.employeeId}' />">
-			</c:forEach>
-
-
-			<table>
-
-				<thead>
-
-					<tr>
-						<th>ID</th>
-						<th>구분</th>
-						<th>급여항목</th>
-						<th>과세구분</th>
-						<th>금액</th>
-						<th>active</th>
-						<th>calculable</th>
-					</tr>
-
-				</thead>
-
-
-				<tbody>
-
-					<c:forEach var="item" items="${wageItems}">
-
-						<tr class="${item.active ? '' : 'inactive'}">
-
-							<td class="center"><c:out value="${item.wageTypeId}" /> <input
-								type="hidden" name="wageTypeId"
-								value="<c:out value='${item.wageTypeId}' />"></td>
-
-							<td class="center"><c:choose>
-
-									<c:when test="${item.itemType eq 'P'}">
-										지급
-									</c:when>
-
-									<c:when test="${item.itemType eq 'D'}">
-										공제
-									</c:when>
-
-									<c:otherwise>
-										<c:out value="${item.itemType}" />
-									</c:otherwise>
-
-								</c:choose></td>
-
-							<td><c:out value="${item.wageTypeName}" /></td>
-
-							<td class="center"><c:out value="${item.taxableYn}" /></td>
-
-							<td class="amount"><input type="number" name="wageValue"
-								min="0" step="1" value="<c:out value='${item.wageValue}' />"
-								required></td>
-
-							<td class="center"><c:out value="${item.active}" /></td>
-
-							<td class="center"><c:out value="${item.calculable}" /></td>
-
-						</tr>
+	<div class="payroll-workspace">
+
+		<section class="payroll-pane employee-pane">
+
+			<div class="employee-toolbar">
+
+				<button type="button" id="previousWageOpenButton"
+					<c:if test="${empty previousWageSourceOptions}">
+						disabled
+					</c:if>>
+					지난급여 불러오기</button>
+
+				<form id="employeeDeleteForm" method="post"
+					action="${pageContext.request.contextPath}/wage/paymentInputDelete.do"
+					style="display: inline; margin-left: 8px;">
+
+					<input type="hidden" name="deleteMode" value="selected"> <input
+						type="hidden" name="employeeId"
+						value="<c:out value='${selectedEmployeeId}' />"> <input
+						type="hidden" name="wageMonth"
+						value="<c:out value='${wageMonth}' />"> <input
+						type="hidden" name="wagePeriod"
+						value="<c:out value='${wagePeriod}' />"> <input
+						type="hidden" name="incomeType"
+						value="<c:out value='${incomeType}' />"> <input
+						type="hidden" id="employeeDeleteConfirmed" name="deleteConfirmed"
+						value="false">
+
+					<c:forEach var="pending" items="${allPendingEmployees}">
+
+						<input type="hidden" name="pendingEmployeeId"
+							value="<c:out value='${pending.employeeId}' />">
 
 					</c:forEach>
 
-				</tbody>
+					<button type="submit" id="employeeDeleteButton">선택삭제</button>
 
-			</table>
+				</form>
 
+				<form id="employeeDeleteAllForm" method="post"
+					action="${pageContext.request.contextPath}/wage/paymentInputDelete.do"
+					style="display: inline; margin-left: 8px;">
 
-			<div style="margin-top: 15px;">
+					<input type="hidden" name="deleteMode" value="all"> <input
+						type="hidden" name="wageMonth"
+						value="<c:out value='${wageMonth}' />"> <input
+						type="hidden" name="wagePeriod"
+						value="<c:out value='${wagePeriod}' />"> <input
+						type="hidden" name="incomeType"
+						value="<c:out value='${incomeType}' />"> <input
+						type="hidden" id="employeeDeleteAllConfirmed"
+						name="deleteConfirmed" value="false"> <input type="hidden"
+						id="employeeDeleteAllFinalConfirmed" name="deleteFinalConfirmed"
+						value="false">
 
-				<button type="submit">자동계산</button>
+					<c:forEach var="pending" items="${allPendingEmployees}">
 
-				<button type="submit"
-					formaction="${pageContext.request.contextPath}/wage/paymentInputSave.do">
-					저장</button>
+						<input type="hidden" name="pendingEmployeeId"
+							value="<c:out value='${pending.employeeId}' />">
+
+					</c:forEach>
+
+					<button type="submit" id="employeeDeleteAllButton">전체삭제</button>
+
+				</form>
 
 			</div>
 
+			<form class="employee-add-form" method="get"
+				action="${pageContext.request.contextPath}/wage/paymentInput.do">
 
-			<c:if test="${autoCalculated}">
+				<input type="hidden" name="wageMonth"
+					value="<c:out value='${wageMonth}' />"> <input
+					type="hidden" name="wagePeriod"
+					value="<c:out value='${wagePeriod}' />"> <input
+					type="hidden" name="incomeType"
+					value="<c:out value='${incomeType}' />">
 
-				<div style="margin-top: 20px;">
+				<c:forEach var="pending" items="${allPendingEmployees}">
 
-					<strong>지급합계:</strong>
+					<input type="hidden" name="pendingEmployeeId"
+						value="<c:out value='${pending.employeeId}' />">
 
-					<fmt:formatNumber value="${totalPayment}" pattern="#,##0" />
+				</c:forEach>
 
-					원 &nbsp;&nbsp; <strong>공제합계:</strong>
+				<label for="addEmployeeId"> 신규추가 </label> <select id="addEmployeeId"
+					name="addEmployeeId" required>
 
-					<fmt:formatNumber value="${totalDeduction}" pattern="#,##0" />
+					<option value="">사원 선택</option>
 
-					원 &nbsp;&nbsp; <strong>실지급액:</strong>
+					<c:forEach var="employee" items="${availableEmployees}">
 
-					<fmt:formatNumber value="${netPayment}" pattern="#,##0" />
+						<option value="${employee.employeeId}">
+							<c:out value="${employee.koreanName}" /> -
+							<c:out value="${employee.employmentType}" />
+						</option>
 
-					원
+					</c:forEach>
 
-				</div>
+				</select>
+
+				<button type="submit">추가</button>
+
+			</form>
+
+			<h2>사원 목록</h2>
+
+			<div style="margin-bottom: 10px;">
+				총
+				<c:out value="${visibleEmployeeCount}" />
+				명
+			</div>
+
+			<div class="table-scroll">
+				<table style="margin-bottom: 25px;">
+
+					<thead>
+						<tr>
+							<th>사원ID</th>
+							<th>구분</th>
+							<th>성명</th>
+							<th>부서</th>
+							<th>지급총액</th>
+							<th>공제총액</th>
+							<th>실지급액</th>
+						</tr>
+					</thead>
+
+					<tbody>
+
+						<c:forEach var="employee" items="${savedEmployees}">
+
+							<tr
+								class="employee-select-row ${selectedEmployeeSaved == true
+								and selectedEmployeeId == employee.employeeId
+									? 'selected-employee-row' : ''}">
+
+								<td class="center"><c:out value="${employee.employeeId}" />
+								</td>
+
+								<td class="center"><c:out
+										value="${employee.employmentType}" /></td>
+
+								<td><c:url var="employeeSelectUrl"
+										value="/wage/paymentInput.do">
+
+										<c:param name="wageMonth" value="${wageMonth}" />
+
+										<c:param name="wagePeriod" value="${wagePeriod}" />
+
+										<c:param name="incomeType" value="${incomeType}" />
+
+										<c:param name="employeeId" value="${employee.employeeId}" />
+
+										<c:forEach var="pending" items="${allPendingEmployees}">
+
+											<c:param name="pendingEmployeeId"
+												value="${pending.employeeId}" />
+
+										</c:forEach>
+
+									</c:url> <a href="${employeeSelectUrl}"> <c:out
+											value="${employee.koreanName}" />
+								</a></td>
+
+								<td><c:choose>
+										<c:when test="${empty employee.departmentName}">
+										-
+									</c:when>
+										<c:otherwise>
+											<c:out value="${employee.departmentName}" />
+										</c:otherwise>
+									</c:choose></td>
+
+								<td class="amount"><fmt:formatNumber
+										value="${employee.totalPayment}" pattern="#,##0" /></td>
+
+								<td class="amount"><fmt:formatNumber
+										value="${employee.totalDeduction}" pattern="#,##0" /></td>
+
+								<td class="amount"><fmt:formatNumber
+										value="${employee.netPayment}" pattern="#,##0" /></td>
+
+							</tr>
+
+						</c:forEach>
+
+						<c:forEach var="employee" items="${pendingEmployees}">
+
+							<tr
+								class="employee-select-row ${selectedEmployeePending == true
+								and selectedEmployeeId == employee.employeeId
+									? 'selected-employee-row' : ''}">
+
+								<td class="center"><c:out value="${employee.employeeId}" />
+								</td>
+
+								<td class="center"><c:out
+										value="${employee.employmentType}" /></td>
+
+								<td><c:url var="pendingEmployeeSelectUrl"
+										value="/wage/paymentInput.do">
+
+										<c:param name="wageMonth" value="${wageMonth}" />
+
+										<c:param name="wagePeriod" value="${wagePeriod}" />
+
+										<c:param name="incomeType" value="${incomeType}" />
+
+										<c:param name="employeeId" value="${employee.employeeId}" />
+
+										<c:forEach var="pending" items="${allPendingEmployees}">
+
+											<c:param name="pendingEmployeeId"
+												value="${pending.employeeId}" />
+
+										</c:forEach>
+
+									</c:url> <a href="${pendingEmployeeSelectUrl}"> <c:out
+											value="${employee.koreanName}" />
+								</a> (미저장)</td>
+
+								<td><c:choose>
+										<c:when test="${empty employee.departmentName}">
+											-
+										</c:when>
+										<c:otherwise>
+											<c:out value="${employee.departmentName}" />
+										</c:otherwise>
+									</c:choose></td>
+
+								<td class="amount">0</td>
+								<td class="amount">0</td>
+								<td class="amount">0</td>
+
+							</tr>
+
+						</c:forEach>
+
+					</tbody>
+
+				</table>
+			</div>
+
+		</section>
+
+		<section class="payroll-pane wage-pane">
+
+			<div class="income-tabs">
+
+				<c:url var="workerIncomeUrl" value="/wage/paymentInput.do">
+
+					<c:param name="wageMonth" value="${wageMonth}" />
+
+					<c:param name="wagePeriod" value="${wagePeriod}" />
+
+					<c:param name="incomeType" value="worker" />
+
+				</c:url>
+
+				<c:url var="businessIncomeUrl" value="/wage/paymentInput.do">
+
+					<c:param name="wageMonth" value="${wageMonth}" />
+
+					<c:param name="wagePeriod" value="${wagePeriod}" />
+
+					<c:param name="incomeType" value="business" />
+
+				</c:url>
+
+				<a href="${workerIncomeUrl}"
+					class="income-tab ${incomeType eq 'worker' ? 'active' : ''}">
+					일반소득 </a> <a href="${businessIncomeUrl}"
+					class="income-tab ${incomeType eq 'business' ? 'active' : ''}">
+					사업소득/기타소득 </a>
+
+			</div>
+
+			<c:if test="${not empty wageItems}">
+
+				<form id="wagePaymentInputForm" class="wage-input-form"
+					method="post"
+					action="${pageContext.request.contextPath}/wage/paymentInputCalculate.do">
+
+					<input type="hidden" name="employeeId"
+						value="<c:out value='${selectedEmployeeId}' />"> <input
+						type="hidden" name="wageMonth"
+						value="<c:out value='${wageMonth}' />"> <input
+						type="hidden" name="wagePeriod"
+						value="<c:out value='${wagePeriod}' />"> <input
+						type="hidden" name="incomeType"
+						value="<c:out value='${incomeType}' />"> <input
+						type="hidden" name="settlementStartDate"
+						value="<c:out value='${settlementStartDate}' />"> <input
+						type="hidden" name="settlementEndDate"
+						value="<c:out value='${settlementEndDate}' />"> <input
+						type="hidden" name="wagePaymentDate"
+						value="<c:out value='${wagePaymentDate}' />">
+
+					<c:forEach var="pending" items="${allPendingEmployees}">
+
+						<input type="hidden" name="pendingEmployeeId"
+							value="<c:out value='${pending.employeeId}' />">
+
+					</c:forEach>
+
+					<div class="wage-item-grid">
+
+						<div class="wage-item-column">
+
+							<div class="wage-item-column-header payment-header">지급항목</div>
+
+							<c:forEach var="item" items="${wageItems}">
+
+								<c:if test="${item.itemType eq 'P'}">
+
+									<div class="wage-item-row">
+
+										<div class="wage-item-name">
+
+											<c:out value="${item.wageTypeName}" />
+
+											<c:if test="${item.taxableYn eq 'N'}">
+												<span class="tax-free-mark">[비]</span>
+											</c:if>
+
+										</div>
+
+										<div class="wage-item-amount">
+
+											<input type="hidden" name="wageTypeId"
+												value="<c:out value='${item.wageTypeId}' />"> <input
+												type="number" name="wageValue" min="0" step="1"
+												value="<c:out value='${item.wageValue}' />" required
+												<c:if test="${not wageInputEnabled}">disabled</c:if>>
+
+										</div>
+
+									</div>
+
+								</c:if>
+
+							</c:forEach>
+
+						</div>
+
+						<div class="wage-item-column">
+
+							<div class="wage-item-column-header deduction-header">공제항목
+							</div>
+
+							<c:forEach var="item" items="${wageItems}">
+
+								<c:if test="${item.itemType eq 'D'}">
+
+									<div class="wage-item-row">
+
+										<div class="wage-item-name">
+											<c:out value="${item.wageTypeName}" />
+										</div>
+
+										<div class="wage-item-amount">
+
+											<input type="hidden" name="wageTypeId"
+												value="<c:out value='${item.wageTypeId}' />"> <input
+												type="number" name="wageValue" min="0" step="1"
+												value="<c:out value='${item.wageValue}' />" required
+												<c:if test="${not wageInputEnabled}">disabled</c:if>>
+
+										</div>
+
+									</div>
+
+								</c:if>
+
+							</c:forEach>
+
+						</div>
+
+					</div>
+
+					<div class="wage-subtotals">
+
+						<div class="wage-subtotal">
+							<span>지급총액</span> <strong> <fmt:formatNumber
+									value="${currentWageTotalPayment}" pattern="#,##0" />원
+							</strong>
+						</div>
+
+						<div class="wage-subtotal">
+							<span>공제총액</span> <strong> <fmt:formatNumber
+									value="${currentWageTotalDeduction}" pattern="#,##0" />원
+							</strong>
+						</div>
+
+					</div>
+
+					<div class="wage-net-total">
+						실지급액 :
+						<fmt:formatNumber value="${currentWageNetPayment}" pattern="#,##0" />
+						원
+					</div>
+
+					<div class="wage-form-actions">
+
+						<button type="submit"
+							<c:if test="${not wageInputEnabled}">disabled</c:if>>
+							자동계산</button>
+
+						<button type="submit"
+							formaction="${pageContext.request.contextPath}/wage/paymentInputSave.do"
+							<c:if test="${not wageInputEnabled}">disabled</c:if>>저장
+						</button>
+
+					</div>
+
+				</form>
 
 			</c:if>
 
-		</form>
+		</section>
 
-	</c:if>
+	</div>
 
 	<section class="payroll-summary">
 

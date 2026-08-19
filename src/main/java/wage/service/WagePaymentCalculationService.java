@@ -21,6 +21,7 @@ import wage.model.WagePaymentCalculationItem;
 import wage.model.WagePaymentCalculationRequest;
 import wage.model.WagePaymentCalculationResult;
 import wage.model.WagePaymentItemInput;
+import wage.model.WageTypeSystemIds;
 
 // 급여 자동계산 서비스
 public class WagePaymentCalculationService {
@@ -54,7 +55,7 @@ public class WagePaymentCalculationService {
 			// 고용형태에 따른 급여 유형 판정
 			String wageCategory = determineWageCategory(employmentType);
 
-			List<WageType> wageTypes = wageTypeDao.selectActiveWageTypes(conn);
+			List<WageType> wageTypes = wageTypeDao.selectAllWageTypes(conn);
 
 			Map<Integer, WageType> wageTypeMap = new LinkedHashMap<>();
 
@@ -92,7 +93,7 @@ public class WagePaymentCalculationService {
 
 				if (wageType == null) {
 					throw new IllegalArgumentException(
-						"현재 사용 중이지 않거나 존재하지 않는 급여항목입니다.");
+						"존재하지 않는 급여항목입니다.");
 				}
 
 				long wageValue = 0L;
@@ -104,35 +105,6 @@ public class WagePaymentCalculationService {
 				if (wageValue < 0) {
 					throw new IllegalArgumentException(
 						"급여금액은 0원 이상이어야 합니다.");
-				}
-
-				// 일반 근로소득자의 허용되지 않는 지급항목 검증
-				if ("WORKER".equals(wageCategory)
-					&& "P".equals(wageType.getItemType())
-					&& ("사업소득".equals(wageType.getWageTypeName())
-						|| "일용급여".equals(wageType.getWageTypeName()))) {
-
-					if (wageValue == 0L) {
-						continue;
-					}
-
-					throw new IllegalArgumentException(
-						"일반급여 대상자에게 사용할 수 없는 지급항목입니다: "
-							+ wageType.getWageTypeName());
-				}
-
-				// 사업소득자의 허용 급여항목 검증
-				if ("BUSINESS".equals(wageCategory)
-					&& !isBusinessWageType(wageType)) {
-
-					// 화면에서 0원 항목까지 전달되는 경우는 무시
-					if (wageValue == 0L) {
-						continue;
-					}
-
-					throw new IllegalArgumentException(
-						"사업소득자에게 사용할 수 없는 급여항목입니다: "
-							+ wageType.getWageTypeName());
 				}
 
 				WagePaymentCalculationItem item = new WagePaymentCalculationItem(
@@ -161,8 +133,8 @@ public class WagePaymentCalculationService {
 				} else if ("D".equals(wageType.getItemType())) {
 
 					if ("BUSINESS".equals(wageCategory)
-						&& ("소득세".equals(wageType.getWageTypeName())
-							|| "지방소득세".equals(wageType.getWageTypeName()))) {
+						&& (wageTypeId == WageTypeSystemIds.INCOME_TAX_ID
+							|| wageTypeId == WageTypeSystemIds.LOCAL_INCOME_TAX_ID)) {
 
 						continue;
 					}
@@ -185,39 +157,28 @@ public class WagePaymentCalculationService {
 
 			if ("BUSINESS".equals(wageCategory)) {
 
-				WageType incomeTaxType = findWageTypeByName(
-					wageTypes,
-					"소득세",
-					"D");
-
-				WageType localTaxType = findWageTypeByName(
-					wageTypes,
-					"지방소득세",
-					"D");
-
 				// 사업소득 소득세 = 비과세 지급항목을 포함한 지급총액의 3%
 				long incomeTax = totalPayment * 3 / 100;
 
 				// 지방소득세 = 소득세의 10%
-				long localTax = roundToTen(incomeTax * 0.1);
+				long localTax = roundToTen(
+					incomeTax * 0.1);
 
-				deductionItems.add(
-					new WagePaymentCalculationItem(
-						incomeTaxType.getWageTypeId(),
-						incomeTaxType.getWageTypeName(),
-						incomeTaxType.getItemType(),
-						incomeTaxType.getTaxableYn(),
-						incomeTax));
+				totalDeduction += addCalculatedDeduction(
+					deductionItems,
+					findInputWageTypeById(
+						wageTypeMap,
+						inputWageTypeIds,
+						WageTypeSystemIds.INCOME_TAX_ID),
+					incomeTax);
 
-				deductionItems.add(
-					new WagePaymentCalculationItem(
-						localTaxType.getWageTypeId(),
-						localTaxType.getWageTypeName(),
-						localTaxType.getItemType(),
-						localTaxType.getTaxableYn(),
-						localTax));
-
-				totalDeduction += incomeTax + localTax;
+				totalDeduction += addCalculatedDeduction(
+					deductionItems,
+					findInputWageTypeById(
+						wageTypeMap,
+						inputWageTypeIds,
+						WageTypeSystemIds.LOCAL_INCOME_TAX_ID),
+					localTax);
 			}
 
 			long healthInsurance = 0L;
@@ -248,11 +209,6 @@ public class WagePaymentCalculationService {
 			// 국민연금
 			if (insuranceAmountMap.containsKey("국민연금")) {
 
-				WageType nationalPensionType = findWageTypeByName(
-					wageTypes,
-					"국민연금",
-					"D");
-
 				long nationalPensionBase = resolveInsuranceBaseAmount(
 					insuranceAmountMap.get("국민연금"),
 					monthlyRemuneration);
@@ -261,24 +217,17 @@ public class WagePaymentCalculationService {
 					nationalPensionBase
 						* NATIONAL_PENSION_RATE);
 
-				deductionItems.add(
-					new WagePaymentCalculationItem(
-						nationalPensionType.getWageTypeId(),
-						nationalPensionType.getWageTypeName(),
-						nationalPensionType.getItemType(),
-						nationalPensionType.getTaxableYn(),
-						nationalPension));
-
-				totalDeduction += nationalPension;
+				totalDeduction += addCalculatedDeduction(
+					deductionItems,
+					findInputWageTypeById(
+						wageTypeMap,
+						inputWageTypeIds,
+						WageTypeSystemIds.NATIONAL_PENSION_ID),
+					nationalPension);
 			}
 
 			// 건강보험
 			if (insuranceAmountMap.containsKey("건강보험")) {
-
-				WageType healthInsuranceType = findWageTypeByName(
-					wageTypes,
-					"건강보험",
-					"D");
 
 				long healthInsuranceBase = resolveInsuranceBaseAmount(
 					insuranceAmountMap.get("건강보험"),
@@ -288,47 +237,33 @@ public class WagePaymentCalculationService {
 					healthInsuranceBase
 						* HEALTH_INSURANCE_RATE);
 
-				deductionItems.add(
-					new WagePaymentCalculationItem(
-						healthInsuranceType.getWageTypeId(),
-						healthInsuranceType.getWageTypeName(),
-						healthInsuranceType.getItemType(),
-						healthInsuranceType.getTaxableYn(),
-						healthInsurance));
-
-				totalDeduction += healthInsurance;
+				totalDeduction += addCalculatedDeduction(
+					deductionItems,
+					findInputWageTypeById(
+						wageTypeMap,
+						inputWageTypeIds,
+						WageTypeSystemIds.HEALTH_INSURANCE_ID),
+					healthInsurance);
 			}
 
 			// 장기요양보험
 			if (insuranceAmountMap.containsKey("장기요양보험")) {
 
-				WageType longTermCareType = findWageTypeByName(
-					wageTypes,
-					"장기요양보험",
-					"D");
-
 				long longTermCare = roundToTen(
 					healthInsurance
 						* LONG_TERM_CARE_RATE);
 
-				deductionItems.add(
-					new WagePaymentCalculationItem(
-						longTermCareType.getWageTypeId(),
-						longTermCareType.getWageTypeName(),
-						longTermCareType.getItemType(),
-						longTermCareType.getTaxableYn(),
-						longTermCare));
-
-				totalDeduction += longTermCare;
+				totalDeduction += addCalculatedDeduction(
+					deductionItems,
+					findInputWageTypeById(
+						wageTypeMap,
+						inputWageTypeIds,
+						WageTypeSystemIds.LONG_TERM_CARE_ID),
+					longTermCare);
 			}
 
 			// 고용보험
 			if (insuranceAmountMap.containsKey("고용보험")) {
-
-				WageType employmentInsuranceType = findWageTypeByName(
-					wageTypes,
-					"고용보험",
-					"D");
 
 				long employmentInsuranceBase = resolveInsuranceBaseAmount(
 					insuranceAmountMap.get("고용보험"),
@@ -338,15 +273,13 @@ public class WagePaymentCalculationService {
 					employmentInsuranceBase
 						* EMPLOYMENT_INSURANCE_RATE);
 
-				deductionItems.add(
-					new WagePaymentCalculationItem(
-						employmentInsuranceType.getWageTypeId(),
-						employmentInsuranceType.getWageTypeName(),
-						employmentInsuranceType.getItemType(),
-						employmentInsuranceType.getTaxableYn(),
-						employmentInsurance));
-
-				totalDeduction += employmentInsurance;
+				totalDeduction += addCalculatedDeduction(
+					deductionItems,
+					findInputWageTypeById(
+						wageTypeMap,
+						inputWageTypeIds,
+						WageTypeSystemIds.EMPLOYMENT_INSURANCE_ID),
+					employmentInsurance);
 			}
 
 			long netPayment = totalPayment - totalDeduction;
@@ -401,47 +334,39 @@ public class WagePaymentCalculationService {
 		return monthlyRemuneration;
 	}
 
-	private boolean isBusinessWageType(
-		WageType wageType) {
+	private WageType findInputWageTypeById(
+		Map<Integer, WageType> wageTypeMap,
+		Set<Integer> inputWageTypeIds,
+		int wageTypeId) {
 
-		String itemType = wageType.getItemType();
-		String wageTypeName = wageType.getWageTypeName();
+		if (!inputWageTypeIds.contains(
+			wageTypeId)) {
 
-		if ("P".equals(itemType)) {
-
-			/*
-			 * 신규 BUSINESS는 일반 지급항목을 사용하며,
-			 * 기존 스냅샷의 사업소득 항목도 허용한다.
-			 */
-			return !"일용급여".equals(wageTypeName);
+			return null;
 		}
 
-		if ("D".equals(itemType)) {
-			return true;
-		}
-
-		return false;
+		return wageTypeMap.get(
+			wageTypeId);
 	}
 
-	private WageType findWageTypeByName(
-		List<WageType> wageTypes,
-		String wageTypeName,
-		String itemType) {
+	private long addCalculatedDeduction(
+		List<WagePaymentCalculationItem> deductionItems,
+		WageType wageType,
+		long wageValue) {
 
-		for (WageType wageType : wageTypes) {
-
-			if (wageTypeName.equals(
-				wageType.getWageTypeName())
-				&& itemType.equals(
-					wageType.getItemType())) {
-
-				return wageType;
-			}
+		if (wageType == null) {
+			return 0L;
 		}
 
-		throw new IllegalStateException(
-			"필수 급여항목이 존재하지 않습니다: "
-				+ wageTypeName);
+		deductionItems.add(
+			new WagePaymentCalculationItem(
+				wageType.getWageTypeId(),
+				wageType.getWageTypeName(),
+				wageType.getItemType(),
+				wageType.getTaxableYn(),
+				wageValue));
+
+		return wageValue;
 	}
 
 	private boolean isSocialInsuranceType(
@@ -451,12 +376,20 @@ public class WagePaymentCalculationService {
 			return false;
 		}
 
-		String wageTypeName = wageType.getWageTypeName();
+		Integer wageTypeId = wageType.getWageTypeId();
 
-		return "국민연금".equals(wageTypeName)
-			|| "건강보험".equals(wageTypeName)
-			|| "장기요양보험".equals(wageTypeName)
-			|| "고용보험".equals(wageTypeName);
+		return Integer.valueOf(
+			WageTypeSystemIds.NATIONAL_PENSION_ID)
+			.equals(wageTypeId)
+			|| Integer.valueOf(
+				WageTypeSystemIds.HEALTH_INSURANCE_ID)
+				.equals(wageTypeId)
+			|| Integer.valueOf(
+				WageTypeSystemIds.LONG_TERM_CARE_ID)
+				.equals(wageTypeId)
+			|| Integer.valueOf(
+				WageTypeSystemIds.EMPLOYMENT_INSURANCE_ID)
+				.equals(wageTypeId);
 	}
 
 	private void validateRequest(

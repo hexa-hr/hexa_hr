@@ -360,6 +360,16 @@ public class WagePaymentInputHandler implements CommandHandler {
 			}
 
 			/*
+			 * 사원이 선택되지 않은 초기 화면에서도
+			 * 현재 사용 중인 급여항목 틀을 표시한다.
+			 */
+			req.setAttribute(
+				"wageItems",
+				wagePaymentInputService.getFrameViewItems(
+					wageMonth,
+					wagePeriod));
+
+			/*
 			 * 사원이 선택된 경우에만
 			 * 오른쪽 급여입력 항목을 조회한다.
 			 *

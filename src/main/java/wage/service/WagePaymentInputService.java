@@ -24,6 +24,7 @@ import wage.model.WagePaymentCalculationItem;
 import wage.model.WagePaymentEmployeeRow;
 import wage.model.WagePaymentInputViewItem;
 import wage.model.WagePaymentPeriodDefault;
+import wage.model.WageTypeSystemIds;
 
 public class WagePaymentInputService {
 
@@ -46,9 +47,12 @@ public class WagePaymentInputService {
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
 
+			List<WageType> activeWageTypes = wageTypeDao.selectActiveWageTypes(conn);
+
 			return buildItems(
 				conn,
 				employeeId,
+				activeWageTypes,
 				settlementStartDate,
 				settlementEndDate,
 				true);
@@ -59,6 +63,124 @@ public class WagePaymentInputService {
 				"급여입력 초기값 조회 중 데이터베이스 오류가 발생했습니다.",
 				e);
 		}
+	}
+
+	public List<WagePaymentInputViewItem> getFrameViewItems(
+		String wageMonth,
+		String wagePeriod) {
+
+		if (wageMonth == null
+			|| wageMonth.trim().isEmpty()) {
+
+			throw new IllegalArgumentException(
+				"귀속연월을 입력해야 합니다.");
+		}
+
+		String normalizedWageMonth;
+
+		try {
+
+			normalizedWageMonth = YearMonth.parse(
+				wageMonth.trim()).toString();
+
+		} catch (DateTimeException e) {
+
+			throw new IllegalArgumentException(
+				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+		}
+
+		if (wagePeriod == null
+			|| wagePeriod.trim().isEmpty()) {
+
+			throw new IllegalArgumentException(
+				"급여차수를 입력해야 합니다.");
+		}
+
+		int wagePeriodNumber;
+
+		try {
+
+			wagePeriodNumber = Integer.parseInt(
+				wagePeriod.trim());
+
+			if (wagePeriodNumber < 1
+				|| wagePeriodNumber > 10) {
+
+				throw new NumberFormatException();
+			}
+
+		} catch (NumberFormatException e) {
+
+			throw new IllegalArgumentException(
+				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+		}
+
+		String normalizedWagePeriod = String.valueOf(wagePeriodNumber);
+
+		try (Connection conn = ConnectionProvider.getConnection()) {
+
+			List<WageType> wageTypes = resolveFrameWageTypes(
+				conn,
+				normalizedWageMonth,
+				normalizedWagePeriod);
+
+			List<WagePaymentInputViewItem> result = new ArrayList<>();
+
+			for (WageType wageType : wageTypes) {
+
+				/*
+				 * 저장된 작업공간이 없을 때만
+				 * 현재 신규 급여입력 항목 기준을 적용한다.
+				 *
+				 * 저장된 작업공간이 있으면 당시 실제 저장된
+				 * 급여항목 틀을 그대로 표시한다.
+				 */
+				if (!isDisplayableWageType(
+					"WORKER",
+					wageType)) {
+
+					continue;
+				}
+
+				boolean active = "Y".equals(wageType.getUsage());
+
+				result.add(
+					new WagePaymentInputViewItem(
+						wageType.getWageTypeId(),
+						wageType.getWageTypeName(),
+						wageType.getItemType(),
+						wageType.getTaxableYn(),
+						resolveFrameInitialValue(wageType),
+						active,
+						false));
+			}
+
+			return result;
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException(
+				"급여입력 기본 항목 조회 중 데이터베이스 오류가 발생했습니다.",
+				e);
+		}
+	}
+
+	private List<WageType> resolveFrameWageTypes(
+		Connection conn,
+		String wageMonth,
+		String wagePeriod)
+		throws SQLException {
+
+		List<WageType> workspaceWageTypes = wageTypeDao.selectWorkspaceWageTypes(
+			conn,
+			wageMonth,
+			wagePeriod);
+
+		if (!workspaceWageTypes.isEmpty()) {
+			return workspaceWageTypes;
+		}
+
+		return wageTypeDao.selectActiveWageTypes(conn);
 	}
 
 	public List<WagePaymentCalculationItem> getItems(
@@ -118,9 +240,17 @@ public class WagePaymentInputService {
 					settlementStartDate,
 					settlementEndDate);
 
+				String normalizedWagePeriod = String.valueOf(wagePeriodNumber);
+
+				List<WageType> frameWageTypes = resolveFrameWageTypes(
+					conn,
+					wageMonth.trim(),
+					normalizedWagePeriod);
+
 				List<WagePaymentCalculationItem> initialItems = buildItems(
 					conn,
 					employeeId,
+					frameWageTypes,
 					settlementStartDate,
 					settlementEndDate,
 					true);
@@ -208,10 +338,9 @@ public class WagePaymentInputService {
 
 				boolean active = activeWageType != null;
 
-				boolean calculable = active
-					&& isCalculableWageType(
-						wageCategory,
-						activeWageType);
+				boolean calculable = isCalculableWageType(
+					wageCategory,
+					item.getItemType());
 
 				result.add(
 					new WagePaymentInputViewItem(
@@ -392,6 +521,7 @@ public class WagePaymentInputService {
 	private List<WagePaymentCalculationItem> buildItems(
 		Connection conn,
 		Integer employeeId,
+		List<WageType> wageTypes,
 		Date settlementStartDate,
 		Date settlementEndDate,
 		boolean applyInitialValues)
@@ -407,8 +537,6 @@ public class WagePaymentInputService {
 		}
 
 		String wageCategory = determineWageCategory(employmentType);
-
-		List<WageType> wageTypes = wageTypeDao.selectActiveWageTypes(conn);
 
 		List<WagePaymentCalculationItem> result = new ArrayList<>();
 
@@ -491,8 +619,9 @@ public class WagePaymentInputService {
 
 			WagePaymentCalculationItem item = items.get(i);
 
-			if ("기본급".equals(
-				item.getWageTypeName())) {
+			if (Integer.valueOf(
+				WageTypeSystemIds.BASIC_PAY_ID).equals(
+					item.getWageTypeId())) {
 
 				items.set(
 					i,
@@ -508,6 +637,42 @@ public class WagePaymentInputService {
 		}
 
 		return items;
+	}
+
+	private long resolveFrameInitialValue(
+		WageType wageType) {
+
+		/*
+		 * 사원이 선택되지 않았으므로 기본급과 근태연결은 0원이다.
+		 * 일괄지급 항목만 급여항목 설정의 금액을 표시한다.
+		 */
+		if (!"P".equals(wageType.getItemType())
+			|| !"일괄지급".equals(
+				wageType.getAttendanceOrLumpsum())) {
+
+			return 0L;
+		}
+
+		String linkContent = wageType.getAttendanceOrLumpsumContent();
+
+		if (linkContent == null
+			|| linkContent.trim().isEmpty()) {
+
+			return 0L;
+		}
+
+		try {
+
+			return Long.parseLong(
+				linkContent.trim());
+
+		} catch (NumberFormatException e) {
+
+			throw new IllegalStateException(
+				"일괄지급 금액이 올바르지 않습니다: "
+					+ wageType.getWageTypeName(),
+				e);
+		}
 	}
 
 	private void validateEmployeeId(
@@ -558,58 +723,30 @@ public class WagePaymentInputService {
 		String wageCategory,
 		WageType wageType) {
 
-		String itemType = wageType.getItemType();
-		String wageTypeName = wageType.getWageTypeName();
+		if (!"WORKER".equals(wageCategory)
+			&& !"BUSINESS".equals(wageCategory)) {
 
-		if ("WORKER".equals(wageCategory)
-			|| "BUSINESS".equals(wageCategory)) {
-
-			if ("P".equals(itemType)
-				&& ("사업소득".equals(wageTypeName)
-					|| "일용급여".equals(wageTypeName))) {
-
-				return false;
-			}
-
-			return "P".equals(itemType)
-				|| "D".equals(itemType);
+			return false;
 		}
 
-		/*
-		 * 일용직은 DAILY_WORK 연동 규칙이 확정된 후
-		 * 별도 처리한다.
-		 */
-		return false;
+		String itemType = wageType.getItemType();
+
+		return "P".equals(itemType)
+			|| "D".equals(itemType);
 	}
 
 	private boolean isCalculableWageType(
 		String wageCategory,
-		WageType wageType) {
+		String itemType) {
 
-		String itemType = wageType.getItemType();
-		String wageTypeName = wageType.getWageTypeName();
+		if (!"WORKER".equals(wageCategory)
+			&& !"BUSINESS".equals(wageCategory)) {
 
-		if ("WORKER".equals(wageCategory)) {
-			return isDisplayableWageType(
-				wageCategory,
-				wageType);
+			return false;
 		}
 
-		if ("BUSINESS".equals(wageCategory)) {
-
-			if ("P".equals(itemType)) {
-
-				/*
-				 * 신규 화면에서는 사업소득 항목을 표시하지 않지만,
-				 * 기존 저장 스냅샷의 사업소득 항목은 계산 가능 상태로 유지한다.
-				 */
-				return !"일용급여".equals(wageTypeName);
-			}
-
-			return "D".equals(itemType);
-		}
-
-		return false;
+		return "P".equals(itemType)
+			|| "D".equals(itemType);
 	}
 
 	private LocalDate resolveCalculationDate(
