@@ -25,7 +25,7 @@ public class WageType {
 		this.itemType = itemType;
 		this.taxableYn = taxableYn;
 		this.taxFreeLimit = taxFreeLimit;
-		this.taxFreeName = taxFreeName; // 비과세명 데이터를 저장하는 코드
+		this.taxFreeName = taxFreeName;
 	}
 
 	public Integer getWageTypeId() {
@@ -66,10 +66,6 @@ public class WageType {
 
 	public String getTaxFreeName() {
 		return taxFreeName;
-	}
-
-	public void setTaxFreeName(String taxFreeName) {
-		this.taxFreeName = taxFreeName;
 	}
 
 }
