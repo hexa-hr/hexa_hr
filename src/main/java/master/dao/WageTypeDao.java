@@ -272,4 +272,74 @@ public class WageTypeDao {
 		return result;
 	}
 
+	// 일용직 급여입력용 - 월/차수에 저장된 공제항목 틀 조회
+	public List<WageType> selectDailyWorkspaceDeductionTypes(
+		Connection conn,
+		String wageMonth,
+		String wagePeriod)
+		throws SQLException {
+
+		String sql = "SELECT wt.wage_type_id, "
+			+ "       wt.wage_type_name, "
+			+ "       wt.number_cut, "
+			+ "       wt.attendance_or_lumpsum, "
+			+ "       wt.attendance_or_lumpsum_content, "
+			+ "       wt.usage, "
+			+ "       wt.item_type, "
+			+ "       wt.taxable_yn, "
+			+ "       wt.tax_free_limit, "
+			+ "       wt.tax_free_name "
+			+ "FROM wage_type wt "
+			+ "WHERE wt.item_type = 'D' "
+			+ "  AND EXISTS ( "
+			+ "      SELECT 1 "
+			+ "      FROM wage w "
+			+ "      JOIN employee e "
+			+ "        ON e.employee_id = w.employee_id "
+			+ "      WHERE w.wage_type_id = wt.wage_type_id "
+			+ "        AND w.wage_month = ? "
+			+ "        AND w.wage_period = ? "
+			+ "        AND e.employment_type = '일용직' "
+			+ "  ) "
+			+ "ORDER BY wt.wage_type_id";
+
+		List<WageType> result = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, wageMonth);
+			pstmt.setString(2, wagePeriod);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					Long taxFreeLimit = null;
+
+					long taxFreeLimitValue = rs.getLong("tax_free_limit");
+
+					if (!rs.wasNull()) {
+						taxFreeLimit = taxFreeLimitValue;
+					}
+
+					result.add(
+						new WageType(
+							rs.getInt("wage_type_id"),
+							rs.getString("wage_type_name"),
+							rs.getString("number_cut"),
+							rs.getString("attendance_or_lumpsum"),
+							rs.getString(
+								"attendance_or_lumpsum_content"),
+							rs.getString("usage"),
+							rs.getString("item_type"),
+							rs.getString("taxable_yn"),
+							taxFreeLimit,
+							rs.getString("tax_free_name")));
+				}
+			}
+		}
+
+		return result;
+	}
+
 }
