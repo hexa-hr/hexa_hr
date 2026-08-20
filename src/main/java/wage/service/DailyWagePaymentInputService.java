@@ -393,6 +393,172 @@ public class DailyWagePaymentInputService {
 			netPayment);
 	}
 
+	public WagePaymentAutoCalculationResult prepareSaveResult(
+		Integer employeeId,
+		String wageMonth,
+		String wagePeriod,
+		Date settlementStartDate,
+		Date settlementEndDate,
+		List<WagePaymentItemInput> currentDeductionInputs) {
+
+		String normalizedWageMonth = normalizeWageMonth(
+			wageMonth);
+
+		String normalizedWagePeriod = normalizeWagePeriod(
+			wagePeriod);
+
+		DailyWorkPayrollResult workResult = getWorkResult(
+			employeeId,
+			settlementStartDate,
+			settlementEndDate);
+
+		List<WagePaymentInputViewItem> baseItems = getDeductionViewItems(
+			employeeId,
+			normalizedWageMonth,
+			normalizedWagePeriod,
+			settlementStartDate,
+			settlementEndDate);
+
+		if (baseItems == null) {
+			throw new IllegalStateException(
+				"공제항목 기준정보가 없습니다.");
+		}
+
+		if (currentDeductionInputs == null) {
+			throw new IllegalArgumentException(
+				"공제항목 정보가 올바르지 않습니다.");
+		}
+
+		Map<Integer, WagePaymentInputViewItem> baseItemMap = new LinkedHashMap<>();
+
+		for (WagePaymentInputViewItem item : baseItems) {
+
+			if (item == null
+				|| item.getWageTypeId() == null
+				|| item.getWageTypeId() <= 0
+				|| !"D".equals(item.getItemType())) {
+
+				throw new IllegalStateException(
+					"공제항목 기준정보가 올바르지 않습니다.");
+			}
+
+			if (baseItemMap.put(
+				item.getWageTypeId(),
+				item) != null) {
+
+				throw new IllegalStateException(
+					"중복된 공제항목 기준정보가 존재합니다.");
+			}
+		}
+
+		Map<Integer, Long> currentValueMap = new LinkedHashMap<>();
+
+		for (WagePaymentItemInput input : currentDeductionInputs) {
+
+			if (input == null
+				|| input.getWageTypeId() == null
+				|| input.getWageTypeId() <= 0) {
+
+				throw new IllegalArgumentException(
+					"공제항목 정보가 올바르지 않습니다.");
+			}
+
+			Integer wageTypeId = input.getWageTypeId();
+
+			if (!baseItemMap.containsKey(wageTypeId)) {
+				throw new IllegalArgumentException(
+					"화면에 존재하지 않는 공제항목이 포함되어 있습니다.");
+			}
+
+			long wageValue = input.getWageValue() == null
+				? 0L
+				: input.getWageValue();
+
+			if (wageValue < 0L) {
+				throw new IllegalArgumentException(
+					"공제금액은 0원 이상이어야 합니다.");
+			}
+
+			if (currentValueMap.put(
+				wageTypeId,
+				wageValue) != null) {
+
+				throw new IllegalArgumentException(
+					"중복된 공제항목이 포함되어 있습니다.");
+			}
+		}
+
+		if (currentValueMap.size() != baseItemMap.size()) {
+
+			throw new IllegalArgumentException(
+				"공제항목 일부가 누락되었습니다.");
+		}
+
+		long totalPayment = requireNonNegative(
+			workResult.getTotalPayment(),
+			"DAILY_WORK 지급총액");
+
+		long totalIncomeTax = requireNonNegative(
+			workResult.getTotalIncomeTax(),
+			"DAILY_WORK 소득세");
+
+		long totalLocalTax = requireNonNegative(
+			workResult.getTotalLocalTax(),
+			"DAILY_WORK 지방소득세");
+
+		List<WagePaymentInputViewItem> saveItems = new ArrayList<>();
+
+		long totalDeduction = 0L;
+
+		for (WagePaymentInputViewItem baseItem : baseItems) {
+
+			Integer wageTypeId = baseItem.getWageTypeId();
+
+			long finalValue = currentValueMap.get(wageTypeId);
+
+			/*
+			 * 소득세와 지방소득세는 화면값 대신
+			 * DAILY_WORK 합계를 사용한다.
+			 */
+			if (Integer.valueOf(
+				WageTypeSystemIds.INCOME_TAX_ID)
+				.equals(wageTypeId)) {
+
+				finalValue = totalIncomeTax;
+
+			} else if (Integer.valueOf(
+				WageTypeSystemIds.LOCAL_INCOME_TAX_ID)
+				.equals(wageTypeId)) {
+
+				finalValue = totalLocalTax;
+			}
+
+			/*
+			 * 4대보험과 기타 공제는
+			 * 현재 화면에 표시된 값을 유지한다.
+			 */
+			saveItems.add(
+				new WagePaymentInputViewItem(
+					baseItem.getWageTypeId(),
+					baseItem.getWageTypeName(),
+					baseItem.getItemType(),
+					baseItem.getTaxableYn(),
+					finalValue,
+					baseItem.isActive(),
+					baseItem.isCalculable()));
+
+			totalDeduction += finalValue;
+		}
+
+		long netPayment = totalPayment - totalDeduction;
+
+		return new WagePaymentAutoCalculationResult(
+			saveItems,
+			totalPayment,
+			totalDeduction,
+			netPayment);
+	}
+
 	private void validateEmployeeId(
 		Integer employeeId) {
 

@@ -54,15 +54,13 @@ public class DailyWagePaymentSaveService {
 			normalizedWagePeriod);
 
 		/*
-		 * 저장 직전에 서버에서 다시 계산한다.
+		 * 저장 직전에 서버에서 저장 기준값을 다시 구성한다.
 		 *
-		 * - 일용직 사원 여부
-		 * - DAILY_WORK 지급액과 세금
-		 * - 공제항목 스냅샷
-		 * - 보험 가입정보와 보험료
-		 * - 전송된 공제항목 ID
+		 * - 일용직 사원 여부와 공제항목 스냅샷을 검증한다.
+		 * - 지급총액, 소득세, 지방소득세는 DAILY_WORK를 기준으로 한다.
+		 * - 4대보험과 기타 공제항목은 화면에 표시된 값을 유지한다.
 		 */
-		WagePaymentAutoCalculationResult canonicalResult = dailyWagePaymentInputService.calculate(
+		WagePaymentAutoCalculationResult canonicalResult = dailyWagePaymentInputService.prepareSaveResult(
 			employeeId,
 			normalizedWageMonth,
 			normalizedWagePeriod,

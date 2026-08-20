@@ -940,11 +940,11 @@ th {
 							<strong>공제항목</strong>
 
 							<div class="deduction-header-actions">
+
 								<button type="submit"
 									<c:if test="${not wageInputEnabled}">disabled</c:if>>
 									4대보험</button>
 
-								<button type="button" disabled>기간단위 소득세</button>
 							</div>
 
 						</div>
@@ -1016,6 +1016,16 @@ th {
 					원
 				</div>
 
+				<c:url var="dailyContentClearUrl" value="/wage/dailyPaymentInput.do">
+
+					<c:param name="wageMonth" value="${wageMonth}" />
+					<c:param name="wagePeriod" value="${wagePeriod}" />
+
+					<c:forEach var="pending" items="${allPendingEmployees}">
+						<c:param name="pendingEmployeeId" value="${pending.employeeId}" />
+					</c:forEach>
+
+				</c:url>
 				<div class="daily-form-actions">
 
 					<button type="submit"
@@ -1024,10 +1034,12 @@ th {
 
 					<button type="submit"
 						formaction="${pageContext.request.contextPath}/wage/dailyPaymentInputSave.do"
-						<c:if test="${not wageInputEnabled or not autoCalculated}">disabled</c:if>>
-						저장</button>
+						<c:if test="${not wageInputEnabled}">disabled</c:if>>저장</button>
 
-					<button type="button" disabled>내용 지우기</button>
+					<button type="button" id="dailyContentClearButton"
+						data-clear-url="<c:out value='${dailyContentClearUrl}' />"
+						<c:if test="${not wageInputEnabled}">disabled</c:if>>내용
+						지우기</button>
 
 				</div>
 
@@ -1764,6 +1776,33 @@ th {
 
 				event.preventDefault();
 				moveWorkspace();
+			});
+
+	})();
+	</script>
+
+	<script>
+	(function() {
+
+		const clearButton = document.getElementById(
+			"dailyContentClearButton");
+
+		if (!clearButton) {
+			return;
+		}
+
+		clearButton.addEventListener(
+			"click",
+			function() {
+
+				const clearUrl =
+					clearButton.dataset.clearUrl;
+
+				if (!clearUrl) {
+					return;
+				}
+
+				window.location.assign(clearUrl);
 			});
 
 	})();
