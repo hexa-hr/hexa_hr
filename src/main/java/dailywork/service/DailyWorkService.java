@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import dailywork.dao.DailyWorkDao;
+import dailywork.model.DailyWorkMonthlyVO;
 import dailywork.model.DailyWorkVO;
 import jdbc.JdbcUtil;
 import jdbc.connection.ConnectionProvider;
@@ -68,6 +69,27 @@ public class DailyWorkService {
 			throw new RuntimeException(e);
 		} finally {
 			JdbcUtil.close(conn);
+		}
+	}
+
+	// 월별 근무 요약 데이터 가져오기
+	public List<DailyWorkMonthlyVO> getMonthlySummary(String yearMonth) {
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			// 새로 추가한 DAO 메서드 호출
+			return dailyWorkDao.selectMonthlySummary(conn, yearMonth);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	// 상세조회 다중 조건 검색 데이터 가져오기
+	public List<Map<String, Object>> getDailyWorkDetailList(String startDate, String endDate, String empName,
+			String deptId, String projectId) {
+		try (Connection conn = ConnectionProvider.getConnection()) {
+
+			return dailyWorkDao.selectDailyWorkDetailList(conn, startDate, endDate, empName, deptId, projectId);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

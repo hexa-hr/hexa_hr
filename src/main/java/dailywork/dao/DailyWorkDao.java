@@ -4,8 +4,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import dailywork.model.DailyWorkMonthlyVO;
 import dailywork.model.DailyWorkVO;
 
 public class DailyWorkDao {
@@ -91,5 +95,86 @@ public class DailyWorkDao {
 			pstmt.setInt(1, workId);
 			return pstmt.executeUpdate();
 		}
+	}
+
+	// 4. 월별 근무 요약 조회 (월별 조회 캘린더용)
+	public List<DailyWorkMonthlyVO> selectMonthlySummary(Connection conn, String yearMonth) throws SQLException {
+		String sql = "SELECT " + "    'No-' || e.employee_id AS emp_no, " + "    e.korean_name, "
+				+ "    NVL(d.department_name, '미배정') AS dept_name, "
+				+ "    LISTAGG(TO_CHAR(dw.work_date, 'FMDD'), ',') WITHIN GROUP (ORDER BY dw.work_date) AS work_days, "
+				+ "    COUNT(dw.work_id) AS total_work_days, " + "    NVL(SUM(dw.income_tax), 0) AS total_income_tax, "
+				+ "    NVL(SUM(dw.local_tax), 0) AS total_local_tax, "
+				+ "    NVL(SUM(dw.actual_payment), 0) AS total_actual_payment " + "FROM employee e "
+				+ "LEFT JOIN daily_work dw ON e.employee_id = dw.employee_id "
+				+ "                       AND TO_CHAR(dw.work_date, 'YYYY-MM') = ? "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id " + "WHERE e.employment_type = '일용직' "
+				+ "GROUP BY e.employee_id, e.korean_name, d.department_name " + "ORDER BY e.employee_id";
+
+		List<DailyWorkMonthlyVO> list = new ArrayList<>();
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, yearMonth);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					list.add(new DailyWorkMonthlyVO(rs.getString("emp_no"), rs.getString("korean_name"),
+							rs.getString("dept_name"), rs.getString("work_days"), rs.getInt("total_work_days"),
+							rs.getLong("total_income_tax"), rs.getLong("total_local_tax"),
+							rs.getLong("total_actual_payment")));
+				}
+			}
+		}
+		return list;
+	}
+
+	// 5. 상세조회 다중 조건 검색 (동적 검색 로직)
+	public List<Map<String, Object>> selectDailyWorkDetailList(Connection conn, String startDate, String endDate,
+			String empName, String deptId, String projectId) throws SQLException {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT d.work_date, 'No-' || e.employee_id AS emp_no, e.korean_name, ");
+		sql.append("       NVL(dp.department_name, '미배정') AS dept_name, ");
+		sql.append("       NVL(p.name, '삭제된 현장') AS proj_name, ");
+		sql.append("       d.daily_wage, d.payment_rate, d.income_tax, d.local_tax, d.actual_payment ");
+		sql.append("FROM DAILY_WORK d ");
+		sql.append("JOIN EMPLOYEE e ON d.employee_id = e.employee_id ");
+		sql.append("LEFT JOIN DEPARTMENT dp ON e.department_id = dp.department_id ");
+		sql.append("LEFT JOIN FIELD_OR_PROJECT p ON d.field_or_project_id = p.field_or_project_id ");
+		sql.append("WHERE e.employment_type = '일용직' ");
+
+		// 체크된 조건만 쿼리에 동적으로 추가
+		if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
+			sql.append("AND d.work_date BETWEEN TO_DATE('" + startDate + "', 'YYYY-MM-DD') AND TO_DATE('" + endDate
+					+ "', 'YYYY-MM-DD') ");
+		}
+		if (empName != null && !empName.isEmpty()) {
+			sql.append("AND e.korean_name LIKE '%" + empName + "%' ");
+		}
+		if (deptId != null && !deptId.isEmpty()) {
+			/* sql.append("AND e.department_id = " + deptId + " "); */
+			sql.append("AND dp.department_name LIKE '%" + deptId + "%' ");
+		}
+
+		if (projectId != null && !projectId.isEmpty()) {
+			sql.append("AND d.field_or_project_id = " + projectId + " ");
+		}
+
+		sql.append("ORDER BY d.work_date DESC, e.employee_id");
+
+		List<Map<String, Object>> list = new ArrayList<>();
+		try (PreparedStatement pstmt = conn.prepareStatement(sql.toString()); ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("workDate", rs.getDate("work_date"));
+				map.put("empNo", rs.getString("emp_no"));
+				map.put("empName", rs.getString("korean_name"));
+				map.put("deptName", rs.getString("dept_name"));
+				map.put("projName", rs.getString("proj_name"));
+				map.put("dailyWage", rs.getLong("daily_wage"));
+				map.put("paymentRate", rs.getDouble("payment_rate"));
+				map.put("incomeTax", rs.getLong("income_tax"));
+				map.put("localTax", rs.getLong("local_tax"));
+				map.put("actualPayment", rs.getLong("actual_payment"));
+				list.add(map);
+			}
+		}
+		return list;
 	}
 }

@@ -12,7 +12,7 @@ import jdbc.connection.ConnectionProvider;
 public class FieldOrProjectService {
 	private FieldOrProjectDao projectDao = new FieldOrProjectDao();
 
-	// 1. 프로젝트 리스트 가져오기
+	// 1. 프로젝트 리스트 가져오기 (기존 메서드)
 	public List<FieldOrProjectVO> getVisibleProjectList() {
 		try (Connection conn = ConnectionProvider.getConnection()) {
 			return projectDao.selectVisibleProjects(conn);
@@ -81,4 +81,16 @@ public class FieldOrProjectService {
 			JdbcUtil.close(conn);
 		}
 	}
+
+	// 5. 현장/프로젝트 활성화된 목록 가져오기 (상세조회 드롭다운용)
+	// ※ 기존 projectDao 변수명에 맞게 코드를 살짝 수정하여 적용했습니다.
+	public java.util.List<dailywork.model.FieldOrProjectVO> getVisibleProjects() {
+		try (java.sql.Connection conn = jdbc.connection.ConnectionProvider.getConnection()) {
+			// FieldOrProjectDao에 있는 selectVisibleProjects 메서드 호출
+			return projectDao.selectVisibleProjects(conn);
+		} catch (java.sql.SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 }
