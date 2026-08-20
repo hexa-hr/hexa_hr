@@ -22,13 +22,10 @@ public class UserInfoHandler implements CommandHandler {
 
 		HttpSession session = request.getSession();
 
-		// 🌟 GET: 화면 보여주기 (DB 데이터 + 세션에 저장해둔 가짜 데이터 합치기!)
 		if (request.getMethod().equalsIgnoreCase("GET")) {
 			try (java.sql.Connection conn = ConnectionProvider.getConnection()) {
-				// 1. 기본 DB 데이터 불러오기
 				Map<String, String> info = dao.selectCompanyInfo(conn);
 
-				// 2. 세션에 저장해둔 화면용 입력 데이터(fakeData)가 있으면 덮어씌우기
 				@SuppressWarnings("unchecked") Map<String, String> fakeData = (Map<String, String>)session
 					.getAttribute("fakeData");
 				if (fakeData != null) {
@@ -42,11 +39,9 @@ public class UserInfoHandler implements CommandHandler {
 			}
 		}
 
-		// 🌟 POST: 저장하기 (세션에 화면 값 몽땅 저장 + DB에는 안전한 값만 저장)
 		if (request.getMethod().equalsIgnoreCase("POST")) {
 			request.setCharacterEncoding("UTF-8");
 
-			// 1. 화면의 모든 입력값을 세션(fakeData)에 저장해서 유지되도록 만듦!
 			Map<String, String> fakeData = new HashMap<>();
 			Enumeration<String> params = request.getParameterNames();
 			while (params.hasMoreElements()) {
@@ -55,7 +50,6 @@ public class UserInfoHandler implements CommandHandler {
 			}
 			session.setAttribute("fakeData", fakeData);
 
-			// 2. DB 업데이트용 안전한 데이터 뽑기
 			Map<String, String> dbData = new HashMap<>();
 			dbData.put("companyName", request.getParameter("companyName"));
 			dbData.put("businessNumber", request.getParameter("businessNumber"));
@@ -67,19 +61,38 @@ public class UserInfoHandler implements CommandHandler {
 			dbData.put("positionId", request.getParameter("positionId"));
 			dbData.put("email", request.getParameter("email"));
 
-			// 🌟 설립일 에러 차단 방어막! (정확히 2000-01-01 형태일 때만 DB에 넣음)
 			String estDate = request.getParameter("establishmentDate");
 			if (estDate != null && estDate.matches("\\d{4}-\\d{2}-\\d{2}")) {
 				dbData.put("establishmentDate", estDate);
 			} else {
-				dbData.put("establishmentDate", ""); // 조건 안맞으면 NULL 처리되어 에러 안남
+				dbData.put("establishmentDate", "");
 			}
+
+			// 🌟 화면에서 급여 설정값(날짜 등) 뽑아오기
+			Integer salaryCalc1 = parseInt(request.getParameter("salaryCalc1"));
+			Integer salaryCalc2 = parseInt(request.getParameter("salaryCalc2"));
+			Integer salaryPaymentDate = parseInt(request.getParameter("salaryPaymentDate"));
+			String calc1MonthType = request.getParameter("calc1MonthType");
+			String calc2MonthType = request.getParameter("calc2MonthType");
+			String paymentMonthType = request.getParameter("paymentMonthType");
+
+			// 🌟 추가된 부분: 은행, 계좌번호, 예금주 파라미터 뽑아오기
+			String bankName = request.getParameter("bankName");
+			String accountNumber = request.getParameter("accountNumber");
+			String depositStocks = request.getParameter("depositStocks");
 
 			java.sql.Connection conn = null;
 			try {
 				conn = ConnectionProvider.getConnection();
 				conn.setAutoCommit(false);
+
+				// 1. 기존 회사 정보 업데이트
 				dao.updateUserInfo(conn, dbData);
+
+				// 2. 🌟 모든 사원의 급여일 테이블 일괄 업데이트 실행! (파라미터 3개 추가 연결 완료)
+				dao.updateAllEmployeeSalaryDates(conn, salaryCalc1, salaryCalc2, salaryPaymentDate,
+					calc1MonthType, calc2MonthType, paymentMonthType, bankName, accountNumber, depositStocks);
+
 				conn.commit();
 			} catch (Exception e) {
 				JdbcUtil.rollback(conn);
@@ -89,10 +102,21 @@ public class UserInfoHandler implements CommandHandler {
 			}
 
 			response.setContentType("text/html; charset=UTF-8");
-			response.getWriter().println("<script>alert('사용자 정보가 성공적으로 저장(유지)되었습니다!'); location.href='"
+			response.getWriter().println("<script>alert('사용자 정보와 급여일 설정이 성공적으로 저장되었습니다!'); location.href='"
 				+ request.getContextPath() + "/employee/userInfo.do';</script>");
 			return null;
 		}
 		return null;
+	}
+
+	// 문자열을 안전하게 숫자로 바꿔주는 헬퍼 메서드
+	private Integer parseInt(String val) {
+		if (val == null || val.trim().isEmpty())
+			return null;
+		try {
+			return Integer.parseInt(val.trim());
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }

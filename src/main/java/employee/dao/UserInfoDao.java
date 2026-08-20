@@ -180,4 +180,41 @@ public class UserInfoDao {
 			pstmt.executeUpdate();
 		}
 	}
+
+	// 🌟 새로 추가된 부분: 모든 사원의 급여일 및 계좌 정보 테이블 일괄 업데이트 실행!
+	public void updateAllEmployeeSalaryDates(java.sql.Connection conn, Integer calc1, Integer calc2,
+		Integer paymentDate,
+		String type1, String type2, String pType, String bank, String accNum, String deposit)
+		throws java.sql.SQLException {
+
+		String sql = "UPDATE employee_salary_account SET "
+			+ "salary_calculation1 = ?, salary_calculation2 = ?, salary_payment_date = ?, "
+			+ "calc1_month_type = ?, calc2_month_type = ?, payment_month_type = ?, "
+			+ "bank_name = ?, account_number = ?, deposit_stocks = ?";
+
+		try (java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			if (calc1 != null)
+				pstmt.setInt(1, calc1);
+			else
+				pstmt.setNull(1, java.sql.Types.INTEGER);
+			if (calc2 != null)
+				pstmt.setInt(2, calc2);
+			else
+				pstmt.setNull(2, java.sql.Types.INTEGER);
+			if (paymentDate != null)
+				pstmt.setInt(3, paymentDate);
+			else
+				pstmt.setNull(3, java.sql.Types.INTEGER);
+
+			pstmt.setString(4, type1);
+			pstmt.setString(5, type2);
+			pstmt.setString(6, pType);
+			pstmt.setString(7, bank);
+			pstmt.setString(8, accNum);
+			pstmt.setString(9, deposit);
+
+			pstmt.executeUpdate();
+		}
+	}
 }

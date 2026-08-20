@@ -13,6 +13,7 @@ public class EmployeeSalaryAccount {
 	private String calc1MonthType;
 	private String calc2MonthType;
 	private String paymentMonthType;
+	private Integer employeeId;
 
 	// 1. 기본 생성자 추가 (빈 상자 만들기)
 	public EmployeeSalaryAccount() {}
@@ -32,6 +33,7 @@ public class EmployeeSalaryAccount {
 		this.calc1MonthType = calc1MonthType;
 		this.calc2MonthType = calc2MonthType;
 		this.paymentMonthType = paymentMonthType;
+
 	}
 
 	// 기존 Getter들 (유지)
@@ -122,5 +124,13 @@ public class EmployeeSalaryAccount {
 
 	public void setPaymentMonthType(String paymentMonthType) {
 		this.paymentMonthType = paymentMonthType;
+	}
+
+	public Integer getEmployeeId() {
+		return employeeId;
+	}
+
+	public void setEmployeeId(Integer employeeId) {
+		this.employeeId = employeeId;
 	}
 }

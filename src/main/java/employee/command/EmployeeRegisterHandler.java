@@ -24,21 +24,23 @@ public class EmployeeRegisterHandler implements CommandHandler {
 	@Override
 	public String process(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		// 🌟 GET 방식: URL에 employeeId가 있으면 데이터를 조회해서 JSP로 넘김!
 		if (request.getMethod().equalsIgnoreCase("GET")) {
 			String empIdStr = request.getParameter("employeeId");
 			if (empIdStr != null && !empIdStr.trim().isEmpty()) {
 				int employeeId = parseInt(empIdStr);
 				Employee emp = registerService.getEmployee(employeeId);
-				request.setAttribute("emp", emp); // JSP에서 ${emp} 로 사용 가능!
+				request.setAttribute("emp", emp);
 			}
+
+			request.setAttribute("deptList", registerService.getDepartments());
+			request.setAttribute("posList", registerService.getPositions());
+
 			return "/WEB-INF/view/employee/employeeRegister.jsp";
 		}
 
 		if (request.getMethod().equalsIgnoreCase("POST")) {
 			request.setCharacterEncoding("UTF-8");
 
-			// --- 1. 기본 정보 ---
 			Integer accountId = null;
 			Integer companyId = parseInt(request.getParameter("companyId"));
 			Integer personId = parseInt(request.getParameter("personId"));
@@ -60,30 +62,24 @@ public class EmployeeRegisterHandler implements CommandHandler {
 			String sns = request.getParameter("sns");
 			String otherDetails = request.getParameter("otherDetails");
 			String status = request.getParameter("status");
+			Integer basicPay = parseInt(request.getParameter("basicPay"));
 
 			Employee employee = new Employee(
 				null, accountId, companyId, personId, employmentType,
 				koreanName, englishName, hireDate, resignationDate, departmentId,
 				positionId, foreignOrDomestic, residentNumber1, residentNumber2, address,
-				telPhone, mobile, email, sns, otherDetails, status);
+				telPhone, mobile, email, sns, otherDetails, status, basicPay);
 
-			// --- 2. 급여 계좌 ---
 			String bankName = request.getParameter("bankName");
 			String accountNumber = request.getParameter("accountNumber");
 			String depositStocks = request.getParameter("depositStocks");
-			Integer salaryCalculation1 = parseInt(request.getParameter("salaryCalculation1"));
-			Integer salaryCalculation2 = parseInt(request.getParameter("salaryCalculation2"));
-			Integer salaryPaymentDate = parseInt(request.getParameter("salaryPaymentDate"));
-			String calc1MonthType = request.getParameter("calc1MonthType");
-			String calc2MonthType = request.getParameter("calc2MonthType");
-			String paymentMonthType = request.getParameter("paymentMonthType");
 
+			// 🌟 핵심 해결 포인트!
+			// DAO에서 NullPointerException이 나지 않도록, 삭제된 급여날짜 항목들에 더미값(0, "")을 줍니다.
 			EmployeeSalaryAccount account = new EmployeeSalaryAccount(
 				null, companyId, bankName, accountNumber, depositStocks,
-				salaryCalculation1, salaryCalculation2, salaryPaymentDate,
-				calc1MonthType, calc2MonthType, paymentMonthType);
+				0, 0, 0, "", "", "");
 
-			// --- 3. 가족 사항 리스트 ---
 			String[] relationships = request.getParameterValues("relationship");
 			String[] parentsNames = request.getParameterValues("parentsName");
 			String[] foreignOrDomestic1s = request.getParameterValues("foreignOrDomestic1");
@@ -95,7 +91,6 @@ public class EmployeeRegisterHandler implements CommandHandler {
 				for (int i = 0; i < relationships.length; i++) {
 					if (relationships[i] != null && !relationships[i].trim().isEmpty() &&
 						parentsNames[i] != null && !parentsNames[i].trim().isEmpty()) {
-
 						Dependents dep = new Dependents(
 							null, null, relationships[i], parentsNames[i],
 							foreignOrDomestic1s[i], parentsNumber1s[i], parentsNumber2s[i]);
@@ -104,7 +99,6 @@ public class EmployeeRegisterHandler implements CommandHandler {
 				}
 			}
 
-			// --- 4. 학력 사항 리스트 ---
 			String[] graduates = request.getParameterValues("graduate");
 			String[] admissionDates = request.getParameterValues("admissionDate");
 			String[] graduationDates = request.getParameterValues("graduationDate");
@@ -125,7 +119,6 @@ public class EmployeeRegisterHandler implements CommandHandler {
 				}
 			}
 
-			// --- 5. 보험 정보 ---
 			String insuranceAgency = request.getParameter("insuranceAgency");
 			String insuranceNumber = request.getParameter("insuranceNumber");
 			String insuranceAmountStr = request.getParameter("insuranceAmount");
@@ -146,7 +139,7 @@ public class EmployeeRegisterHandler implements CommandHandler {
 				Integer newEmpId = registerService.register(employee, account, dependentsList, degreeList, insurance);
 
 				out.println("<script>");
-				out.println("alert('사원정보 1이 성공적으로 저장되었습니다.');");
+				out.println("parent.alert('사원정보 1이 성공적으로 저장되었습니다.');");
 				out.println("parent.document.getElementById('hiddenEmpId').value = '" + newEmpId + "';");
 				out.println("</script>");
 				out.flush();
@@ -155,8 +148,8 @@ public class EmployeeRegisterHandler implements CommandHandler {
 			} catch (Exception e) {
 				e.printStackTrace();
 				out.println("<script>");
-				out.println("alert('사원 등록 실패: " + e.getMessage() + "');");
-				out.println("history.back();");
+				String errMsg = e.getMessage() != null ? e.getMessage().replace("'", "\\'") : "알 수 없는 오류";
+				out.println("parent.alert('사원 등록 실패: 입력하신 정보를 다시 확인해주세요.\\n(상세 원인: " + errMsg + ")');");
 				out.println("</script>");
 				out.flush();
 				return null;

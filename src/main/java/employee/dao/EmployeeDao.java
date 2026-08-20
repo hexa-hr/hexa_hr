@@ -5,7 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import employee.model.Employee;
 import employee.model.EmployeeSelectRow;
@@ -13,11 +15,9 @@ import jdbc.JdbcUtil;
 
 public class EmployeeDao {
 
-	public List<EmployeeSelectRow> selectEmployeeRows(
-		Connection conn, String keyword, Integer departmentId, String status) throws SQLException {
-
+	public List<EmployeeSelectRow> selectEmployeeRows(Connection conn, String keyword, Integer departmentId,
+		String status) throws SQLException {
 		StringBuilder sql = new StringBuilder();
-
 		sql.append(
 			"SELECT e.employee_id, e.employment_type, e.korean_name, d.department_name, p.position_name, e.status ");
 		sql.append("FROM employee e ");
@@ -26,7 +26,6 @@ public class EmployeeDao {
 		sql.append("WHERE 1 = 1 ");
 
 		List<Object> params = new ArrayList<>();
-
 		if (keyword != null && !keyword.trim().isEmpty()) {
 			sql.append("AND e.korean_name LIKE ? ");
 			params.add("%" + keyword.trim() + "%");
@@ -59,21 +58,6 @@ public class EmployeeDao {
 		return result;
 	}
 
-	public String selectEmploymentType(Connection conn, Integer employeeId) throws SQLException {
-		String sql = "SELECT employment_type FROM employee WHERE employee_id = ?";
-		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setInt(1, employeeId);
-			try (ResultSet rs = pstmt.executeQuery()) {
-				if (rs.next())
-					return rs.getString("employment_type");
-			}
-		}
-		return null;
-	}
-
-	// =========================================================================
-	// 🌟 1명의 사원 정보를 가져오는 메서드 추가! (상세 조회용)
-	// =========================================================================
 	public Employee selectById(Connection conn, int employeeId) throws SQLException {
 		String sql = "SELECT * FROM employee WHERE employee_id = ?";
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -93,8 +77,21 @@ public class EmployeeDao {
 						rs.getString("resident_number2"),
 						rs.getString("address"), rs.getString("tel_phone"), rs.getString("mobile"),
 						rs.getString("email"), rs.getString("sns"), rs.getString("other_details"),
-						rs.getString("status"));
+						rs.getString("status"),
+						rs.getObject("basic_pay") != null ? rs.getInt("basic_pay") : null);
 				}
+			}
+		}
+		return null;
+	}
+
+	public String selectEmploymentType(Connection conn, Integer employeeId) throws SQLException {
+		String sql = "SELECT employment_type FROM employee WHERE employee_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, employeeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next())
+					return rs.getString("employment_type");
 			}
 		}
 		return null;
@@ -122,9 +119,9 @@ public class EmployeeDao {
 				"INSERT INTO employee " +
 					"(employee_id, account_id, company_id, person_id, employment_type, korean_name, english_name, " +
 					"hire_date, resignation_date, department_id, position_id, foreign_or_domestic, " +
-					"resident_number1, resident_number2, address, tel_phone, mobile, email, sns, other_details, status) "
+					"resident_number1, resident_number2, address, tel_phone, mobile, email, sns, other_details, status, basic_pay) "
 					+
-					"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+					"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 			pstmt.setInt(1, employee.getEmployeeId());
 			if (employee.getAccountId() != null)
@@ -168,9 +165,56 @@ public class EmployeeDao {
 			pstmt.setString(19, employee.getSns());
 			pstmt.setString(20, employee.getOtherDetails());
 			pstmt.setString(21, employee.getStatus());
+			if (employee.getBasicPay() != null)
+				pstmt.setInt(22, employee.getBasicPay());
+			else
+				pstmt.setNull(22, java.sql.Types.INTEGER);
 
 			pstmt.executeUpdate();
 		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// =========================================================================
+	// 🌟 추가된 부분: 부서 및 직위 목록 불러오기
+	// =========================================================================
+	public List<Map<String, Object>> selectDepartments(Connection conn) throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<Map<String, Object>> list = new ArrayList<>();
+		try {
+			pstmt = conn.prepareStatement("SELECT * FROM department ORDER BY department_id");
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("id", rs.getInt("department_id"));
+				map.put("name", rs.getString("department_name"));
+				list.add(map);
+			}
+			return list;
+		} finally {
+			JdbcUtil.close(rs);
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	public List<Map<String, Object>> selectPositions(Connection conn) throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<Map<String, Object>> list = new ArrayList<>();
+		try {
+			pstmt = conn.prepareStatement("SELECT * FROM position ORDER BY position_id");
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("id", rs.getInt("position_id"));
+				map.put("name", rs.getString("position_name"));
+				list.add(map);
+			}
+			return list;
+		} finally {
+			JdbcUtil.close(rs);
 			JdbcUtil.close(pstmt);
 		}
 	}
