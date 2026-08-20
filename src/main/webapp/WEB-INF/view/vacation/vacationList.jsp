@@ -228,10 +228,6 @@ table.data-table tr:hover {
 		</tbody>
 	</table>
 
-	<!-- 하단 페이징 -->
-	<div class="pagination">
-		<a href="#">&lt; 이전페이지</a> <span class="current">1</span> <a href="#">다음페이지 &gt;</a>
-	</div>
 
 </body>
 </html>
