@@ -38,6 +38,11 @@ button:disabled {
 	font-weight: bold;
 }
 
+.success-message {
+	margin: 12px 0;
+	font-weight: bold;
+}
+
 .search-form {
 	border: 1px solid #cccccc;
 	padding: 18px 20px;
@@ -458,6 +463,12 @@ th {
 	<c:if test="${not empty errorMessage}">
 		<div class="error-message">
 			<c:out value="${errorMessage}" />
+		</div>
+	</c:if>
+
+	<c:if test="${not empty successMessage}">
+		<div class="success-message">
+			<c:out value="${successMessage}" />
 		</div>
 	</c:if>
 
@@ -965,7 +976,11 @@ th {
 						<c:if test="${not wageInputEnabled}">disabled</c:if>>
 						자동계산</button>
 
-					<button type="button" disabled>저장</button>
+					<button type="submit"
+						formaction="${pageContext.request.contextPath}/wage/dailyPaymentInputSave.do"
+						<c:if test="${not wageInputEnabled or not autoCalculated}">disabled</c:if>>
+						저장</button>
+
 					<button type="button" disabled>내용 지우기</button>
 
 				</div>
