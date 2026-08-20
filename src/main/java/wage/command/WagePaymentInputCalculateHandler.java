@@ -98,6 +98,14 @@ public class WagePaymentInputCalculateHandler
 				"incomeType",
 				incomeType);
 
+			List<EmployeeSelectRow> modalEmployees = filterEmployeesByIncomeType(
+				employeeRows,
+				incomeType);
+
+			req.setAttribute(
+				"modalEmployees",
+				modalEmployees);
+
 			req.setAttribute(
 				"settlementStartDate",
 				settlementStartDateParam);
@@ -186,7 +194,7 @@ public class WagePaymentInputCalculateHandler
 			/*
 			 * 현재 소득구분에 표시할 pending 사원
 			 */
-			List<EmployeeSelectRow> pendingEmployees = filterPendingEmployeesByIncomeType(
+			List<EmployeeSelectRow> pendingEmployees = filterEmployeesByIncomeType(
 				allPendingEmployees,
 				incomeType);
 
@@ -525,13 +533,13 @@ public class WagePaymentInputCalculateHandler
 		return result;
 	}
 
-	private List<EmployeeSelectRow> filterPendingEmployeesByIncomeType(
-		List<EmployeeSelectRow> allPendingEmployees,
+	private List<EmployeeSelectRow> filterEmployeesByIncomeType(
+		List<EmployeeSelectRow> employees,
 		String incomeType) {
 
 		List<EmployeeSelectRow> result = new ArrayList<>();
 
-		for (EmployeeSelectRow employee : allPendingEmployees) {
+		for (EmployeeSelectRow employee : employees) {
 
 			if (isAvailableEmployeeForIncomeType(
 				employee,

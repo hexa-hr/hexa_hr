@@ -342,6 +342,101 @@ th {
 		border-right: 0;
 	}
 }
+
+.employee-select-dialog {
+	border: 0;
+	border-radius: 14px;
+	width: min(900px, calc(100vw - 40px));
+	max-width: 900px;
+	max-height: calc(100vh - 40px);
+	padding: 24px;
+	box-sizing: border-box;
+}
+
+.employee-select-dialog::backdrop {
+	background-color: rgba(0, 0, 0, 0.45);
+}
+
+.employee-select-dialog h2 {
+	margin: 0 0 18px;
+}
+
+.employee-modal-filters {
+	display: grid;
+	grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(110px, 150px));
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.employee-modal-search {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 6px;
+}
+
+.employee-modal-filters input, .employee-modal-filters select {
+	width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.employee-modal-table-wrap {
+	min-height: 360px;
+	max-height: 430px;
+	overflow: auto;
+	border: 1px solid #dddddd;
+}
+
+.employee-modal-table {
+	width: 100%;
+	min-width: 760px;
+}
+
+.employee-modal-table th, .employee-modal-table td {
+	text-align: center;
+}
+
+.employee-modal-table th:first-child, .employee-modal-table td:first-child
+	{
+	width: 42px;
+}
+
+.employee-modal-row {
+	cursor: pointer;
+}
+
+.employee-modal-row:hover {
+	background-color: #f5f5f5;
+}
+
+.employee-modal-row.selected-modal-row, .employee-modal-row.selected-modal-row:hover
+	{
+	background-color: #d9edf7;
+}
+
+.employee-modal-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	margin-top: 14px;
+}
+
+.employee-modal-actions {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 18px;
+}
+
+@media ( max-width : 760px) {
+	.employee-modal-filters {
+		grid-template-columns: 1fr 1fr;
+	}
+	.employee-modal-search {
+		grid-column: 1/-1;
+	}
+}
 </style>
 </head>
 
@@ -529,6 +624,141 @@ th {
 
 	</dialog>
 
+	<dialog id="employeeSelectDialog" class="employee-select-dialog">
+
+	<h2>급여지급 사원선택</h2>
+
+	<form id="employeeModalAddForm" method="get"
+		action="${pageContext.request.contextPath}/wage/paymentInput.do">
+
+		<input type="hidden" name="wageMonth"
+			value="<c:out value='${wageMonth}' />"> <input type="hidden"
+			name="wagePeriod" value="<c:out value='${wagePeriod}' />"> <input
+			type="hidden" name="incomeType"
+			value="<c:out value='${incomeType}' />">
+
+		<c:if test="${not empty selectedEmployeeId}">
+
+			<input type="hidden" name="employeeId"
+				value="<c:out value='${selectedEmployeeId}' />">
+
+		</c:if>
+
+		<c:forEach var="pending" items="${allPendingEmployees}">
+
+			<input type="hidden" name="pendingEmployeeId"
+				value="<c:out value='${pending.employeeId}' />">
+
+		</c:forEach>
+
+		<div class="employee-modal-filters">
+
+			<div class="employee-modal-search">
+
+				<input type="search" id="employeeModalSearchInput"
+					placeholder="사원번호 또는 성명" autocomplete="off">
+
+				<button type="button" id="employeeModalSearchButton">검색</button>
+
+			</div>
+
+			<select id="employeeModalDepartmentFilter" aria-label="부서별">
+				<option value="">부서별</option>
+			</select> <select id="employeeModalPositionFilter" aria-label="직위별">
+				<option value="">직위별</option>
+			</select> <select id="employeeModalStatusFilter" aria-label="재직상태">
+				<option value="">재직상태</option>
+			</select>
+
+		</div>
+
+		<div class="employee-modal-table-wrap">
+
+			<table class="employee-modal-table">
+
+				<thead>
+					<tr>
+						<th><input type="checkbox" id="employeeModalSelectAll"
+							aria-label="현재 페이지 전체 선택"></th>
+						<th>구분</th>
+						<th>사원번호</th>
+						<th>성명</th>
+						<th>부서</th>
+						<th>직위</th>
+						<th>상태</th>
+					</tr>
+				</thead>
+
+				<tbody>
+
+					<c:forEach var="employee" items="${modalEmployees}">
+
+						<tr class="employee-modal-row"
+							data-employee-id="<c:out value='${employee.employeeId}' />"
+							data-employee-name="<c:out value='${employee.koreanName}' />"
+							data-department="<c:out value='${employee.departmentName}' />"
+							data-position="<c:out value='${employee.positionName}' />"
+							data-status="<c:out value='${employee.status}' />">
+
+							<td><input type="checkbox" class="employee-modal-checkbox"
+								name="addEmployeeId"
+								value="<c:out value='${employee.employeeId}' />"
+								aria-label="<c:out value='${employee.koreanName}' /> 선택">
+							</td>
+
+							<td><c:out value="${employee.employmentType}" /></td>
+
+							<td><c:out value="${employee.employeeId}" /></td>
+
+							<td><c:out value="${employee.koreanName}" /></td>
+
+							<td><c:out
+									value="${empty employee.departmentName ? '-' : employee.departmentName}" />
+							</td>
+
+							<td><c:out
+									value="${empty employee.positionName ? '-' : employee.positionName}" />
+							</td>
+
+							<td><c:out
+									value="${empty employee.status ? '-' : employee.status}" /></td>
+
+						</tr>
+
+					</c:forEach>
+
+					<tr id="employeeModalNoResultRow" style="display: none;">
+						<td colspan="7">조건에 맞는 사원이 없습니다.</td>
+					</tr>
+
+				</tbody>
+
+			</table>
+
+		</div>
+
+		<div class="employee-modal-pagination">
+
+			<button type="button" id="employeeModalPreviousPage">‹ 이전</button>
+
+			<strong id="employeeModalPageInfo">1 / 1</strong>
+
+			<button type="button" id="employeeModalNextPage">다음 ›</button>
+
+		</div>
+
+		<div class="employee-modal-actions">
+
+			<button type="submit" id="employeeModalSubmitButton">사원선택</button>
+
+			<button type="button" id="employeeModalCloseButton">선택취소</button>
+
+		</div>
+
+	</form>
+
+	</dialog>
+
 	<div class="payroll-workspace">
 
 		<section class="payroll-pane employee-pane">
@@ -597,42 +827,11 @@ th {
 
 			</div>
 
-			<form class="employee-add-form" method="get"
-				action="${pageContext.request.contextPath}/wage/paymentInput.do">
+			<div class="employee-add-form">
 
-				<input type="hidden" name="wageMonth"
-					value="<c:out value='${wageMonth}' />"> <input
-					type="hidden" name="wagePeriod"
-					value="<c:out value='${wagePeriod}' />"> <input
-					type="hidden" name="incomeType"
-					value="<c:out value='${incomeType}' />">
+				<button type="button" id="employeeSelectOpenButton">신규추가</button>
 
-				<c:forEach var="pending" items="${allPendingEmployees}">
-
-					<input type="hidden" name="pendingEmployeeId"
-						value="<c:out value='${pending.employeeId}' />">
-
-				</c:forEach>
-
-				<label for="addEmployeeId"> 신규추가 </label> <select id="addEmployeeId"
-					name="addEmployeeId" required>
-
-					<option value="">사원 선택</option>
-
-					<c:forEach var="employee" items="${availableEmployees}">
-
-						<option value="${employee.employeeId}">
-							<c:out value="${employee.koreanName}" /> -
-							<c:out value="${employee.employmentType}" />
-						</option>
-
-					</c:forEach>
-
-				</select>
-
-				<button type="submit">추가</button>
-
-			</form>
+			</div>
 
 			<h2>사원 목록</h2>
 
@@ -986,6 +1185,548 @@ th {
 		</div>
 
 	</section>
+
+	<script>
+	(function() {
+
+		const PAGE_SIZE = 8;
+
+		const openButton =
+			document.getElementById(
+				"employeeSelectOpenButton");
+
+		const dialog =
+			document.getElementById(
+				"employeeSelectDialog");
+
+		const addForm =
+			document.getElementById(
+				"employeeModalAddForm");
+
+		const closeButton =
+			document.getElementById(
+				"employeeModalCloseButton");
+
+		const submitButton =
+			document.getElementById(
+				"employeeModalSubmitButton");
+
+		const searchInput =
+			document.getElementById(
+				"employeeModalSearchInput");
+
+		const searchButton =
+			document.getElementById(
+				"employeeModalSearchButton");
+
+		const departmentFilter =
+			document.getElementById(
+				"employeeModalDepartmentFilter");
+
+		const positionFilter =
+			document.getElementById(
+				"employeeModalPositionFilter");
+
+		const statusFilter =
+			document.getElementById(
+				"employeeModalStatusFilter");
+
+		const selectAllCheckbox =
+			document.getElementById(
+				"employeeModalSelectAll");
+
+		const previousPageButton =
+			document.getElementById(
+				"employeeModalPreviousPage");
+
+		const nextPageButton =
+			document.getElementById(
+				"employeeModalNextPage");
+
+		const pageInfo =
+			document.getElementById(
+				"employeeModalPageInfo");
+
+		const noResultRow =
+			document.getElementById(
+				"employeeModalNoResultRow");
+
+		if (!openButton
+			|| !dialog
+			|| !addForm
+			|| !closeButton
+			|| !submitButton
+			|| !searchInput
+			|| !searchButton
+			|| !departmentFilter
+			|| !positionFilter
+			|| !statusFilter
+			|| !selectAllCheckbox
+			|| !previousPageButton
+			|| !nextPageButton
+			|| !pageInfo
+			|| !noResultRow) {
+
+			return;
+		}
+
+		const rows =
+			Array.from(
+				dialog.querySelectorAll(
+					".employee-modal-row"));
+
+		const employeeCheckboxes =
+			Array.from(
+				dialog.querySelectorAll(
+					".employee-modal-checkbox"));
+
+		let filteredRows =
+			rows.slice();
+
+		let currentPage = 1;
+
+		function normalize(value) {
+
+			return (value || "")
+				.trim()
+				.toLowerCase();
+		}
+
+		function populateFilter(
+			filter,
+			dataName) {
+
+			const values =
+				new Set();
+
+			rows.forEach(
+				function(row) {
+
+					const value =
+						(row.dataset[dataName] || "")
+							.trim();
+
+					if (value) {
+						values.add(value);
+					}
+				});
+
+			Array.from(values)
+				.sort(
+					function(first, second) {
+
+						return first.localeCompare(
+							second,
+							"ko");
+					})
+				.forEach(
+					function(value) {
+
+						const option =
+							document.createElement(
+								"option");
+
+						option.value = value;
+						option.textContent = value;
+
+						filter.appendChild(
+							option);
+					});
+		}
+
+		function getCurrentPageRows() {
+
+			const startIndex =
+				(currentPage - 1)
+					* PAGE_SIZE;
+
+			return filteredRows.slice(
+				startIndex,
+				startIndex + PAGE_SIZE);
+		}
+
+		function updateRowSelection(
+			row,
+			checked) {
+
+			row.classList.toggle(
+				"selected-modal-row",
+				checked);
+		}
+
+		function updateSelectAllState() {
+
+			const pageCheckboxes =
+				getCurrentPageRows()
+					.map(
+						function(row) {
+
+							return row.querySelector(
+								".employee-modal-checkbox");
+						})
+					.filter(Boolean);
+
+			const selectedCount =
+				pageCheckboxes.filter(
+					function(checkbox) {
+
+						return checkbox.checked;
+					}).length;
+
+			selectAllCheckbox.disabled =
+				pageCheckboxes.length === 0;
+
+			selectAllCheckbox.checked =
+				pageCheckboxes.length > 0
+					&& selectedCount
+						=== pageCheckboxes.length;
+
+			selectAllCheckbox.indeterminate =
+				selectedCount > 0
+					&& selectedCount
+						< pageCheckboxes.length;
+		}
+
+		function renderPage() {
+
+			const pageCount =
+				Math.max(
+					1,
+					Math.ceil(
+						filteredRows.length
+							/ PAGE_SIZE));
+
+			if (currentPage > pageCount) {
+				currentPage = pageCount;
+			}
+
+			rows.forEach(
+				function(row) {
+
+					row.style.display =
+						"none";
+				});
+
+			getCurrentPageRows()
+				.forEach(
+					function(row) {
+
+						row.style.display =
+							"table-row";
+					});
+
+			noResultRow.style.display =
+				filteredRows.length === 0
+					? "table-row"
+					: "none";
+
+			pageInfo.textContent =
+				currentPage
+					+ " / "
+					+ pageCount;
+
+			previousPageButton.disabled =
+				currentPage <= 1;
+
+			nextPageButton.disabled =
+				currentPage >= pageCount;
+
+			updateSelectAllState();
+		}
+
+		function applyFilters() {
+
+			const searchText =
+				normalize(
+					searchInput.value);
+
+			const department =
+				departmentFilter.value;
+
+			const position =
+				positionFilter.value;
+
+			const status =
+				statusFilter.value;
+
+			filteredRows =
+				rows.filter(
+					function(row) {
+
+						const employeeText =
+							normalize(
+								row.dataset.employeeId
+									+ " "
+									+ row.dataset.employeeName);
+
+						return (!searchText
+								|| employeeText.includes(
+									searchText))
+							&& (!department
+								|| row.dataset.department
+									=== department)
+							&& (!position
+								|| row.dataset.position
+									=== position)
+							&& (!status
+								|| row.dataset.status
+									=== status);
+					});
+
+			currentPage = 1;
+
+			renderPage();
+		}
+
+		populateFilter(
+			departmentFilter,
+			"department");
+
+		populateFilter(
+			positionFilter,
+			"position");
+
+		populateFilter(
+			statusFilter,
+			"status");
+
+		rows.forEach(
+			function(row) {
+
+				const checkbox =
+					row.querySelector(
+						".employee-modal-checkbox");
+
+				if (!checkbox) {
+					return;
+				}
+
+				row.addEventListener(
+					"click",
+					function(event) {
+
+						if (event.target.closest(
+								"input")) {
+
+							return;
+						}
+
+						checkbox.checked =
+							!checkbox.checked;
+
+						updateRowSelection(
+							row,
+							checkbox.checked);
+
+						updateSelectAllState();
+					});
+
+				checkbox.addEventListener(
+					"change",
+					function() {
+
+						updateRowSelection(
+							row,
+							checkbox.checked);
+
+						updateSelectAllState();
+					});
+			});
+
+		openButton.addEventListener(
+			"click",
+			function() {
+
+				searchInput.value = "";
+				departmentFilter.value = "";
+				positionFilter.value = "";
+
+				/*
+				 * Payzon과 같이 재직 사원을 기본 표시한다.
+				 * 재직 상태값이 없으면 전체 상태로 표시한다.
+				 */
+				const hasActiveStatus =
+					Array.from(
+						statusFilter.options)
+						.some(
+							function(option) {
+
+								return option.value
+									=== "재직";
+							});
+
+				statusFilter.value =
+					hasActiveStatus
+						? "재직"
+						: "";
+
+				employeeCheckboxes.forEach(
+					function(checkbox) {
+
+						checkbox.checked =
+							false;
+
+						const row =
+							checkbox.closest(
+								".employee-modal-row");
+
+						if (row) {
+
+							updateRowSelection(
+								row,
+								false);
+						}
+					});
+
+				currentPage = 1;
+				applyFilters();
+
+				submitButton.disabled =
+					false;
+
+				dialog.showModal();
+			});
+
+		closeButton.addEventListener(
+			"click",
+			function() {
+
+				dialog.close();
+			});
+
+		searchInput.addEventListener(
+			"input",
+			applyFilters);
+
+		searchInput.addEventListener(
+			"keydown",
+			function(event) {
+
+				if (event.key !== "Enter") {
+					return;
+				}
+
+				event.preventDefault();
+
+				applyFilters();
+			});
+
+		searchButton.addEventListener(
+			"click",
+			applyFilters);
+
+		departmentFilter.addEventListener(
+			"change",
+			applyFilters);
+
+		positionFilter.addEventListener(
+			"change",
+			applyFilters);
+
+		statusFilter.addEventListener(
+			"change",
+			applyFilters);
+
+		selectAllCheckbox.addEventListener(
+			"change",
+			function() {
+
+				const checked =
+					selectAllCheckbox.checked;
+
+				getCurrentPageRows()
+					.forEach(
+						function(row) {
+
+							const checkbox =
+								row.querySelector(
+									".employee-modal-checkbox");
+
+							if (!checkbox) {
+								return;
+							}
+
+							checkbox.checked =
+								checked;
+
+							updateRowSelection(
+								row,
+								checked);
+						});
+
+				updateSelectAllState();
+			});
+
+		previousPageButton.addEventListener(
+			"click",
+			function() {
+
+				if (currentPage <= 1) {
+					return;
+				}
+
+				currentPage--;
+
+				renderPage();
+			});
+
+		nextPageButton.addEventListener(
+			"click",
+			function() {
+
+				const pageCount =
+					Math.max(
+						1,
+						Math.ceil(
+							filteredRows.length
+								/ PAGE_SIZE));
+
+				if (currentPage >= pageCount) {
+					return;
+				}
+
+				currentPage++;
+
+				renderPage();
+			});
+
+		addForm.addEventListener(
+			"submit",
+			function(event) {
+
+				const hasSelection =
+					employeeCheckboxes.some(
+						function(checkbox) {
+
+							return checkbox.checked;
+						});
+
+				if (!hasSelection) {
+
+					event.preventDefault();
+
+					window.alert(
+						"추가할 사원을 선택해 주세요.");
+
+					return;
+				}
+
+				submitButton.disabled =
+					true;
+			});
+
+		dialog.addEventListener(
+			"close",
+			function() {
+
+				submitButton.disabled =
+					false;
+			});
+
+		renderPage();
+
+	})();
+	</script>
 
 	<script>
 	(function() {

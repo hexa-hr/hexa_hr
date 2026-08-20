@@ -61,8 +61,6 @@ public class WagePaymentInputHandler implements CommandHandler {
 
 		String employeeIdParam = trim(req.getParameter("employeeId"));
 
-		String addEmployeeIdParam = trim(req.getParameter("addEmployeeId"));
-
 		String wageMonth = trim(req.getParameter("wageMonth"));
 
 		String wagePeriod = trim(req.getParameter("wagePeriod"));
@@ -72,9 +70,18 @@ public class WagePaymentInputHandler implements CommandHandler {
 			List<Integer> pendingEmployeeIds = parsePendingEmployeeIds(
 				req);
 
+			List<Integer> addEmployeeIds = parseAddEmployeeIds(
+				req);
+
 			String incomeType = normalizeIncomeType(
 				req.getParameter(
 					"incomeType"));
+
+			req.setAttribute(
+				"modalEmployees",
+				filterEmployeesByIncomeType(
+					employeeRows,
+					incomeType));
 
 			req.setAttribute(
 				"incomeType",
@@ -166,25 +173,11 @@ public class WagePaymentInputHandler implements CommandHandler {
 			}
 
 			/*
-			 * 신규추가로 전달된 사원을
-			 * 현재 요청 흐름의 pending 사원으로 추가한다.
-			 *
-			 * wage에는 아직 저장하지 않는다.
+			 * 모달에서 선택한 여러 사원을 검증한 뒤 pending으로 추가한다.
 			 */
-			if (addEmployeeIdParam != null) {
+			List<Integer> validatedAddEmployeeIds = new ArrayList<>();
 
-				Integer addEmployeeId;
-
-				try {
-
-					addEmployeeId = Integer.valueOf(
-						addEmployeeIdParam);
-
-				} catch (NumberFormatException e) {
-
-					throw new IllegalArgumentException(
-						"올바른 사원을 선택해야 합니다.");
-				}
+			for (Integer addEmployeeId : addEmployeeIds) {
 
 				EmployeeSelectRow addEmployee = findEmployee(
 					employeeRows,
@@ -204,21 +197,43 @@ public class WagePaymentInputHandler implements CommandHandler {
 						"현재 소득구분에서 추가할 수 없는 사원입니다.");
 				}
 
-				if (!containsSavedEmployee(
-					allSavedEmployees,
-					addEmployeeId)
-					&& !pendingEmployeeIds.contains(
-						addEmployeeId)) {
+				validatedAddEmployeeIds.add(
+					addEmployeeId);
+			}
 
-					pendingEmployeeIds.add(
-						addEmployeeId);
-				}
+			Integer firstAddedEmployeeId = null;
+
+			for (Integer addEmployeeId : validatedAddEmployeeIds) {
 
 				/*
-				 * 신규추가한 사원을 바로 선택한다.
+				 * 이미 저장됐거나 pending인 사원은 아무 처리도 하지 않는다.
 				 */
-				employeeIdParam = String.valueOf(
+				if (containsSavedEmployee(
+					allSavedEmployees,
+					addEmployeeId)
+					|| pendingEmployeeIds.contains(
+						addEmployeeId)) {
+
+					continue;
+				}
+
+				pendingEmployeeIds.add(
 					addEmployeeId);
+
+				if (firstAddedEmployeeId == null) {
+
+					firstAddedEmployeeId = addEmployeeId;
+				}
+			}
+
+			/*
+			 * 실제로 새로 추가된 첫 번째 사원을 선택한다.
+			 * 전부 기존 사원이면 현재 선택 상태를 유지한다.
+			 */
+			if (firstAddedEmployeeId != null) {
+
+				employeeIdParam = String.valueOf(
+					firstAddedEmployeeId);
 
 				req.setAttribute(
 					"selectedEmployeeId",
@@ -254,7 +269,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 			/*
 			 * 현재 소득구분 탭에 표시할 미저장 사원
 			 */
-			List<EmployeeSelectRow> pendingEmployees = filterPendingEmployeesByIncomeType(
+			List<EmployeeSelectRow> pendingEmployees = filterEmployeesByIncomeType(
 				allPendingEmployees,
 				incomeType);
 
@@ -508,6 +523,49 @@ public class WagePaymentInputHandler implements CommandHandler {
 		return new ArrayList<>(result);
 	}
 
+	private List<Integer> parseAddEmployeeIds(
+		HttpServletRequest req) {
+
+		String[] values = req.getParameterValues(
+			"addEmployeeId");
+
+		Set<Integer> result = new LinkedHashSet<>();
+
+		if (values == null) {
+			return new ArrayList<>();
+		}
+
+		for (String value : values) {
+
+			value = trim(value);
+
+			if (value == null) {
+				continue;
+			}
+
+			try {
+
+				Integer employeeId = Integer.valueOf(
+					value);
+
+				if (employeeId <= 0) {
+					throw new NumberFormatException();
+				}
+
+				result.add(
+					employeeId);
+
+			} catch (NumberFormatException e) {
+
+				throw new IllegalArgumentException(
+					"추가할 사원 정보가 올바르지 않습니다.");
+			}
+		}
+
+		return new ArrayList<>(
+			result);
+	}
+
 	private List<EmployeeSelectRow> buildAllPendingEmployees(
 		List<EmployeeSelectRow> employeeRows,
 		List<WagePaymentEmployeeRow> allSavedEmployees,
@@ -574,13 +632,13 @@ public class WagePaymentInputHandler implements CommandHandler {
 		return result;
 	}
 
-	private List<EmployeeSelectRow> filterPendingEmployeesByIncomeType(
-		List<EmployeeSelectRow> allPendingEmployees,
+	private List<EmployeeSelectRow> filterEmployeesByIncomeType(
+		List<EmployeeSelectRow> employees,
 		String incomeType) {
 
 		List<EmployeeSelectRow> result = new ArrayList<>();
 
-		for (EmployeeSelectRow employee : allPendingEmployees) {
+		for (EmployeeSelectRow employee : employees) {
 
 			if (isAvailableEmployeeForIncomeType(
 				employee,
