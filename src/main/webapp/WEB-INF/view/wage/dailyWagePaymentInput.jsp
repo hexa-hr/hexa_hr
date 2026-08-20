@@ -1029,10 +1029,6 @@ th {
 				<div class="daily-form-actions">
 
 					<button type="submit"
-						<c:if test="${not wageInputEnabled}">disabled</c:if>>
-						자동계산</button>
-
-					<button type="submit"
 						formaction="${pageContext.request.contextPath}/wage/dailyPaymentInputSave.do"
 						<c:if test="${not wageInputEnabled}">disabled</c:if>>저장</button>
 
