@@ -73,7 +73,12 @@ public class VacationDao {
 				sql.append("AND vt.vacation_type_id = ? ");
 			}
 			if (keyword != null && !keyword.isEmpty()) {
-				sql.append("AND (e.korean_name LIKE ? OR e.account_id LIKE ?) ");
+				// 5가지 컬럼을 모두 검색하도록 수정
+				sql.append("AND (e.employment_type LIKE ? ");
+				sql.append("     OR e.account_id LIKE ? ");
+				sql.append("     OR e.korean_name LIKE ? ");
+				sql.append("     OR d.department_name LIKE ? ");
+				sql.append("     OR p.position_name LIKE ?) ");
 			}
 
 			pstmt = conn.prepareStatement(sql.toString());
@@ -82,9 +87,15 @@ public class VacationDao {
 			if (vacationTypeId != null && !vacationTypeId.isEmpty()) {
 				pstmt.setInt(idx++, Integer.parseInt(vacationTypeId));
 			}
+
+			// 바인딩 파라미터도 5개로 늘려줍니다.
 			if (keyword != null && !keyword.isEmpty()) {
-				pstmt.setString(idx++, "%" + keyword + "%");
-				pstmt.setString(idx++, "%" + keyword + "%");
+				String likeKeyword = "%" + keyword + "%";
+				pstmt.setString(idx++, likeKeyword); // employment_type
+				pstmt.setString(idx++, likeKeyword); // account_id
+				pstmt.setString(idx++, likeKeyword); // korean_name
+				pstmt.setString(idx++, likeKeyword); // department_name
+				pstmt.setString(idx++, likeKeyword); // position_name
 			}
 
 			rs = pstmt.executeQuery();
