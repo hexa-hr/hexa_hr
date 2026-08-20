@@ -132,9 +132,9 @@ public class WagePaymentCalculationService {
 
 				} else if ("D".equals(wageType.getItemType())) {
 
-					if ("BUSINESS".equals(wageCategory)
-						&& (wageTypeId == WageTypeSystemIds.INCOME_TAX_ID
-							|| wageTypeId == WageTypeSystemIds.LOCAL_INCOME_TAX_ID)) {
+					if (("WORKER".equals(wageCategory)
+						|| "BUSINESS".equals(wageCategory))
+						&& isIncomeTaxType(wageTypeId)) {
 
 						continue;
 					}
@@ -154,6 +154,31 @@ public class WagePaymentCalculationService {
 			}
 
 			long monthlyRemuneration = totalPayment - taxFreeAmount;
+
+			if ("WORKER".equals(wageCategory)) {
+
+				long incomeTax = calculateWorkerIncomeTax(
+					monthlyRemuneration);
+
+				long localTax = truncateToTen(
+					incomeTax / 10L);
+
+				totalDeduction += addCalculatedDeduction(
+					deductionItems,
+					findInputWageTypeById(
+						wageTypeMap,
+						inputWageTypeIds,
+						WageTypeSystemIds.INCOME_TAX_ID),
+					incomeTax);
+
+				totalDeduction += addCalculatedDeduction(
+					deductionItems,
+					findInputWageTypeById(
+						wageTypeMap,
+						inputWageTypeIds,
+						WageTypeSystemIds.LOCAL_INCOME_TAX_ID),
+					localTax);
+			}
 
 			if ("BUSINESS".equals(wageCategory)) {
 
@@ -313,6 +338,76 @@ public class WagePaymentCalculationService {
 		}
 
 		return "WORKER";
+	}
+
+	private long calculateWorkerIncomeTax(
+		long monthlyTaxablePay) {
+
+		if (monthlyTaxablePay <= 0L) {
+			return 0L;
+		}
+
+		long rate;
+		long progressiveDeduction;
+
+		if (monthlyTaxablePay <= 1_000_000L) {
+			rate = 6L;
+			progressiveDeduction = 0L;
+
+		} else if (monthlyTaxablePay <= 4_000_000L) {
+			rate = 15L;
+			progressiveDeduction = 90_000L;
+
+		} else if (monthlyTaxablePay <= 7_000_000L) {
+			rate = 24L;
+			progressiveDeduction = 450_000L;
+
+		} else if (monthlyTaxablePay <= 12_000_000L) {
+			rate = 35L;
+			progressiveDeduction = 1_220_000L;
+
+		} else if (monthlyTaxablePay <= 25_000_000L) {
+			rate = 38L;
+			progressiveDeduction = 1_580_000L;
+
+		} else if (monthlyTaxablePay <= 40_000_000L) {
+			rate = 40L;
+			progressiveDeduction = 2_080_000L;
+
+		} else if (monthlyTaxablePay <= 80_000_000L) {
+			rate = 42L;
+			progressiveDeduction = 2_880_000L;
+
+		} else {
+			rate = 45L;
+			progressiveDeduction = 5_280_000L;
+		}
+
+		long incomeTax = monthlyTaxablePay * rate / 100L
+			- progressiveDeduction;
+
+		return truncateToTen(
+			Math.max(incomeTax, 0L));
+	}
+
+	private long truncateToTen(long value) {
+
+		if (value <= 0L) {
+			return 0L;
+		}
+
+		return value / 10L * 10L;
+	}
+
+	private boolean isIncomeTaxType(
+		Integer wageTypeId) {
+
+		return Integer.valueOf(
+			WageTypeSystemIds.INCOME_TAX_ID)
+			.equals(wageTypeId)
+			|| Integer.valueOf(
+				WageTypeSystemIds.LOCAL_INCOME_TAX_ID)
+				.equals(wageTypeId);
 	}
 
 	// 10원 단위 반올림
