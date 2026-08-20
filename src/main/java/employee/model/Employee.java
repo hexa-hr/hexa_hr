@@ -25,11 +25,12 @@ public class Employee {
 	private String sns;
 	private String otherDetails;
 	private String status;
+	private Long basicPay;
 
 	public Employee(Integer employeeId, Integer accountId, Integer companyId, Integer personId, String employmentType,
 		String koreanName, String englishName, Date hireDate, Date resignationDate, Integer departmentId,
 		Integer positionId, String foreignOrDomestic, String residentNumber1, String residentNumber2, String address,
-		String telPhone, String mobile, String email, String sns, String otherDetails, String status) {
+		String telPhone, String mobile, String email, String sns, String otherDetails, String status, Long basicPay) {
 		this.employeeId = employeeId;
 		this.accountId = accountId;
 		this.companyId = companyId;
@@ -51,6 +52,7 @@ public class Employee {
 		this.sns = sns;
 		this.otherDetails = otherDetails;
 		this.status = status;
+		this.basicPay = basicPay;
 	}
 
 	public Integer getEmployeeId() {
@@ -135,6 +137,10 @@ public class Employee {
 
 	public String getStatus() {
 		return status;
+	}
+
+	public Long getBasicPay() {
+		return basicPay;
 	}
 
 }
