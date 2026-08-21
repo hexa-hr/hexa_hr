@@ -25,6 +25,7 @@ public class Employee {
 	private String sns;
 	private String otherDetails;
 	private String status;
+	private Long basicPay;
 
 	// 1. 기본 생성자
 	public Employee() {}
@@ -33,7 +34,7 @@ public class Employee {
 	public Employee(Integer employeeId, Integer accountId, Integer companyId, Integer personId, String employmentType,
 		String koreanName, String englishName, Date hireDate, Date resignationDate, Integer departmentId,
 		Integer positionId, String foreignOrDomestic, String residentNumber1, String residentNumber2, String address,
-		String telPhone, String mobile, String email, String sns, String otherDetails, String status) {
+		String telPhone, String mobile, String email, String sns, String otherDetails, String status, Long basicPay) {
 		this.employeeId = employeeId;
 		this.accountId = accountId;
 		this.companyId = companyId;
@@ -55,6 +56,7 @@ public class Employee {
 		this.sns = sns;
 		this.otherDetails = otherDetails;
 		this.status = status;
+		this.basicPay = basicPay;
 	}
 
 	// 3. Getter & Setter (이 부분에 setEmployeeId가 포함되어 있어!)
@@ -224,5 +226,9 @@ public class Employee {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+  
+  public Long getBasicPay() {
+		return basicPay;
 	}
 }

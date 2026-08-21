@@ -200,3 +200,36 @@ public class EmployeeDao {
 		}
 	}
 }
+	// 사원등록 시 설정한 기본급 또는 일급 조회
+	public Long selectBasicPay(
+		Connection conn,
+		Integer employeeId)
+		throws SQLException {
+
+		String sql = "SELECT basic_pay "
+			+ "FROM employee "
+			+ "WHERE employee_id = ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(
+				1,
+				employeeId);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				if (rs.next()) {
+
+					long basicPay = rs.getLong(
+						"basic_pay");
+
+					return rs.wasNull()
+						? null
+						: basicPay;
+				}
+			}
+		}
+
+		return null;
+	}
+}
