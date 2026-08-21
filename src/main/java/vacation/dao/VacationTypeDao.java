@@ -38,8 +38,27 @@ public class VacationTypeDao {
 		}
 	}
 
-	// 신규 항목 저장 (Oracle 시퀀스 vacation_type_seq 사용 예시)
+	// 👉 [추가] 동일한 휴가 항목 이름이 이미 존재하는지 확인하는 메서드
+	public boolean isDuplicateName(Connection conn, String vacationTypeName) throws SQLException {
+		String sql = "SELECT COUNT(*) FROM vacation_type WHERE vacation_type_name = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, vacationTypeName);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt(1) > 0; // 1개 이상 존재하면 true (중복)
+				}
+			}
+		}
+		return false;
+	}
+
+	// 휴가 항목 추가 (중복 검사 로직 포함)
 	public void insert(Connection conn, VacationType vacation) throws SQLException {
+		// 1. 등록하려는 이름이 이미 존재하는지 검사
+		if (isDuplicateName(conn, vacation.getVacationTypeName())) {
+			throw new SQLException("이미 존재하는 휴가 항목 이름입니다."); // 중복 시 예외 발생
+		}
+
 		PreparedStatement pstmt = null;
 		String sql = "INSERT INTO vacation_type (vacation_type_id, vacation_type_name, apply_period1, apply_period2, usage) "
 			+ "VALUES (vacation_type_seq.NEXTVAL, ?, ?, ?, ?)";
@@ -57,6 +76,11 @@ public class VacationTypeDao {
 	}
 
 	public int update(Connection conn, VacationType vacation) throws SQLException {
+		// 👉 [추가] 수정하려는 이름이 자신을 제외하고 이미 존재하는지 검사
+		if (isDuplicateNameForUpdate(conn, vacation.getVacationTypeId(), vacation.getVacationTypeName())) {
+			throw new SQLException("이미 존재하는 휴가 항목 이름입니다."); // 중복 시 예외 발생
+		}
+
 		String sql = "UPDATE vacation_type SET "
 			+ " vacation_type_name = ?, "
 			+ " apply_period1 = ?, "
@@ -94,5 +118,20 @@ public class VacationTypeDao {
 			pstmt.setInt(1, vacationTypeId);
 			return pstmt.executeUpdate();
 		}
+	}
+
+	public boolean isDuplicateNameForUpdate(Connection conn, int vacationTypeId, String vacationTypeName)
+		throws SQLException {
+		String sql = "SELECT COUNT(*) FROM vacation_type WHERE vacation_type_name = ? AND vacation_type_id != ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, vacationTypeName);
+			pstmt.setInt(2, vacationTypeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt(1) > 0;
+				}
+			}
+		}
+		return false;
 	}
 }

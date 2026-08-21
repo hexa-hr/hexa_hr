@@ -423,11 +423,19 @@ public class AttendanceDao {
 		throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String sql = "SELECT e.*, d.department_name, p.position_name, a.attendance_days " + "FROM employee e "
+
+		// 👉 SELECT e.* 대신 컬럼을 직접 나열하고 basic_pay를 명시적으로 가져오도록 수정
+		String sql = "SELECT e.employee_id, e.account_id, e.company_id, e.person_id, e.employment_type, "
+			+ "e.korean_name, e.english_name, e.hire_date, e.resignation_date, e.department_id, e.position_id, "
+			+ "e.foreign_or_domestic, e.resident_number1, e.resident_number2, e.address, e.tel_phone, "
+			+ "e.mobile, e.email, e.sns, e.other_details, e.status, NVL(e.basic_pay, 0) AS basic_pay, "
+			+ "d.department_name, p.position_name, a.attendance_days "
+			+ "FROM employee e "
 			+ "LEFT JOIN department d ON e.department_id = d.department_id "
 			+ "LEFT JOIN position p ON e.position_id = p.position_id "
 			+ "LEFT JOIN attendance a ON e.employee_id = a.employee_id AND a.attendance_type_id = ? "
 			+ "ORDER BY e.employee_id ASC";
+
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, attendanceTypeId);
@@ -549,5 +557,33 @@ public class AttendanceDao {
 			}
 		}
 		return list;
+	}
+
+	// [추가] 1. 신규 등록 시 이름 중복 확인 [유진 코드]
+	public boolean isDuplicateName(Connection conn, String attendanceTypeName) throws SQLException {
+		String sql = "SELECT COUNT(*) FROM attendance_type WHERE attendance_type_name = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, attendanceTypeName);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next())
+					return rs.getInt(1) > 0;
+			}
+		}
+		return false;
+	}
+
+	// [추가] 2. 수정 시 자기 자신 제외하고 이름 중복 확인 [유진 코드]
+	public boolean isDuplicateNameForUpdate(Connection conn, int attendanceTypeId, String attendanceTypeName)
+		throws SQLException {
+		String sql = "SELECT COUNT(*) FROM attendance_type WHERE attendance_type_name = ? AND attendance_type_id != ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, attendanceTypeName);
+			pstmt.setInt(2, attendanceTypeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next())
+					return rs.getInt(1) > 0;
+			}
+		}
+		return false;
 	}
 }

@@ -55,9 +55,23 @@ public class VacationTypeSaveHandler implements CommandHandler {
 		vacation.setApplyPeriod2(sdf.parse(applyPeriod2));
 		vacation.setUsage(usage != null ? usage : "Y");
 
-		vacationService.addVacationType(vacation);
+		try {
+			// 중복 예외 발생 지점
+			vacationService.addVacationType(vacation);
+		} catch (RuntimeException e) {
+			String errorMessage = e.getMessage();
+			if (e.getCause() != null && e.getCause().getMessage() != null) {
+				errorMessage = e.getCause().getMessage();
+			}
 
-		// 4. 저장 완료 후 목록 URL로 리다이렉트
+			// 👉 [수정] request가 아닌 session에 에러 메시지 저장
+			req.getSession().setAttribute("errorMessage", errorMessage);
+
+			// 👉 [수정] setting.do로 리다이렉트 후 종료
+			res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
+			return null;
+		}
+
 		res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
 		return null;
 	}

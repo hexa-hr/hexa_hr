@@ -34,10 +34,23 @@ public class AttendanceTypeSaveHandler implements CommandHandler {
 		AttendanceType att = new AttendanceType(null, name, unit, attendanceGroupId, vacationTypeId, usage);
 
 		// 3. DB 저장
-		attendanceService.addAttendance(att);
+		try {
+			attendanceService.addAttendance(att);
+			res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
+			return null;
+			// ... 에러 발생 시 catch 블록 내부 ...
+		} catch (RuntimeException e) {
+			String errorMessage = e.getMessage();
+			// (중복 에러 체크 로직 동일)
 
-		// 4. 리다이렉트
-		res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
-		return null;
+			// 1. 세션에 메시지 저장
+			req.getSession().setAttribute("errorMessage", errorMessage);
+
+			// 2. 리다이렉트 (PRG 패턴: Post-Redirect-Get)
+			res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
+
+			// 3. 컨트롤러가 포워딩하지 않도록 null 리턴
+			return null;
+		}
 	}
 }

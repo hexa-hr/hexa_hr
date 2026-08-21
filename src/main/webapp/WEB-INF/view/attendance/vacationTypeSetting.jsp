@@ -17,16 +17,19 @@ if (request.getAttribute("defaultEndDate") == null) {
 <meta charset="UTF-8">
 <title>휴가/근태 설정</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
 body {
 	font-family: sans-serif;
 	color: #333;
-    margin: 0;
+	margin: 0;
 }
 
 .page-header {
@@ -182,8 +185,8 @@ tr:hover {
 </head>
 <body>
 
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<!-- [1] 휴가항목 설정 -->
 	<div class="page-header">
@@ -209,11 +212,11 @@ tr:hover {
 							value="vacationTypeSetting.do?selectedVacationId=${vacation.vacationTypeId}&vacationTypeName=${vacation.vacationTypeName}&applyPeriod1=${vacation.applyPeriod1}&applyPeriod2=${vacation.applyPeriod2}&usage=${vacation.usage}" />
 						<tr>
 							<td><a href="${vacUrl}">${vacation.vacationTypeName}</a></td>
-							<td><a href="${vacUrl}">${vacation.applyPeriod1} ~ ${vacation.applyPeriod2}</a></td>
-							<td style="padding: 5px 0;">
-								<a href="vacationDaysManage.do?attendanceTypeId=${vacation.vacationTypeId}"
-								   target="_blank" class="btn-manage">관리</a>
-							</td>
+							<td><a href="${vacUrl}">${vacation.applyPeriod1} ~
+									${vacation.applyPeriod2}</a></td>
+							<td style="padding: 5px 0;"><a
+								href="vacationDaysManage.do?attendanceTypeId=${vacation.vacationTypeId}"
+								target="_blank" class="btn-manage">관리</a></td>
 							<td><a href="${vacUrl}">${vacation.usage == 'Y' ? '사용' : '사용안함'}</a></td>
 						</tr>
 					</c:forEach>
@@ -371,6 +374,19 @@ tr:hover {
 			</form>
 		</div>
 	</div>
+
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<%-- 세션에 errorMessage가 있으면 실행 --%>
+<c:if test="${not empty sessionScope.errorMessage}">
+    <script>
+        alert("${sessionScope.errorMessage}");
+    </script>
+    <%-- 한 번 보여준 에러는 세션에서 제거 (중요!) --%>
+    <c:remove var="errorMessage" scope="session" />
+</c:if>
+
+
 
 </body>
 </html>
