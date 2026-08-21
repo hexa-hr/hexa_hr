@@ -7,11 +7,21 @@
 <html>
 <head>
 <title>일용직 근무 조회 - 월별</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
+body {
+    font-family: 'Malgun Gothic', dotum, sans-serif;
+    margin: 0;
+}
+
 /* 상단 제목 및 탭 디자인 */
 .page-header {
 	margin-bottom: 20px;
-	font-family: 'Malgun Gothic', sans-serif;
 }
 
 .title-area {
@@ -113,6 +123,9 @@ th {
 </style>
 </head>
 <body>
+
+    <jsp:include page="/WEB-INF/view/include/header.jsp" />
+    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<!-- 상단 제목 영역 -->
 	<div class="page-header">

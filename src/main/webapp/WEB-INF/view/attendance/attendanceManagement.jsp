@@ -5,8 +5,14 @@
 <head>
 <meta charset="UTF-8">
 <title>근태기록/관리</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
-    body { font-family: 'Malgun Gothic', dotum, sans-serif; font-size: 13px; color: #333; margin: 0; padding: 20px; background-color: #f5f5f5;}
+    body { font-family: 'Malgun Gothic', dotum, sans-serif; font-size: 13px; color: #333; margin: 0; background-color: #f5f5f5;}
     
     /* Layout */
     .container { display: flex; gap: 30px; background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -40,6 +46,9 @@
 </style>
 </head>
 <body>
+
+<jsp:include page="/WEB-INF/view/include/header.jsp" />
+<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 <div class="container">
     <!-- 좌측 리스트 영역 -->

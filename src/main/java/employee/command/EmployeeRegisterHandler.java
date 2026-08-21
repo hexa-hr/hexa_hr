@@ -62,7 +62,7 @@ public class EmployeeRegisterHandler implements CommandHandler {
 			String sns = request.getParameter("sns");
 			String otherDetails = request.getParameter("otherDetails");
 			String status = request.getParameter("status");
-			Integer basicPay = parseInt(request.getParameter("basicPay"));
+			Long basicPay = parseLong(request.getParameter("basicPay"));
 
 			Employee employee = new Employee(
 				null, accountId, companyId, personId, employmentType,
@@ -176,6 +176,16 @@ public class EmployeeRegisterHandler implements CommandHandler {
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			return sdf.parse(val.trim());
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private Long parseLong(String val) {
+		if (val == null || val.trim().isEmpty())
+			return null;
+		try {
+			return Long.parseLong(val.trim());
 		} catch (Exception e) {
 			return null;
 		}

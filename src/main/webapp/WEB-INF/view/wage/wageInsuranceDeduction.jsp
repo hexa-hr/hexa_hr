@@ -8,10 +8,15 @@
 <meta charset="UTF-8">
 <title>4대보험 공제내역</title>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
 body {
 	font-family: Arial, sans-serif;
-	margin: 30px;
+    margin: 0;
 }
 
 .search-form {
@@ -111,6 +116,9 @@ button {
 </head>
 
 <body>
+    
+    <jsp:include page="/WEB-INF/view/include/header.jsp" />
+    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<h1>4대보험 공제내역</h1>
 

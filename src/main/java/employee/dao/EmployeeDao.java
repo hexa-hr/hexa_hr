@@ -78,7 +78,7 @@ public class EmployeeDao {
 						rs.getString("address"), rs.getString("tel_phone"), rs.getString("mobile"),
 						rs.getString("email"), rs.getString("sns"), rs.getString("other_details"),
 						rs.getString("status"),
-						rs.getObject("basic_pay") != null ? rs.getInt("basic_pay") : null);
+						rs.getObject("basic_pay") != null ? rs.getLong("basic_pay") : null);
 				}
 			}
 		}
@@ -166,7 +166,7 @@ public class EmployeeDao {
 			pstmt.setString(20, employee.getOtherDetails());
 			pstmt.setString(21, employee.getStatus());
 			if (employee.getBasicPay() != null)
-				pstmt.setInt(22, employee.getBasicPay());
+				pstmt.setLong(22, employee.getBasicPay());
 			else
 				pstmt.setNull(22, java.sql.Types.INTEGER);
 

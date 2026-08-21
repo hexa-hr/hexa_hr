@@ -6,7 +6,14 @@
 <head>
 <meta charset="UTF-8">
 <title>사원 신규 등록 / 상세</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
+body { margin: 0; }
 .wrap { display: flex; align-items: flex-start; }
 .sidebar { width: 280px; padding: 20px; background-color: #f4f4f4; border-right: 1px solid #ddd; height: 100vh; position: sticky; top: 0; box-sizing: border-box; }
 .container { padding: 20px; font-family: sans-serif; flex: 1; box-sizing: border-box; }
@@ -23,6 +30,9 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 </style>
 </head>
 <body>
+
+    <jsp:include page="/WEB-INF/view/include/header.jsp" />
+    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<div class="wrap">
 		<div class="sidebar">

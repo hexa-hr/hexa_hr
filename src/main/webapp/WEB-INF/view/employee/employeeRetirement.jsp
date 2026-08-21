@@ -6,8 +6,14 @@
 <head>
 <meta charset="UTF-8">
 <title>사원 퇴직처리</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
-    body { margin: 0; background-color: #f8f9fa; font-family: 'Malgun Gothic', sans-serif; padding: 40px 0; }
+    body { margin: 0; background-color: #f8f9fa; font-family: 'Malgun Gothic', sans-serif; }
     .wrap { max-width: 1200px; margin: 0 auto; background-color: white; border: 1px solid #ddd; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
     
     .header-area { display: flex; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
@@ -110,6 +116,10 @@
 </script>
 </head>
 <body>
+
+    <jsp:include page="/WEB-INF/view/include/header.jsp" />
+    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+    
     <div class="wrap">
         <div class="header-area">
             <div class="header-icon">💻</div>

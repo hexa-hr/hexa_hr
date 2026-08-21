@@ -5,8 +5,14 @@
 <head>
 <meta charset="UTF-8">
 <title>근태 상세 조회</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
-    body { font-family: 'Malgun Gothic', sans-serif; font-size: 13px; color: #333; margin: 0; padding: 20px; background-color: #f5f5f5; }
+    body { font-family: 'Malgun Gothic', sans-serif; font-size: 13px; color: #333; margin: 0; background-color: #f5f5f5; }
     .container { background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); min-height: 600px; }
     
     /* 상단 타이틀 및 탭 영역 */
@@ -44,6 +50,9 @@
 </style>
 </head>
 <body>
+
+<jsp:include page="/WEB-INF/view/include/header.jsp" />
+<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 <div class="container">
     <!-- 상단 타이틀 및 탭 메뉴 -->
