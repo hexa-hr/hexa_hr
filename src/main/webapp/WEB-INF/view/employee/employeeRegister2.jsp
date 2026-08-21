@@ -5,6 +5,12 @@
 <head>
 <meta charset="UTF-8">
 <title>사원 부가정보 등록 (사원정보 2)</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
 body {
 	margin: 0;
@@ -141,6 +147,9 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 </style>
 </head>
 <body>
+
+    <jsp:include page="/WEB-INF/view/include/header.jsp" />
+    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<div class="wrap">
 		<!-- ================= 1. 왼쪽 사이드바 ================= -->

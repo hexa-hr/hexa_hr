@@ -6,8 +6,14 @@
 <head>
 <meta charset="UTF-8">
 <title>사원 명부 (Employee List)</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
-    body { margin: 0; background-color: #f8f9fa; font-family: sans-serif; padding: 40px 0; }
+    body { margin: 0; background-color: #f8f9fa; font-family: sans-serif; }
     
     /* 🌟 사이드바를 없애고 가운데 정렬된 넓은 단일 박스로 변경! */
     .wrap { max-width: 1200px; margin: 0 auto; background-color: white; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
@@ -60,6 +66,10 @@
 </script>
 </head>
 <body>
+
+    <jsp:include page="/WEB-INF/view/include/header.jsp" />
+    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+    
     <div class="wrap">
         <div class="container">
             <div class="section-title">사원 명부</div>

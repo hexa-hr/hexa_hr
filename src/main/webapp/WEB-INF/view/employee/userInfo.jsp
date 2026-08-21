@@ -5,8 +5,14 @@
 <head>
 <meta charset="UTF-8">
 <title>사용자 정보</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
-    body { font-family: 'Malgun Gothic', sans-serif; background-color: #f8f9fa; margin: 0; padding: 40px; }
+    body { font-family: 'Malgun Gothic', sans-serif; background-color: #f8f9fa; margin: 0; }
     .wrap { max-width: 1300px; margin: 0 auto; background-color: white; padding: 40px; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
     h2 { font-size: 22px; color: #333; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 30px; }
     
@@ -77,6 +83,7 @@
 </script>
 </head>
 <body>
+    
     <div class="wrap">
         <h2>사용자 정보</h2>
         

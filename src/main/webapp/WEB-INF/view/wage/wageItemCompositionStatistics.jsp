@@ -9,6 +9,11 @@
 <meta charset="UTF-8">
 <title>급여항목 구성 통계</title>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <script
 	src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
 
@@ -18,7 +23,7 @@
 <style>
 body {
 	font-family: Arial, sans-serif;
-	margin: 30px;
+    margin: 0;
 }
 
 .description {
@@ -253,6 +258,9 @@ button {
 </head>
 
 <body>
+    
+    <jsp:include page="/WEB-INF/view/include/header.jsp" />
+    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<h1>급여항목 구성 통계</h1>
 
