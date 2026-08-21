@@ -8,16 +8,19 @@
 <meta charset="UTF-8">
 <title>급여 항목 설정</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
 body {
 	font-family: 'Malgun Gothic', sans-serif;
 	color: #333;
-    margin: 0;
+	margin: 0;
 }
 
 .page-header {
@@ -222,8 +225,8 @@ table.data-table tr:hover {
 </head>
 <body>
 
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<div class="page-header">
 		<h1>💰 급여 항목 설정</h1>
@@ -601,5 +604,15 @@ table.data-table tr:hover {
 			toggleLumpSum();
 		};
 	</script>
+
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<c:if test="${not empty sessionScope.errorMessage}">
+    <script>
+        alert("${sessionScope.errorMessage}");
+    </script>
+    <c:remove var="errorMessage" scope="session"/>
+</c:if>
+
 </body>
 </html>

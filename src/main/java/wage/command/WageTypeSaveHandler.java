@@ -52,11 +52,21 @@ public class WageTypeSaveHandler implements CommandHandler {
 			taxFreeLimit,
 			taxFreeName);
 
-		// 서비스 호출 (저장 실행)
-		wageService.addWageType(wageType);
+		try {
+			wageService.addWageType(wageType);
+		} catch (RuntimeException e) {
+			String errorMessage = e.getMessage();
+			if (errorMessage == null || errorMessage.trim().isEmpty()) {
+				errorMessage = "이미 존재하는 지급/공제 항목 이름입니다.";
+			}
+			req.getSession().setAttribute("errorMessage", errorMessage);
+			res.sendRedirect(req.getContextPath() + "/wageTypeSetting.do");
+			return null;
+		}
 
 		// 저장 완료 후 목록 화면으로 리다이렉트
 		res.sendRedirect(req.getContextPath() + "/wageTypeSetting.do");
 		return null;
 	}
+
 }
