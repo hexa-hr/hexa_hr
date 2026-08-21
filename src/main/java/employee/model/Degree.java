@@ -57,4 +57,8 @@ public class Degree {
 		return completion;
 	}
 
+	public void setEmployeeId(Integer employeeId) {
+		this.employeeId = employeeId;
+	}
+
 }
