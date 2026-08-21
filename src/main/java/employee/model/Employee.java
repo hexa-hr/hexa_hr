@@ -2,7 +2,6 @@ package employee.model;
 
 import java.util.Date;
 
-// 사원 기본 정보
 public class Employee {
 	private Integer employeeId;
 	private Integer accountId;
@@ -27,10 +26,6 @@ public class Employee {
 	private String status;
 	private Long basicPay;
 
-	// 1. 기본 생성자
-	public Employee() {}
-
-	// 2. 전체 필드 생성자
 	public Employee(Integer employeeId, Integer accountId, Integer companyId, Integer personId, String employmentType,
 		String koreanName, String englishName, Date hireDate, Date resignationDate, Integer departmentId,
 		Integer positionId, String foreignOrDomestic, String residentNumber1, String residentNumber2, String address,
@@ -59,7 +54,7 @@ public class Employee {
 		this.basicPay = basicPay;
 	}
 
-	// 3. Getter & Setter (이 부분에 setEmployeeId가 포함되어 있어!)
+	// Getter & Setter
 	public Integer getEmployeeId() {
 		return employeeId;
 	}
@@ -227,7 +222,7 @@ public class Employee {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-  
+
   public Long getBasicPay() {
 		return basicPay;
 	}
