@@ -43,6 +43,7 @@ body {
 	gap: 30px;
 	align-items: flex-start;
 	margin-bottom: 40px;
+	min-width: 1100px;
 }
 
 .table-section {
