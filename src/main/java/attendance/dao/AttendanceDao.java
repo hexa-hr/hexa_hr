@@ -1,6 +1,7 @@
 package attendance.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,6 +27,27 @@ public class AttendanceDao {
 			return ((Number)obj).intValue();
 		}
 		return Integer.parseInt(obj.toString());
+	}
+
+	private Long getLong(
+		ResultSet rs,
+		String columnName)
+		throws SQLException {
+
+		Object value = rs.getObject(
+			columnName);
+
+		if (value == null) {
+			return null;
+		}
+
+		if (value instanceof Number) {
+
+			return ((Number)value).longValue();
+		}
+
+		return Long.valueOf(
+			value.toString());
 	}
 
 	// 1. 전체 목록 조회 (master 패키지 DTO 수정 없이 기본 필드만 조회) - 유진님 코드
@@ -420,7 +442,7 @@ public class AttendanceDao {
 					rs.getString("foreign_or_domestic"), rs.getString("resident_number1"),
 					rs.getString("resident_number2"), rs.getString("address"), rs.getString("tel_phone"),
 					rs.getString("mobile"), rs.getString("email"), rs.getString("sns"),
-					rs.getString("other_details"), rs.getString("status"), rs.getInt("basicpay"));
+					rs.getString("other_details"), rs.getString("status"), getLong(rs, "basic_pay"));
 
 				Integer days = getInteger(rs, "attendance_days");
 				int attendanceDays = (days != null) ? days : 0;
@@ -473,5 +495,59 @@ public class AttendanceDao {
 		} finally {
 			JdbcUtil.close(pstmt);
 		}
+	}
+
+	// 급여 연동용 - 사원별 근태연결 수당 합계 조회
+	public long selectLinkedAllowanceAmount(
+		Connection conn,
+		int employeeId,
+		String attendanceTypeName,
+		Date settlementStartDate,
+		Date settlementEndDate) throws SQLException {
+
+		String sql = "SELECT NVL(SUM(NVL(a.amount, 0)), 0) AS total_amount "
+			+ "FROM attendance a "
+			+ "JOIN attendance_type t "
+			+ "ON a.attendance_type_id = t.attendance_type_id "
+			+ "WHERE a.employee_id = ? "
+			+ "AND t.attendance_type_name = ? "
+			+ "AND a.start_date BETWEEN ? AND ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, employeeId);
+			pstmt.setString(2, attendanceTypeName);
+			pstmt.setDate(3, settlementStartDate);
+			pstmt.setDate(4, settlementEndDate);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				if (rs.next()) {
+					return rs.getLong("total_amount");
+				}
+			}
+		}
+
+		return 0L;
+	}
+
+	// 일용직 사원만 조회 (employment_type이 '일용직'인 경우) -나(에스더)코드
+	public List<EmployeeVO> selectDailyWorkers(Connection conn) throws SQLException {
+		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, " + "d.department_name, p.position_name "
+			+ "FROM employee e " + "LEFT JOIN department d ON e.department_id = d.department_id "
+			+ "LEFT JOIN position p ON e.position_id = p.position_id " + "WHERE e.employment_type = '일용직' " // <--
+																																																																													// 요렇게
+																																																																													// 일용직만
+																																																																													// 필터링!
+			+ "ORDER BY e.employee_id ASC";
+
+		List<EmployeeVO> list = new ArrayList<>();
+		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				list.add(new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
+					rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name")));
+			}
+		}
+		return list;
 	}
 }

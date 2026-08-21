@@ -24,15 +24,12 @@ public class Employee {
 	private String sns;
 	private String otherDetails;
 	private String status;
-	// 🌟 추가된 급여(기본급/일급) 컬럼
-	private Integer basicPay;
+	private Long basicPay;
 
 	public Employee(Integer employeeId, Integer accountId, Integer companyId, Integer personId, String employmentType,
 		String koreanName, String englishName, Date hireDate, Date resignationDate, Integer departmentId,
-		Integer positionId, String foreignOrDomestic, String residentNumber1, String residentNumber2,
-		String address, String telPhone, String mobile, String email, String sns, String otherDetails,
-		String status, Integer basicPay) { // 🌟 맨 끝에 basicPay 추가!
-
+		Integer positionId, String foreignOrDomestic, String residentNumber1, String residentNumber2, String address,
+		String telPhone, String mobile, String email, String sns, String otherDetails, String status, Long basicPay) {
 		this.employeeId = employeeId;
 		this.accountId = accountId;
 		this.companyId = companyId;
@@ -54,7 +51,7 @@ public class Employee {
 		this.sns = sns;
 		this.otherDetails = otherDetails;
 		this.status = status;
-		this.basicPay = basicPay; // 🌟 추가!
+		this.basicPay = basicPay;
 	}
 
 	// Getter & Setter
@@ -226,11 +223,7 @@ public class Employee {
 		this.status = status;
 	}
 
-	public Integer getBasicPay() {
+  public Long getBasicPay() {
 		return basicPay;
-	}
-
-	public void setBasicPay(Integer basicPay) {
-		this.basicPay = basicPay;
 	}
 }
