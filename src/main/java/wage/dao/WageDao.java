@@ -19,6 +19,7 @@ import wage.model.WageMonthlyTotalStatisticsRow;
 import wage.model.WagePaymentCalculationItem;
 import wage.model.WagePaymentEmployeeRow;
 import wage.model.WagePaymentPreviousSourceOption;
+import wage.model.WageTypeSystemIds;
 
 public class WageDao {
 
@@ -299,17 +300,23 @@ public class WageDao {
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_payment, "
 			+ "       SUM(CASE WHEN wt.item_type = 'D' "
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_deduction, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '국민연금' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.NATIONAL_PENSION_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS national_pension, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '건강보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.HEALTH_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS health_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '장기요양보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.LONG_TERM_CARE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS long_term_care_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '고용보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.EMPLOYMENT_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS employment_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '소득세' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.INCOME_TAX_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS income_tax, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '지방소득세' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.LOCAL_INCOME_TAX_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS local_income_tax "
 			+ "FROM wage w "
 			+ "JOIN wage_type wt "
@@ -364,13 +371,17 @@ public class WageDao {
 			+ "       e.hire_date, "
 			+ "       d.department_name, "
 			+ "       p.position_name, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '국민연금' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.NATIONAL_PENSION_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS national_pension, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '건강보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.HEALTH_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS health_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '장기요양보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.LONG_TERM_CARE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS long_term_care_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '고용보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.EMPLOYMENT_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS employment_insurance "
 			+ "FROM wage w "
 			+ "JOIN employee e "
