@@ -199,12 +199,13 @@ th {
 				<div class="search-row">
 					<input type="checkbox" id="chkDept"
 						onchange="toggleInput('chkDept', 'deptId')"> <label
-						for="chkDept">부서</label> <select id="deptId" name="deptId"
-						disabled>
+						for="chkDept">부서</label> 
+					<!-- [수정된 부분] 하드코딩 지우고 DB 데이터 연동 -->
+					<select id="deptId" name="deptId" disabled>
 						<option value="">선택하세요.</option>
-						<option value="관리">관리팀</option>
-						<option value="연구">연구소</option>
-						<option value="개발">개발팀</option>
+						<c:forEach var="dept" items="${deptList}">
+							<option value="${dept.id}">${dept.name}</option>
+						</c:forEach>
 					</select>
 				</div>
 
