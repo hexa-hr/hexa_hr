@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import employee.model.Appointment;
 import employee.model.Career;
 import employee.model.Certification;
+import employee.model.LanguageAbility; // 🌟 어학능력 모델 임포트 추가!
 import employee.model.MilitaryService;
 import employee.model.Referrer;
 import employee.model.Retirement;
@@ -51,7 +52,6 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 		if (companyNames != null) {
 			for (int i = 0; i < companyNames.length; i++) {
 				if (companyNames[i] != null && !companyNames[i].trim().isEmpty()) {
-					// 🌟 NPE 방지를 위해 날짜 파싱에도 safeGet을 씌웠어!
 					Career career = new Career(null, employeeId, companyNames[i],
 						parseDate(safeGet(startDates, i)),
 						parseDate(safeGet(endDates, i)),
@@ -87,13 +87,13 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 		}
 
 		// ==========================================
-		// 4. 자격증(Certification) 수집
+		// 4. 자격증(Certification) 수집 (🌟 JSP 이름표에 맞게 수정 완료)
 		// ==========================================
-		String[] certNames = request.getParameterValues("certificationName");
-		String[] acqDates = request.getParameterValues("acquisitionDate");
-		String[] orgs = request.getParameterValues("issuingOrganization");
-		String[] certNums = request.getParameterValues("certificationNumber");
-		String[] remarks = request.getParameterValues("remarks1");
+		String[] certNames = request.getParameterValues("certName");
+		String[] acqDates = request.getParameterValues("certAcqDate");
+		String[] orgs = request.getParameterValues("certIssuer");
+		String[] certNums = request.getParameterValues("certNumber");
+		String[] remarks = request.getParameterValues("certRemarks");
 
 		List<Certification> certList = new ArrayList<>();
 		if (certNames != null) {
@@ -103,6 +103,31 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 						parseDate(safeGet(acqDates, i)),
 						safeGet(orgs, i), safeGet(certNums, i), safeGet(remarks, i));
 					certList.add(cert);
+				}
+			}
+		}
+
+		// ==========================================
+		// 🌟 4-2. 어학능력(LanguageAbility) 수집 (새로 추가!)
+		// ==========================================
+		String[] langNames = request.getParameterValues("langName");
+		String[] langTests = request.getParameterValues("langTest");
+		String[] langScores = request.getParameterValues("langScore");
+		String[] langAcqDates = request.getParameterValues("langAcqDate");
+		String[] langReadings = request.getParameterValues("langReading");
+		String[] langWritings = request.getParameterValues("langWriting");
+		String[] langSpeakings = request.getParameterValues("langSpeaking");
+
+		List<LanguageAbility> langList = new ArrayList<>();
+		if (langNames != null) {
+			for (int i = 0; i < langNames.length; i++) {
+				if (langNames[i] != null && !langNames[i].trim().isEmpty()) {
+					LanguageAbility lang = new LanguageAbility(null, employeeId, langNames[i],
+						safeGet(langTests, i),
+						parseInteger(safeGet(langScores, i)),
+						parseDate(safeGet(langAcqDates, i)),
+						safeGet(langReadings, i), safeGet(langWritings, i), safeGet(langSpeakings, i));
+					langList.add(lang);
 				}
 			}
 		}
@@ -201,10 +226,11 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 		}
 
 		// ==========================================
-		// 10. DB 저장 실행
+		// 10. DB 저장 실행 (🌟 langList 파라미터 쏙 추가 완료!)
 		// ==========================================
 		try {
-			service.register2(employeeId, careerList, militaryList, certList, trainingList, rewardList, apptList,
+			service.register2(employeeId, careerList, militaryList, certList, langList, trainingList, rewardList,
+				apptList,
 				referrerList, retirement);
 
 			response.setContentType("text/html; charset=UTF-8");

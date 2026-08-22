@@ -7,6 +7,7 @@ import java.util.List;
 import employee.dao.AppointmentDao;
 import employee.dao.CareerDao;
 import employee.dao.CertificationDao;
+import employee.dao.LanguageAbilityDao;
 import employee.dao.MilitaryServiceDao;
 import employee.dao.ReferrerDao;
 import employee.dao.RetirementDao;
@@ -15,6 +16,7 @@ import employee.dao.TrainingDao;
 import employee.model.Appointment;
 import employee.model.Career;
 import employee.model.Certification;
+import employee.model.LanguageAbility;
 import employee.model.MilitaryService;
 import employee.model.Referrer;
 import employee.model.Retirement;
@@ -28,16 +30,20 @@ public class EmployeeRegister2Service {
 	private CareerDao careerDao = new CareerDao();
 	private MilitaryServiceDao militaryDao = new MilitaryServiceDao();
 	private CertificationDao certificationDao = new CertificationDao();
+	private LanguageAbilityDao languageDao = new LanguageAbilityDao(); // ⭐ 어학능력 DAO 추가
 	private TrainingDao trainingDao = new TrainingDao();
 	private RewardPenaltyDao rewardDao = new RewardPenaltyDao();
 	private AppointmentDao apptDao = new AppointmentDao();
 	private ReferrerDao referrerDao = new ReferrerDao();
 	private RetirementDao retirementDao = new RetirementDao();
 
+	// ⭐ 파라미터에 List<LanguageAbility> langList 추가
 	public void register2(Integer employeeId, List<Career> careerList,
 		List<MilitaryService> militaryList, List<Certification> certList,
+		List<LanguageAbility> langList,
 		List<Training> trainingList, List<RewardPenalty> rewardList,
 		List<Appointment> apptList, List<Referrer> referrerList, Retirement retirement) {
+
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
@@ -61,6 +67,13 @@ public class EmployeeRegister2Service {
 			if (certList != null && !certList.isEmpty()) {
 				for (Certification cert : certList) {
 					certificationDao.insert(conn, cert);
+				}
+			}
+
+			// ⭐ 3-2. 어학능력 등록
+			if (langList != null && !langList.isEmpty()) {
+				for (LanguageAbility lang : langList) {
+					languageDao.insert(conn, lang);
 				}
 			}
 

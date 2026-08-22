@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -144,6 +143,12 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 	padding: 4px 8px;
 	font-size: 12px;
 }
+
+/* 🌟 분리된 테이블용 헤더 버튼 스타일 추가 */
+.table-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; margin-top: 15px; }
+.table-header .title { color: #0056b3; font-weight: bold; font-size: 14px; }
+.btn-outline-add { padding: 4px 10px; font-size: 12px; background: white; border: 1px solid #ccc; cursor: pointer; color: #d9534f; font-weight: bold; border-radius: 3px; }
+.btn-outline-del { padding: 4px 10px; font-size: 12px; background: white; border: 1px solid #ccc; cursor: pointer; color: #555; border-radius: 3px; margin-left: 5px;}
 </style>
 </head>
 <body>
@@ -233,20 +238,46 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 					</tr>
 				</table>
 
-				<!-- 3. 자격·면허 & 어학능력 -->
-				<div class="section-title" id="cert">
-					자격·면허 & 어학능력
-					<button type="button" class="add-btn" onclick="addRow('certTable')">+
-						추가</button>
+				<!-- 3. 자격·면허 & 어학능력 (🌟 수정된 영역) -->
+				<div class="section-title" id="cert">자격·면허 & 어학능력</div>
+				
+				<!-- 3-1. 자격 & 면허 테이블 -->
+				<div class="table-header">
+					<div class="title">+ 자격 & 면허</div>
+					<div>
+						<button type="button" class="btn-outline-add" onclick="addRow('certTable')">+ 추가</button>
+						<button type="button" class="btn-outline-del" onclick="deleteSelectedRows('certTable')">선택삭제</button>
+					</div>
 				</div>
-				<table id="certTable">
+				<table id="certTable" style="border-top: 2px solid #007bff; margin-bottom: 20px;">
 					<tr>
-						<th>자격증명</th>
-						<th>취득일</th>
-						<th>발급기관</th>
-						<th>자격증번호</th>
-						<th>비고</th>
-						<th>삭제</th>
+						<th style="width: 5%;"><input type="checkbox" onclick="toggleAll(this, 'certTable')"></th>
+						<th style="width: 25%;">자격/면허명</th>
+						<th style="width: 15%;">취득일</th>
+						<th style="width: 20%;">발행기관</th>
+						<th style="width: 20%;">증번호</th>
+						<th style="width: 15%;">비고</th>
+					</tr>
+				</table>
+
+				<!-- 3-2. 어학능력 테이블 -->
+				<div class="table-header">
+					<div class="title">+ 어학능력</div>
+					<div>
+						<button type="button" class="btn-outline-add" onclick="addRow('langTable')">+ 추가</button>
+						<button type="button" class="btn-outline-del" onclick="deleteSelectedRows('langTable')">선택삭제</button>
+					</div>
+				</div>
+				<table id="langTable" style="border-top: 2px solid #007bff;">
+					<tr>
+						<th style="width: 5%;"><input type="checkbox" onclick="toggleAll(this, 'langTable')"></th>
+						<th style="width: 15%;">외국어명</th>
+						<th style="width: 15%;">시험</th>
+						<th style="width: 15%;">공인점수</th>
+						<th style="width: 15%;">취득일</th>
+						<th style="width: 10%;">독해</th>
+						<th style="width: 10%;">작문</th>
+						<th style="width: 15%;">회화</th>
 					</tr>
 				</table>
 
@@ -391,6 +422,7 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 			addRow('careerTable');
 			addRow('militaryTable');
 			addRow('certTable');
+			addRow('langTable'); // 🌟 어학능력 추가
 			addRow('trainingTable');
 			addRow('rewardTable');
 			addRow('appointmentTable');
@@ -406,7 +438,7 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 			var html = "";
 			if (tableId === 'careerTable') {
 				html = '<td><input type="text" name="companyName"></td>'
-						+ '<td><input type="date" name="startDate"></td>' /* 🌟 name 수정됨 (주의: 이전 코드 확인) */
+						+ '<td><input type="date" name="startDate"></td>' 
 						+ '<td><input type="date" name="endDate"></td>'
 						+ '<td><input type="text" name="finalPosition"></td>'
 						+ '<td><input type="text" name="responsibilities"></td>';
@@ -419,12 +451,24 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 						+ '<td><input type="text" name="department1"></td>'
 						+ '<td><input type="text" name="exemptionReason"></td>';
 			} else if (tableId === 'certTable') {
-				html = '<td><input type="text" name="certificationName"></td>'
-						+ '<td><input type="date" name="acquisitionDate"></td>'
-						+ '<td><input type="text" name="issuingOrganization"></td>'
-						+ '<td><input type="text" name="certificationNumber"></td>'
-						+ '<td><input type="text" name="remarks1"></td>';
-			} else if (tableId === 'trainingTable') {
+                // 🌟 자격 면허 (체크박스 구조)
+				html = '<td><input type="checkbox" class="row-check"></td>'
+						+ '<td><input type="text" name="certName"></td>'
+						+ '<td><input type="date" name="certAcqDate"></td>'
+						+ '<td><input type="text" name="certIssuer"></td>'
+						+ '<td><input type="text" name="certNumber"></td>'
+						+ '<td><input type="text" name="certRemarks"></td>';
+			} else if (tableId === 'langTable') {
+                // 🌟 어학 능력 (체크박스 구조)
+                html = '<td><input type="checkbox" class="row-check"></td>'
+                        + '<td><input type="text" name="langName"></td>'
+                        + '<td><input type="text" name="langTest"></td>'
+                        + '<td><input type="text" name="langScore"></td>'
+                        + '<td><input type="date" name="langAcqDate"></td>'
+                        + '<td><select name="langReading"><option value="">선택</option><option value="상">상</option><option value="중">중</option><option value="하">하</option></select></td>'
+                        + '<td><select name="langWriting"><option value="">선택</option><option value="상">상</option><option value="중">중</option><option value="하">하</option></select></td>'
+                        + '<td><select name="langSpeaking"><option value="">선택</option><option value="상">상</option><option value="중">중</option><option value="하">하</option></select></td>';
+            } else if (tableId === 'trainingTable') {
 				html = '<td><input type="text" name="trainingType"></td>'
 						+ '<td><input type="text" name="trainingName"></td>'
 						+ '<td><input type="date" name="trainingStartDate"></td>'
@@ -460,9 +504,10 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 						+ '<td><input type="text" name="guaPeriod" placeholder="예: 2년"></td>';
 			}
 
-			// 공통 삭제 버튼 추가
-			html += '<td><button type="button" class="del-btn" onclick="deleteRow(this, \''
-					+ tableId + '\')">X</button></td>';
+			// 🌟 공통 삭제 버튼 (단, 체크박스로 삭제하는 certTable, langTable은 제외)
+            if (tableId !== 'certTable' && tableId !== 'langTable') {
+			    html += '<td><button type="button" class="del-btn" onclick="deleteRow(this, \'' + tableId + '\')">X</button></td>';
+            }
 			row.innerHTML = html;
 		}
 
@@ -473,6 +518,39 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 			} else {
 				alert("최소 1줄은 입력란이 필요합니다.");
 			}
+		}
+
+        // 🌟 전체 선택 체크박스 로직 (자격면허, 어학능력용)
+		function toggleAll(source, tableId) {
+			var checkboxes = document.querySelectorAll('#' + tableId + ' .row-check');
+			for(var i = 0; i < checkboxes.length; i++) {
+				checkboxes[i].checked = source.checked;
+			}
+		}
+
+		// 🌟 선택 삭제 로직 (자격면허, 어학능력용)
+		function deleteSelectedRows(tableId) {
+			var table = document.getElementById(tableId);
+			var checkboxes = table.querySelectorAll('.row-check:checked');
+			
+			if (checkboxes.length === 0) {
+				alert("삭제할 항목을 선택해주세요.");
+				return;
+			}
+			
+			if (table.rows.length - 1 === checkboxes.length) {
+				alert("최소 1줄의 입력란은 남겨두어야 합니다.");
+				return;
+			}
+			
+			// 인덱스 꼬임을 방지하기 위해 아래쪽부터 삭제
+			for (var i = checkboxes.length - 1; i >= 0; i--) {
+				var row = checkboxes[i].closest('tr');
+				row.parentNode.removeChild(row);
+			}
+			
+			// 전체 선택 체크박스 해제
+			table.querySelector('th input[type="checkbox"]').checked = false;
 		}
 	</script>
 
