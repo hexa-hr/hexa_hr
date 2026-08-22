@@ -226,7 +226,7 @@ input[type="date"], input[type="text"], input[type="number"], select {
 					<tr>
 						<th>근태항목</th>
 						<td>
-							<!-- [수정된 부분 1] data-unit 추가 -->
+							<!-- [수정된 부분] data-att-usage와 data-vac-usage 추가 -->
 							<select id="attendanceType" name="attendance_type_id"
 								onchange="toggleVacationPeriod()" required>
 									<option value="" data-has-vacation="false" data-unit="일">선택하세요.</option>
@@ -236,7 +236,9 @@ input[type="date"], input[type="text"], input[type="number"], select {
 												data-vacation-name="${att.vacationTypeName}"
 												data-start="<fmt:formatDate value='${att.applyPeriod1}' pattern='yyyy-MM-dd'/>"
 												data-end="<fmt:formatDate value='${att.applyPeriod2}' pattern='yyyy-MM-dd'/>"
-												data-unit="${att.unit}">
+												data-unit="${att.unit}"
+												data-att-usage="${att.usage}"
+												data-vac-usage="${att.vacationUsage}">
 											${att.attendanceTypeName}
 										</option>
 									</c:forEach>
@@ -258,7 +260,7 @@ input[type="date"], input[type="text"], input[type="number"], select {
 						<th>근태일수</th>
 						<td><input type="number" id="attendanceDays"
 							name="attendance_days" min="0" step="0.5" value="1" required>
-							<!-- [수정된 부분 2] 단위 글자 변경을 위해 id="unitText" span 추가 -->
+							<!-- 단위 글자 변경을 위해 id="unitText" span 추가 -->
 							<span id="unitText">일</span></td>
 					</tr>
 					<tr>
@@ -475,7 +477,7 @@ input[type="date"], input[type="text"], input[type="number"], select {
         .catch(function(err) { alert('서버 통신 오류가 발생했습니다.'); });
     }
 
-    // [수정된 부분 3] 근태항목 선택 시 휴가기간 자동 표시 및 달력 제한, 단위 변경 토글 
+    // [수정된 부분] 사용여부에 따라 휴가기간 표시여부 결정 로직 추가
     function toggleVacationPeriod() {
         var typeSelect = document.getElementById('attendanceType');
         var selectedOption = typeSelect.options[typeSelect.selectedIndex];
@@ -496,6 +498,10 @@ input[type="date"], input[type="text"], input[type="number"], select {
         var vEnd = selectedOption.getAttribute('data-end');
         var unit = selectedOption.getAttribute('data-unit');
         
+        // 추가된 사용여부 데이터
+        var attUsage = selectedOption.getAttribute('data-att-usage');
+        var vacUsage = selectedOption.getAttribute('data-vac-usage');
+        
         // 단위가 '시간'이면 시간으로, 아니면 기본값인 '일'로 변경
         if (unit === '시간') {
             unitTextSpan.innerText = '시간';
@@ -503,8 +509,11 @@ input[type="date"], input[type="text"], input[type="number"], select {
             unitTextSpan.innerText = '일';
         }
         
-        // 선택한 근태항목에 연결된 휴가공제가 존재할 경우
-        if (hasVacation && vStart && vEnd) {
+        // 둘 다 '사용' (또는 DB값 'Y') 상태인지 확인
+        var isBothUsed = (attUsage === 'Y' || attUsage === '사용') && (vacUsage === 'Y' || vacUsage === '사용');
+        
+        // 선택한 근태항목에 연결된 휴가공제가 존재하고, 둘 다 '사용'일 경우
+        if (hasVacation && vStart && vEnd && isBothUsed) {
             vacationRow.style.display = 'table-row';
             
             displayTd.innerText = vName + " (" + vStart + " ~ " + vEnd + ")";
@@ -523,7 +532,7 @@ input[type="date"], input[type="text"], input[type="number"], select {
                 endDateInput.value = vEnd;
             }
         } else {
-            // 연결된 휴가가 없는 일반 근태항목일 경우
+            // 연결된 휴가가 없는 일반 근태항목이거나 사용안함일 경우
             vacationRow.style.display = 'none';
             displayTd.innerText = "";
             

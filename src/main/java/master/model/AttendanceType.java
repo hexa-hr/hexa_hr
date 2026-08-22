@@ -2,6 +2,7 @@ package master.model;
 
 // 근태 항목
 public class AttendanceType {
+	private String vacationUsage;
 	private Integer attendanceTypeId;
 	private String attendanceTypeName;
 	private String unit;
@@ -72,5 +73,14 @@ public class AttendanceType {
 
 	public void setApplyPeriod2(java.util.Date applyPeriod2) {
 		this.applyPeriod2 = applyPeriod2;
+	}
+
+	// [추가] 휴가항목 사용여부 데이터
+	public String getVacationUsage() {
+		return vacationUsage;
+	}
+
+	public void setVacationUsage(String vacationUsage) {
+		this.vacationUsage = vacationUsage;
 	}
 }

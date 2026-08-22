@@ -45,15 +45,16 @@ public class AttendanceDao {
 		return Long.valueOf(value.toString());
 	}
 
-	// 1. 전체 목록 조회 - 유진님 코드 (수정: 에스더님 - 휴가기간 JOIN 추가)
+	// 1. 전체 목록 조회
 	public List<AttendanceType> selectAll(Connection conn) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-			// 쿼리 변경: vacation_type을 LEFT JOIN 하여 휴가명과 날짜(apply_period)를 함께 가져옵니다.
+			// 쿼리 변경: a."USAGE" 와 v.usage 를 모두 가져오도록 별칭(AS) 적용
 			pstmt = conn.prepareStatement("SELECT a.attendance_type_id, a.attendance_type_name, a.unit, "
-					+ "a.attendance_group_id, a.vacation_type_id, a.\"USAGE\", "
-					+ "v.vacation_type_name, v.apply_period1, v.apply_period2 " + "FROM attendance_type a "
+					+ "a.attendance_group_id, a.vacation_type_id, a.\"USAGE\" AS att_usage, "
+					+ "v.vacation_type_name, v.apply_period1, v.apply_period2, v.usage AS vac_usage "
+					+ "FROM attendance_type a "
 					+ "LEFT JOIN vacation_type v ON a.vacation_type_id = v.vacation_type_id "
 					+ "ORDER BY a.attendance_type_id ASC");
 			rs = pstmt.executeQuery();
@@ -62,14 +63,17 @@ public class AttendanceDao {
 				Integer groupId = rs.getObject("attendance_group_id") != null ? rs.getInt("attendance_group_id") : null;
 				Integer vacationId = rs.getObject("vacation_type_id") != null ? rs.getInt("vacation_type_id") : null;
 
+				// 별칭으로 가져온 att_usage 세팅
 				AttendanceType att = new AttendanceType(rs.getInt("attendance_type_id"),
 						rs.getString("attendance_type_name"), rs.getString("unit"), groupId, vacationId,
-						rs.getString("USAGE"));
+						rs.getString("att_usage"));
 
-				// 조인해 온 휴가 이름과 적용 기간(Date)을 VO에 세팅
 				att.setVacationTypeName(rs.getString("vacation_type_name"));
 				att.setApplyPeriod1(rs.getDate("apply_period1"));
 				att.setApplyPeriod2(rs.getDate("apply_period2"));
+
+				// [추가] 휴가 사용여부 세팅
+				att.setVacationUsage(rs.getString("vac_usage"));
 
 				list.add(att);
 			}
