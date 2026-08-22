@@ -602,7 +602,8 @@ public class WageDao {
 		String wageMonth)
 		throws SQLException {
 
-		String sql = "SELECT wt.wage_type_name, "
+		String sql = "SELECT w.wage_type_id, "
+			+ "       wt.wage_type_name, "
 			+ "       wt.item_type, "
 			+ "       SUM(NVL(w.wage_value, 0)) AS amount "
 			+ "FROM wage w "
@@ -610,8 +611,11 @@ public class WageDao {
 			+ "  ON wt.wage_type_id = w.wage_type_id "
 			+ "WHERE w.employee_id = ? "
 			+ "  AND w.wage_month = ? "
-			+ "GROUP BY wt.wage_type_name, wt.item_type "
-			+ "ORDER BY wt.item_type DESC, wt.wage_type_name";
+			+ "GROUP BY w.wage_type_id, "
+			+ "         wt.wage_type_name, "
+			+ "         wt.item_type "
+			+ "ORDER BY wt.item_type DESC, "
+			+ "         w.wage_type_id";
 
 		List<WageItemCompositionStatisticsRow> result = new ArrayList<>();
 
