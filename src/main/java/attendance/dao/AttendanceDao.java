@@ -86,15 +86,20 @@ public class AttendanceDao {
 
 	// 1. 전체 사원 목록 조회 (JOIN department, position) - 나(에스더) 코드
 	public List<EmployeeVO> selectAllEmployees(Connection conn) throws SQLException {
-		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, " + "d.department_name, p.position_name "
-				+ "FROM employee e " + "LEFT JOIN department d ON e.department_id = d.department_id "
+		// 쿼리에 e.basic_pay 추가
+		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, "
+				+ "d.department_name, p.position_name, e.basic_pay " + "FROM employee e "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id "
 				+ "LEFT JOIN position p ON e.position_id = p.position_id " + "ORDER BY e.employee_id ASC";
 
 		List<EmployeeVO> list = new ArrayList<>();
 		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				list.add(new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
-						rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name")));
+				EmployeeVO vo = new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
+						rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name"));
+
+				vo.setBasicPay(rs.getLong("basic_pay"));
+				list.add(vo);
 			}
 		}
 		return list;
@@ -533,8 +538,10 @@ public class AttendanceDao {
 
 	// 일용직 사원만 조회 (employment_type이 '일용직'인 경우) -나(에스더)코드
 	public List<EmployeeVO> selectDailyWorkers(Connection conn) throws SQLException {
-		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, " + "d.department_name, p.position_name "
-				+ "FROM employee e " + "LEFT JOIN department d ON e.department_id = d.department_id "
+		// 쿼리에 e.basic_pay 추가
+		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, "
+				+ "d.department_name, p.position_name, e.basic_pay " + "FROM employee e "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id "
 				+ "LEFT JOIN position p ON e.position_id = p.position_id " + "WHERE e.employment_type = '일용직' " // <--
 																												// 요렇게
 																												// 일용직만
@@ -544,8 +551,11 @@ public class AttendanceDao {
 		List<EmployeeVO> list = new ArrayList<>();
 		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				list.add(new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
-						rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name")));
+				EmployeeVO vo = new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
+						rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name"));
+
+				vo.setBasicPay(rs.getLong("basic_pay"));
+				list.add(vo);
 			}
 		}
 		return list;
