@@ -226,23 +226,24 @@ input[type="date"], input[type="text"], input[type="number"], select {
 					<tr>
 						<th>근태항목</th>
 						<td>
-							<!-- [수정된 부분] DB 연동 드롭다운 및 데이터 숨기기 적용 -->
+							<!-- [수정된 부분 1] data-unit 추가 -->
 							<select id="attendanceType" name="attendance_type_id"
 								onchange="toggleVacationPeriod()" required>
-									<option value="" data-has-vacation="false">선택하세요.</option>
+									<option value="" data-has-vacation="false" data-unit="일">선택하세요.</option>
 									<c:forEach var="att" items="${attendanceList}">
 										<option value="${att.attendanceTypeId}" 
 												data-has-vacation="${not empty att.vacationTypeId and att.vacationTypeId != 0 ? 'true' : 'false'}"
 												data-vacation-name="${att.vacationTypeName}"
 												data-start="<fmt:formatDate value='${att.applyPeriod1}' pattern='yyyy-MM-dd'/>"
-												data-end="<fmt:formatDate value='${att.applyPeriod2}' pattern='yyyy-MM-dd'/>">
+												data-end="<fmt:formatDate value='${att.applyPeriod2}' pattern='yyyy-MM-dd'/>"
+												data-unit="${att.unit}">
 											${att.attendanceTypeName}
 										</option>
 									</c:forEach>
 							</select>
 						</td>
 					</tr>
-					<!-- [수정된 부분] JS가 데이터를 꽂아넣을 수 있도록 id(vacationPeriodDisplay) 부여, 초기엔 비워둠 -->
+					<!-- JS가 데이터를 꽂아넣을 수 있도록 id(vacationPeriodDisplay) 부여, 초기엔 비워둠 -->
 					<tr id="vacationPeriodRow" style="display: none;">
 						<th style="color: #e53935;">휴가적용기간</th>
 						<td id="vacationPeriodDisplay" style="color: #e53935; font-weight: bold;"></td>
@@ -257,7 +258,8 @@ input[type="date"], input[type="text"], input[type="number"], select {
 						<th>근태일수</th>
 						<td><input type="number" id="attendanceDays"
 							name="attendance_days" min="0" step="0.5" value="1" required>
-							일</td>
+							<!-- [수정된 부분 2] 단위 글자 변경을 위해 id="unitText" span 추가 -->
+							<span id="unitText">일</span></td>
 					</tr>
 					<tr>
 						<th>금액(수당)</th>
@@ -473,7 +475,7 @@ input[type="date"], input[type="text"], input[type="number"], select {
         .catch(function(err) { alert('서버 통신 오류가 발생했습니다.'); });
     }
 
-    // 🌟 9. [수정된 부분] 근태항목 선택 시 휴가기간 자동 표시 및 달력 제한 토글 
+    // [수정된 부분 3] 근태항목 선택 시 휴가기간 자동 표시 및 달력 제한, 단위 변경 토글 
     function toggleVacationPeriod() {
         var typeSelect = document.getElementById('attendanceType');
         var selectedOption = typeSelect.options[typeSelect.selectedIndex];
@@ -483,18 +485,28 @@ input[type="date"], input[type="text"], input[type="number"], select {
         
         var startDateInput = document.getElementById('startDate');
         var endDateInput = document.getElementById('endDate');
+        
+        // 단위 텍스트 요소
+        var unitTextSpan = document.getElementById('unitText');
 
         // option 태그에 숨겨둔 데이터를 꺼냅니다.
         var hasVacation = selectedOption.getAttribute('data-has-vacation') === 'true';
         var vName = selectedOption.getAttribute('data-vacation-name');
         var vStart = selectedOption.getAttribute('data-start');
         var vEnd = selectedOption.getAttribute('data-end');
+        var unit = selectedOption.getAttribute('data-unit');
+        
+        // 단위가 '시간'이면 시간으로, 아니면 기본값인 '일'로 변경
+        if (unit === '시간') {
+            unitTextSpan.innerText = '시간';
+        } else {
+            unitTextSpan.innerText = '일';
+        }
         
         // 선택한 근태항목에 연결된 휴가공제가 존재할 경우
         if (hasVacation && vStart && vEnd) {
             vacationRow.style.display = 'table-row';
             
-            // "어쩌구휴가 (2026-01-01 ~ 2026-12-31)" 형태로 화면에 출력
             displayTd.innerText = vName + " (" + vStart + " ~ " + vEnd + ")";
             
             // 달력 선택 범위 강제 제한
