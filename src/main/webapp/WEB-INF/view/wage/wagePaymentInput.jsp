@@ -9,10 +9,13 @@
 <meta charset="UTF-8">
 <title>급여입력</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
 body {
@@ -268,8 +271,32 @@ th {
 }
 
 .deduction-header {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 42px;
 	background-color: #fff4f1;
 	color: #e44343;
+	box-sizing: border-box;
+}
+
+.wage-auto-calculate-button {
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	transform: translateY(-50%);
+	padding: 3px 7px;
+	border: 0;
+	border-radius: 2px;
+	background-color: #111111;
+	color: #ffffff;
+	font-size: 12px;
+}
+
+.wage-auto-calculate-button:disabled {
+	opacity: 0.45;
+	cursor: default;
 }
 
 .wage-item-row {
@@ -335,8 +362,10 @@ th {
 }
 
 .wage-form-actions {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
 	margin-top: 15px;
-	text-align: center;
 }
 
 @media ( max-width : 700px) {
@@ -447,8 +476,8 @@ th {
 
 <body>
 
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<c:set var="visibleEmployeeCount"
 		value="${fn:length(savedEmployees) + fn:length(pendingEmployees)}" />
@@ -1084,7 +1113,14 @@ th {
 
 						<div class="wage-item-column">
 
-							<div class="wage-item-column-header deduction-header">공제항목
+							<div class="wage-item-column-header deduction-header">
+
+								<span>공제항목</span>
+
+								<button type="submit" class="wage-auto-calculate-button"
+									<c:if test="${not wageInputEnabled}">disabled</c:if>>
+									자동계산</button>
+
 							</div>
 
 							<c:forEach var="item" items="${wageItems}">
@@ -1139,16 +1175,29 @@ th {
 						원
 					</div>
 
-					<div class="wage-form-actions">
+					<c:url var="wageContentClearUrl" value="/wage/paymentInput.do">
 
-						<button type="submit"
-							<c:if test="${not wageInputEnabled}">disabled</c:if>>
-							자동계산</button>
+						<c:param name="wageMonth" value="${wageMonth}" />
+						<c:param name="wagePeriod" value="${wagePeriod}" />
+						<c:param name="incomeType" value="${incomeType}" />
+
+						<c:forEach var="pending" items="${allPendingEmployees}">
+							<c:param name="pendingEmployeeId" value="${pending.employeeId}" />
+						</c:forEach>
+
+					</c:url>
+
+					<div class="wage-form-actions">
 
 						<button type="submit"
 							formaction="${pageContext.request.contextPath}/wage/paymentInputSave.do"
 							<c:if test="${not wageInputEnabled}">disabled</c:if>>저장
 						</button>
+
+						<button type="button" id="wageContentClearButton"
+							data-clear-url="<c:out value='${wageContentClearUrl}' />"
+							<c:if test="${not wageInputEnabled}">disabled</c:if>>내용
+							지우기</button>
 
 					</div>
 
@@ -2157,6 +2206,34 @@ th {
 
 				event.preventDefault();
 				moveWorkspace();
+			});
+
+	})();
+	</script>
+
+	<script>
+	(function() {
+
+		const clearButton =
+			document.getElementById(
+				"wageContentClearButton");
+
+		if (!clearButton) {
+			return;
+		}
+
+		clearButton.addEventListener(
+			"click",
+			function() {
+
+				const clearUrl =
+					clearButton.dataset.clearUrl;
+
+				if (!clearUrl) {
+					return;
+				}
+
+				window.location.assign(clearUrl);
 			});
 
 	})();

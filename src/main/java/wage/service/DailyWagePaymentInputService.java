@@ -298,6 +298,8 @@ public class DailyWagePaymentInputService {
 			new WagePaymentCalculationRequest(
 				employeeId,
 				normalizedWageMonth,
+				settlementStartDate,
+				settlementEndDate,
 				calculationInputs));
 
 		Map<Integer, Long> calculatedInsuranceMap = new LinkedHashMap<>();

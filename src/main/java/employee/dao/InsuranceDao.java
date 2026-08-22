@@ -1,6 +1,7 @@
 package employee.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,30 +53,51 @@ public class InsuranceDao {
 
 	public List<EmployeeInsurance> selectByEmployeeId(
 		Connection conn,
-		Integer employeeId)
+		Integer employeeId,
+		Date settlementStartDate,
+		Date settlementEndDate)
 		throws SQLException {
 
 		String sql = "SELECT insurance_agency, "
-			+ "NVL(insurance_amount, 0) AS insurance_amount "
+			+ "       NVL(insurance_amount, 0) AS insurance_amount "
 			+ "FROM insurance "
 			+ "WHERE employee_id = ? "
+			+ "  AND (insurance_start_date IS NULL "
+			+ "       OR insurance_start_date <= ?) "
+			+ "  AND (insurance_end_date IS NULL "
+			+ "       OR insurance_end_date >= ?) "
 			+ "ORDER BY insurance_id";
 
 		List<EmployeeInsurance> result = new ArrayList<>();
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-			pstmt.setInt(1, employeeId);
+			pstmt.setInt(
+				1,
+				employeeId);
+
+			// 보험 시작일이 정산 종료일 이하여야 함
+			pstmt.setDate(
+				2,
+				settlementEndDate);
+
+			// 보험 종료일이 정산 시작일 이상이어야 함
+			pstmt.setDate(
+				3,
+				settlementStartDate);
 
 			try (ResultSet rs = pstmt.executeQuery()) {
 
 				while (rs.next()) {
 
 					EmployeeInsurance insurance = new EmployeeInsurance(
-						rs.getString("insurance_agency"),
-						rs.getLong("insurance_amount"));
+						rs.getString(
+							"insurance_agency"),
+						rs.getLong(
+							"insurance_amount"));
 
-					result.add(insurance);
+					result.add(
+						insurance);
 				}
 			}
 		}

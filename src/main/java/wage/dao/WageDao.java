@@ -19,6 +19,7 @@ import wage.model.WageMonthlyTotalStatisticsRow;
 import wage.model.WagePaymentCalculationItem;
 import wage.model.WagePaymentEmployeeRow;
 import wage.model.WagePaymentPreviousSourceOption;
+import wage.model.WageTypeSystemIds;
 
 public class WageDao {
 
@@ -299,17 +300,23 @@ public class WageDao {
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_payment, "
 			+ "       SUM(CASE WHEN wt.item_type = 'D' "
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_deduction, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '국민연금' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.NATIONAL_PENSION_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS national_pension, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '건강보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.HEALTH_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS health_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '장기요양보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.LONG_TERM_CARE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS long_term_care_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '고용보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.EMPLOYMENT_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS employment_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '소득세' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.INCOME_TAX_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS income_tax, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '지방소득세' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.LOCAL_INCOME_TAX_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS local_income_tax "
 			+ "FROM wage w "
 			+ "JOIN wage_type wt "
@@ -364,13 +371,17 @@ public class WageDao {
 			+ "       e.hire_date, "
 			+ "       d.department_name, "
 			+ "       p.position_name, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '국민연금' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.NATIONAL_PENSION_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS national_pension, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '건강보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.HEALTH_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS health_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '장기요양보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.LONG_TERM_CARE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS long_term_care_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '고용보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.EMPLOYMENT_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS employment_insurance "
 			+ "FROM wage w "
 			+ "JOIN employee e "
@@ -602,7 +613,8 @@ public class WageDao {
 		String wageMonth)
 		throws SQLException {
 
-		String sql = "SELECT wt.wage_type_name, "
+		String sql = "SELECT w.wage_type_id, "
+			+ "       wt.wage_type_name, "
 			+ "       wt.item_type, "
 			+ "       SUM(NVL(w.wage_value, 0)) AS amount "
 			+ "FROM wage w "
@@ -610,8 +622,11 @@ public class WageDao {
 			+ "  ON wt.wage_type_id = w.wage_type_id "
 			+ "WHERE w.employee_id = ? "
 			+ "  AND w.wage_month = ? "
-			+ "GROUP BY wt.wage_type_name, wt.item_type "
-			+ "ORDER BY wt.item_type DESC, wt.wage_type_name";
+			+ "GROUP BY w.wage_type_id, "
+			+ "         wt.wage_type_name, "
+			+ "         wt.item_type "
+			+ "ORDER BY wt.item_type DESC, "
+			+ "         w.wage_type_id";
 
 		List<WageItemCompositionStatisticsRow> result = new ArrayList<>();
 
@@ -879,6 +894,26 @@ public class WageDao {
 		}
 
 		return result;
+	}
+
+	// 급여대장 - 선택한 귀속연월/급여차수의 전체 급여 삭제
+	public int deleteWageLedgerRows(
+		Connection conn,
+		String wageMonth,
+		String wagePeriod)
+		throws SQLException {
+
+		String sql = "DELETE FROM wage "
+			+ "WHERE wage_month = ? "
+			+ "  AND wage_period = ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, wageMonth);
+			pstmt.setString(2, wagePeriod);
+
+			return pstmt.executeUpdate();
+		}
 	}
 
 	// 지난급여 불러오기 - 대상 월/차수의 일반·사업 급여 전체 삭제

@@ -478,9 +478,8 @@ public class WagePaymentInputService {
 				COMPANY_ID);
 
 			if (account == null) {
-
-				throw new IllegalStateException(
-					"급여지급정보가 등록되어 있지 않습니다.");
+				throw new IllegalArgumentException(
+					"급여 산정기간과 지급일이 설정되어 있지 않습니다. 사용자 정보에서 급여지급정보를 먼저 설정해 주세요.");
 			}
 
 			LocalDate settlementStartDate = resolveCalculationDate(

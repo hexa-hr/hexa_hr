@@ -9,10 +9,13 @@
 <meta charset="UTF-8">
 <title>급여항목 구성 통계</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <script
 	src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
@@ -23,7 +26,7 @@
 <style>
 body {
 	font-family: Arial, sans-serif;
-    margin: 0;
+	margin: 0;
 }
 
 .description {
@@ -258,9 +261,9 @@ button {
 </head>
 
 <body>
-    
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<h1>급여항목 구성 통계</h1>
 
@@ -448,12 +451,12 @@ button {
 					</div>
 
 					<c:set var="paymentCount"
-						value="${fn:length(itemCompositionStatistics.paymentItems)}" />
+						value="${fn:length(itemCompositionStatistics.tablePaymentItems)}" />
 
 					<c:set var="deductionCount"
-						value="${fn:length(itemCompositionStatistics.deductionItems)}" />
+						value="${fn:length(itemCompositionStatistics.tableDeductionItems)}" />
 
-					<%-- 급여항목 칸은 기본 10개를 유지하고, 항목이 더 많으면 그만큼 늘어남 --%>
+					<%-- 급여항목 칸은 기본 10개이며, 10개 이상이면 9개 + 그 외(N)로 표시 --%>
 					<c:set var="minItemColumnCount" value="${10}" />
 
 					<c:set var="itemColumnCount"
@@ -472,7 +475,7 @@ button {
 								<th class="row-head">지급항목</th>
 
 								<c:forEach var="row"
-									items="${itemCompositionStatistics.paymentItems}">
+									items="${itemCompositionStatistics.tablePaymentItems}">
 
 									<th class="item-head"><c:out value="${row.wageTypeName}" /></th>
 
@@ -492,7 +495,7 @@ button {
 								<th class="sub-head">┗ 금액 (원)</th>
 
 								<c:forEach var="row"
-									items="${itemCompositionStatistics.paymentItems}">
+									items="${itemCompositionStatistics.tablePaymentItems}">
 
 									<td class="item-cell"><fmt:formatNumber
 											value="${row.amount}" pattern="#,##0" /></td>
@@ -515,7 +518,7 @@ button {
 								<th class="sub-head">┗ 구성비율</th>
 
 								<c:forEach var="row"
-									items="${itemCompositionStatistics.paymentItems}">
+									items="${itemCompositionStatistics.tablePaymentItems}">
 
 									<td class="item-cell"><fmt:formatNumber
 											value="${row.compositionRate}" pattern="0.0" />%</td>
@@ -545,7 +548,7 @@ button {
 								<th class="row-head">공제항목</th>
 
 								<c:forEach var="row"
-									items="${itemCompositionStatistics.deductionItems}">
+									items="${itemCompositionStatistics.tableDeductionItems}">
 
 									<th class="item-head"><c:out value="${row.wageTypeName}" /></th>
 
@@ -565,7 +568,7 @@ button {
 								<th class="sub-head">┗ 금액 (원)</th>
 
 								<c:forEach var="row"
-									items="${itemCompositionStatistics.deductionItems}">
+									items="${itemCompositionStatistics.tableDeductionItems}">
 
 									<td class="item-cell"><fmt:formatNumber
 											value="${row.amount}" pattern="#,##0" /></td>
@@ -590,7 +593,7 @@ button {
 								<th class="sub-head">┗ 구성비율</th>
 
 								<c:forEach var="row"
-									items="${itemCompositionStatistics.deductionItems}">
+									items="${itemCompositionStatistics.tableDeductionItems}">
 
 									<td class="item-cell"><fmt:formatNumber
 											value="${row.compositionRate}" pattern="0.0" />%</td>
@@ -863,7 +866,7 @@ button {
 
 		const axisColor = "#5b7096";
 
-		// 짙은 색에서 옅은 색 순서. 항목 10개 + '기타' 까지 커버한다.
+		// 항목 수가 팔레트 색상 수를 넘으면 색상을 처음부터 반복해서 사용한다.
 		const bluePalette = [ "#1F4E79", "#215E92", "#246EAB", "#2A80C0",
 				"#3592D2", "#4BA3DD", "#69B5E5", "#8AC7EC", "#ACD8F3",
 				"#CBE7F8", "#E3F2FC" ];
@@ -872,46 +875,11 @@ button {
 				"#F79245", "#F9A461", "#FBB681", "#FCC8A2", "#FDD9C1",
 				"#FEE7DA", "#FEF2EB" ];
 
-		const MAX_DONUT_ITEMS = 10;
-
 		// 조각이 이 비율보다 얇으면 퍼센트 라벨을 그리지 않는다. 참고 화면도 얇은 조각에는 라벨이 없다.
 		const MIN_LABEL_RATIO = 0.05;
 
 		function formatRate(rate) {
 			return Number(rate).toFixed(1) + "%";
-		}
-
-		/*
-		 * 항목이 10개를 넘으면 금액 내림차순 상위 10개만 남기고 나머지를 '기타'로 합친다.
-		 * 차트에만 적용하며 아래 표는 실제 항목을 전부 그대로 보여준다.
-		 */
-		function groupDonutItems(items) {
-
-			if (items.length <= MAX_DONUT_ITEMS) {
-				return items;
-			}
-
-			const sorted = items.slice().sort(function(a, b) {
-				return b.amount - a.amount;
-			});
-
-			const kept = sorted.slice(0, MAX_DONUT_ITEMS);
-
-			const rest = sorted.slice(MAX_DONUT_ITEMS);
-
-			kept.push({
-				name : "기타",
-
-				amount : rest.reduce(function(sum, item) {
-					return sum + item.amount;
-				}, 0),
-
-				rate : rest.reduce(function(sum, item) {
-					return sum + item.rate;
-				}, 0)
-			});
-
-			return kept;
 		}
 
 		// 도넛 가운데 제목을 그리는 플러그인
@@ -964,7 +932,7 @@ button {
 				return;
 			}
 
-			const items = groupDonutItems(sourceItems);
+			const items = sourceItems;
 
 			// 총액이 0이면 비율 계산에서 NaN 이 나오므로 라벨 판정에 그대로 쓰지 않는다.
 			const total = items.reduce(function(sum, item) {
