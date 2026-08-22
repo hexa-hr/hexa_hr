@@ -25,15 +25,18 @@ WageItemLedgerResult ledgerResult = (WageItemLedgerResult)request.getAttribute("
 <meta charset="UTF-8">
 <title>항목별 대장</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
 body {
 	font-family: Arial, sans-serif;
-    margin: 0;
+	margin: 0;
 }
 
 .search-form {
@@ -114,8 +117,8 @@ button {
 
 <body>
 
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<h1>항목별 대장</h1>
 
@@ -284,6 +287,10 @@ button {
 	<%
 	}
 	%>
+
+	<p>
+		<a href="<%=request.getContextPath()%>/wage/ledger.do"> 급여대장 목록 </a>
+	</p>
 
 </body>
 </html>
