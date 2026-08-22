@@ -896,6 +896,26 @@ public class WageDao {
 		return result;
 	}
 
+	// 급여대장 - 선택한 귀속연월/급여차수의 전체 급여 삭제
+	public int deleteWageLedgerRows(
+		Connection conn,
+		String wageMonth,
+		String wagePeriod)
+		throws SQLException {
+
+		String sql = "DELETE FROM wage "
+			+ "WHERE wage_month = ? "
+			+ "  AND wage_period = ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, wageMonth);
+			pstmt.setString(2, wagePeriod);
+
+			return pstmt.executeUpdate();
+		}
+	}
+
 	// 지난급여 불러오기 - 대상 월/차수의 일반·사업 급여 전체 삭제
 	public int deleteWagePaymentWorkspaceRows(
 		Connection conn,

@@ -31,6 +31,24 @@ public class WageLedgerHandler implements CommandHandler {
 
 		req.setAttribute("selectedYear", year);
 
+		String deleteResult = req.getParameter(
+			"deleteResult");
+
+		if ("success".equals(
+			deleteResult)) {
+
+			req.setAttribute(
+				"deleteMessage",
+				"삭제 되었습니다.");
+
+		} else if ("notFound".equals(
+			deleteResult)) {
+
+			req.setAttribute(
+				"deleteMessage",
+				"삭제할 급여대장이 없습니다.");
+		}
+
 		try {
 
 			WageLedgerSummaryResult result = wageLedgerService.getWageLedgerSummaries(year);
