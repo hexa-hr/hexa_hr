@@ -34,6 +34,10 @@ public class AttendanceManagementHandler implements CommandHandler {
 		try (Connection conn = ConnectionProvider.getConnection()) {
 			List<EmployeeVO> empList = attendanceDao.selectAllEmployees(conn);
 			req.setAttribute("empList", empList);
+
+			List<master.model.AttendanceType> attendanceList = attendanceDao.selectAll(conn);
+			req.setAttribute("attendanceList", attendanceList);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

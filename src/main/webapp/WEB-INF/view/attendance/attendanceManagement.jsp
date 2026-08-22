@@ -225,25 +225,27 @@ input[type="date"], input[type="text"], input[type="number"], select {
 					</tr>
 					<tr>
 						<th>근태항목</th>
-						<td><select id="attendanceType" name="attendance_type_id"
-							onchange="toggleVacationPeriod()" required>
-								<option value="">선택하세요.</option>
-								<option value="1">연차</option>
-								<option value="2">반차</option>
-								<option value="3">지각</option>
-								<option value="4">조퇴</option>
-								<option value="5">외근</option>
-								<option value="6">휴일근무</option>
-								<option value="7">연장근무</option>
-								<option value="8">포상휴가</option>
-								<option value="9">야간근무</option>
-								<option value="10">청원휴가</option>
-						</select></td>
+						<td>
+							<!-- [수정된 부분] DB 연동 드롭다운 및 데이터 숨기기 적용 -->
+							<select id="attendanceType" name="attendance_type_id"
+								onchange="toggleVacationPeriod()" required>
+									<option value="" data-has-vacation="false">선택하세요.</option>
+									<c:forEach var="att" items="${attendanceList}">
+										<option value="${att.attendanceTypeId}" 
+												data-has-vacation="${not empty att.vacationTypeId and att.vacationTypeId != 0 ? 'true' : 'false'}"
+												data-vacation-name="${att.vacationTypeName}"
+												data-start="<fmt:formatDate value='${att.applyPeriod1}' pattern='yyyy-MM-dd'/>"
+												data-end="<fmt:formatDate value='${att.applyPeriod2}' pattern='yyyy-MM-dd'/>">
+											${att.attendanceTypeName}
+										</option>
+									</c:forEach>
+							</select>
+						</td>
 					</tr>
+					<!-- [수정된 부분] JS가 데이터를 꽂아넣을 수 있도록 id(vacationPeriodDisplay) 부여, 초기엔 비워둠 -->
 					<tr id="vacationPeriodRow" style="display: none;">
 						<th style="color: #e53935;">휴가적용기간</th>
-						<td style="color: #e53935; font-weight: bold;">2026-01-01 ~
-							2026-12-31</td>
+						<td id="vacationPeriodDisplay" style="color: #e53935; font-weight: bold;"></td>
 					</tr>
 					<tr>
 						<th>기간</th>
@@ -471,15 +473,53 @@ input[type="date"], input[type="text"], input[type="number"], select {
         .catch(function(err) { alert('서버 통신 오류가 발생했습니다.'); });
     }
 
-    // 9. 포상휴가 선택 시 휴가기간 표시 토글
+    // 🌟 9. [수정된 부분] 근태항목 선택 시 휴가기간 자동 표시 및 달력 제한 토글 
     function toggleVacationPeriod() {
         var typeSelect = document.getElementById('attendanceType');
-        var vacationRow = document.getElementById('vacationPeriodRow');
+        var selectedOption = typeSelect.options[typeSelect.selectedIndex];
         
-        if (typeSelect.options[typeSelect.selectedIndex].text === '포상휴가') {
+        var vacationRow = document.getElementById('vacationPeriodRow');
+        var displayTd = document.getElementById('vacationPeriodDisplay');
+        
+        var startDateInput = document.getElementById('startDate');
+        var endDateInput = document.getElementById('endDate');
+
+        // option 태그에 숨겨둔 데이터를 꺼냅니다.
+        var hasVacation = selectedOption.getAttribute('data-has-vacation') === 'true';
+        var vName = selectedOption.getAttribute('data-vacation-name');
+        var vStart = selectedOption.getAttribute('data-start');
+        var vEnd = selectedOption.getAttribute('data-end');
+        
+        // 선택한 근태항목에 연결된 휴가공제가 존재할 경우
+        if (hasVacation && vStart && vEnd) {
             vacationRow.style.display = 'table-row';
+            
+            // "어쩌구휴가 (2026-01-01 ~ 2026-12-31)" 형태로 화면에 출력
+            displayTd.innerText = vName + " (" + vStart + " ~ " + vEnd + ")";
+            
+            // 달력 선택 범위 강제 제한
+            startDateInput.min = vStart;
+            startDateInput.max = vEnd;
+            endDateInput.min = vStart;
+            endDateInput.max = vEnd;
+            
+            // 만약 이미 입력된 날짜가 제한 범위를 벗어났다면 범위 안으로 강제 조정
+            if (startDateInput.value && (startDateInput.value < vStart || startDateInput.value > vEnd)) {
+                startDateInput.value = vStart;
+            }
+            if (endDateInput.value && (endDateInput.value < vStart || endDateInput.value > vEnd)) {
+                endDateInput.value = vEnd;
+            }
         } else {
+            // 연결된 휴가가 없는 일반 근태항목일 경우
             vacationRow.style.display = 'none';
+            displayTd.innerText = "";
+            
+            // 일반 근태항목은 달력 제한 해제
+            startDateInput.removeAttribute('min');
+            startDateInput.removeAttribute('max');
+            endDateInput.removeAttribute('min');
+            endDateInput.removeAttribute('max');
         }
     }
 </script>

@@ -100,17 +100,16 @@ input[type="number"] {
 			<tr>
 				<th>근태항목</th>
 				<td><select id="attendanceType" name="attendanceType">
-						<option value="">선택하세요.</option>
-						<option value="연차">연차</option>
-						<option value="반차">반차</option>
-						<option value="지각">지각</option>
-						<option value="조퇴">조퇴</option>
-						<option value="외근">외근</option>
-						<option value="휴일근무">휴일근무</option>
-						<option value="연장근무">연장근무</option>
-						<option value="포상휴가">포상휴가</option>
-						<option value="야간근무">야간근무</option>
-						<option value="청원휴가">청원휴가</option>
+						<option value="" data-has-vacation="false">선택하세요.</option>
+						<!-- 서버에서 넘겨주는 근태항목 리스트(attendanceList)를 반복 -->
+						<c:forEach var="att" items="${attendanceList}">
+							<option value="${att.attendanceTypeId}"
+								data-has-vacation="${not empty att.vacationTypeId ? 'true' : 'false'}"
+								data-vacation-name="${att.vacationTypeName}"
+								data-start="<fmt:formatDate value='${att.applyPeriod1}' pattern='yyyy-MM-dd'/>"
+								data-end="<fmt:formatDate value='${att.applyPeriod2}' pattern='yyyy-MM-dd'/>">
+								${att.attendanceTypeName}</option>
+						</c:forEach>
 				</select></td>
 			</tr>
 
@@ -177,23 +176,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const maxRange = "2017-12-31";
 
     function updateFormState() {
-        if (attendanceType.value === '포상휴가') {
-            rewardVacationRow.style.display = '';
-            
-            startDate.min = minRange;
-            startDate.max = maxRange;
-            endDate.min = minRange;
-            endDate.max = maxRange;
+        // 현재 선택된 <option> 태그를 가져옵니다.
+        const selectedOption = attendanceType.options[attendanceType.selectedIndex];
+        
+        // <option>에 숨겨둔 데이터들을 꺼냅니다.
+        const hasVacation = selectedOption.getAttribute('data-has-vacation') === 'true';
+        const vName = selectedOption.getAttribute('data-vacation-name');
+        const vStart = selectedOption.getAttribute('data-start');
+        const vEnd = selectedOption.getAttribute('data-end');
 
-            if (startDate.value && (startDate.value < minRange || startDate.value > maxRange)) {
-                startDate.value = minRange;
+        // 선택한 근태항목에 연결된 휴가가 있는 경우
+        if (hasVacation && vStart && vEnd) {
+            rewardVacationRow.style.display = ''; // 행 보이기
+            
+            // 화면 텍스트 변경 (예: 어쩌구휴가 2026-01-01 ~ 2026-12-31)
+            document.getElementById('appliedStartDate').textContent = vName + " " + vStart;
+            document.getElementById('appliedEndDate').textContent = vEnd;
+            
+            // 기간 입력 input의 min, max 속성 동적 설정
+            startDate.min = vStart;
+            startDate.max = vEnd;
+            endDate.min = vStart;
+            endDate.max = vEnd;
+
+            // 만약 이미 입력된 날짜가 제한 범위를 벗어났다면 범위 안으로 강제 조정
+            if (startDate.value && (startDate.value < vStart || startDate.value > vEnd)) {
+                startDate.value = vStart;
             }
-            if (endDate.value && (endDate.value < minRange || endDate.value > maxRange)) {
-                endDate.value = maxRange;
+            if (endDate.value && (endDate.value < vStart || endDate.value > vEnd)) {
+                endDate.value = vEnd;
             }
         } else {
-            rewardVacationRow.style.display = 'none';
+            // 연결된 휴가가 없는 일반 근태항목(지각, 연장근무 등)일 경우
+            rewardVacationRow.style.display = 'none'; // 행 숨기기
             
+            // 기간 제한 해제
             startDate.removeAttribute('min');
             startDate.removeAttribute('max');
             endDate.removeAttribute('min');
