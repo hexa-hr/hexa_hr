@@ -13,16 +13,16 @@ public class VacationService {
 
 	private AttendanceDao attendanceDao = new AttendanceDao();
 
-	// 사원별 휴가일수 목록 조회
+	// 社員別休暇日数目録照会
 	public List<Map<String, Object>> getEmployeeVacationList(int attendanceTypeId) {
 		try (Connection conn = ConnectionProvider.getConnection()) {
 			return attendanceDao.selectEmployeeVacationList(conn, attendanceTypeId);
 		} catch (SQLException e) {
-			throw new RuntimeException("사원 휴가목록 조회 오류", e);
+			throw new RuntimeException("社員休暇リスト照会エラー", e);
 		}
 	}
 
-	// 사원별 휴가일수 저장
+	// 社員別休暇日数の保存
 	public void saveVacationDays(int attendanceTypeId, String[] employeeIds, String[] vacationDays) {
 		Connection conn = null;
 		try {
@@ -40,7 +40,7 @@ public class VacationService {
 			conn.commit();
 		} catch (SQLException e) {
 			JdbcUtil.rollback(conn);
-			throw new RuntimeException("휴가일수 저장 오류", e);
+			throw new RuntimeException("休暇日数保存エラー", e);
 		} finally {
 			JdbcUtil.close(conn);
 		}

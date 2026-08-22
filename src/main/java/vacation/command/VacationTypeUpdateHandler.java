@@ -9,12 +9,12 @@ import javax.servlet.http.HttpServletResponse;
 import mvc.command.CommandHandler;
 import vacation.model.VacationType;
 import vacation.service.UpdateVacationTypeService;
-import vacation.service.VacationTypeService; // 목록 재조회를 위해 추가
+import vacation.service.VacationTypeService; // リスト再取得のため追加
 
 public class VacationTypeUpdateHandler implements CommandHandler {
 
 	private UpdateVacationTypeService updateService = new UpdateVacationTypeService();
-	private VacationTypeService vacationService = new VacationTypeService(); // 목록 불러오기용
+	private VacationTypeService vacationService = new VacationTypeService(); // リスト読み込み用
 
 	@Override
 	public String process(HttpServletRequest req, HttpServletResponse res) throws Exception {
@@ -23,12 +23,12 @@ public class VacationTypeUpdateHandler implements CommandHandler {
 			return null;
 		}
 
-		// 1. 파라미터 수신
+		// 1. パラメータ受信
 		String idStr = req.getParameter("vacationTypeId");
 
-		// 👉 [수정] 레코드를 선택하지 않은 경우 세션에 담고 리다이렉트
+		// 👉 [修正] レコードを選択していない場合、セッションに格納してリダイレクト
 		if (idStr == null || idStr.trim().isEmpty()) {
-			req.getSession().setAttribute("errorMessage", "휴가항목 목록에서 레코드를 선택해 주세요.");
+			req.getSession().setAttribute("errorMessage", "休暇項目一覧からレコードを選択してください。");
 			res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
 			return null;
 		}
@@ -57,11 +57,11 @@ public class VacationTypeUpdateHandler implements CommandHandler {
 				errorMessage = e.getCause().getMessage();
 			}
 
-			if (errorMessage.contains("ORA-00001") || errorMessage.contains("중복")) {
-				errorMessage = "이미 존재하는 휴가 항목 이름입니다.";
+			if (errorMessage.contains("ORA-00001") || errorMessage.contains("重複") || errorMessage.contains("重複")) {
+				errorMessage = "すでに存在する休暇項目名です。";
 			}
 
-			// 👉 [수정] 중복 에러 발생 시 세션에 담고 리다이렉트
+			// 👉 [修正] 重複エラー発生時、セッションに格納してリダイレクト
 			req.getSession().setAttribute("errorMessage", errorMessage);
 			res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
 			return null;

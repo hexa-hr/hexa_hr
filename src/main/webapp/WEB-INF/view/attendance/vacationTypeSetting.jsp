@@ -15,7 +15,7 @@ if (request.getAttribute("defaultEndDate") == null) {
 <html>
 <head>
 <meta charset="UTF-8">
-<title>휴가/근태 설정</title>
+<title>休暇/勤怠設定</title>
 
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -188,22 +188,22 @@ tr:hover {
 	<jsp:include page="/WEB-INF/view/include/header.jsp" />
 	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<!-- [1] 휴가항목 설정 -->
+	<!-- [1] 休暇項目設定 -->
 	<div class="page-header">
-		<h1>휴가/근태 설정</h1>
-		<p>급여와 연관된 휴가 및 근태항목을 설정하는 메뉴입니다.</p>
+		<h1>休暇/勤怠設定</h1>
+		<p>給与に関連する休暇および勤怠項目を設定するメニューです。</p>
 	</div>
 
 	<div class="container">
 		<div class="table-section">
-			<h3>휴가항목 목록</h3>
+			<h3>休暇項目一覧</h3>
 			<table>
 				<thead>
 					<tr>
-						<th>휴가항목</th>
-						<th>적용기간</th>
-						<th>사원별 휴가일수</th>
-						<th>사용여부</th>
+						<th>休暇項目</th>
+						<th>適用期間</th>
+						<th>社員別休暇日数</th>
+						<th>使用有無</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -216,8 +216,8 @@ tr:hover {
 									${vacation.applyPeriod2}</a></td>
 							<td style="padding: 5px 0;"><a
 								href="vacationDaysManage.do?attendanceTypeId=${vacation.vacationTypeId}"
-								target="_blank" class="btn-manage">관리</a></td>
-							<td><a href="${vacUrl}">${vacation.usage == 'Y' ? '사용' : '사용안함'}</a></td>
+								target="_blank" class="btn-manage">管理</a></td>
+							<td><a href="${vacUrl}">${vacation.usage == 'Y' ? '使用' : '使用しない'}</a></td>
 						</tr>
 					</c:forEach>
 				</tbody>
@@ -229,11 +229,11 @@ tr:hover {
 				<input type="hidden" name="vacationTypeId"
 					value="${param.selectedVacationId}" />
 				<div class="form-group">
-					<label>휴가항목</label> <input type="text" name="vacationTypeName"
-						value="${param.vacationTypeName}" placeholder="휴가항목을 입력해주세요.">
+					<label>休暇項目</label> <input type="text" name="vacationTypeName"
+						value="${param.vacationTypeName}" placeholder="休暇項目を入力してください。">
 				</div>
 				<div class="form-group">
-					<label>적용기간</label>
+					<label>適用期間</label>
 					<div class="date-range">
 						<input type="date" name="applyPeriod1"
 							value="${empty param.applyPeriod1 ? defaultStartDate : param.applyPeriod1}">
@@ -242,23 +242,23 @@ tr:hover {
 					</div>
 				</div>
 				<div class="form-group">
-					<label>사용여부</label>
+					<label>使用有無</label>
 					<div class="radio-group">
 						<label><input type="radio" name="usage" value="Y"
 							${empty param.usage || param.usage == 'Y' ? 'checked' : ''}>
-							사용</label> <label><input type="radio" name="usage" value="N"
-							${param.usage == 'N' ? 'checked' : ''}> 사용안함</label>
+							使用</label> <label><input type="radio" name="usage" value="N"
+							${param.usage == 'N' ? 'checked' : ''}> 使用しない</label>
 					</div>
 				</div>
 				<div class="btn-group">
 					<button type="submit" class="btn btn-primary" formmethod="post"
-						formaction="${pageContext.request.contextPath}/vacationTypeSave.do">추가</button>
+						formaction="${pageContext.request.contextPath}/vacationTypeSave.do">追加</button>
 					<button type="submit" class="btn btn-primary" formmethod="post"
-						formaction="${pageContext.request.contextPath}/vacationTypeUpdate.do">수정</button>
+						formaction="${pageContext.request.contextPath}/vacationTypeUpdate.do">修正</button>
 					<button type="submit" class="btn btn-secondary" formmethod="post"
-						formaction="${pageContext.request.contextPath}/vacationTypeDelete.do">삭제</button>
+						formaction="${pageContext.request.contextPath}/vacationTypeDelete.do">削除</button>
 					<a href="${pageContext.request.contextPath}/vacationTypeSetting.do"
-						class="btn btn-secondary">내용 지우기</a>
+						class="btn btn-secondary">クリア</a>
 				</div>
 			</form>
 		</div>
@@ -266,23 +266,23 @@ tr:hover {
 
 	<hr class="section-divider">
 
-	<!-- [2] 근태항목 설정 -->
+	<!-- [2] 勤怠項目設定 -->
 	<div class="page-header">
-		<h1>근태항목 설정</h1>
-		<p>급여 계산 시 반영될 근태항목을 설정합니다.</p>
+		<h1>勤怠項目設定</h1>
+		<p>給与計算時に反映される勤怠項目を設定します。</p>
 	</div>
 
 	<div class="container">
 		<div class="table-section">
-			<h3>근태항목 목록</h3>
+			<h3>勤怠項目一覧</h3>
 			<table>
 				<thead>
 					<tr>
-						<th>근태항목</th>
-						<th>단위</th>
-						<th>근태그룹</th>
-						<th>휴가공제</th>
-						<th>사용여부</th>
+						<th>勤怠項目</th>
+						<th>単位</th>
+						<th>勤怠グループ</th>
+						<th>休暇控除</th>
+						<th>使用有無</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -307,7 +307,7 @@ tr:hover {
 										</c:if>
 									</c:forEach> ${empty vacName ? '-' : vacName}
 							</a></td>
-							<td><a href="${attUrl}">${att.usage == 'Y' ? '사용' : '사용안함'}</a></td>
+							<td><a href="${attUrl}">${att.usage == 'Y' ? '使用' : '使用しない'}</a></td>
 						</tr>
 					</c:forEach>
 				</tbody>
@@ -319,33 +319,33 @@ tr:hover {
 				<input type="hidden" name="attendanceTypeId"
 					value="${param.selectedAttId}" />
 				<div class="form-group">
-					<label>근태항목</label> <input type="text" name="name"
-						value="${param.attName}" placeholder="근태항목을 입력해주세요.">
+					<label>勤怠項目</label> <input type="text" name="name"
+						value="${param.attName}" placeholder="勤怠項目を入力してください。">
 				</div>
 				<div class="form-group">
-					<label>단위</label> <select name="unit">
-						<option value="">선택하세요</option>
-						<option value="일" ${param.attUnit == '일' ? 'selected' : ''}>일</option>
-						<option value="시간" ${param.attUnit == '시간' ? 'selected' : ''}>시간</option>
+					<label>単位</label> <select name="unit">
+						<option value="">選択してください</option>
+						<option value="日" ${param.attUnit == '日' ? 'selected' : ''}>日</option>
+						<option value="時間" ${param.attUnit == '時間' ? 'selected' : ''}>時間</option>
 					</select>
 				</div>
 				<div class="form-group">
-					<label>근태그룹</label>
+					<label>勤怠グループ</label>
 					<div class="group-input-group">
 						<select name="attendanceGroupId">
-							<option value="">선택하세요</option>
+							<option value="">選択してください</option>
 							<c:forEach var="group" items="${attendanceGroupList}">
 								<option value="${group.attendanceGroupId}"
 									${param.attGroupId == group.attendanceGroupId ? 'selected' : ''}>${group.attendanceGroupName}</option>
 							</c:forEach>
 						</select> <a
 							href="${pageContext.request.contextPath}/attendanceGroupManage.do"
-							target="_blank" class="btn btn-secondary">관리</a>
+							target="_blank" class="btn btn-secondary">管理</a>
 					</div>
 				</div>
 				<div class="form-group">
-					<label>휴가공제</label> <select name="vacationTypeId">
-						<option value="">선택하세요</option>
+					<label>休暇控除</label> <select name="vacationTypeId">
+						<option value="">選択してください</option>
 						<c:forEach var="vac" items="${vacationList}">
 							<option value="${vac.vacationTypeId}"
 								${param.attVacationId == vac.vacationTypeId ? 'selected' : ''}>${vac.vacationTypeName}</option>
@@ -353,40 +353,48 @@ tr:hover {
 					</select>
 				</div>
 				<div class="form-group">
-					<label>사용여부</label>
+					<label>使用有無</label>
 					<div class="radio-group">
 						<label><input type="radio" name="usage" value="Y"
 							${empty param.attUsage || param.attUsage == 'Y' ? 'checked' : ''}>
-							사용</label> <label><input type="radio" name="usage" value="N"
-							${param.attUsage == 'N' ? 'checked' : ''}> 사용안함</label>
+							使用</label> <label><input type="radio" name="usage" value="N"
+							${param.attUsage == 'N' ? 'checked' : ''}> 使用しない</label>
 					</div>
 				</div>
 				<div class="btn-group">
 					<button type="submit" class="btn btn-primary" formmethod="post"
-						formaction="${pageContext.request.contextPath}/attendanceTypeSave.do">추가</button>
+						formaction="${pageContext.request.contextPath}/attendanceTypeSave.do">追加</button>
 					<button type="submit" class="btn btn-primary" formmethod="post"
-						formaction="${pageContext.request.contextPath}/attendanceTypeUpdate.do">수정</button>
+						formaction="${pageContext.request.contextPath}/attendanceTypeUpdate.do">修正</button>
 					<button type="submit" class="btn btn-secondary" formmethod="post"
-						formaction="${pageContext.request.contextPath}/attendanceTypeDelete.do">삭제</button>
+						formaction="${pageContext.request.contextPath}/attendanceTypeDelete.do">削除</button>
 					<a href="${pageContext.request.contextPath}/vacationTypeSetting.do"
-						class="btn btn-secondary">내용 지우기</a>
+						class="btn btn-secondary">クリア</a>
 				</div>
 			</form>
 		</div>
 	</div>
 
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+	<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<%-- 세션에 errorMessage가 있으면 실행 --%>
-<c:if test="${not empty sessionScope.errorMessage}">
-    <script>
-        alert("${sessionScope.errorMessage}");
-    </script>
-    <%-- 한 번 보여준 에러는 세션에서 제거 (중요!) --%>
-    <c:remove var="errorMessage" scope="session" />
-</c:if>
+	<%-- セッションに errorMessage が存在する場合に実行 --%>
+	<c:if test="${not empty sessionScope.errorMessage}">
+		<script>
+			alert("${sessionScope.errorMessage}");
+		</script>
+		<%-- 一度表示したエラーはセッションから削除 --%>
+		<c:remove var="errorMessage" scope="session" />
+	</c:if>
 
-
+<script>
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('error') === 'inUse') {
+            alert('現在使用中の休暇項目のため削除できません。');
+            history.replaceState({}, null, location.pathname);
+        }
+    };
+</script>
 
 </body>
 </html>

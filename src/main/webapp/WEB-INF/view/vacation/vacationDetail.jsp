@@ -114,7 +114,7 @@
         <div class="summary-bar">
             <span>합 계</span>
             <span>
-                • 총 휴가일수 : <fmt:formatNumber value="${empty detailList ? 19 : detailList[0].totalDays}" pattern="#,##0.000" />&nbsp;&nbsp;&nbsp;&nbsp;
+                • 총 휴가일수 : <fmt:formatNumber value="${empty detailList ? 15 : detailList[0].totalDays}" pattern="#,##0.000" />&nbsp;&nbsp;&nbsp;&nbsp;
                 • 사용일수 : <span style="color: #2563eb;"><fmt:formatNumber value="${totalUsed}" pattern="#,##0.000" /></span>&nbsp;&nbsp;&nbsp;&nbsp;
                 • 잔여일수 : <span style="color: #e11d48;"><fmt:formatNumber value="${(empty detailList ? 19 : detailList[0].totalDays) - totalUsed}" pattern="#,##0.000" /></span>
             </span>
