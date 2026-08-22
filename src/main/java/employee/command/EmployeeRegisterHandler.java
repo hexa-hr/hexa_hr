@@ -74,8 +74,6 @@ public class EmployeeRegisterHandler implements CommandHandler {
 			String accountNumber = request.getParameter("accountNumber");
 			String depositStocks = request.getParameter("depositStocks");
 
-			// 🌟 핵심 해결 포인트!
-			// DAO에서 NullPointerException이 나지 않도록, 삭제된 급여날짜 항목들에 더미값(0, "")을 줍니다.
 			EmployeeSalaryAccount account = new EmployeeSalaryAccount(
 				null, companyId, bankName, accountNumber, depositStocks,
 				0, 0, 0, "", "", "");
@@ -119,7 +117,8 @@ public class EmployeeRegisterHandler implements CommandHandler {
 				}
 			}
 
-			String insuranceAgency = request.getParameter("insuranceAgency");
+			// 🌟 체크박스로 전송된 보험 목록 처리 (최대 4개)
+			String[] insuranceAgencies = request.getParameterValues("insuranceAgency");
 			String insuranceNumber = request.getParameter("insuranceNumber");
 			String insuranceAmountStr = request.getParameter("insuranceAmount");
 			Long insuranceAmount = (insuranceAmountStr != null && !insuranceAmountStr.trim().isEmpty())
@@ -128,15 +127,24 @@ public class EmployeeRegisterHandler implements CommandHandler {
 			Date insuranceEndDate = parseDate(request.getParameter("insuranceEndDate"));
 			String remarks4 = request.getParameter("remarks4");
 
-			Insurance insurance = new Insurance(
-				null, null, insuranceAgency, insuranceNumber, insuranceAmount,
-				insuranceStartDate, insuranceEndDate, remarks4);
+			List<Insurance> insuranceList = new ArrayList<>();
+			if (insuranceAgencies != null) {
+				for (String agency : insuranceAgencies) {
+					if (agency != null && !agency.trim().isEmpty()) {
+						Insurance ins = new Insurance(
+							null, null, agency, insuranceNumber, insuranceAmount,
+							insuranceStartDate, insuranceEndDate, remarks4);
+						insuranceList.add(ins);
+					}
+				}
+			}
 
 			response.setContentType("text/html; charset=UTF-8");
 			PrintWriter out = response.getWriter();
 
 			try {
-				Integer newEmpId = registerService.register(employee, account, dependentsList, degreeList, insurance);
+				Integer newEmpId = registerService.register(employee, account, dependentsList, degreeList,
+					insuranceList);
 
 				out.println("<script>");
 				out.println("parent.alert('사원정보 1이 성공적으로 저장되었습니다.');");

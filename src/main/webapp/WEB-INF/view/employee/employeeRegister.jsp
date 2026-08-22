@@ -24,7 +24,6 @@ th { background-color: #f8f9fa; width: 15%; text-align: left; }
 input[type="text"], input[type="password"], input[type="date"], input[type="email"], input[type="number"], select { padding: 5px; width: 80%; }
 .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
 
-/* 🌟 버튼 크기 통일을 위해 width: 100%, box-sizing, font-family 추가! */
 .menu-btn { background-color: #666; color: white; padding: 12px 5px; text-align: center; border-radius: 3px; cursor: pointer; text-decoration: none; font-size: 13px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; height: 45px; width: 100%; box-sizing: border-box; font-family: inherit; }
 .menu-btn:hover { background-color: #555; }
 </style>
@@ -41,7 +40,6 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 				<p style="font-size: 12px; color: #777; margin-top: 10px;">사원사진을 등록해주세요</p>
 			</div>
 
-			<!-- 🌟 모든 메뉴를 button 태그로 깔끔하게 통일했습니다 -->
 			<h3>사원정보 1</h3>
 			<div class="menu-grid">
 				<button type="button" class="menu-btn" onclick="moveToPage2('career')">경력</button>
@@ -179,22 +177,29 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 				<div class="section-title">보험 정보</div>
 				<table>
 					<tr>
-						<th>* 보험 기관명</th>
-						<td><input type="text" name="insuranceAgency" placeholder="예: 국민건강보험공단, SGI서울보증" required></td>
-						<th>보험 번호</th>
-						<td><input type="text" name="insuranceNumber" placeholder="- 제외하고 입력"></td>
+						<th>* 4대 보험</th>
+						<td colspan="3">
+							<label style="margin-right: 15px; cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="국민연금" checked style="width: auto;"> 국민연금</label>
+							<label style="margin-right: 15px; cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="건강보험" checked style="width: auto;"> 건강보험</label>
+							<label style="margin-right: 15px; cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="고용보험" checked style="width: auto;"> 고용보험</label>
+							<label style="cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="산재보험" checked style="width: auto;"> 산재보험</label>
+						</td>
 					</tr>
 					<tr>
+						<th>보험 번호</th>
+						<td><input type="text" name="insuranceNumber" placeholder="- 제외하고 입력"></td>
 						<th>보험 가입 금액</th>
 						<td><input type="number" name="insuranceAmount" placeholder="숫자만 입력"></td>
-						<th>비고</th>
-						<td><input type="text" name="remarks4"></td>
 					</tr>
 					<tr>
 						<th>가입일(시작일)</th>
 						<td><input type="date" name="insuranceStartDate"></td>
 						<th>만료일(종료일)</th>
 						<td><input type="date" name="insuranceEndDate"></td>
+					</tr>
+					<tr>
+						<th>비고</th>
+						<td colspan="3"><input type="text" name="remarks4" style="width: 95%;"></td>
 					</tr>
 				</table>
 
@@ -275,19 +280,31 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 			}
 		}
 
-		function validateForm() {
-			var relationships = document.getElementsByName("relationship");
-			var parentsNames = document.getElementsByName("parentsName");
-			var hasDependent = false;
-			for (var i = 0; i < relationships.length; i++) {
-				if (relationships[i].value.trim() !== "" && parentsNames[i].value.trim() !== "") {
-					hasDependent = true; break;
-				}
-			}
-			if (!hasDependent) { alert("가족 사항을 최소 1명 이상 입력해 주세요. (관계 및 성명 필수)"); return false; }
-			return true;
-		}
+		let isSubmitting = false; // 전송 상태를 기억하는 변수 추가
 
+		function validateForm() {
+		    if (isSubmitting) {
+		        alert("현재 저장 중입니다. 잠시만 기다려주세요.");
+		        return false; // 중복 클릭 차단
+		    }
+
+		    var relationships = document.getElementsByName("relationship");
+		    var parentsNames = document.getElementsByName("parentsName");
+		    var hasDependent = false;
+		    for (var i = 0; i < relationships.length; i++) {
+		        if (relationships[i].value.trim() !== "" && parentsNames[i].value.trim() !== "") {
+		            hasDependent = true; break;
+		        }
+		    }
+		    if (!hasDependent) { alert("가족 사항을 최소 1명 이상 입력해 주세요. (관계 및 성명 필수)"); return false; }
+
+		    isSubmitting = true; // 검증을 통과하면 전송 상태로 변경
+		    
+		    // 에러가 났을 때를 대비해 3초 뒤에 다시 버튼을 누를 수 있게 풀어줌
+		    setTimeout(function() { isSubmitting = false; }, 3000); 
+		    
+		    return true;
+		}
 		function moveToPage2(tab) {
 			const empId = document.getElementById("hiddenEmpId").value;
 			if (empId) { location.href = "register2.do?employeeId=" + empId + "&tab=" + tab; } 

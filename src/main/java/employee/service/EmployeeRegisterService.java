@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-// 🌟 회원님 프로젝트의 실제 DAO 이름에 맞게 import 경로 수정 완료!
 import employee.dao.DegreeDao;
 import employee.dao.DependentsDao;
 import employee.dao.EmployeeDao;
@@ -23,14 +22,13 @@ public class EmployeeRegisterService {
 
 	private EmployeeDao employeeDao = new EmployeeDao();
 	private EmployeeSalaryAccountDao accountDao = new EmployeeSalaryAccountDao();
-
-	// 🌟 에러가 났던 DAO 이름들을 실제 파일명으로 수정 완료!
 	private DependentsDao dependentsDao = new DependentsDao();
 	private DegreeDao degreeDao = new DegreeDao();
 	private InsuranceDao insuranceDao = new InsuranceDao();
 
+	// 🌟 List<Insurance> 파라미터 적용
 	public Integer register(Employee employee, EmployeeSalaryAccount account, List<Dependents> dependentsList,
-		List<Degree> degreeList, Insurance insurance) {
+		List<Degree> degreeList, List<Insurance> insuranceList) {
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
@@ -58,10 +56,12 @@ public class EmployeeRegisterService {
 				}
 			}
 
-			if (insurance != null && insurance.getInsuranceAgency() != null
-				&& !insurance.getInsuranceAgency().trim().isEmpty()) {
-				insurance.setEmployeeId(newEmpId);
-				insuranceDao.insert(conn, insurance);
+			// 🌟 체크된 개수만큼 반복하며 각각 독립된 행으로 INSERT
+			if (insuranceList != null && !insuranceList.isEmpty()) {
+				for (Insurance ins : insuranceList) {
+					ins.setEmployeeId(newEmpId);
+					insuranceDao.insert(conn, ins);
+				}
 			}
 
 			conn.commit();
