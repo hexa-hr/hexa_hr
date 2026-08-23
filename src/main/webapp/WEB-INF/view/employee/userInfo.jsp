@@ -178,8 +178,8 @@
                 </div>
             </div>
 
-            <!-- 🌟 급여지급정보 레이아웃 넓게 수정 및 DB 규격 연동 -->
-            <div class="section-title">급여지급정보 (사원 공통 일괄 적용)</div>
+            <!-- 🌟 급여지급정보 레이아웃 -->
+            <div class="section-title">급여지급정보</div>
             <table class="info-table">
                 <tr>
                     <th style="width: 15%;">급여 산정기간</th>
@@ -194,7 +194,8 @@
                             <c:forEach var="day" begin="1" end="31">
                                 <option value="${day}" ${info.salaryCalc1 == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}일</option>
                             </c:forEach>
-                            <option value="99" ${info.salaryCalc1 == 99 ? 'selected' : ''}>말일</option>
+                            <!-- 🌟 말일의 value를 0으로 명확히 지정 -->
+                            <option value="0" ${info.salaryCalc1 != null && info.salaryCalc1 == 0 ? 'selected' : ''}>말일</option>
                         </select>
                         <span style="margin: 0 10px;">~</span>
                         <select name="calc2MonthType" style="padding:4px;">
@@ -207,7 +208,8 @@
                             <c:forEach var="day" begin="1" end="31">
                                 <option value="${day}" ${info.salaryCalc2 == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}일</option>
                             </c:forEach>
-                            <option value="99" ${info.salaryCalc2 == 99 || info.salaryCalc2 == null ? 'selected' : ''}>말일</option>
+                            <!-- 🌟 말일의 value를 0으로 명확히 지정 -->
+                            <option value="0" ${info.salaryCalc2 != null && info.salaryCalc2 == 0 ? 'selected' : ''}>말일</option>
                         </select>
                     </td>
                     
@@ -222,7 +224,8 @@
                             <c:forEach var="day" begin="1" end="31">
                                 <option value="${day}" ${info.salaryPaymentDate == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}일</option>
                             </c:forEach>
-                            <option value="99" ${info.salaryPaymentDate == 99 ? 'selected' : ''}>말일</option>
+                            <!-- 🌟 말일의 value를 0으로 명확히 지정 -->
+                            <option value="0" ${info.salaryPaymentDate != null && info.salaryPaymentDate == 0 ? 'selected' : ''}>말일</option>
                         </select>
                     </td>
                 </tr>
