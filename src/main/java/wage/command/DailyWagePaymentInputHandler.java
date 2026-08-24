@@ -23,7 +23,7 @@ import wage.model.WagePaymentPeriodDefault;
 import wage.service.DailyWagePaymentInputService;
 import wage.service.WagePaymentInputService;
 
-// 급여입력/관리(일용직) 화면 조회 Handler
+// 給与入力・管理（日雇い）画面照会Handler
 public class DailyWagePaymentInputHandler implements CommandHandler {
 
 	private static final String INTERNAL_CALCULATION_ATTRIBUTE = DailyWagePaymentInputHandler.class.getName()
@@ -57,7 +57,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 
 	private DailyWagePaymentInputService dailyWagePaymentInputService = new DailyWagePaymentInputService();
 
-	// 월·차수 공통 날짜 조회용
+	// 月・回次共通の日付照会用
 	private WagePaymentInputService wagePaymentInputService = new WagePaymentInputService();
 
 	@Override
@@ -102,7 +102,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 				if (!(value instanceof WagePaymentAutoCalculationResult)) {
 
 					throw new IllegalStateException(
-						"일용직 급여 자동계산 결과가 올바르지 않습니다.");
+						"日雇給与の自動計算結果が正しくありません。");
 				}
 
 				internalCalculationResult = (WagePaymentAutoCalculationResult)value;
@@ -134,8 +134,8 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 				null);
 
 			/*
-			 * 저장·pending 여부와 관계없이
-			 * 모든 일용직 사원을 모달에 표시한다.
+			 * 保存済み・pendingの状態に関係なく
+			 * すべての日雇い社員をモーダルに表示する。
 			 */
 			List<EmployeeSelectRow> dailyEmployees = filterDailyEmployees(
 				allEmployeeRows);
@@ -152,7 +152,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 			List<Integer> pendingEmployeeIds = parseEmployeeIds(
 				req,
 				"pendingEmployeeId",
-				"미저장 사원 정보가 올바르지 않습니다.");
+				"未保存社員情報が正しくありません。");
 
 			List<Integer> addEmployeeIds;
 
@@ -165,12 +165,12 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 				addEmployeeIds = parseEmployeeIds(
 					req,
 					"addEmployeeId",
-					"추가할 사원 정보가 올바르지 않습니다.");
+					"追加する社員情報が正しくありません。");
 			}
 
 			/*
-			 * 모달에서 받은 사원이 실제 일용직인지
-			 * 먼저 전부 검증한다.
+			 * モーダルから受け取った社員が実際に日雇い社員であるか
+			 * 先にすべて検証する。
 			 */
 			for (Integer addEmployeeId : addEmployeeIds) {
 
@@ -181,7 +181,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 				if (addEmployee == null) {
 
 					throw new IllegalArgumentException(
-						"일용직 사원만 추가할 수 있습니다.");
+						"日雇い社員のみ追加できます。");
 				}
 			}
 
@@ -190,8 +190,8 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 			for (Integer addEmployeeId : addEmployeeIds) {
 
 				/*
-				 * 이미 저장됐거나 pending인 사원은
-				 * 별도 반응 없이 건너뛴다.
+				 * すでに保存済み、またはpendingの社員は
+				 * 別途処理せずにスキップする。
 				 */
 				if (findSavedEmployee(
 					savedEmployees,
@@ -212,8 +212,8 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 			}
 
 			/*
-			 * 실제 새로 추가된 첫 번째 사원을 선택한다.
-			 * 전부 기존 사원이면 기존 선택을 유지한다.
+			 * 実際に新しく追加された最初の社員を選択する。
+			 * すべて既存の社員であれば、現在の選択を維持する。
 			 */
 			if (firstAddedEmployeeId != null) {
 
@@ -248,8 +248,8 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 				savedEmployees);
 
 			/*
-			 * 같은 월·차수의 WAGE가 존재하면 저장된 날짜,
-			 * 없으면 회사 급여설정의 기본 날짜를 사용한다.
+			 * 同じ月・回次のWAGEが存在する場合は保存済みの日付を、
+			 * 存在しない場合は会社の給与設定の基本日付を使用する。
 			 */
 			WageLedgerSummary periodSummary = wagePaymentInputService.getPeriodSummary(
 				wageMonth,
@@ -306,8 +306,8 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 				toDateString(wagePaymentDate));
 
 			/*
-			 * 사원 미선택 상태에서도 현재 월·차수의
-			 * 공제항목 틀을 표시한다.
+			 * 社員未選択の状態でも現在の月・回次の
+			 * 控除項目の枠を表示する。
 			 */
 			List<WagePaymentInputViewItem> deductionItems = dailyWagePaymentInputService
 				.getDeductionViewItems(
@@ -357,7 +357,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 				if (selectedEmployee == null) {
 
 					throw new IllegalArgumentException(
-						"올바른 일용직 사원을 선택해야 합니다.");
+						"正しい日雇い社員を選択する必要があります。");
 				}
 
 				WagePaymentEmployeeRow savedEmployee = findSavedEmployee(
@@ -374,7 +374,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 					&& !selectedEmployeePending) {
 
 					throw new IllegalArgumentException(
-						"현재 급여차수에 등록되지 않은 사원입니다.");
+						"現在の給与回次に登録されていない社員です。");
 				}
 
 				DailyWorkPayrollResult workResult = dailyWagePaymentInputService
@@ -398,8 +398,8 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 				if (selectedEmployeeSaved) {
 
 					/*
-					 * 저장 사원의 합계는
-					 * WAGE에 저장된 값을 사용한다.
+					 * 保存済み社員の合計は
+					 * WAGEに保存された値を使用する。
 					 */
 					currentTotalPayment = safe(
 						savedEmployee.getTotalPayment());
@@ -430,7 +430,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 						|| internalCalculationResult.getNetPayment() == null) {
 
 						throw new IllegalStateException(
-							"일용직 급여 자동계산 결과가 올바르지 않습니다.");
+							"日雇給与の自動計算結果が正しくありません。");
 					}
 
 					deductionItems = internalCalculationResult.getWageItems();
@@ -493,7 +493,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 
 				req.setAttribute(
 					"successMessage",
-					"급여가 저장되었습니다.");
+					"給与が保存されました。");
 			}
 
 		} catch (IllegalArgumentException e) {
@@ -616,7 +616,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 		}
 	}
 
@@ -740,7 +740,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 	}
 
@@ -769,7 +769,7 @@ public class DailyWagePaymentInputHandler implements CommandHandler {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 창합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 	}
 
