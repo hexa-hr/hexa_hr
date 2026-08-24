@@ -16,7 +16,7 @@ import dailywork.model.DailyWorkVO;
 
 public class DailyWorkDao {
 
-	// 일용직 근무기록 등록 (INSERT)
+	// 日雇い勤務記録登録 (INSERT)[cite: 24]
 	public int insertDailyWork(Connection conn, DailyWorkVO vo) throws SQLException {
 		String sql = "INSERT INTO DAILY_WORK (work_id, employee_id, work_date, field_or_project_id, daily_wage, payment_rate, income_tax, local_tax, actual_payment) "
 				+ "VALUES ((SELECT NVL(MAX(work_id), 0) + 1 FROM DAILY_WORK), ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -34,11 +34,11 @@ public class DailyWorkDao {
 		}
 	}
 
-	// 1. 목록 조회 (모달창 용) - 조인해서 현장 이름(name)을 가져옵니다.
+	// 1. リスト照会 (モーダル用) - ジョインして現場名(name)を取得します[cite: 24].
 	public List<java.util.Map<String, Object>> selectDailyWorkList(Connection conn, int empId, String yearMonth)
 			throws SQLException {
 
-		// p.name을 명시적으로 가져오고, 꺼내기 쉽게 AS proj_name 별칭을 붙입니다.
+		// p.nameを明示的に取得し、取り出しやすいようにAS proj_nameエイリアスを付けます[cite: 24].
 		String sql = "SELECT d.work_id, d.work_date, d.field_or_project_id, p.name AS proj_name, d.daily_wage, d.payment_rate, d.income_tax, d.local_tax, d.actual_payment "
 				+ "FROM DAILY_WORK d "
 				+ "LEFT JOIN FIELD_OR_PROJECT p ON d.field_or_project_id = p.field_or_project_id "
@@ -56,9 +56,9 @@ public class DailyWorkDao {
 					map.put("workDate", rs.getDate("work_date"));
 					map.put("fieldProjectId", rs.getInt("field_or_project_id"));
 
-					// DB에서 가져온 proj_name(실제로는 p.name)을 안전하게 꺼냅니다.
+					// DBから取得したproj_name(実際にはp.name)を安全に取り出します[cite: 24].
 					String pName = rs.getString("proj_name");
-					// 현장 데이터가 존재하면 그 이름을 넣고, 현장이 삭제되어서 못 찾으면 '삭제된 현장'으로 표시합니다.
+					// 現場データが存在すればその名前を入れ、現場が削除されて見つからない場合は「削除された現場」と表示します[cite: 24].
 					map.put("projectName", (pName != null && !pName.trim().isEmpty()) ? pName : "削除された現場");
 
 					map.put("dailyWage", rs.getLong("daily_wage"));
@@ -74,7 +74,7 @@ public class DailyWorkDao {
 		return list;
 	}
 
-	// 2. 수정 (UPDATE) - SaveHandler에서 호출됨
+	// 2. 修正 (UPDATE) - SaveHandlerから呼び出されます[cite: 24]
 	public int updateDailyWork(Connection conn, dailywork.model.DailyWorkVO vo) throws SQLException {
 		String sql = "UPDATE DAILY_WORK SET work_date=?, field_or_project_id=?, daily_wage=?, payment_rate=?, income_tax=?, local_tax=?, actual_payment=? WHERE work_id=?";
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -90,7 +90,7 @@ public class DailyWorkDao {
 		}
 	}
 
-	// 3. 삭제 (DELETE)
+	// 3. 削除 (DELETE)[cite: 24]
 	public int deleteDailyWork(Connection conn, int workId) throws SQLException {
 		String sql = "DELETE FROM DAILY_WORK WHERE work_id=?";
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -99,7 +99,7 @@ public class DailyWorkDao {
 		}
 	}
 
-	// 4. 월별 근무 요약 조회 (월별 조회 캘린더용)
+	// 4. 月別勤務要約照会 (月別照会カレンダー用)[cite: 24]
 	public List<DailyWorkMonthlyVO> selectMonthlySummary(Connection conn, String yearMonth) throws SQLException {
 		String sql = "SELECT " + "    'No-' || e.employee_id AS emp_no, " + "    e.korean_name, "
 				+ "    NVL(d.department_name, '未配属') AS dept_name, "
@@ -127,7 +127,7 @@ public class DailyWorkDao {
 		return list;
 	}
 
-	// 5. 상세조회 다중 조건 검색 (동적 검색 로직)
+	// 5. 詳細照会マルチ条件検索 (動的検索ロジック)[cite: 24]
 	public List<Map<String, Object>> selectDailyWorkDetailList(Connection conn, String startDate, String endDate,
 			String empName, String deptId, String projectId) throws SQLException {
 		StringBuilder sql = new StringBuilder();
@@ -141,7 +141,7 @@ public class DailyWorkDao {
 		sql.append("LEFT JOIN FIELD_OR_PROJECT p ON d.field_or_project_id = p.field_or_project_id ");
 		sql.append("WHERE e.employment_type = '日雇い' ");
 
-		// 체크된 조건만 쿼리에 동적으로 추가
+		// チェックされた条件のみクエリに動的追加[cite: 24]
 		if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
 			sql.append("AND d.work_date BETWEEN TO_DATE('" + startDate + "', 'YYYY-MM-DD') AND TO_DATE('" + endDate
 					+ "', 'YYYY-MM-DD') ");
@@ -151,7 +151,7 @@ public class DailyWorkDao {
 		}
 
 		if (deptId != null && !deptId.isEmpty()) {
-			// [수정된 부분] 엉뚱하게 이름으로 검색하던 코드를 지우고, 부서 ID로 정확히 검색하도록 원상복구!
+			// [修正された部分] 名前の誤った検索コードを削除し、部署IDで正確に検索するように原状復帰！[cite: 24]
 			sql.append("AND e.department_id = " + deptId + " ");
 		}
 
@@ -181,7 +181,7 @@ public class DailyWorkDao {
 		return list;
 	}
 
-	// 일용직 급여입력용 - 정산기간 내 사원별 근무기록 조회
+	// 日雇い給与入力用 - 精算期間内の社員別勤務記録照会[cite: 24]
 	public List<DailyWorkPayrollRow> selectPayrollRows(Connection conn, int employeeId, Date settlementStartDate,
 			Date settlementEndDate) throws SQLException {
 
