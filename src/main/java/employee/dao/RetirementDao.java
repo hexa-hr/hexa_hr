@@ -2,6 +2,7 @@ package employee.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -25,6 +26,26 @@ public class RetirementDao {
 				pstmt.setNull(6, Types.NUMERIC);
 			pstmt.executeUpdate();
 		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// 🌟 새로 추가 (퇴직은 단일 객체)
+	public Retirement selectByEmployeeId(Connection conn, int employeeId) throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			pstmt = conn.prepareStatement("SELECT * FROM retirement WHERE employee_id = ?");
+			pstmt.setInt(1, employeeId);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				return new Retirement(rs.getInt("employee_id"), rs.getString("retirement_type"),
+					rs.getDate("retirement_date"), rs.getString("retirement_reason"),
+					rs.getString("contact_after_retirement"), rs.getLong("retirement_pay"));
+			}
+			return null;
+		} finally {
+			JdbcUtil.close(rs);
 			JdbcUtil.close(pstmt);
 		}
 	}

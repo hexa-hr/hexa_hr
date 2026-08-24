@@ -9,11 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import employee.model.Appointment;
-import employee.model.Career;
 import employee.model.Certification;
-import employee.model.Guarantor; // 🌟 보증인 임포트
+import employee.model.Guarantor;
 import employee.model.LanguageAbility;
-import employee.model.MilitaryService;
 import employee.model.Referrer;
 import employee.model.Retirement;
 import employee.model.RewardPenalty;
@@ -27,55 +25,14 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 
 	@Override
 	public String process(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
 		request.setCharacterEncoding("UTF-8");
 
 		String empIdStr = request.getParameter("employeeId");
-		if (empIdStr == null || empIdStr.trim().isEmpty()) {
-			response.sendRedirect(request.getContextPath() + "/employee/register.do");
+		if (empIdStr == null || empIdStr.trim().isEmpty())
 			return null;
-		}
 		Integer employeeId = Integer.valueOf(empIdStr);
 
-		// 2. 경력
-		String[] companyNames = request.getParameterValues("companyName");
-		String[] startDates = request.getParameterValues("startDate");
-		String[] endDates = request.getParameterValues("endDate");
-		String[] employmentPeriods = request.getParameterValues("employmentPeriod");
-		String[] finalPositions = request.getParameterValues("finalPosition");
-		String[] responsibilities = request.getParameterValues("responsibilities");
-		String[] reasonForResignations = request.getParameterValues("reasonForResignation");
-		List<Career> careerList = new ArrayList<>();
-		if (companyNames != null) {
-			for (int i = 0; i < companyNames.length; i++) {
-				if (companyNames[i] != null && !companyNames[i].trim().isEmpty()) {
-					careerList.add(new Career(null, employeeId, companyNames[i], parseDate(safeGet(startDates, i)),
-						parseDate(safeGet(endDates, i)), safeGet(employmentPeriods, i), safeGet(finalPositions, i),
-						safeGet(responsibilities, i), safeGet(reasonForResignations, i)));
-				}
-			}
-		}
-
-		// 3. 병역
-		String[] serviceTypes = request.getParameterValues("serviceType");
-		String[] branches = request.getParameterValues("branch");
-		String[] servicePeriod1s = request.getParameterValues("servicePeriod1");
-		String[] servicePeriod2s = request.getParameterValues("servicePeriod2");
-		String[] finalRanks = request.getParameterValues("finalRank");
-		String[] department1s = request.getParameterValues("department1");
-		String[] exemptionReasons = request.getParameterValues("exemptionReason");
-		List<MilitaryService> militaryList = new ArrayList<>();
-		if (serviceTypes != null) {
-			for (int i = 0; i < serviceTypes.length; i++) {
-				if (serviceTypes[i] != null && !serviceTypes[i].trim().isEmpty()) {
-					militaryList.add(new MilitaryService(null, employeeId, serviceTypes[i], safeGet(branches, i),
-						parseDate(safeGet(servicePeriod1s, i)), parseDate(safeGet(servicePeriod2s, i)),
-						safeGet(finalRanks, i), safeGet(department1s, i), safeGet(exemptionReasons, i)));
-				}
-			}
-		}
-
-		// 4. 자격증
+		// 자격증
 		String[] certNames = request.getParameterValues("certName");
 		String[] acqDates = request.getParameterValues("certAcqDate");
 		String[] orgs = request.getParameterValues("certIssuer");
@@ -91,7 +48,7 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 			}
 		}
 
-		// 4-2. 어학능력
+		// 어학
 		String[] langNames = request.getParameterValues("langName");
 		String[] langTests = request.getParameterValues("langTest");
 		String[] langScores = request.getParameterValues("langScore");
@@ -110,7 +67,7 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 			}
 		}
 
-		// 5. 교육훈련
+		// 교육훈련
 		String[] trTypes = request.getParameterValues("trainingType");
 		List<Training> trainingList = new ArrayList<>();
 		if (trTypes != null) {
@@ -129,7 +86,7 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 			}
 		}
 
-		// 6. 상벌
+		// 상벌
 		String[] rwTypes = request.getParameterValues("rewardPenaltyType");
 		List<RewardPenalty> rewardList = new ArrayList<>();
 		if (rwTypes != null) {
@@ -146,7 +103,7 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 			}
 		}
 
-		// 7. 발령
+		// 발령
 		String[] apTypes = request.getParameterValues("appointmentType");
 		List<Appointment> apptList = new ArrayList<>();
 		if (apTypes != null) {
@@ -164,7 +121,7 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 			}
 		}
 
-		// 8. 추천인
+		// 추천인
 		String[] refNames = request.getParameterValues("referrerName");
 		List<Referrer> referrerList = new ArrayList<>();
 		if (refNames != null) {
@@ -180,25 +137,22 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 			}
 		}
 
-		// 🌟 8-2. 신원보증 (새로 추가!)
+		// 신원보증
 		String[] guaNames = request.getParameterValues("guaName");
 		String[] guaRels = request.getParameterValues("guaRelation");
 		String[] guaRrns = request.getParameterValues("guaRrn");
 		String[] guaAmounts = request.getParameterValues("guaAmount");
-
 		List<Guarantor> guarantorList = new ArrayList<>();
 		if (guaNames != null) {
 			for (int i = 0; i < guaNames.length; i++) {
 				if (guaNames[i] != null && !guaNames[i].trim().isEmpty()) {
-					// Date 필드(시작일/만료일)와 전화번호는 JSP 입력칸과 규격이 달라 우선 null 로 안전하게 넘김
-					Guarantor gua = new Guarantor(null, employeeId, guaNames[i], safeGet(guaRels, i),
-						safeGet(guaRrns, i), parseLong(safeGet(guaAmounts, i)), null, null, null);
-					guarantorList.add(gua);
+					guarantorList.add(new Guarantor(null, employeeId, guaNames[i], safeGet(guaRels, i),
+						safeGet(guaRrns, i), parseLong(safeGet(guaAmounts, i)), null, null, null));
 				}
 			}
 		}
 
-		// 9. 퇴직
+		// 퇴직
 		Retirement retirement = null;
 		String retType = request.getParameter("retirementType");
 		if (retType != null && !retType.trim().isEmpty()) {
@@ -208,24 +162,19 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 				parseLong(request.getParameter("severancePay")));
 		}
 
-		// 10. DB 저장 실행 (🌟 guarantorList 파라미터 추가!)
 		try {
-			service.register2(employeeId, careerList, militaryList, certList, langList, trainingList, rewardList,
+			service.register2(employeeId, certList, langList, trainingList, rewardList,
 				apptList, referrerList, guarantorList, retirement);
-
 			response.setContentType("text/html; charset=UTF-8");
 			response.getWriter().println("<script>parent.alert('사원 부가정보가 성공적으로 저장되었습니다.');</script>");
 			return null;
-
 		} catch (Exception e) {
-			e.printStackTrace();
 			response.setContentType("text/html; charset=UTF-8");
 			response.getWriter().println("<script>parent.alert('등록 실패: " + e.getMessage() + "');</script>");
 			return null;
 		}
 	}
 
-	// 날짜 파싱 유틸리티
 	private Date parseDate(String val) {
 		if (val == null || val.trim().isEmpty())
 			return null;
@@ -236,14 +185,12 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 		}
 	}
 
-	// 배열 Null 방지 유틸리티
 	private String safeGet(String[] arr, int index) {
 		if (arr != null && arr.length > index)
 			return arr[index];
 		return null;
 	}
 
-	// Integer 파싱 유틸리티 (에러 방지용)
 	private Integer parseInteger(String val) {
 		if (val == null || val.trim().isEmpty())
 			return null;
@@ -254,7 +201,6 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 		}
 	}
 
-	// Long 파싱 유틸리티 (에러 방지용)
 	private Long parseLong(String val) {
 		if (val == null || val.trim().isEmpty())
 			return null;

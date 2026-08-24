@@ -2,7 +2,10 @@ package employee.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import employee.model.Guarantor;
 import jdbc.JdbcUtil;
@@ -41,6 +44,29 @@ public class GuarantorDao {
 
 			pstmt.executeUpdate();
 		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// 🌟 서비스가 애타게 찾던 조회 메서드 추가!
+	public List<Guarantor> selectAllByEmployeeId(Connection conn, int employeeId) throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<Guarantor> result = new ArrayList<>();
+		try {
+			pstmt = conn.prepareStatement("SELECT * FROM guarantor WHERE employee_id = ? ORDER BY guarantor_id ASC");
+			pstmt.setInt(1, employeeId);
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				result.add(new Guarantor(
+					rs.getInt("guarantor_id"), rs.getInt("employee_id"), rs.getString("guarantor_name"),
+					rs.getString("guarantor_relationship"), rs.getString("guarantor_resident_number"),
+					rs.getLong("guarantee_amount"), rs.getDate("guarantee_date"),
+					rs.getDate("guarantee_expiration_date"), rs.getString("guarantor_phone_number")));
+			}
+			return result;
+		} finally {
+			JdbcUtil.close(rs);
 			JdbcUtil.close(pstmt);
 		}
 	}
