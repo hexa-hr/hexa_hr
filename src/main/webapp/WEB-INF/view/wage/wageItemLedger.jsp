@@ -23,7 +23,7 @@ WageItemLedgerResult ledgerResult = (WageItemLedgerResult)request.getAttribute("
 <html>
 <head>
 <meta charset="UTF-8">
-<title>항목별 대장</title>
+<title>項目別台帳</title>
 
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -120,17 +120,17 @@ button {
 	<jsp:include page="/WEB-INF/view/include/header.jsp" />
 	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<h1>항목별 대장</h1>
+	<h1>項目別台帳</h1>
 
 	<form class="search-form" method="get"
 		action="<%=request.getContextPath()%>/wage/itemLedger.do">
 
 		<div class="search-row">
 
-			<label for="wageTypeId">급여항목</label> <select id="wageTypeId"
+			<label for="wageTypeId">給与項目</label> <select id="wageTypeId"
 				name="wageTypeId" required>
 
-				<option value="">급여항목 선택</option>
+				<option value="">給与項目を選択</option>
 
 				<%
 				if (wageTypeOptions != null) {
@@ -141,8 +141,8 @@ button {
 						boolean selected = optionId.equals(selectedWageTypeId);
 
 						String itemTypeName = "P".equals(option.getItemType())
-					? "지급"
-					: "공제";
+					? "支給"
+					: "控除";
 				%>
 				<option value="<%=optionId%>" <%=selected ? "selected" : ""%>>
 
@@ -154,15 +154,15 @@ button {
 				}
 				%>
 
-			</select> <label for="startMonth">시작월</label> <input type="month"
+			</select> <label for="startMonth">開始月</label> <input type="month"
 				id="startMonth" name="startMonth"
 				value="<%=startMonth == null ? "" : startMonth%>" required>
 
-			<label for="endMonth">종료월</label> <input type="month" id="endMonth"
+			<label for="endMonth">終了月</label> <input type="month" id="endMonth"
 				name="endMonth" value="<%=endMonth == null ? "" : endMonth%>"
 				required>
 
-			<button type="submit">조회</button>
+			<button type="submit">照会</button>
 
 		</div>
 
@@ -184,15 +184,15 @@ button {
 	<div class="result-container">
 
 		<div class="result-summary">
-			조회 결과:
-			<%=ledgerResult.getEmployeeRows().size()%>명,
-			<%=ledgerResult.getMonths().size()%>개월
+			照会結果:
+			<%=ledgerResult.getEmployeeRows().size()%>名,
+			<%=ledgerResult.getMonths().size()%>か月
 		</div>
 
 		<%
 		if (ledgerResult.getEmployeeRows().isEmpty()) {
 		%>
-		<p>조회된 급여내역이 없습니다.</p>
+		<p>照会された給与履歴がありません。</p>
 		<%
 		} else {
 		%>
@@ -200,10 +200,10 @@ button {
 		<table class="result-table">
 			<thead>
 				<tr>
-					<th>구분</th>
-					<th>사원명</th>
-					<th>부서</th>
-					<th>직위</th>
+					<th>区分</th>
+					<th>社員名</th>
+					<th>部署</th>
+					<th>役職</th>
 
 					<%
 					for (String month : ledgerResult.getMonths()) {
@@ -213,7 +213,7 @@ button {
 					}
 					%>
 
-					<th>합계</th>
+					<th>合計</th>
 				</tr>
 			</thead>
 
@@ -259,7 +259,7 @@ button {
 
 			<tfoot>
 				<tr>
-					<th colspan="4">월별 합계</th>
+					<th colspan="4">月別合計</th>
 
 					<%
 					for (String month : ledgerResult.getMonths()) {
@@ -289,7 +289,7 @@ button {
 	%>
 
 	<p>
-		<a href="<%=request.getContextPath()%>/wage/ledger.do"> 급여대장 목록 </a>
+		<a href="<%=request.getContextPath()%>/wage/ledger.do"> 給与台帳一覧 </a>
 	</p>
 
 </body>

@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-//항목별 대장 화면에 표시할 사원별 월 급여 정보
+// 項目別台帳画面に表示する社員別月次給与情報
 public class WageItemLedgerEmployeeRow {
 
 	private Integer employeeId;
@@ -26,7 +26,7 @@ public class WageItemLedgerEmployeeRow {
 		this.monthlyValues = new LinkedHashMap<>();
 		this.totalValue = 0L;
 
-		// 급여 데이터가 없는 월도 화면에 0으로 표시하기 위해 초기화
+		// 給与データがない月も画面に0として表示するために初期化
 		for (String month : months) {
 			monthlyValues.put(month, 0L);
 		}
