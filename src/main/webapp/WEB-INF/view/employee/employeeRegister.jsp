@@ -35,11 +35,20 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 
 	<div class="wrap">
 		<div class="sidebar">
-			<div style="background: white; padding: 15px; border: 1px solid #ccc; text-align: center; margin-bottom: 20px;">
-				<img src="<%=request.getContextPath()%>/images/default_profile.png" alt="사진" style="width: 80px; height: 100px; background: #eee;">
-				<p style="font-size: 12px; color: #777; margin-top: 10px;">사원사진을 등록해주세요</p>
-			</div>
-
+<div style="background: white; padding: 15px; border: 1px solid #ccc; text-align: center; margin-bottom: 20px;">
+    <img src="<%=request.getContextPath()%>/images/default_profile.png" alt="사진" style="width: 80px; height: 100px; background: #eee;">
+    
+    <!-- 사원번호 띄워주는 코드 -->
+    <c:choose>
+        <c:when test="${not empty emp.employeeId}">
+            <p style="margin: 10px 0 0 0; font-weight: bold; font-size: 15px; color: #0056b3;">사원번호: ${emp.employeeId}</p>
+        </c:when>
+        <c:otherwise>
+            <p style="margin: 10px 0 0 0; font-weight: bold; font-size: 14px; color: #e74a3b;">[신규 사원 등록]</p>
+        </c:otherwise>
+    </c:choose>
+    
+</div>
 			<h3>사원정보 1</h3>
 			<div class="menu-grid">
 				<button type="button" class="menu-btn" onclick="location.href='#account'">급여<br>4대 보험</button>
