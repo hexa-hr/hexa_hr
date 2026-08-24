@@ -7,6 +7,9 @@ public class EmployeeVO {
 	private String departmentName;
 	private String positionName;
 
+	// 🌟 [추가된 부분] 일당(기본급) 데이터를 담을 변수
+	private Long basicPay;
+
 	public EmployeeVO() {
 	}
 
@@ -57,5 +60,14 @@ public class EmployeeVO {
 
 	public void setPositionName(String positionName) {
 		this.positionName = positionName;
+	}
+
+	// [추가된 부분] Getter & Setter
+	public Long getBasicPay() {
+		return basicPay;
+	}
+
+	public void setBasicPay(Long basicPay) {
+		this.basicPay = basicPay;
 	}
 }

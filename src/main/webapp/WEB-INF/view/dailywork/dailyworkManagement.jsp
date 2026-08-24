@@ -49,12 +49,11 @@
             <tbody>
                 <c:forEach var="emp" items="${empList}">
                     <tr>
-                        <td><input type="checkbox" class="emp-checkbox" value="${emp.employeeId}" data-name="${emp.koreanName}"></td>
+                        <td><input type="checkbox" class="emp-checkbox" value="${emp.employeeId}" data-name="${emp.koreanName}" data-wage="${emp.basicPay}"></td>
                         <td>${emp.employmentType}</td>
                         <td>No-${emp.employeeId}</td>
                         <td>${emp.koreanName}</td>
                         <td>${emp.departmentName}</td>
-                        <!-- 관리 버튼에 클릭 이벤트 추가 -->
                         <td><button type="button" class="btn-blue" onclick="openWorkRecordModal('${emp.employeeId}', '${emp.koreanName}')">관리</button></td>
                     </tr>
                 </c:forEach>
@@ -64,7 +63,6 @@
 
     <div class="right-panel">
         <form id="dailyWorkForm" action="${pageContext.request.contextPath}/dailywork/save.do" method="post" onsubmit="return validateForm();">
-            <!-- 사원ID와 수정용 근무기록ID Hidden 태그 -->
             <input type="hidden" id="selectedEmpNo" name="employee_id">
             <input type="hidden" id="workId" name="work_id">
             
@@ -91,7 +89,8 @@
                 </tr>
                 <tr>
                     <th>일당</th>
-                    <td><input type="text" id="dailyWage" name="daily_wage" class="text-red calc-trigger" value="110,000" required> 원</td>
+                    <!-- [수정된 부분 1] 초기값을 110,000에서 0으로 변경 -->
+                    <td><input type="text" id="dailyWage" name="daily_wage" class="text-red calc-trigger" value="0" required> 원</td>
                 </tr>
                 <tr>
                     <th>지급율</th>
@@ -121,7 +120,6 @@
 
 <!-- 현장/프로젝트 목록 관리 모달 -->
 <div id="projectModal" class="modal-overlay">
-    <!-- (이전과 동일한 프로젝트 관리 모달 내용, 길이상 생략하지 않고 포함합니다) -->
     <div class="modal-content" style="width: 400px;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">현장/프로젝트 관리</div>
         <ul class="project-list-ul">
@@ -145,7 +143,7 @@
     </div>
 </div>
 
-<!-- 사원별 근무기록 리스트 모달 (새로 추가됨) -->
+<!-- 사원별 근무기록 리스트 모달 -->
 <div id="workRecordModal" class="modal-overlay">
     <div class="modal-content" style="width: 900px;">
         <div style="font-size: 18px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between;">
@@ -166,22 +164,32 @@
                 </tr>
             </thead>
             <tbody id="modalWorkTableBody">
-                <!-- 동적 데이터 렌더링 영역 -->
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // --- 공통 체크박스 및 급여 계산 로직 ---
     document.querySelectorAll('.emp-checkbox').forEach(cb => {
         cb.addEventListener('change', function() {
             document.querySelectorAll('.emp-checkbox').forEach(otherCb => { if(otherCb !== cb) otherCb.checked = false; });
             document.querySelectorAll('#employeeTable tbody tr').forEach(tr => tr.classList.remove('selected-row'));
+            
             if(this.checked) {
                 this.closest('tr').classList.add('selected-row');
                 document.getElementById('selectedEmpNo').value = this.value; 
                 document.getElementById('selectedEmpInfoDisplay').innerText = '선택된 사원: ' + this.dataset.name + ' (No-' + this.value + ')';
+                
+                let empWage = this.getAttribute('data-wage');
+                
+                // [수정된 부분 2] DB 데이터가 없으면 기본값 0으로 세팅
+                if (empWage && empWage !== '0' && empWage !== '') {
+                    document.getElementById('dailyWage').value = formatComma(empWage);
+                } else {
+                    document.getElementById('dailyWage').value = '0';
+                }
+                calculatePay();
+
             } else {
                 resetWorkForm();
             }
@@ -230,6 +238,9 @@
         document.getElementById('selectedEmpNo').value = '';
         document.getElementById('selectedEmpInfoDisplay').innerText = "[사원을 먼저 좌측 체크박스에서 선택하세요]";
         document.getElementById('selectedEmpInfoDisplay').style.color = '#5c7cba';
+        
+        // [수정된 부분 3] 폼 초기화 시 기본값을 0으로 롤백 후 재계산
+        document.getElementById('dailyWage').value = '0';
         calculatePay();
     }
 
@@ -241,7 +252,6 @@
         document.getElementById('workRecordModal').style.display = 'flex';
         document.getElementById('modalWorkEmpInfo').innerText = '• 성명: ' + empName + ' (No-' + empNo + ')';
         
-        // 년월 셀렉트박스 셋팅 (최초 1회)
         const yearSel = document.getElementById('searchYear');
         const monthSel = document.getElementById('searchMonth');
         if (yearSel.options.length === 0) {
@@ -264,7 +274,6 @@
         const tbody = document.getElementById('modalWorkTableBody');
         tbody.innerHTML = '<tr><td colspan="8">불러오는 중...</td></tr>';
 
-        // 서버로 JSON 데이터 요청
         fetch('${pageContext.request.contextPath}/dailywork/list.do?empNo=' + currentWorkEmpNo + '&yearMonth=' + year + '-' + month)
             .then(res => res.json())
             .then(data => {
@@ -296,11 +305,10 @@
             .catch(err => { tbody.innerHTML = '<tr><td colspan="8">데이터 조회 오류</td></tr>'; });
     }
 
-    // 수정 버튼: 폼에 데이터 세팅
     function editWorkRecord(workId, workDate, projectId, wage, rate) {
-        document.getElementById('workRecordModal').style.display = 'none'; // 모달 닫기
+        document.getElementById('workRecordModal').style.display = 'none'; 
         
-        document.getElementById('workId').value = workId; // 업데이트용 ID 세팅
+        document.getElementById('workId').value = workId; 
         document.getElementById('selectedEmpNo').value = currentWorkEmpNo;
         
         let empName = document.getElementById('modalWorkEmpInfo').innerText.split('성명: ')[1].split(' (')[0];
@@ -312,10 +320,9 @@
         document.getElementById('dailyWage').value = formatComma(wage);
         document.getElementById('paymentRate').value = rate;
 
-        calculatePay(); // 세금 자동 재계산
+        calculatePay(); 
     }
 
-    // 삭제 버튼: DB 삭제 처리
     function deleteWorkRecord(workId) {
         if(!confirm("이 근무 기록을 정말 삭제하시겠습니까?")) return;
         fetch('${pageContext.request.contextPath}/dailywork/delete.do?workId=' + workId, { method: 'POST' })
@@ -326,7 +333,6 @@
         });
     }
 
-    // --- 프로젝트(현장) 관리 통신 로직 ---
     function addProject() {
         const name = document.getElementById('newProjectName').value.trim();
         if(!name) { alert("프로젝트명을 입력하세요."); return; }
