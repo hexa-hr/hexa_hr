@@ -17,7 +17,7 @@ import wage.model.WagePaymentItemInput;
 import wage.service.WagePaymentInputService;
 import wage.service.WagePaymentSaveService;
 
-// 급여입력 화면 - 선택 사원 급여 저장 Handler
+// 給与入力画面 - 選択社員の給与保存Handler
 public class WagePaymentInputSaveHandler
 	implements CommandHandler {
 
@@ -63,7 +63,7 @@ public class WagePaymentInputSaveHandler
 			if (employeeIdParam == null) {
 
 				throw new IllegalArgumentException(
-					"올바른 사원을 선택해야 합니다.");
+					"正しい社員を選択する必要があります。");
 			}
 
 			Integer employeeId;
@@ -76,15 +76,15 @@ public class WagePaymentInputSaveHandler
 			} catch (NumberFormatException e) {
 
 				throw new IllegalArgumentException(
-					"올바른 사원을 선택해야 합니다.");
+					"正しい社員を選択する必要があります。");
 			}
 
 			List<Integer> pendingEmployeeIds = parsePendingEmployeeIds(
 				req);
 
 			/*
-			 * 사원 존재 여부와 현재 고용형태를
-			 * 서버 DB 기준으로 확인한다.
+			 * 社員の存在有無と現在の雇用形態を
+			 * サーバーDBを基準に確認する。
 			 */
 			List<EmployeeSelectRow> employeeRows = employeeSelectService
 				.getEmployeeRows(
@@ -99,31 +99,31 @@ public class WagePaymentInputSaveHandler
 			if (selectedEmployee == null) {
 
 				throw new IllegalArgumentException(
-					"올바른 사원을 선택해야 합니다.");
+					"正しい社員を選択する必要があります。");
 			}
 
 			/*
-			 * 현재 incomeType 탭에 속하지 않는 사원과
-			 * 일용직 사원의 저장을 막는다.
+			 * 現在のincomeTypeタブに属さない社員と
+			 * 日雇い社員の保存を防ぐ。
 			 */
 			if (!isAvailableEmployeeForIncomeType(
 				selectedEmployee,
 				incomeType)) {
 
 				throw new IllegalArgumentException(
-					"현재 소득구분에서 저장할 수 없는 사원입니다.");
+					"現在の所得区分では保存できない社員です。");
 			}
 
 			/*
-			 * 현재 귀속연월 + 급여차수의 전체 저장 사원.
+			 * 現在の帰属年月 + 給与回次の保存済み社員全体。
 			 */
 			List<WagePaymentEmployeeRow> allSavedEmployees = wagePaymentInputService.getSavedEmployees(
 				wageMonth,
 				wagePeriod);
 
 			/*
-			 * 미존재 사원, 이미 저장된 사원, 일용직을 제거한
-			 * 전체 pending 상태.
+			 * 存在しない社員、すでに保存済みの社員、日雇いを除外した
+			 * 全体のpending状態。
 			 */
 			List<EmployeeSelectRow> allPendingEmployees = buildPendingEmployees(
 				employeeRows,
@@ -142,14 +142,14 @@ public class WagePaymentInputSaveHandler
 				&& !selectedEmployeePending) {
 
 				throw new IllegalArgumentException(
-					"현재 급여차수에 등록되지 않은 사원입니다.");
+					"現在の給与回次に登録されていない社員です。");
 			}
 
 			List<WagePaymentItemInput> currentItemInputs = parseItemInputs(
 				req);
 
 			/*
-			 * 실제 저장
+			 * 実際の保存
 			 */
 			wagePaymentSaveService.save(
 				employeeId,
@@ -160,9 +160,9 @@ public class WagePaymentInputSaveHandler
 			/*
 			 * PRG(Post-Redirect-Get)
 			 *
-			 * 저장 완료 후 새로고침해도
-			 * 저장 POST가 다시 실행되지 않도록
-			 * 급여입력 GET 화면으로 이동한다.
+			 * 保存完了後に再読み込みしても
+			 * 保存POSTが再実行されないように
+			 * 給与入力GET画面へ移動する。
 			 */
 			StringBuilder redirectUrl = new StringBuilder();
 
@@ -197,10 +197,10 @@ public class WagePaymentInputSaveHandler
 				employeeId);
 
 			/*
-			 * 현재 저장된 사원은
-			 * 더 이상 pending으로 전달하지 않는다.
+			 * 現在保存されている社員は
+			 * これ以上pendingとして渡さない。
 			 *
-			 * 다른 미저장 사원만 유지한다.
+			 * 他の未保存社員のみ維持する。
 			 */
 			for (EmployeeSelectRow pendingEmployee : allPendingEmployees) {
 
@@ -231,10 +231,10 @@ public class WagePaymentInputSaveHandler
 			| IllegalStateException e) {
 
 			/*
-			 * 서버 검증 실패.
+			 * サーバー検証に失敗。
 			 *
-			 * 정상 UI에서는 발생하지 않아야 하며,
-			 * 잘못된 POST 데이터의 저장은 수행하지 않는다.
+			 * 正常なUIでは発生しないはずであり、
+			 * 不正なPOSTデータは保存しない。
 			 */
 			res.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
@@ -258,7 +258,7 @@ public class WagePaymentInputSaveHandler
 			|| wageTypeIds.length != wageValues.length) {
 
 			throw new IllegalArgumentException(
-				"급여항목 정보가 올바르지 않습니다.");
+				"給与項目情報が正しくありません。");
 		}
 
 		List<WagePaymentItemInput> result = new ArrayList<>();
@@ -274,7 +274,7 @@ public class WagePaymentInputSaveHandler
 			if (wageTypeIdValue == null) {
 
 				throw new IllegalArgumentException(
-					"급여항목 정보가 올바르지 않습니다.");
+					"給与項目情報が正しくありません。");
 			}
 
 			try {
@@ -295,7 +295,7 @@ public class WagePaymentInputSaveHandler
 			} catch (NumberFormatException e) {
 
 				throw new IllegalArgumentException(
-					"급여금액은 정수로 입력해야 합니다.");
+					"給与金額は整数で入力する必要があります。");
 			}
 		}
 
@@ -339,7 +339,7 @@ public class WagePaymentInputSaveHandler
 			} catch (NumberFormatException e) {
 
 				throw new IllegalArgumentException(
-					"pending 사원 정보가 올바르지 않습니다.");
+					"pending社員情報が正しくありません。");
 			}
 		}
 
@@ -486,7 +486,7 @@ public class WagePaymentInputSaveHandler
 		}
 
 		throw new IllegalArgumentException(
-			"올바른 소득구분을 선택해야 합니다.");
+			"正しい所得区分を選択する必要があります。");
 	}
 
 	private String encode(

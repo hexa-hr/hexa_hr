@@ -33,11 +33,11 @@ public class WageDao {
 			+ "       d.department_name, "
 			+ "       p.position_name, "
 			+ "       w.wage_month, "
-			+ "       SUM(w.wage_value) AS wage_value " // 한 귀속연월에 여러 급여차수가 있을 수 있으므로 합산
+			+ "       SUM(w.wage_value) AS wage_value " // 1つの帰属年月に複数の給与回次が存在する可能性があるため合算
 			+ "FROM wage w "
 			+ "JOIN employee e "
 			+ "  ON e.employee_id = w.employee_id "
-			+ "LEFT JOIN department d " // 부서·직위가 없는 사원도 조회에 포함되도록 LEFT JOIN
+			+ "LEFT JOIN department d " // 部署・役職がない社員も照会対象に含めるためLEFT JOIN
 			+ "  ON d.department_id = e.department_id "
 			+ "LEFT JOIN position p "
 			+ "  ON p.position_id = e.position_id "
@@ -652,7 +652,7 @@ public class WageDao {
 		return result;
 	}
 
-	// 지난급여 불러오기 - 원본 귀속연월/급여차수 목록 조회
+	// 過去給与の読み込み - コピー元の帰属年月・給与回次一覧照会
 	public List<WagePaymentPreviousSourceOption> selectWagePaymentPreviousSourceOptions(
 		Connection conn,
 		String targetWageMonth,
@@ -713,7 +713,7 @@ public class WageDao {
 		return result;
 	}
 
-	// 급여입력용 - 사원별 저장된 급여항목 조회
+	// 給与入力用 - 社員別の保存済み給与項目照会
 	public List<WagePaymentCalculationItem> selectEmployeeWageItems(
 		Connection conn,
 		Integer employeeId,
@@ -769,7 +769,7 @@ public class WageDao {
 		return result;
 	}
 
-	// 급여입력용 - 귀속연월/급여차수별 저장 사원 목록 조회
+	// 給与入力用 - 帰属年月・給与回次別の保存済み社員一覧照会
 	public List<WagePaymentEmployeeRow> selectWagePaymentEmployeeRows(
 		Connection conn,
 		String wageMonth,
@@ -832,7 +832,7 @@ public class WageDao {
 		return result;
 	}
 
-	// 일용직 급여입력용 - 귀속연월/급여차수별 저장 사원 목록 조회
+	// 日雇給与入力用 - 帰属年月・給与回次別の保存済み社員一覧照会
 	public List<WagePaymentEmployeeRow> selectDailyWagePaymentEmployeeRows(
 		Connection conn,
 		String wageMonth,
@@ -896,7 +896,7 @@ public class WageDao {
 		return result;
 	}
 
-	// 급여대장 - 선택한 귀속연월/급여차수의 전체 급여 삭제
+	// 給与台帳 - 選択した帰属年月・給与回次の全給与を削除
 	public int deleteWageLedgerRows(
 		Connection conn,
 		String wageMonth,
@@ -916,7 +916,7 @@ public class WageDao {
 		}
 	}
 
-	// 지난급여 불러오기 - 대상 월/차수의 일반·사업 급여 전체 삭제
+	// 過去給与の読み込み - 対象月・回次の一般所得・事業所得給与をすべて削除
 	public int deleteWagePaymentWorkspaceRows(
 		Connection conn,
 		String wageMonth,
@@ -947,7 +947,7 @@ public class WageDao {
 		}
 	}
 
-	// 지난급여 불러오기 - 원본 월/차수 급여를 대상 작업공간으로 복사
+	// 過去給与の読み込み - コピー元の月・回次の給与を対象ワークスペースへコピー
 	public int insertWagePaymentWorkspaceFromSource(
 		Connection conn,
 		String sourceWageMonth,
@@ -1021,7 +1021,7 @@ public class WageDao {
 		}
 	}
 
-	// 급여입력용 - 사원의 해당 귀속연월/급여차수 급여 삭제
+	// 給与入力用 - 社員の該当帰属年月・給与回次の給与を削除
 	public int deleteEmployeeWages(
 		Connection conn,
 		Integer employeeId,
@@ -1052,7 +1052,7 @@ public class WageDao {
 		}
 	}
 
-	// 급여입력용 - 사원의 급여항목 한 건 저장
+	// 給与入力用 - 社員の給与項目を1件保存
 	public void insertEmployeeWage(
 		Connection conn,
 		Integer employeeId,
