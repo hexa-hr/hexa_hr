@@ -59,7 +59,7 @@ public class DailyWorkDao {
 					// DB에서 가져온 proj_name(실제로는 p.name)을 안전하게 꺼냅니다.
 					String pName = rs.getString("proj_name");
 					// 현장 데이터가 존재하면 그 이름을 넣고, 현장이 삭제되어서 못 찾으면 '삭제된 현장'으로 표시합니다.
-					map.put("projectName", (pName != null && !pName.trim().isEmpty()) ? pName : "삭제된 현장");
+					map.put("projectName", (pName != null && !pName.trim().isEmpty()) ? pName : "削除された現場");
 
 					map.put("dailyWage", rs.getLong("daily_wage"));
 					map.put("paymentRate", rs.getDouble("payment_rate"));
@@ -102,14 +102,14 @@ public class DailyWorkDao {
 	// 4. 월별 근무 요약 조회 (월별 조회 캘린더용)
 	public List<DailyWorkMonthlyVO> selectMonthlySummary(Connection conn, String yearMonth) throws SQLException {
 		String sql = "SELECT " + "    'No-' || e.employee_id AS emp_no, " + "    e.korean_name, "
-				+ "    NVL(d.department_name, '미배정') AS dept_name, "
+				+ "    NVL(d.department_name, '未配属') AS dept_name, "
 				+ "    LISTAGG(TO_CHAR(dw.work_date, 'FMDD'), ',') WITHIN GROUP (ORDER BY dw.work_date) AS work_days, "
 				+ "    COUNT(dw.work_id) AS total_work_days, " + "    NVL(SUM(dw.income_tax), 0) AS total_income_tax, "
 				+ "    NVL(SUM(dw.local_tax), 0) AS total_local_tax, "
 				+ "    NVL(SUM(dw.actual_payment), 0) AS total_actual_payment " + "FROM employee e "
 				+ "LEFT JOIN daily_work dw ON e.employee_id = dw.employee_id "
 				+ "                       AND TO_CHAR(dw.work_date, 'YYYY-MM') = ? "
-				+ "LEFT JOIN department d ON e.department_id = d.department_id " + "WHERE e.employment_type = '일용직' "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id " + "WHERE e.employment_type = '日雇い' "
 				+ "GROUP BY e.employee_id, e.korean_name, d.department_name " + "ORDER BY e.employee_id";
 
 		List<DailyWorkMonthlyVO> list = new ArrayList<>();
@@ -132,14 +132,14 @@ public class DailyWorkDao {
 			String empName, String deptId, String projectId) throws SQLException {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT d.work_date, 'No-' || e.employee_id AS emp_no, e.korean_name, ");
-		sql.append("       NVL(dp.department_name, '미배정') AS dept_name, ");
-		sql.append("       NVL(p.name, '삭제된 현장') AS proj_name, ");
+		sql.append("       NVL(dp.department_name, '未配属') AS dept_name, ");
+		sql.append("       NVL(p.name, '削除された現場') AS proj_name, ");
 		sql.append("       d.daily_wage, d.payment_rate, d.income_tax, d.local_tax, d.actual_payment ");
 		sql.append("FROM DAILY_WORK d ");
 		sql.append("JOIN EMPLOYEE e ON d.employee_id = e.employee_id ");
 		sql.append("LEFT JOIN DEPARTMENT dp ON e.department_id = dp.department_id ");
 		sql.append("LEFT JOIN FIELD_OR_PROJECT p ON d.field_or_project_id = p.field_or_project_id ");
-		sql.append("WHERE e.employment_type = '일용직' ");
+		sql.append("WHERE e.employment_type = '日雇い' ");
 
 		// 체크된 조건만 쿼리에 동적으로 추가
 		if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {

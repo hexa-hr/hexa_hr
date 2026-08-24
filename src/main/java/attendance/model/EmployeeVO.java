@@ -7,7 +7,7 @@ public class EmployeeVO {
 	private String departmentName;
 	private String positionName;
 
-	// 🌟 [추가된 부분] 일당(기본급) 데이터를 담을 변수
+	// [추가된 부분] 일당(기본급) 데이터를 담을 변수
 	private Long basicPay;
 
 	public EmployeeVO() {
