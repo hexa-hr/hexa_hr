@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import employee.dao.UserInfoDao;
+import employee.service.EmployeeRegisterService; // 🌟 사원등록 서비스를 불러옵니다!
 import jdbc.JdbcUtil;
 import jdbc.connection.ConnectionProvider;
 import mvc.command.CommandHandler;
@@ -16,6 +17,8 @@ import mvc.command.CommandHandler;
 public class UserInfoHandler implements CommandHandler {
 
 	private UserInfoDao dao = new UserInfoDao();
+	// 🌟 사원등록 페이지와 똑같은 DB 테이블을 바라보기 위해 서비스 객체 생성
+	private EmployeeRegisterService empService = new EmployeeRegisterService();
 
 	@Override
 	public String process(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -33,8 +36,11 @@ public class UserInfoHandler implements CommandHandler {
 				}
 
 				request.setAttribute("info", info);
-				request.setAttribute("deptList", dao.selectDepartments(conn));
-				request.setAttribute("posList", dao.selectPositions(conn));
+
+				// 🌟 핵심 변경: UserInfoDao가 아닌, 사원등록(EmployeeRegisterService)에서 쓰는 부서/직위 목록을 그대로 가져옵니다!
+				request.setAttribute("deptList", empService.getDepartments());
+				request.setAttribute("posList", empService.getPositions());
+
 				return "/WEB-INF/view/employee/userInfo.jsp";
 			}
 		}
@@ -68,7 +74,7 @@ public class UserInfoHandler implements CommandHandler {
 				dbData.put("establishmentDate", "");
 			}
 
-			// 🌟 화면에서 급여 설정값(날짜 등) 뽑아오기
+			// 화면에서 급여 설정값(날짜 등) 뽑아오기
 			Integer salaryCalc1 = parseInt(request.getParameter("salaryCalc1"));
 			Integer salaryCalc2 = parseInt(request.getParameter("salaryCalc2"));
 			Integer salaryPaymentDate = parseInt(request.getParameter("salaryPaymentDate"));
@@ -76,7 +82,7 @@ public class UserInfoHandler implements CommandHandler {
 			String calc2MonthType = request.getParameter("calc2MonthType");
 			String paymentMonthType = request.getParameter("paymentMonthType");
 
-			// 🌟 추가된 부분: 은행, 계좌번호, 예금주 파라미터 뽑아오기
+			// 추가된 부분: 은행, 계좌번호, 예금주 파라미터 뽑아오기
 			String bankName = request.getParameter("bankName");
 			String accountNumber = request.getParameter("accountNumber");
 			String depositStocks = request.getParameter("depositStocks");
@@ -89,7 +95,7 @@ public class UserInfoHandler implements CommandHandler {
 				// 1. 기존 회사 정보 업데이트
 				dao.updateUserInfo(conn, dbData);
 
-				// 2. 🌟 모든 사원의 급여일 테이블 일괄 업데이트 실행! (파라미터 3개 추가 연결 완료)
+				// 2. 모든 사원의 급여일 테이블 일괄 업데이트 실행! (파라미터 3개 추가 연결 완료)
 				dao.updateAllEmployeeSalaryDates(conn, salaryCalc1, salaryCalc2, salaryPaymentDate,
 					calc1MonthType, calc2MonthType, paymentMonthType, bankName, accountNumber, depositStocks);
 
