@@ -6,289 +6,180 @@
 <head>
 <meta charset="UTF-8">
 <title>근태 상세 조회</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
-body {
-	font-family: 'Malgun Gothic', sans-serif;
-	font-size: 13px;
-	color: #333;
-	margin: 0;
-	padding: 20px;
-	background-color: #f5f5f5;
-}
+    body { font-family: 'Malgun Gothic', sans-serif; font-size: 13px; color: #333; margin: 0; background-color: #f5f5f5; }
+    .container { background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); min-height: 600px; }
+    
+    /* 상단 타이틀 및 탭 영역 */
+    .page-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+    .page-title-icon { font-size: 35px; }
+    .page-title-text h1 { margin: 0; font-size: 22px; color: #333; letter-spacing: -1px; }
+    .page-title-text p { margin: 5px 0 0 0; font-size: 13px; color: #777; }
+    
+    .tab-menu { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+    .tab-btn { padding: 10px 30px; font-size: 14px; font-weight: bold; border: none; cursor: pointer; border-radius: 4px; }
+    .tab-active { background-color: #599b9a; color: white; } /* 활성화 탭 (청록색) */
+    .tab-inactive { background-color: #a5a5a5; color: white; } /* 비활성화 탭 (회색) */
+    .tab-inactive:hover { background-color: #888; }
+    
+    /* 레이아웃 패널 */
+    .content-wrap { display: flex; gap: 20px; }
+    
+    /* 좌측 필터 패널 */
+    .filter-panel { flex: 0 0 300px; border-right: 2px solid #333; padding-right: 20px; }
+    .filter-table { width: 100%; border-collapse: collapse; }
+    .filter-table td { padding: 10px 5px; border-bottom: 1px solid #eee; vertical-align: middle; }
+    .filter-table input[type="text"], .filter-table input[type="date"], .filter-table select {
+        width: 100%; padding: 4px; box-sizing: border-box; border: 1px solid #ccc;
+    }
+    
+    .btn-wrap { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+    .btn-search { background-color: #e5502c; color: #fff; border: none; padding: 8px 20px; cursor: pointer; border-radius: 3px; font-weight: bold; }
+    .btn-all { background-color: #999; color: #fff; border: none; padding: 8px 20px; cursor: pointer; border-radius: 3px; font-weight: bold; }
 
-.container {
-	background: #fff;
-	padding: 20px;
-	border-radius: 5px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	min-height: 600px;
-}
-
-/* 상단 타이틀 및 탭 영역 */
-.page-header {
-	display: flex;
-	align-items: center;
-	gap: 15px;
-	margin-bottom: 20px;
-	border-bottom: 1px solid #eee;
-	padding-bottom: 15px;
-}
-
-.page-title-icon {
-	font-size: 35px;
-}
-
-.page-title-text h1 {
-	margin: 0;
-	font-size: 22px;
-	color: #333;
-	letter-spacing: -1px;
-}
-
-.page-title-text p {
-	margin: 5px 0 0 0;
-	font-size: 13px;
-	color: #777;
-}
-
-.tab-menu {
-	display: flex;
-	gap: 5px;
-	margin-bottom: 20px;
-	border-bottom: 2px solid #ddd;
-	padding-bottom: 10px;
-}
-
-.tab-btn {
-	padding: 10px 30px;
-	font-size: 14px;
-	font-weight: bold;
-	border: none;
-	cursor: pointer;
-	border-radius: 4px;
-}
-
-.tab-active {
-	background-color: #599b9a;
-	color: white;
-} /* 활성화 탭 (청록색) */
-.tab-inactive {
-	background-color: #a5a5a5;
-	color: white;
-} /* 비활성화 탭 (회색) */
-.tab-inactive:hover {
-	background-color: #888;
-}
-
-/* 레이아웃 패널 */
-.content-wrap {
-	display: flex;
-	gap: 20px;
-}
-
-/* 좌측 필터 패널 */
-.filter-panel {
-	flex: 0 0 300px;
-	border-right: 2px solid #333;
-	padding-right: 20px;
-}
-
-.filter-table {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-.filter-table td {
-	padding: 10px 5px;
-	border-bottom: 1px solid #eee;
-	vertical-align: middle;
-}
-
-.filter-table input[type="text"], .filter-table input[type="date"],
-	.filter-table select {
-	width: 100%;
-	padding: 4px;
-	box-sizing: border-box;
-	border: 1px solid #ccc;
-}
-
-.btn-wrap {
-	display: flex;
-	gap: 10px;
-	margin-top: 20px;
-	justify-content: center;
-}
-
-.btn-search {
-	background-color: #e5502c;
-	color: #fff;
-	border: none;
-	padding: 8px 20px;
-	cursor: pointer;
-	border-radius: 3px;
-	font-weight: bold;
-}
-
-.btn-all {
-	background-color: #999;
-	color: #fff;
-	border: none;
-	padding: 8px 20px;
-	cursor: pointer;
-	border-radius: 3px;
-	font-weight: bold;
-}
-
-/* 우측 결과 패널 */
-.result-panel {
-	flex: 1;
-	overflow-x: auto;
-}
-
-.result-table {
-	width: 100%;
-	border-collapse: collapse;
-	text-align: center;
-}
-
-.result-table th, .result-table td {
-	border: 1px solid #ddd;
-	padding: 8px;
-}
-
-.result-table th {
-	background-color: #f4f8fe;
-	color: #333;
-	font-weight: bold;
-}
+    /* 우측 결과 패널 */
+    .result-panel { flex: 1; overflow-x: auto; }
+    .result-table { width: 100%; border-collapse: collapse; text-align: center; }
+    .result-table th, .result-table td { border: 1px solid #ddd; padding: 8px; }
+    .result-table th { background-color: #f4f8fe; color: #333; font-weight: bold; }
 </style>
 </head>
 <body>
 
-	<div class="container">
-		<!-- 상단 타이틀 및 탭 메뉴 -->
-		<div class="page-header">
+<jsp:include page="/WEB-INF/view/include/header.jsp" />
+<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-			<div class="page-title-text">
-				<h1>근태조회</h1>
+<div class="container">
+    <!-- 상단 타이틀 및 탭 메뉴 -->
+    <div class="page-header">
+       
+        <div class="page-title-text">
+            <h1>근태조회</h1>
+            
+        </div>
+    </div>
+    
+    <div class="tab-menu">
+        <button class="tab-btn tab-inactive" onclick="location.href='${pageContext.request.contextPath}/attendance/monthly.do'">월별 조회</button>
+        <button class="tab-btn tab-active" onclick="location.href='${pageContext.request.contextPath}/attendance/detail.do'">상세 조회</button>
+    </div>
 
-			</div>
-		</div>
+    <div class="content-wrap">
+        <!-- 좌측 조건 검색 패널 -->
+        <div class="filter-panel">
+            <form id="searchForm">
+                <table class="filter-table">
+                    <tr>
+                        <td style="width: 25px;"><input type="checkbox" id="chkInputDate"></td>
+                        <td style="width: 75px;"><label for="chkInputDate">입력일자</label></td>
+                        <td><input type="date" id="inputDate"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" id="chkAttPeriod"></td>
+                        <td><label for="chkAttPeriod">근태기간</label></td>
+                        <td style="display: flex; gap: 5px; align-items: center;">
+                            <input type="date" id="startDate"> ~ <input type="date" id="endDate">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" id="chkDept"></td>
+                        <td><label for="chkDept">부서</label></td>
+                        <td>
+                            <select id="deptId">
+                                <option value="">선택하세요.</option>
+                                <c:forEach var="dept" items="${deptList}">
+                                    <option value="${dept.id}">${dept.name}</option>
+                                </c:forEach>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" id="chkName"></td>
+                        <td><label for="chkName">성명</label></td>
+                        <td><input type="text" id="empName" placeholder="성명을 입력하세요."></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" id="chkAttGroup"></td>
+                        <td><label for="chkAttGroup">근태그룹</label></td>
+                        <td>
+                            <select id="attGroupId">
+                                <option value="">선택하세요.</option>
+                                <c:forEach var="group" items="${attGroupList}">
+                                    <option value="${group.id}">${group.name}</option>
+                                </c:forEach>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" id="chkAttType"></td>
+                        <td><label for="chkAttType">근태항목</label></td>
+                        <td>
+                            <select id="attTypeId">
+                                <option value="">선택하세요.</option>
+                                <c:forEach var="type" items="${attTypeList}">
+                                    <option value="${type.id}">${type.name}</option>
+                                </c:forEach>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" id="chkVacType"></td>
+                        <td><label for="chkVacType">휴가항목</label></td>
+                        <td>
+                            <select id="vacTypeId">
+                                <option value="">선택하세요.</option>
+                                <c:forEach var="vac" items="${vacTypeList}">
+                                    <option value="${vac.id}">${vac.name}</option>
+                                </c:forEach>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" id="chkSummary"></td>
+                        <td><label for="chkSummary">적요</label></td>
+                        <td><input type="text" id="summary"></td>
+                    </tr>
+                </table>
+                
+                <div class="btn-wrap">
+                    <button type="button" class="btn-search" onclick="searchData()">검색</button>
+                    <button type="button" class="btn-all" onclick="searchAll()">전체보기</button>
+                </div>
+            </form>
+        </div>
 
-		<div class="tab-menu">
-			<button class="tab-btn tab-inactive"
-				onclick="location.href='${pageContext.request.contextPath}/attendance/monthly.do'">월별
-				조회</button>
-			<button class="tab-btn tab-active"
-				onclick="location.href='${pageContext.request.contextPath}/attendance/detail.do'">상세
-				조회</button>
-		</div>
+        <!-- 우측 검색 결과 패널 -->
+        <div class="result-panel">
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th style="color:#5c7cba;">입력일자</th>
+                        <th style="color:#5c7cba;">구분</th>
+                        <th style="color:#5c7cba;">성명</th>
+                        <th style="color:#5c7cba;">부서</th>
+                        <th style="color:#5c7cba;">직위</th>
+                        <th>근태항목</th>
+                        <th>근태기간</th>
+                        <th>근태일수</th>
+                        <th>금액</th>
+                        <th>적요</th>
+                    </tr>
+                </thead>
+                <tbody id="resultBody">
+                    <tr><td colspan="10" style="padding: 30px;">데이터를 불러오는 중입니다...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-		<div class="content-wrap">
-			<!-- 좌측 조건 검색 패널 -->
-			<div class="filter-panel">
-				<form id="searchForm">
-					<table class="filter-table">
-						<tr>
-							<td style="width: 25px;"><input type="checkbox"
-								id="chkInputDate"></td>
-							<td style="width: 75px;"><label for="chkInputDate">입력일자</label></td>
-							<td><input type="date" id="inputDate"></td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" id="chkAttPeriod"></td>
-							<td><label for="chkAttPeriod">근태기간</label></td>
-							<td style="display: flex; gap: 5px; align-items: center;"><input
-								type="date" id="startDate"> ~ <input type="date"
-								id="endDate"></td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" id="chkDept"></td>
-							<td><label for="chkDept">부서</label></td>
-							<td><select id="deptId">
-									<option value="">선택하세요.</option>
-									<c:forEach var="dept" items="${deptList}">
-										<option value="${dept.id}">${dept.name}</option>
-									</c:forEach>
-							</select></td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" id="chkName"></td>
-							<td><label for="chkName">성명</label></td>
-							<td><input type="text" id="empName" placeholder="성명을 입력하세요."></td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" id="chkAttGroup"></td>
-							<td><label for="chkAttGroup">근태그룹</label></td>
-							<td><select id="attGroupId">
-									<option value="">선택하세요.</option>
-									<c:forEach var="group" items="${attGroupList}">
-										<option value="${group.id}">${group.name}</option>
-									</c:forEach>
-							</select></td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" id="chkAttType"></td>
-							<td><label for="chkAttType">근태항목</label></td>
-							<td><select id="attTypeId">
-									<option value="">선택하세요.</option>
-									<c:forEach var="type" items="${attTypeList}">
-										<option value="${type.id}">${type.name}</option>
-									</c:forEach>
-							</select></td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" id="chkVacType"></td>
-							<td><label for="chkVacType">휴가항목</label></td>
-							<td><select id="vacTypeId">
-									<option value="">선택하세요.</option>
-									<c:forEach var="vac" items="${vacTypeList}">
-										<option value="${vac.id}">${vac.name}</option>
-									</c:forEach>
-							</select></td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" id="chkSummary"></td>
-							<td><label for="chkSummary">적요</label></td>
-							<td><input type="text" id="summary"></td>
-						</tr>
-					</table>
-
-					<div class="btn-wrap">
-						<button type="button" class="btn-search" onclick="searchData()">검색</button>
-						<button type="button" class="btn-all" onclick="searchAll()">전체보기</button>
-					</div>
-				</form>
-			</div>
-
-			<!-- 우측 검색 결과 패널 -->
-			<div class="result-panel">
-				<table class="result-table">
-					<thead>
-						<tr>
-							<th style="color: #5c7cba;">입력일자</th>
-							<th style="color: #5c7cba;">구분</th>
-							<th style="color: #5c7cba;">성명</th>
-							<th style="color: #5c7cba;">부서</th>
-							<th style="color: #5c7cba;">직위</th>
-							<th>근태항목</th>
-							<th>근태기간</th>
-							<th>근태일수</th>
-							<th>금액</th>
-							<th>적요</th>
-						</tr>
-					</thead>
-					<tbody id="resultBody">
-						<tr>
-							<td colspan="10" style="padding: 30px;">데이터를 불러오는 중입니다...</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-
-	<script>
+<script>
     // 1. 페이지 로드 시 실행 (월별조회에서 사원 클릭으로 넘어왔는지 판별)
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);

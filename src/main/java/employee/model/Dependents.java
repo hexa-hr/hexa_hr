@@ -49,4 +49,7 @@ public class Dependents {
 		return parentsNumber2;
 	}
 
+	public void setEmployeeId(Integer employeeId) {
+		this.employeeId = employeeId;
+	}
 }

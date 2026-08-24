@@ -2,7 +2,6 @@ package employee.model;
 
 import java.util.Date;
 
-// 사원 기본 정보
 public class Employee {
 	private Integer employeeId;
 	private Integer accountId;
@@ -55,92 +54,176 @@ public class Employee {
 		this.basicPay = basicPay;
 	}
 
+	// Getter & Setter
 	public Integer getEmployeeId() {
 		return employeeId;
+	}
+
+	public void setEmployeeId(Integer employeeId) {
+		this.employeeId = employeeId;
 	}
 
 	public Integer getAccountId() {
 		return accountId;
 	}
 
+	public void setAccountId(Integer accountId) {
+		this.accountId = accountId;
+	}
+
 	public Integer getCompanyId() {
 		return companyId;
+	}
+
+	public void setCompanyId(Integer companyId) {
+		this.companyId = companyId;
 	}
 
 	public Integer getPersonId() {
 		return personId;
 	}
 
+	public void setPersonId(Integer personId) {
+		this.personId = personId;
+	}
+
 	public String getEmploymentType() {
 		return employmentType;
+	}
+
+	public void setEmploymentType(String employmentType) {
+		this.employmentType = employmentType;
 	}
 
 	public String getKoreanName() {
 		return koreanName;
 	}
 
+	public void setKoreanName(String koreanName) {
+		this.koreanName = koreanName;
+	}
+
 	public String getEnglishName() {
 		return englishName;
+	}
+
+	public void setEnglishName(String englishName) {
+		this.englishName = englishName;
 	}
 
 	public Date getHireDate() {
 		return hireDate;
 	}
 
+	public void setHireDate(Date hireDate) {
+		this.hireDate = hireDate;
+	}
+
 	public Date getResignationDate() {
 		return resignationDate;
+	}
+
+	public void setResignationDate(Date resignationDate) {
+		this.resignationDate = resignationDate;
 	}
 
 	public Integer getDepartmentId() {
 		return departmentId;
 	}
 
+	public void setDepartmentId(Integer departmentId) {
+		this.departmentId = departmentId;
+	}
+
 	public Integer getPositionId() {
 		return positionId;
+	}
+
+	public void setPositionId(Integer positionId) {
+		this.positionId = positionId;
 	}
 
 	public String getForeignOrDomestic() {
 		return foreignOrDomestic;
 	}
 
+	public void setForeignOrDomestic(String foreignOrDomestic) {
+		this.foreignOrDomestic = foreignOrDomestic;
+	}
+
 	public String getResidentNumber1() {
 		return residentNumber1;
+	}
+
+	public void setResidentNumber1(String residentNumber1) {
+		this.residentNumber1 = residentNumber1;
 	}
 
 	public String getResidentNumber2() {
 		return residentNumber2;
 	}
 
+	public void setResidentNumber2(String residentNumber2) {
+		this.residentNumber2 = residentNumber2;
+	}
+
 	public String getAddress() {
 		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	public String getTelPhone() {
 		return telPhone;
 	}
 
+	public void setTelPhone(String telPhone) {
+		this.telPhone = telPhone;
+	}
+
 	public String getMobile() {
 		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
 	}
 
 	public String getEmail() {
 		return email;
 	}
 
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	public String getSns() {
 		return sns;
+	}
+
+	public void setSns(String sns) {
+		this.sns = sns;
 	}
 
 	public String getOtherDetails() {
 		return otherDetails;
 	}
 
+	public void setOtherDetails(String otherDetails) {
+		this.otherDetails = otherDetails;
+	}
+
 	public String getStatus() {
 		return status;
 	}
 
-	public Long getBasicPay() {
-		return basicPay;
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
+  public Long getBasicPay() {
+		return basicPay;
+	}
 }

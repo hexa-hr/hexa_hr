@@ -6,14 +6,10 @@ import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import employee.dao.EmployeeDao;
 import jdbc.connection.ConnectionProvider;
-import master.dao.WageTypeDao;
-import master.model.WageTypeOption;
 import wage.dao.WageDao;
 import wage.model.WageItemCompositionStatisticsDetail;
 import wage.model.WageItemCompositionStatisticsResult;
@@ -22,17 +18,10 @@ import wage.model.WageItemCompositionStatisticsRow;
 // 급여항목 구성 통계 집계 서비스
 public class WageItemCompositionStatisticsService {
 
-	private static final String EMPLOYMENT_TYPE_TEMPORARY = "임시직";
-	private static final String EMPLOYMENT_TYPE_DAILY = "일용직";
-
-	private static final String WAGE_TYPE_DAILY_WAGE = "일용급여";
-	private static final String WAGE_TYPE_BUSINESS_INCOME = "사업소득";
-	private static final String WAGE_TYPE_INCOME_TAX = "소득세";
-	private static final String WAGE_TYPE_LOCAL_INCOME_TAX = "지방소득세";
+	private static final int TABLE_VISIBLE_ITEM_COUNT = 9;
 
 	private EmployeeDao employeeDao = new EmployeeDao();
 	private WageDao wageDao = new WageDao();
-	private WageTypeDao wageTypeDao = new WageTypeDao();
 
 	public WageItemCompositionStatisticsResult getItemCompositionStatistics(
 		Integer employeeId,
@@ -64,58 +53,17 @@ public class WageItemCompositionStatisticsService {
 				return emptyResult();
 			}
 
-			List<WageTypeOption> activeWageTypes = wageTypeDao.selectActiveWageTypeOptions(conn);
-
-			Map<String, ItemAmount> itemMap = new LinkedHashMap<>();
-
-			// 현재 사용 중인 급여항목을 기준으로
-			// 사원 소득유형에 맞는 0원 기본항목 생성
-			for (WageTypeOption wageType : activeWageTypes) {
-
-				if (!shouldIncludeDefaultItem(
-					employmentType,
-					wageType)) {
-
-					continue;
-				}
-
-				String key = createItemKey(
-					wageType.getItemType(),
-					wageType.getWageTypeName());
-
-				itemMap.put(
-					key,
-					new ItemAmount(
-						wageType.getWageTypeName(),
-						wageType.getItemType(),
-						0L));
-			}
-
-			// 실제 저장된 급여 데이터 반영
-			// usage='N' 항목도 실제 데이터가 있으면 포함
-			for (WageItemCompositionStatisticsRow actualRow : actualRows) {
-
-				String key = createItemKey(
-					actualRow.getItemType(),
-					actualRow.getWageTypeName());
-
-				itemMap.put(
-					key,
-					new ItemAmount(
-						actualRow.getWageTypeName(),
-						actualRow.getItemType(),
-						actualRow.getAmount()));
-			}
-
 			long totalPayment = 0L;
 			long totalDeduction = 0L;
 
-			for (ItemAmount item : itemMap.values()) {
+			// 선택 사원의 해당 귀속월 모든 차수 금액 합계
+			for (WageItemCompositionStatisticsRow actualRow : actualRows) {
 
-				if ("P".equals(item.itemType)) {
-					totalPayment += item.amount;
-				} else if ("D".equals(item.itemType)) {
-					totalDeduction += item.amount;
+				if ("P".equals(actualRow.getItemType())) {
+					totalPayment += actualRow.getAmount();
+
+				} else if ("D".equals(actualRow.getItemType())) {
+					totalDeduction += actualRow.getAmount();
 				}
 			}
 
@@ -123,35 +71,48 @@ public class WageItemCompositionStatisticsService {
 
 			List<WageItemCompositionStatisticsDetail> deductionItems = new ArrayList<>();
 
-			for (ItemAmount item : itemMap.values()) {
+			// WAGE에 실제 존재하는 항목만 화면 목록으로 구성
+			for (WageItemCompositionStatisticsRow actualRow : actualRows) {
 
-				if ("P".equals(item.itemType)) {
+				if ("P".equals(actualRow.getItemType())) {
 
 					paymentItems.add(
 						new WageItemCompositionStatisticsDetail(
-							item.wageTypeName,
-							item.itemType,
-							item.amount,
+							actualRow.getWageTypeName(),
+							actualRow.getItemType(),
+							actualRow.getAmount(),
 							calculateCompositionRate(
-								item.amount,
+								actualRow.getAmount(),
 								totalPayment)));
 
-				} else if ("D".equals(item.itemType)) {
+				} else if ("D".equals(actualRow.getItemType())) {
 
 					deductionItems.add(
 						new WageItemCompositionStatisticsDetail(
-							item.wageTypeName,
-							item.itemType,
-							item.amount,
+							actualRow.getWageTypeName(),
+							actualRow.getItemType(),
+							actualRow.getAmount(),
 							calculateCompositionRate(
-								item.amount,
+								actualRow.getAmount(),
 								totalDeduction)));
 				}
 			}
 
+			List<WageItemCompositionStatisticsDetail> tablePaymentItems = createTableItems(
+				paymentItems,
+				totalPayment,
+				"P");
+
+			List<WageItemCompositionStatisticsDetail> tableDeductionItems = createTableItems(
+				deductionItems,
+				totalDeduction,
+				"D");
+
 			return new WageItemCompositionStatisticsResult(
 				paymentItems,
 				deductionItems,
+				tablePaymentItems,
+				tableDeductionItems,
 				totalPayment,
 				totalDeduction);
 
@@ -196,63 +157,41 @@ public class WageItemCompositionStatisticsService {
 		return normalizedWageMonth;
 	}
 
-	private boolean shouldIncludeDefaultItem(
-		String employmentType,
-		WageTypeOption wageType) {
+	private List<WageItemCompositionStatisticsDetail> createTableItems(
+		List<WageItemCompositionStatisticsDetail> items,
+		long totalAmount,
+		String itemType) {
 
-		String wageTypeName = wageType.getWageTypeName();
-
-		String itemType = wageType.getItemType();
-
-		// 사업소득자
-		if (EMPLOYMENT_TYPE_TEMPORARY.equals(
-			employmentType)) {
-
-			if ("P".equals(itemType)) {
-				return WAGE_TYPE_BUSINESS_INCOME.equals(
-					wageTypeName);
-			}
-
-			if ("D".equals(itemType)) {
-				return isIncomeTax(wageTypeName);
-			}
-
-			return false;
+		if (items.size() <= TABLE_VISIBLE_ITEM_COUNT) {
+			return new ArrayList<>(items);
 		}
 
-		// 일용근로자
-		if (EMPLOYMENT_TYPE_DAILY.equals(
-			employmentType)) {
+		List<WageItemCompositionStatisticsDetail> tableItems = new ArrayList<>();
 
-			if ("P".equals(itemType)) {
-				return WAGE_TYPE_DAILY_WAGE.equals(
-					wageTypeName);
-			}
+		for (int index = 0; index < TABLE_VISIBLE_ITEM_COUNT; index++) {
 
-			if ("D".equals(itemType)) {
-				return isIncomeTax(wageTypeName);
-			}
-
-			return false;
+			tableItems.add(items.get(index));
 		}
 
-		// 일반 근로소득자
-		if ("P".equals(itemType)) {
+		long otherAmount = 0L;
 
-			return !WAGE_TYPE_DAILY_WAGE.equals(
-				wageTypeName)
-				&& !WAGE_TYPE_BUSINESS_INCOME.equals(
-					wageTypeName);
+		for (int index = TABLE_VISIBLE_ITEM_COUNT; index < items.size(); index++) {
+
+			otherAmount += items.get(index).getAmount();
 		}
 
-		return "D".equals(itemType);
-	}
+		int otherCount = items.size() - TABLE_VISIBLE_ITEM_COUNT;
 
-	private boolean isIncomeTax(String wageTypeName) {
+		tableItems.add(
+			new WageItemCompositionStatisticsDetail(
+				"그 외(" + otherCount + ")",
+				itemType,
+				otherAmount,
+				calculateCompositionRate(
+					otherAmount,
+					totalAmount)));
 
-		return WAGE_TYPE_INCOME_TAX.equals(wageTypeName)
-			|| WAGE_TYPE_LOCAL_INCOME_TAX.equals(
-				wageTypeName);
+		return tableItems;
 	}
 
 	private double calculateCompositionRate(
@@ -268,15 +207,6 @@ public class WageItemCompositionStatisticsService {
 			* 100.0;
 	}
 
-	private String createItemKey(
-		String itemType,
-		String wageTypeName) {
-
-		return itemType
-			+ ":"
-			+ wageTypeName;
-	}
-
 	private WageItemCompositionStatisticsResult emptyResult() {
 
 		return new WageItemCompositionStatisticsResult(
@@ -286,23 +216,5 @@ public class WageItemCompositionStatisticsService {
 				.<WageItemCompositionStatisticsDetail>emptyList(),
 			0L,
 			0L);
-	}
-
-	// Service 내부에서 항목별 금액을 조립하기 위한 임시 객체
-	private static class ItemAmount {
-
-		private String wageTypeName;
-		private String itemType;
-		private long amount;
-
-		private ItemAmount(
-			String wageTypeName,
-			String itemType,
-			long amount) {
-
-			this.wageTypeName = wageTypeName;
-			this.itemType = itemType;
-			this.amount = amount;
-		}
 	}
 }

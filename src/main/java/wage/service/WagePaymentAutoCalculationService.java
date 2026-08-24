@@ -155,6 +155,8 @@ public class WagePaymentAutoCalculationService {
 			WagePaymentCalculationRequest request = new WagePaymentCalculationRequest(
 				employeeId,
 				wageMonth,
+				settlementStartDate,
+				settlementEndDate,
 				calculationInputs);
 
 			WagePaymentCalculationResult calculationResult = wagePaymentCalculationService.calculate(

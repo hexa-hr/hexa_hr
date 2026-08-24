@@ -8,313 +8,188 @@
 <head>
 <meta charset="UTF-8">
 <title>근태기록/관리</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
-body {
-	font-family: 'Malgun Gothic', dotum, sans-serif;
-	font-size: 13px;
-	color: #333;
-	margin: 0;
-	padding: 20px;
-	background-color: #f5f5f5;
-}
+    body { font-family: 'Malgun Gothic', dotum, sans-serif; font-size: 13px; color: #333; margin: 0; background-color: #f5f5f5;}
+    
+    /* Layout */
+    .container { display: flex; gap: 30px; background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .left-panel { flex: 6; overflow-y: auto; max-height: 600px; }
+    .right-panel { flex: 4; border-left: 1px solid #ddd; padding-left: 30px; }
 
-/* Layout */
-.container {
-	display: flex;
-	gap: 30px;
-	background: #fff;
-	padding: 20px;
-	border-radius: 5px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+    /* Table Styles */
+    table { width: 100%; border-collapse: collapse; text-align: center; }
+    th, td { border: 1px solid #e2e2e2; padding: 10px; }
+    th { background-color: #f4f4f4; }
+    .selected-row { background-color: #e8f0fe !important; font-weight: bold; }
 
-.left-panel {
-	flex: 6;
-	overflow-y: auto;
-	max-height: 600px;
-}
+    /* Button Styles */
+    .btn-manage { background: white; border: 1px solid #ccc; padding: 4px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; }
+    .btn-manage:hover { background: #eee; }
+    .btn-delete { background: #ff4d4f; color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; }
+    .btn-delete:hover { background: #ff7875; }
+    .btn-submit { background-color: #5c7cba; color: white; border: none; padding: 6px 20px; border-radius: 3px; cursor: pointer; }
+    .btn-reset { background-color: #999; color: white; border: none; padding: 6px 15px; border-radius: 3px; cursor: pointer; }
 
-.right-panel {
-	flex: 4;
-	border-left: 1px solid #ddd;
-	padding-left: 30px;
-}
-
-/* Table Styles */
-table {
-	width: 100%;
-	border-collapse: collapse;
-	text-align: center;
-}
-
-th, td {
-	border: 1px solid #e2e2e2;
-	padding: 10px;
-}
-
-th {
-	background-color: #f4f4f4;
-}
-
-.selected-row {
-	background-color: #e8f0fe !important;
-	font-weight: bold;
-}
-
-/* Button Styles */
-.btn-manage {
-	background: white;
-	border: 1px solid #ccc;
-	padding: 4px 8px;
-	cursor: pointer;
-	border-radius: 3px;
-	font-size: 12px;
-}
-
-.btn-manage:hover {
-	background: #eee;
-}
-
-.btn-delete {
-	background: #ff4d4f;
-	color: white;
-	border: none;
-	padding: 4px 8px;
-	cursor: pointer;
-	border-radius: 3px;
-	font-size: 12px;
-}
-
-.btn-delete:hover {
-	background: #ff7875;
-}
-
-.btn-submit {
-	background-color: #5c7cba;
-	color: white;
-	border: none;
-	padding: 6px 20px;
-	border-radius: 3px;
-	cursor: pointer;
-}
-
-.btn-reset {
-	background-color: #999;
-	color: white;
-	border: none;
-	padding: 6px 15px;
-	border-radius: 3px;
-	cursor: pointer;
-}
-
-/* Modal Styles */
-.modal-overlay {
-	display: none;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0, 0, 0, 0.5);
-	z-index: 100;
-	justify-content: center;
-	align-items: center;
-}
-
-.modal-content {
-	background: white;
-	width: 850px;
-	padding: 20px;
-	border-radius: 8px;
-	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-	font-size: 18px;
-	font-weight: bold;
-	margin-bottom: 15px;
-	display: flex;
-	justify-content: space-between;
-}
-
-.btn-close-modal {
-	cursor: pointer;
-	font-size: 20px;
-	background: none;
-	border: none;
-}
-
-/* Form Styles */
-.form-table th {
-	width: 120px;
-	text-align: left;
-	background-color: #fbfbfb;
-}
-
-.form-table td {
-	text-align: left;
-}
-
-input[type="date"], input[type="text"], input[type="number"], select {
-	padding: 3px;
-	border: 1px solid #ccc;
-}
+    /* Modal Styles */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+    .modal-content { background: white; width: 850px; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .modal-header { font-size: 18px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; }
+    .btn-close-modal { cursor: pointer; font-size: 20px; background: none; border: none; }
+    
+    /* Form Styles */
+    .form-table th { width: 120px; text-align: left; background-color: #fbfbfb; }
+    .form-table td { text-align: left; }
+    input[type="date"], input[type="text"], input[type="number"], select { padding: 3px; border: 1px solid #ccc; }
 </style>
 </head>
 <body>
 
-	<div class="container">
-		<!-- 좌측 리스트 영역 -->
-		<div class="left-panel">
-			<h2>근태기록/관리</h2>
-			<table id="employeeTable">
-				<thead>
-					<tr>
-						<th>선택</th>
-						<th>구분</th>
-						<th>사원번호</th>
-						<th>성명</th>
-						<th>부서</th>
-						<th>직위</th>
-						<th>근태기록</th>
-					</tr>
-				</thead>
-				<tbody>
-					<!-- DB 동적 목록 조회를 위한 JSTL 반복문 -->
-					<c:forEach var="emp" items="${empList}">
-						<tr>
-							<td><input type="checkbox" class="emp-checkbox"
-								value="${emp.employeeId}" data-name="${emp.koreanName}"></td>
-							<td>${emp.employmentType}</td>
-							<td>No-${emp.employeeId}</td>
-							<td>${emp.koreanName}</td>
-							<td>${emp.departmentName}</td>
-							<td>${emp.positionName}</td>
-							<td>
-								<button type="button" class="btn-manage"
-									onclick="openModal('${emp.employeeId}', '${emp.koreanName}', '${emp.departmentName}', '${emp.positionName}')">관리</button>
-							</td>
-						</tr>
-					</c:forEach>
-				</tbody>
-			</table>
-		</div>
+<jsp:include page="/WEB-INF/view/include/header.jsp" />
+<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-		<!-- 우측 폼 영역 -->
-		<div class="right-panel">
-			<!-- 폼 데이터가 attendanceSaveProcess.jsp로 넘어가도록 action 주소 변경 -->
-			<form id="attendanceForm"
-				action="${pageContext.request.contextPath}/attendance/save.do"
-				method="post" onsubmit="return validateForm();">
+<div class="container">
+    <!-- 좌측 리스트 영역 -->
+    <div class="left-panel">
+        <h2>근태기록/관리</h2>
+        <table id="employeeTable">
+            <thead>
+                <tr>
+                    <th>선택</th>
+                    <th>구분</th>
+                    <th>사원번호</th>
+                    <th>성명</th>
+                    <th>부서</th>
+                    <th>직위</th>
+                    <th>근태기록</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- DB 동적 목록 조회를 위한 JSTL 반복문 -->
+                <c:forEach var="emp" items="${empList}">
+                    <tr>
+                        <td><input type="checkbox" class="emp-checkbox" value="${emp.employeeId}" data-name="${emp.koreanName}"></td>
+                        <td>${emp.employmentType}</td>
+                        <td>No-${emp.employeeId}</td>
+                        <td>${emp.koreanName}</td>
+                        <td>${emp.departmentName}</td>
+                        <td>${emp.positionName}</td>
+                        <td>
+                            <button type="button" class="btn-manage" onclick="openModal('${emp.employeeId}', '${emp.koreanName}', '${emp.departmentName}', '${emp.positionName}')">관리</button>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
 
-				<input type="hidden" id="selectedEmpNo" name="employee_id">
-				<input type="hidden" id="attendanceId" name="attendance_id">
-				<!-- 서버로 넘어가는 입력일자 자동 설정 -->
-				<input type="hidden" id="inputDate" name="input_date"
-					value="<fmt:formatDate value='${now}' pattern='yyyy-MM-dd' />">
+    <!-- 우측 폼 영역 -->
+    <div class="right-panel">
+        <!-- [수정됨 1] 폼 데이터가 attendanceSaveProcess.jsp로 넘어가도록 action 주소 변경 -->
+			<form id="attendanceForm" action="${pageContext.request.contextPath}/attendance/save.do" method="post" onsubmit="return validateForm();">
+            
+            <input type="hidden" id="selectedEmpNo" name="employee_id">
+            <input type="hidden" id="attendanceId" name="attendance_id"> <!-- 수정할 때 사용할 근태기록 ID -->
+            <input type="hidden" id="inputDate" name="input_date" value="2026-08-06"> <!-- 고정 입력일자 -->
+            
+            <div id="selectedEmpInfoDisplay" style="margin-bottom: 10px; font-weight: bold; color: #5c7cba;">
+                [사원을 먼저 좌측 체크박스에서 선택하세요]
+            </div>
 
-				<div id="selectedEmpInfoDisplay"
-					style="margin-bottom: 10px; font-weight: bold; color: #5c7cba;">
-					[사원을 먼저 좌측 체크박스에서 선택하세요]</div>
+            <table class="form-table">
+                <tr style="border-top: 2px solid #000;">
+                    <th>입력일자</th>
+                    <td id="currentDateDisplay">2026-08-06</td>
+                </tr>
+                <tr>
+                    <th>근태항목</th>
+                    <td>
+                        <select id="attendanceType" name="attendance_type_id" onchange="toggleVacationPeriod()" required>
+                            <option value="">선택하세요.</option>
+                            <!-- [수정됨 2] 백엔드에서 에러가 나지 않도록 value를 고유 숫자로 변경 -->
+                            <option value="1">연차</option>
+                            <option value="2">반차</option>
+                            <option value="3">지각</option>
+                            <option value="4">조퇴</option>
+                            <option value="5">외근</option>
+                            <option value="6">휴일근무</option>
+                            <option value="7">연장근무</option>
+                            <option value="8">포상휴가</option>
+                            <option value="9">야간근무</option>
+                            <option value="10">청원휴가</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr id="vacationPeriodRow" style="display: none;">
+                    <th style="color: #e53935;">휴가적용기간</th>
+                    <td style="color: #e53935; font-weight: bold;">
+                        2026-01-01 ~ 2026-12-31
+                    </td>
+                </tr>        
+                <tr>
+                    <th>기간</th>
+                    <td>
+                        <input type="date" id="startDate" name="start_date" required> ~ 
+                        <input type="date" id="endDate" name="end_date" required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>근태일수</th>
+                    <td><input type="number" id="attendanceDays" name="attendance_days" min="0" step="0.5" value="1" required> 일</td>
+                </tr>
+                <tr>
+                    <th>금액(수당)</th>
+                    <td><input type="number" id="wageAmount" name="amount" value="0"> 원</td>
+                </tr>
+                <tr>
+                    <th>적요</th>
+                    <td><input type="text" id="remark" name="summary" style="width: 80%;"></td>
+                </tr>
+            </table>
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="submit" class="btn-submit">저장</button>
+                <button type="button" class="btn-reset" onclick="resetForm();">내용 지우기</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-				<table class="form-table">
-					<tr style="border-top: 2px solid #000;">
-						<th>입력일자</th>
-						<td id="currentDateDisplay"><fmt:formatDate value="${now}"
-								pattern="yyyy-MM-dd" /></td>
-					</tr>
-					<tr>
-						<th>근태항목</th>
-						<td>
-							<!-- [수정된 부분] data-att-usage와 data-vac-usage 추가 -->
-							<select id="attendanceType" name="attendance_type_id"
-								onchange="toggleVacationPeriod()" required>
-									<option value="" data-has-vacation="false" data-unit="일">선택하세요.</option>
-									<c:forEach var="att" items="${attendanceList}">
-										<option value="${att.attendanceTypeId}" 
-												data-has-vacation="${not empty att.vacationTypeId and att.vacationTypeId != 0 ? 'true' : 'false'}"
-												data-vacation-name="${att.vacationTypeName}"
-												data-start="<fmt:formatDate value='${att.applyPeriod1}' pattern='yyyy-MM-dd'/>"
-												data-end="<fmt:formatDate value='${att.applyPeriod2}' pattern='yyyy-MM-dd'/>"
-												data-unit="${att.unit}"
-												data-att-usage="${att.usage}"
-												data-vac-usage="${att.vacationUsage}">
-											${att.attendanceTypeName}
-										</option>
-									</c:forEach>
-							</select>
-						</td>
-					</tr>
-					<!-- JS가 데이터를 꽂아넣을 수 있도록 id(vacationPeriodDisplay) 부여, 초기엔 비워둠 -->
-					<tr id="vacationPeriodRow" style="display: none;">
-						<th style="color: #e53935;">휴가적용기간</th>
-						<td id="vacationPeriodDisplay" style="color: #e53935; font-weight: bold;"></td>
-					</tr>
-					<tr>
-						<th>기간</th>
-						<td><input type="date" id="startDate" name="start_date"
-							required> ~ <input type="date" id="endDate"
-							name="end_date" required></td>
-					</tr>
-					<tr>
-						<th>근태일수</th>
-						<td><input type="number" id="attendanceDays"
-							name="attendance_days" min="0" step="0.5" value="1" required>
-							<!-- 단위 글자 변경을 위해 id="unitText" span 추가 -->
-							<span id="unitText">일</span></td>
-					</tr>
-					<tr>
-						<th>금액(수당)</th>
-						<td><input type="number" id="wageAmount" name="amount"
-							value="0"> 원</td>
-					</tr>
-					<tr>
-						<th>적요</th>
-						<td><input type="text" id="remark" name="summary"
-							style="width: 80%;"></td>
-					</tr>
-				</table>
-				<div style="text-align: center; margin-top: 20px;">
-					<button type="submit" class="btn-submit">저장</button>
-					<button type="button" class="btn-reset" onclick="resetForm();">내용
-						지우기</button>
-				</div>
-			</form>
-		</div>
-	</div>
+<!-- 모달 팝업 영역 -->
+<div id="recordModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>사원별 근태기록</span>
+            <button class="btn-close-modal" onclick="closeModal()">×</button>
+        </div>
+        <div style="margin-bottom: 10px; font-weight: bold;" id="modalEmpInfo">
+            <!-- JS로 이름, 부서, 직위 입력 -->
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>번호</th>
+                    <th>입력일자</th>
+                    <th>근태항목</th>
+                    <th>근태기간</th>
+                    <th>근태일수</th>
+                    <th>금액</th>
+                    <th>적요</th>
+                    <th>수정/삭제</th>
+                </tr>
+            </thead>
+            <tbody id="modalTableBody">
+                <!-- 동적 렌더링 영역 -->
+            </tbody>
+        </table>
+    </div>
+</div>
 
-	<!-- 모달 팝업 영역 -->
-	<div id="recordModal" class="modal-overlay">
-		<div class="modal-content">
-			<div class="modal-header">
-				<span>사원별 근태기록</span>
-				<button class="btn-close-modal" onclick="closeModal()">×</button>
-			</div>
-			<div style="margin-bottom: 10px; font-weight: bold;"
-				id="modalEmpInfo">
-				<!-- JS로 이름, 부서, 직위 입력 -->
-			</div>
-			<table>
-				<thead>
-					<tr>
-						<th>번호</th>
-						<th>입력일자</th>
-						<th>근태항목</th>
-						<th>근태기간</th>
-						<th>근태일수</th>
-						<th>금액</th>
-						<th>적요</th>
-						<th>수정/삭제</th>
-					</tr>
-				</thead>
-				<tbody id="modalTableBody">
-					<!-- 동적 렌더링 영역 -->
-				</tbody>
-			</table>
-		</div>
-	</div>
-
-	<script>
+<script>
     var currentModalEmpNo = '';
 
     // 1. 체크박스 선택 시 사번 저장 및 UI 표시

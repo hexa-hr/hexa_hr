@@ -210,7 +210,9 @@ public class WagePaymentCalculationService {
 
 			List<EmployeeInsurance> employeeInsurances = insuranceDao.selectByEmployeeId(
 				conn,
-				request.getEmployeeId());
+				request.getEmployeeId(),
+				request.getSettlementStartDate(),
+				request.getSettlementEndDate());
 
 			Map<String, Long> insuranceAmountMap = new LinkedHashMap<>();
 
@@ -516,6 +518,20 @@ public class WagePaymentCalculationService {
 		} catch (DateTimeParseException e) {
 			throw new IllegalArgumentException(
 				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+		}
+
+		if (request.getSettlementStartDate() == null
+			|| request.getSettlementEndDate() == null) {
+
+			throw new IllegalArgumentException(
+				"정산기간을 입력해야 합니다.");
+		}
+
+		if (request.getSettlementStartDate().after(
+			request.getSettlementEndDate())) {
+
+			throw new IllegalArgumentException(
+				"정산 시작일은 종료일보다 늦을 수 없습니다.");
 		}
 
 		if (request.getItemInputs() == null) {
