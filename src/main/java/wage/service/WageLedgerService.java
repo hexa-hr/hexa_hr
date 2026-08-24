@@ -21,7 +21,7 @@ import wage.model.WageLedgerEmployeeRow;
 import wage.model.WageLedgerSummary;
 import wage.model.WageLedgerSummaryResult;
 
-// 급여대장 조회 서비스
+// 給与台帳照会Service
 public class WageLedgerService {
 
 	private WageDao wageDao = new WageDao();
@@ -32,7 +32,7 @@ public class WageLedgerService {
 
 		if (year == null || !year.matches("\\d{4}")) {
 			throw new IllegalArgumentException(
-				"귀속연도는 YYYY 형식이어야 합니다.");
+				"帰属年度はYYYY形式である必要があります。");
 		}
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
@@ -60,7 +60,7 @@ public class WageLedgerService {
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
-				"급여대장 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与台帳の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -85,7 +85,7 @@ public class WageLedgerService {
 
 		if (wageMonth == null || wagePeriod == null) {
 			throw new IllegalArgumentException(
-				"귀속연월과 급여차수를 입력해야 합니다.");
+				"帰属年月と給与回次を入力する必要があります。");
 		}
 
 		wageMonth = wageMonth.trim();
@@ -93,14 +93,14 @@ public class WageLedgerService {
 
 		if (wageMonth.isEmpty() || wagePeriod.isEmpty()) {
 			throw new IllegalArgumentException(
-				"귀속연월과 급여차수를 입력해야 합니다.");
+				"帰属年月と給与回次を入力する必要があります。");
 		}
 
 		try {
 			YearMonth.parse(wageMonth);
 		} catch (DateTimeParseException e) {
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 
 		int period;
@@ -109,12 +109,12 @@ public class WageLedgerService {
 			period = Integer.parseInt(wagePeriod);
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException(
-				"급여차수는 숫자여야 합니다.");
+				"給与回次は数値である必要があります。");
 		}
 
 		if (period <= 0) {
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상이어야 합니다.");
+				"給与回次は1以上である必要があります。");
 		}
 
 		wagePeriod = String.valueOf(period);
@@ -130,12 +130,12 @@ public class WageLedgerService {
 				parsedDepartmentId = Integer.valueOf(departmentId);
 			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException(
-					"부서 정보가 올바르지 않습니다.");
+					"部署情報が正しくありません。");
 			}
 
 			if (parsedDepartmentId <= 0) {
 				throw new IllegalArgumentException(
-					"부서 정보가 올바르지 않습니다.");
+					"部署情報が正しくありません。");
 			}
 		}
 
@@ -145,23 +145,23 @@ public class WageLedgerService {
 			&& !"daily".equals(incomeType)) {
 
 			throw new IllegalArgumentException(
-				"소득자 구분이 올바르지 않습니다.");
+				"所得者区分が正しくありません。");
 		}
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
 
-			// 선택한 급여차수의 기본 정보
+			// 選択した給与回次の基本情報
 			WageLedgerSummary summary = wageDao.selectWageLedgerSummary(
 				conn, wageMonth, wagePeriod);
 
 			if (summary == null) {
 				throw new IllegalArgumentException(
-					"해당 급여차수가 존재하지 않습니다.");
+					"該当する給与回次が存在しません。");
 			}
 
 			List<Department> departments = departmentDao.selectDepartments(conn);
 
-			// usage 여부와 관계없이 전체 급여항목 조회
+			// usageにかかわらずすべての給与項目を照会
 			List<WageTypeOption> wageTypes = wageTypeDao.selectWageTypeOptions(conn);
 
 			List<WageTypeOption> paymentTypes = new ArrayList<>();
@@ -195,7 +195,7 @@ public class WageLedgerService {
 					itemType);
 			}
 
-			// 사원 × 급여항목 세로형 원본 조회
+			// 社員 × 給与項目の縦持ち形式の元データを照会
 			List<WageLedgerDetailRow> rawRows = wageDao.selectWageLedgerDetailRows(
 				conn,
 				wageMonth,
@@ -230,7 +230,7 @@ public class WageLedgerService {
 
 				if (itemType == null) {
 					throw new IllegalStateException(
-						"급여항목 마스터에 존재하지 않는 급여 데이터가 포함되어 있습니다.");
+						"給与項目マスターに存在しない給与データが含まれています。");
 				}
 
 				employeeRow.addWageValue(
@@ -241,7 +241,7 @@ public class WageLedgerService {
 
 			List<WageLedgerEmployeeRow> employeeRows = new ArrayList<>(employeeMap.values());
 
-			// 급여항목별 전체 합계 계산
+			// 給与項目別の全体合計を計算
 			Map<Integer, Long> itemTotals = new LinkedHashMap<>();
 
 			for (Integer wageTypeId : wageTypeIds) {
@@ -290,7 +290,7 @@ public class WageLedgerService {
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
-				"급여대장 상세 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与台帳詳細の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}

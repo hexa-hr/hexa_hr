@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>급여대장</title>
+<title>給与台帳</title>
 
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -28,15 +28,15 @@ body {
 	<jsp:include page="/WEB-INF/view/include/header.jsp" />
 	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<h2>급여대장</h2>
+	<h2>給与台帳</h2>
 
 	<form method="get"
 		action="${pageContext.request.contextPath}/wage/ledger.do">
 
-		<label for="year">귀속연도</label> <input type="number" id="year"
+		<label for="year">帰属年度</label> <input type="number" id="year"
 			name="year" min="1000" max="9999" value="${selectedYear}">
 
-		<button type="submit">조회</button>
+		<button type="submit">照会</button>
 	</form>
 
 	<hr>
@@ -58,7 +58,7 @@ body {
 		<c:choose>
 
 			<c:when test="${empty ledgerSummary.summaries}">
-				<p>조회된 급여내역이 없습니다.</p>
+				<p>照会された給与履歴がありません。</p>
 			</c:when>
 
 			<c:otherwise>
@@ -66,15 +66,15 @@ body {
 				<table border="1">
 					<thead>
 						<tr>
-							<th>귀속연월</th>
-							<th>급여차수</th>
-							<th>정산기간</th>
-							<th>지급일</th>
-							<th>인원</th>
-							<th>지급총액</th>
-							<th>공제총액</th>
-							<th>실지급액</th>
-							<th>삭제</th>
+							<th>帰属年月</th>
+							<th>給与回次</th>
+							<th>精算期間</th>
+							<th>支給日</th>
+							<th>人数</th>
+							<th>支給総額</th>
+							<th>控除総額</th>
+							<th>差引支給額</th>
+							<th>削除</th>
 						</tr>
 					</thead>
 
@@ -88,8 +88,8 @@ body {
 								style="cursor: pointer;">
 								<td>${summary.wageMonth}</td>
 
-								<td>급여-<fmt:formatNumber value="${summary.wagePeriod}"
-										pattern="00" />차
+								<td>給与-<fmt:formatNumber value="${summary.wagePeriod}"
+										pattern="00" />回
 								</td>
 
 								<td><fmt:formatDate
@@ -122,7 +122,7 @@ body {
 											type="hidden" name="deleteConfirmed" value="false"> <input
 											type="hidden" name="deleteFinalConfirmed" value="false">
 
-										<button type="submit">삭제</button>
+										<button type="submit">削除</button>
 									</form>
 								</td>
 							</tr>
@@ -133,7 +133,7 @@ body {
 
 					<tfoot>
 						<tr>
-							<th>합계</th>
+							<th>合計</th>
 							<th></th>
 							<th></th>
 							<th></th>
@@ -211,19 +211,19 @@ body {
 						"false";
 
 					var firstConfirmed = window.confirm(
-						"[필독] - [삭제기능]\n\n"
-						+ "선택하신 급여차수에 해당하는\n"
-						+ "급여데이터가 전부 삭제됩니다.\n\n"
-						+ "삭제된 급여대장 및 급여데이터는\n"
-						+ "복구할 수 없습니다.\n"
-						+ "다시 한번 확인하시고 삭제해 주세요.");
+						"[必読] - [削除機能]\n\n"
+						+ "選択した給与回次に該当する\n"
+						+ "給与データがすべて削除されます。\n\n"
+						+ "削除された給与台帳および給与データは\n"
+						+ "復元できません。\n"
+						+ "もう一度確認してから削除してください。");
 
 					if (!firstConfirmed) {
 						return;
 					}
 
 					var finalConfirmed = window.confirm(
-						"[경고] 정말 삭제하시겠습니까?");
+						"[警告] 本当に削除しますか？");
 
 					if (!finalConfirmed) {
 						return;

@@ -2,7 +2,7 @@ package wage.model;
 
 import java.util.Date;
 
-// 급여대장 급여차수 목록 조회 DTO
+// 給与台帳の給与回次一覧照会DTO
 public class WageLedgerSummary {
 
 	private String wageMonth;
