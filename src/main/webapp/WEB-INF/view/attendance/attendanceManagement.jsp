@@ -1,5 +1,8 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<jsp:useBean id="now" class="java.util.Date" />
 <!DOCTYPE html>
 <html>
 <head>
@@ -309,9 +312,8 @@
         var modalTitle = document.getElementById('modalEmpInfo').innerText;
         var empName = modalTitle.split('• 성명: ')[1].split(' (')[0];
         document.getElementById('selectedEmpInfoDisplay').innerText = '[수정 모드] 선택된 사원: ' + empName + ' (No-' + currentModalEmpNo + ')';
-        document.getElementById('selectedEmpInfoDisplay').style.color = '#e53935'; // 빨간색으로 변경
+        document.getElementById('selectedEmpInfoDisplay').style.color = '#e53935'; 
         
-        // [수정됨 3] 드롭다운 값이 숫자로 바뀌었으므로, 한글 이름(type)과 일치하는 항목을 찾아 선택되도록 수정
         var selectEl = document.getElementById('attendanceType');
         for(var i=0; i<selectEl.options.length; i++) {
             if(selectEl.options[i].text === type) {
@@ -350,16 +352,70 @@
         .catch(function(err) { alert('서버 통신 오류가 발생했습니다.'); });
     }
 
-    // 9. 포상휴가 선택 시 휴가기간 표시 토글
+    // [수정된 부분] 사용여부에 따라 휴가기간 표시여부 결정 로직 추가
     function toggleVacationPeriod() {
         var typeSelect = document.getElementById('attendanceType');
-        var vacationRow = document.getElementById('vacationPeriodRow');
+        var selectedOption = typeSelect.options[typeSelect.selectedIndex];
         
-        // [수정됨 4] value가 숫자로 바뀌었으므로 텍스트명으로 조건 검사하도록 수정
-        if (typeSelect.options[typeSelect.selectedIndex].text === '포상휴가') {
-            vacationRow.style.display = 'table-row';
+        var vacationRow = document.getElementById('vacationPeriodRow');
+        var displayTd = document.getElementById('vacationPeriodDisplay');
+        
+        var startDateInput = document.getElementById('startDate');
+        var endDateInput = document.getElementById('endDate');
+        
+        // 단위 텍스트 요소
+        var unitTextSpan = document.getElementById('unitText');
+
+        // option 태그에 숨겨둔 데이터를 꺼냅니다.
+        var hasVacation = selectedOption.getAttribute('data-has-vacation') === 'true';
+        var vName = selectedOption.getAttribute('data-vacation-name');
+        var vStart = selectedOption.getAttribute('data-start');
+        var vEnd = selectedOption.getAttribute('data-end');
+        var unit = selectedOption.getAttribute('data-unit');
+        
+        // 추가된 사용여부 데이터
+        var attUsage = selectedOption.getAttribute('data-att-usage');
+        var vacUsage = selectedOption.getAttribute('data-vac-usage');
+        
+        // 단위가 '시간'이면 시간으로, 아니면 기본값인 '일'로 변경
+        if (unit === '시간') {
+            unitTextSpan.innerText = '시간';
         } else {
+            unitTextSpan.innerText = '일';
+        }
+        
+        // 둘 다 '사용' (또는 DB값 'Y') 상태인지 확인
+        var isBothUsed = (attUsage === 'Y' || attUsage === '사용') && (vacUsage === 'Y' || vacUsage === '사용');
+        
+        // 선택한 근태항목에 연결된 휴가공제가 존재하고, 둘 다 '사용'일 경우
+        if (hasVacation && vStart && vEnd && isBothUsed) {
+            vacationRow.style.display = 'table-row';
+            
+            displayTd.innerText = vName + " (" + vStart + " ~ " + vEnd + ")";
+            
+            // 달력 선택 범위 강제 제한
+            startDateInput.min = vStart;
+            startDateInput.max = vEnd;
+            endDateInput.min = vStart;
+            endDateInput.max = vEnd;
+            
+            // 만약 이미 입력된 날짜가 제한 범위를 벗어났다면 범위 안으로 강제 조정
+            if (startDateInput.value && (startDateInput.value < vStart || startDateInput.value > vEnd)) {
+                startDateInput.value = vStart;
+            }
+            if (endDateInput.value && (endDateInput.value < vStart || endDateInput.value > vEnd)) {
+                endDateInput.value = vEnd;
+            }
+        } else {
+            // 연결된 휴가가 없는 일반 근태항목이거나 사용안함일 경우
             vacationRow.style.display = 'none';
+            displayTd.innerText = "";
+            
+            // 일반 근태항목은 달력 제한 해제
+            startDateInput.removeAttribute('min');
+            startDateInput.removeAttribute('max');
+            endDateInput.removeAttribute('min');
+            endDateInput.removeAttribute('max');
         }
     }
 </script>

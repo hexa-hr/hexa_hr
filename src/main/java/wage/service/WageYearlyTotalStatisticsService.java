@@ -25,14 +25,14 @@ public class WageYearlyTotalStatisticsService {
 
 		if (selectedYear == null) {
 			throw new IllegalArgumentException(
-				"귀속년도를 선택해야 합니다.");
+				"帰属年度を選択する必要があります。");
 		}
 
 		selectedYear = selectedYear.trim();
 
 		if (selectedYear.isEmpty()) {
 			throw new IllegalArgumentException(
-				"귀속년도를 선택해야 합니다.");
+				"帰属年度を選択する必要があります。");
 		}
 
 		int endYear;
@@ -41,7 +41,7 @@ public class WageYearlyTotalStatisticsService {
 			endYear = Year.parse(selectedYear).getValue();
 		} catch (DateTimeParseException e) {
 			throw new IllegalArgumentException(
-				"귀속년도는 YYYY 형식이어야 합니다.");
+				"帰属年度はYYYY形式である必要があります。");
 		}
 
 		int startYear = endYear - 9;
@@ -136,7 +136,7 @@ public class WageYearlyTotalStatisticsService {
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
-				"연도별 전체급여 통계 조회 중 데이터베이스 오류가 발생했습니다.",
+				"年度別全体給与統計の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}

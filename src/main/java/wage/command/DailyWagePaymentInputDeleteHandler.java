@@ -18,7 +18,7 @@ import wage.model.WagePaymentEmployeeRow;
 import wage.service.DailyWagePaymentInputService;
 import wage.service.WagePaymentDeleteService;
 
-// 급여입력/관리(일용직) - 선택/전체 삭제 Handler
+// 給与入力・管理（日雇い）- 選択・全件削除Handler
 public class DailyWagePaymentInputDeleteHandler
 	implements CommandHandler {
 
@@ -60,7 +60,7 @@ public class DailyWagePaymentInputDeleteHandler
 			if (!deleteConfirmed) {
 
 				throw new IllegalArgumentException(
-					"삭제 확인이 필요합니다.");
+					"削除の確認が必要です。");
 			}
 
 			if ("all".equals(deleteMode)
@@ -69,7 +69,7 @@ public class DailyWagePaymentInputDeleteHandler
 						"deleteFinalConfirmed"))) {
 
 				throw new IllegalArgumentException(
-					"최종 삭제 확인이 필요합니다.");
+					"最終削除の確認が必要です。");
 			}
 
 			List<Integer> pendingEmployeeIds = parsePendingEmployeeIds(req);
@@ -179,14 +179,14 @@ public class DailyWagePaymentInputDeleteHandler
 			&& pendingEmployee == null) {
 
 			throw new IllegalArgumentException(
-				"현재 급여 목록에 존재하지 않는 사원입니다.");
+				"現在の給与一覧に存在しない社員です。");
 		}
 
 		if (savedEmployee != null) {
 
 			/*
-			 * 지정 사원의 해당 월·차수 WAGE만 삭제한다.
-			 * DAILY_WORK는 변경하지 않는다.
+			 * 指定した社員の該当月・回次のWAGEのみ削除する。
+			 * DAILY_WORKは変更しない。
 			 */
 			wagePaymentDeleteService.delete(
 				employeeId,
@@ -218,7 +218,7 @@ public class DailyWagePaymentInputDeleteHandler
 			&& pendingEmployees.isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"추가된 사원이 없습니다.");
+				"追加された社員がいません。");
 		}
 
 		if (!savedEmployees.isEmpty()) {
@@ -238,8 +238,8 @@ public class DailyWagePaymentInputDeleteHandler
 		}
 
 		/*
-		 * 현재 일용직 작업공간의 pending 사원도
-		 * 전부 제거한다.
+		 * 現在の日雇いワークスペースのpending社員も
+		 * すべて削除する。
 		 */
 		return new ArrayList<>();
 	}
@@ -325,7 +325,7 @@ public class DailyWagePaymentInputDeleteHandler
 			} catch (NumberFormatException e) {
 
 				throw new IllegalArgumentException(
-					"미저장 사원 정보가 올바르지 않습니다.");
+					"未保存社員情報が正しくありません。");
 			}
 		}
 
@@ -340,7 +340,7 @@ public class DailyWagePaymentInputDeleteHandler
 		if (value == null) {
 
 			throw new IllegalArgumentException(
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 		}
 
 		try {
@@ -356,7 +356,7 @@ public class DailyWagePaymentInputDeleteHandler
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 		}
 	}
 
@@ -408,7 +408,7 @@ public class DailyWagePaymentInputDeleteHandler
 		}
 
 		throw new IllegalArgumentException(
-			"올바른 삭제 방식을 선택해야 합니다.");
+			"正しい削除方法を選択する必要があります。");
 	}
 
 	private String normalizeWageMonth(
@@ -419,7 +419,7 @@ public class DailyWagePaymentInputDeleteHandler
 		if (wageMonth == null) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		try {
@@ -430,7 +430,7 @@ public class DailyWagePaymentInputDeleteHandler
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 	}
 
@@ -442,7 +442,7 @@ public class DailyWagePaymentInputDeleteHandler
 		if (wagePeriod == null) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		try {
@@ -461,7 +461,7 @@ public class DailyWagePaymentInputDeleteHandler
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 	}
 

@@ -12,7 +12,7 @@ import mvc.command.CommandHandler;
 import wage.model.WageEmployeeHistoryResult;
 import wage.service.WageEmployeeHistoryService;
 
-// 사원별 급여내역 조회 Handler
+// 社員別給与履歴照会Handler
 public class WageEmployeeHistoryHandler implements CommandHandler {
 
 	private static final String FORM_VIEW = "/WEB-INF/view/wage/wageEmployeeHistory.jsp";
@@ -30,7 +30,7 @@ public class WageEmployeeHistoryHandler implements CommandHandler {
 		String employeeIdParam = trim(req.getParameter("employeeId"));
 		boolean searchRequested = "true".equals(req.getParameter("search"));
 
-		// 최초 진입 시 현재 연도의 1월부터 현재 월까지를 기본 조회기간으로 사용
+		// 初回表示時は現在年の1月から現在月までをデフォルトの照会期間として使用
 		YearMonth currentMonth = YearMonth.now();
 
 		if (startMonth == null) {
@@ -45,21 +45,21 @@ public class WageEmployeeHistoryHandler implements CommandHandler {
 		req.setAttribute("endMonth", endMonth);
 		req.setAttribute("selectedEmployeeId", employeeIdParam);
 
-		// 사원 선택 화면에 사용할 전체 사원 목록
+		// 社員選択画面で使用する全社員一覧
 		List<EmployeeSelectRow> employeeRows = employeeSelectService.getEmployeeRows(null, null, null);
 
 		req.setAttribute("employeeRows", employeeRows);
 
-		// 최초 진입 시에는 조회하지 않음
+		// 初回表示時は照会しない
 		if (!searchRequested && employeeIdParam == null) {
 			return FORM_VIEW;
 		}
 
-		// 조회 버튼을 눌렀지만 사원을 선택하지 않은 경우
+		// 照会ボタンを押したが社員を選択していない場合
 		if (searchRequested && employeeIdParam == null) {
 			req.setAttribute(
 				"errorMessage",
-				"사원을 선택해야 합니다.");
+				"社員を選択する必要があります。");
 
 			return FORM_VIEW;
 		}
@@ -68,7 +68,7 @@ public class WageEmployeeHistoryHandler implements CommandHandler {
 
 			Integer employeeId = Integer.valueOf(employeeIdParam);
 
-			// 선택한 employeeId에 해당하는 실제 사원명 확인
+			// 選択したemployeeIdに該当する実際の社員名を確認
 			EmployeeSelectRow selectedEmployee = null;
 
 			for (EmployeeSelectRow employeeRow : employeeRows) {
@@ -83,7 +83,7 @@ public class WageEmployeeHistoryHandler implements CommandHandler {
 
 			if (selectedEmployee == null) {
 				throw new IllegalArgumentException(
-					"올바른 사원을 선택해야 합니다.");
+					"正しい社員を選択する必要があります。");
 			}
 
 			req.setAttribute(
@@ -104,7 +104,7 @@ public class WageEmployeeHistoryHandler implements CommandHandler {
 
 			req.setAttribute(
 				"errorMessage",
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 
 		} catch (IllegalArgumentException e) {
 

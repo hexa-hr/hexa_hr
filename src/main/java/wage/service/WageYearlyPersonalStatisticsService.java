@@ -26,19 +26,19 @@ public class WageYearlyPersonalStatisticsService {
 
 		if (employeeId == null || employeeId <= 0) {
 			throw new IllegalArgumentException(
-				"사원을 선택해야 합니다.");
+				"社員を選択する必要があります。");
 		}
 
 		if (selectedYear == null) {
 			throw new IllegalArgumentException(
-				"귀속년도를 선택해야 합니다.");
+				"帰属年度を選択する必要があります。");
 		}
 
 		selectedYear = selectedYear.trim();
 
 		if (selectedYear.isEmpty()) {
 			throw new IllegalArgumentException(
-				"귀속년도를 선택해야 합니다.");
+				"帰属年度を選択する必要があります。");
 		}
 
 		int endYear;
@@ -47,7 +47,7 @@ public class WageYearlyPersonalStatisticsService {
 			endYear = Year.parse(selectedYear).getValue();
 		} catch (DateTimeParseException e) {
 			throw new IllegalArgumentException(
-				"귀속년도는 YYYY 형식이어야 합니다.");
+				"帰属年度はYYYY形式である必要があります。");
 		}
 
 		int startYear = endYear - 9;
@@ -128,7 +128,7 @@ public class WageYearlyPersonalStatisticsService {
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
-				"연도별 개인연봉 통계 조회 중 데이터베이스 오류가 발생했습니다.",
+				"年度別個人年俸統計の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}

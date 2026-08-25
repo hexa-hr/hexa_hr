@@ -25,7 +25,7 @@ public class WageInsuranceDeductionService {
 
 		if (wageMonth == null || wagePeriod == null) {
 			throw new IllegalArgumentException(
-				"귀속연월과 급여차수를 선택해야 합니다.");
+				"帰属年月と給与回次を選択する必要があります。");
 		}
 
 		wageMonth = wageMonth.trim();
@@ -33,14 +33,14 @@ public class WageInsuranceDeductionService {
 
 		if (wageMonth.isEmpty() || wagePeriod.isEmpty()) {
 			throw new IllegalArgumentException(
-				"귀속연월과 급여차수를 선택해야 합니다.");
+				"帰属年月と給与回次を選択する必要があります。");
 		}
 
 		try {
 			YearMonth.parse(wageMonth);
 		} catch (DateTimeParseException e) {
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 
 		int period;
@@ -49,12 +49,12 @@ public class WageInsuranceDeductionService {
 			period = Integer.parseInt(wagePeriod);
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException(
-				"급여차수가 올바르지 않습니다.");
+				"給与回次が正しくありません。");
 		}
 
 		if (period < 1 || period > 10) {
 			throw new IllegalArgumentException(
-				"급여차수는 1차부터 10차까지 선택할 수 있습니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 
 		// "01"처럼 전달되어도 DB의 "1"과 일치하도록 정규화
@@ -152,7 +152,7 @@ public class WageInsuranceDeductionService {
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
-				"4대보험 공제내역 조회 중 데이터베이스 오류가 발생했습니다.",
+				"4大保険控除内訳の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}

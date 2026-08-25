@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-// 급여대장 상세 화면의 사원별 1행 DTO
+// 給与台帳詳細画面の社員別1行DTO
 public class WageLedgerEmployeeRow {
 
 	private Integer employeeId;
@@ -15,7 +15,7 @@ public class WageLedgerEmployeeRow {
 	private String departmentName;
 	private String positionName;
 
-	// key: wageTypeId, value: 해당 급여항목 금액
+	// key: wageTypeId, value: 該当する給与項目の金額
 	private Map<Integer, Long> wageValues = new LinkedHashMap<>();
 
 	private Long totalPayment = 0L;
@@ -33,7 +33,7 @@ public class WageLedgerEmployeeRow {
 		this.departmentName = departmentName;
 		this.positionName = positionName;
 
-		// 데이터가 없는 급여항목도 화면에 0으로 표시하기 위해 초기화
+		// データがない給与項目も画面に0として表示するために初期化
 		for (Integer wageTypeId : wageTypeIds) {
 			wageValues.put(wageTypeId, 0L);
 		}

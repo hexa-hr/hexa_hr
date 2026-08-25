@@ -1,5 +1,6 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -261,6 +262,8 @@
             }
 
             data.forEach(item => {
+            	let displaySummary = (item.summary === null || item.summary === 'null') ? '' : item.summary;
+
                 let row = `<tr>
                     <td style="color:#5c7cba;">\${item.inputDate}</td>
                     <td style="color:#5c7cba;">\${item.empType}</td>
@@ -271,7 +274,7 @@
                     <td>\${item.attPeriod}</td>
                     <td>\${item.attDays}(d)</td>
                     <td>\${item.amount}</td>
-                    <td>\${item.summary}</td>
+                    <td>\${displaySummary}</td> 
                 </tr>`;
                 tbody.innerHTML += row;
             });

@@ -4,38 +4,18 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.DateTimeException;
 import java.time.YearMonth;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 import jdbc.connection.ConnectionProvider;
 import wage.dao.WageDao;
 
-// 給与入力画面 - 選択社員の給与削除Service
-public class WagePaymentDeleteService {
+// 給与台帳 - 帰属年月・給与回次の全給与削除Service
+public class WageLedgerDeleteService {
 
 	private WageDao wageDao = new WageDao();
 
 	public void delete(
-		Integer employeeId,
 		String wageMonth,
 		String wagePeriod) {
-
-		deleteEmployees(
-			Collections.singletonList(
-				employeeId),
-			wageMonth,
-			wagePeriod);
-	}
-
-	public void deleteEmployees(
-		List<Integer> employeeIds,
-		String wageMonth,
-		String wagePeriod) {
-
-		Set<Integer> normalizedEmployeeIds = normalizeEmployeeIds(
-			employeeIds);
 
 		String normalizedWageMonth = normalizeWageMonth(
 			wageMonth);
@@ -49,19 +29,15 @@ public class WagePaymentDeleteService {
 
 			try {
 
-				for (Integer employeeId : normalizedEmployeeIds) {
+				int deletedCount = wageDao.deleteWageLedgerRows(
+					conn,
+					normalizedWageMonth,
+					normalizedWagePeriod);
 
-					int deletedCount = wageDao.deleteEmployeeWages(
-						conn,
-						employeeId,
-						normalizedWageMonth,
-						normalizedWagePeriod);
+				if (deletedCount <= 0) {
 
-					if (deletedCount <= 0) {
-
-						throw new IllegalStateException(
-							"削除する給与情報がありません。");
-					}
+					throw new IllegalStateException(
+						"削除する給与台帳がありません。");
 				}
 
 				conn.commit();
@@ -85,43 +61,8 @@ public class WagePaymentDeleteService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"給与削除中にデータベースエラーが発生しました。",
+				"給与台帳の削除中にデータベースエラーが発生しました。",
 				e);
-		}
-	}
-
-	private Set<Integer> normalizeEmployeeIds(
-		List<Integer> employeeIds) {
-
-		if (employeeIds == null
-			|| employeeIds.isEmpty()) {
-
-			throw new IllegalArgumentException(
-				"削除する社員がいません。");
-		}
-
-		Set<Integer> result = new LinkedHashSet<>();
-
-		for (Integer employeeId : employeeIds) {
-
-			validateEmployeeId(
-				employeeId);
-
-			result.add(
-				employeeId);
-		}
-
-		return result;
-	}
-
-	private void validateEmployeeId(
-		Integer employeeId) {
-
-		if (employeeId == null
-			|| employeeId <= 0) {
-
-			throw new IllegalArgumentException(
-				"正しい社員を選択する必要があります。");
 		}
 	}
 

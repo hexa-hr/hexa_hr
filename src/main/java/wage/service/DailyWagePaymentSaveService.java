@@ -18,7 +18,7 @@ import wage.model.WagePaymentItemInput;
 import wage.model.WagePaymentPeriodDefault;
 import wage.model.WageTypeSystemIds;
 
-// 급여입력/관리(일용직) - 선택 사원 급여 저장 Service
+// 給与入力・管理（日雇い）- 選択した社員の給与保存Service
 public class DailyWagePaymentSaveService {
 
 	private WageDao wageDao = new WageDao();
@@ -42,23 +42,23 @@ public class DailyWagePaymentSaveService {
 		if (currentDeductionInputs == null) {
 
 			throw new IllegalArgumentException(
-				"공제항목 정보가 올바르지 않습니다.");
+				"控除項目情報が正しくありません。");
 		}
 
 		/*
-		 * 기존 월·차수이면 저장된 날짜,
-		 * 신규 월·차수이면 회사 급여설정의 기본 날짜를 사용한다.
+		 * 既存の月・回次の場合は保存済みの日付を、
+		 * 新規の月・回次の場合は会社の給与設定の基本日付を使用する。
 		 */
 		PeriodDates periodDates = resolvePeriodDates(
 			normalizedWageMonth,
 			normalizedWagePeriod);
 
 		/*
-		 * 저장 직전에 서버에서 저장 기준값을 다시 구성한다.
+		 * 保存直前にサーバーで保存基準値を再構成する。
 		 *
-		 * - 일용직 사원 여부와 공제항목 스냅샷을 검증한다.
-		 * - 지급총액, 소득세, 지방소득세는 DAILY_WORK를 기준으로 한다.
-		 * - 4대보험과 기타 공제항목은 화면에 표시된 값을 유지한다.
+		 * - 日雇い社員であることと控除項目スナップショットを検証する。
+		 * - 支給総額、所得税、住民税はDAILY_WORKを基準とする。
+		 * - 4大保険とその他の控除項目は画面に表示された値を維持する。
 		 */
 		WagePaymentAutoCalculationResult canonicalResult = dailyWagePaymentInputService.prepareSaveResult(
 			employeeId,
@@ -71,19 +71,19 @@ public class DailyWagePaymentSaveService {
 		if (canonicalResult == null) {
 
 			throw new IllegalStateException(
-				"일용직 급여 계산 결과가 없습니다.");
+				"日雇い給与の計算結果がありません。");
 		}
 
 		long totalPayment = requireNonNegative(
 			canonicalResult.getTotalPayment(),
-			"지급총액");
+			"支給総額");
 
 		List<WagePaymentInputViewItem> deductionItems = canonicalResult.getWageItems();
 
 		if (deductionItems == null) {
 
 			throw new IllegalStateException(
-				"일용직 급여 공제항목 계산 결과가 없습니다.");
+				"日雇い給与の控除項目計算結果がありません。");
 		}
 
 		Map<Integer, Long> deductionValueMap = new LinkedHashMap<>();
@@ -99,7 +99,7 @@ public class DailyWagePaymentSaveService {
 					deductionItem.getItemType())) {
 
 				throw new IllegalStateException(
-					"일용직 급여 공제항목 계산 결과가 올바르지 않습니다.");
+					"日雇い給与の控除項目計算結果が正しくありません。");
 			}
 
 			Integer wageTypeId = deductionItem.getWageTypeId();
@@ -109,19 +109,19 @@ public class DailyWagePaymentSaveService {
 				.equals(wageTypeId)) {
 
 				throw new IllegalStateException(
-					"지급항목이 공제항목에 포함되어 있습니다.");
+					"支給項目が控除項目に含まれています。");
 			}
 
 			long wageValue = requireNonNegative(
 				deductionItem.getWageValue(),
-				"공제금액");
+				"控除金額");
 
 			if (deductionValueMap.put(
 				wageTypeId,
 				wageValue) != null) {
 
 				throw new IllegalStateException(
-					"중복된 공제항목 계산 결과가 존재합니다.");
+					"重複した控除項目の計算結果が存在します。");
 			}
 
 			totalDeduction += wageValue;
@@ -135,12 +135,12 @@ public class DailyWagePaymentSaveService {
 			|| canonicalResult.getNetPayment().longValue() != netPayment) {
 
 			throw new IllegalStateException(
-				"일용직 급여 계산 결과의 합계가 일치하지 않습니다.");
+				"日雇い給与の計算結果の合計が一致しません。");
 		}
 
 		/*
-		 * WAGE 변경은 하나의 트랜잭션으로 처리한다.
-		 * DAILY_WORK는 수정하지 않는다.
+		 * WAGEの変更は1つのトランザクションで処理する。
+		 * DAILY_WORKは変更しない。
 		 */
 		try (Connection conn = ConnectionProvider.getConnection()) {
 
@@ -155,8 +155,8 @@ public class DailyWagePaymentSaveService {
 					normalizedWagePeriod);
 
 				/*
-				 * 일용직 지급총액은 기본급 시스템 항목
-				 * wage_type_id=1에 저장한다.
+				 * 日雇いの支給総額は基本給のシステム項目
+				 * wage_type_id=1に保存する。
 				 */
 				wageDao.insertEmployeeWage(
 					conn,
@@ -170,7 +170,7 @@ public class DailyWagePaymentSaveService {
 					periodDates.wagePaymentDate);
 
 				/*
-				 * 모든 공제항목을 0원 항목까지 저장한다.
+				 * すべての控除項目を0ウォンの項目も含めて保存する。
 				 */
 				for (Map.Entry<Integer, Long> entry : deductionValueMap.entrySet()) {
 
@@ -207,7 +207,7 @@ public class DailyWagePaymentSaveService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"일용직 급여 저장 중 데이터베이스 오류가 발생했습니다.",
+				"日雇い給与の保存中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -255,14 +255,14 @@ public class DailyWagePaymentSaveService {
 			|| wagePaymentDate == null) {
 
 			throw new IllegalStateException(
-				"급여차수 날짜 정보가 올바르지 않습니다.");
+				"給与回次の日付情報が正しくありません。");
 		}
 
 		if (settlementStartDate.after(
 			settlementEndDate)) {
 
 			throw new IllegalStateException(
-				"정산 시작일은 종료일보다 늦을 수 없습니다.");
+				"精算開始日は終了日より後にすることはできません。");
 		}
 
 		return new PeriodDates(
@@ -278,7 +278,7 @@ public class DailyWagePaymentSaveService {
 			|| employeeId <= 0) {
 
 			throw new IllegalArgumentException(
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 		}
 	}
 
@@ -289,7 +289,7 @@ public class DailyWagePaymentSaveService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		try {
@@ -300,7 +300,7 @@ public class DailyWagePaymentSaveService {
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 	}
 
@@ -311,7 +311,7 @@ public class DailyWagePaymentSaveService {
 			|| wagePeriod.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		try {
@@ -331,7 +331,7 @@ public class DailyWagePaymentSaveService {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 	}
 
@@ -347,7 +347,7 @@ public class DailyWagePaymentSaveService {
 
 			throw new IllegalArgumentException(
 				fieldName
-					+ "은 0원 이상이어야 합니다.");
+					+ "は0ウォン以上である必要があります。");
 		}
 
 		return normalizedValue;

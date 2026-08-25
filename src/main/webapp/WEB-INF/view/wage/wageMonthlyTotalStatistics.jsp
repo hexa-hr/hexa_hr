@@ -6,12 +6,15 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>월별 전체급여 통계</title>
+<title>月別全体給与統計</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <script
 	src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
@@ -22,7 +25,7 @@
 <style>
 body {
 	font-family: Arial, sans-serif;
-    margin: 0;
+	margin: 0;
 }
 
 .description {
@@ -138,12 +141,12 @@ button {
 
 <body>
 
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<h1>월별 전체급여 통계</h1>
+	<h1>月別全体給与統計</h1>
 
-	<p class="description">귀속년도를 선택하면 월별 전체 급여액과 인원현황을 확인할 수 있습니다.</p>
+	<p class="description">帰属年度を選択すると、月別の全体給与額と人数を確認できます。</p>
 
 	<jsp:useBean id="today" class="java.util.Date" />
 
@@ -154,8 +157,8 @@ button {
 
 		<div class="search-row">
 
-			<label for="year"><span class="required-mark">*</span> 귀속년도를
-				선택해 주세요.</label> <select id="year" name="year"
+			<label for="year"><span class="required-mark">*</span>
+				帰属年度を選択してください。</label> <select id="year" name="year"
 				onchange="this.form.submit();">
 
 				<c:forEach begin="0" end="9" var="offset">
@@ -164,7 +167,7 @@ button {
 
 					<option value="${yearOption}"
 						<c:if test="${yearOption == selectedYear}">selected</c:if>>${yearOption}
-						년</option>
+						年</option>
 
 				</c:forEach>
 
@@ -203,16 +206,16 @@ button {
 
 				<thead>
 					<tr>
-						<th>구분</th>
+						<th>区分</th>
 
 						<c:forEach var="row" items="${monthlyTotalStatistics.rows}"
 							varStatus="status">
 
-							<th>${status.count}월</th>
+							<th>${status.count}月</th>
 
 						</c:forEach>
 
-						<th class="total-column">합계</th>
+						<th class="total-column">合計</th>
 					</tr>
 				</thead>
 
@@ -220,7 +223,7 @@ button {
 				<tbody>
 
 					<tr>
-						<td class="row-title">전체 급여액 (천원)</td>
+						<td class="row-title">全体給与額（千ウォン）</td>
 
 						<c:forEach var="row" items="${monthlyTotalStatistics.rows}">
 
@@ -236,7 +239,7 @@ button {
 
 
 					<tr>
-						<td class="growth-title">└ 증감률</td>
+						<td class="growth-title">└ 増減率</td>
 
 						<c:forEach var="row" items="${monthlyTotalStatistics.rows}">
 
@@ -271,7 +274,7 @@ button {
 
 
 					<tr>
-						<td class="row-title">인원 (명)</td>
+						<td class="row-title">人数（名）</td>
 
 						<c:forEach var="row" items="${monthlyTotalStatistics.rows}">
 
@@ -286,7 +289,7 @@ button {
 
 
 					<tr>
-						<td class="growth-title">└ 증감률</td>
+						<td class="growth-title">└ 増減率</td>
 
 						<c:forEach var="row" items="${monthlyTotalStatistics.rows}">
 
@@ -354,8 +357,8 @@ button {
 			</c:forEach>
 		];
 
-		const monthLabels = [ "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월",
-				"9월", "10월", "11월", "12월" ];
+		const monthLabels = [ "1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月",
+				"9月", "10月", "11月", "12月" ];
 
 		const axisColor = "#5b7096";
 
@@ -374,7 +377,7 @@ button {
 							{
 								type : "bar",
 
-								label : "전체 급여액 (천원)",
+								label : "全体給与額（千ウォン）",
 
 								data : monthlyPaymentData,
 
@@ -410,7 +413,7 @@ button {
 							{
 								type : "line",
 
-								label : "인원 (명)",
+								label : "人数（名）",
 
 								data : monthlyEmployeeData,
 
@@ -543,7 +546,7 @@ button {
 
 							title : {
 								display : true,
-								text : "전체 급여액 (천원)",
+								text : "全体給与額（千ウォン）",
 								color : axisColor
 							},
 
@@ -567,7 +570,7 @@ button {
 
 							title : {
 								display : true,
-								text : "인원 (명)",
+								text : "人数（名）",
 								color : axisColor
 							},
 

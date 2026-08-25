@@ -7,7 +7,7 @@ import mvc.command.CommandHandler;
 import wage.model.WageLedgerDetailResult;
 import wage.service.WageLedgerService;
 
-// 급여대장 상세 조회 Handler
+// 給与台帳詳細照会Handler
 public class WageLedgerDetailHandler implements CommandHandler {
 
 	private static final String FORM_VIEW = "/WEB-INF/view/wage/wageLedgerDetail.jsp";

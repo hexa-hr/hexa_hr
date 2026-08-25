@@ -29,7 +29,7 @@ import wage.model.WagePaymentInputViewItem;
 import wage.model.WagePaymentItemInput;
 import wage.model.WageTypeSystemIds;
 
-// 일용직 급여입력 조회 Service
+// 日雇い給与入力照会Service
 public class DailyWagePaymentInputService {
 
 	private DailyWorkDao dailyWorkDao = new DailyWorkDao();
@@ -63,7 +63,7 @@ public class DailyWagePaymentInputService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"일용직 급여 근무기록 조회 중 데이터베이스 오류가 발생했습니다.",
+				"日雇い給与の勤務記録照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -86,7 +86,7 @@ public class DailyWagePaymentInputService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"일용직 급여 저장 사원 조회 중 데이터베이스 오류가 발생했습니다.",
+				"日雇い給与の保存済み社員照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -128,8 +128,8 @@ public class DailyWagePaymentInputService {
 					normalizedWagePeriod);
 
 				/*
-				 * 저장된 급여가 있으면 당시 사원의
-				 * 공제항목 스냅샷과 저장 금액을 그대로 사용한다.
+				 * 保存済み給与がある場合は、その時点の社員の
+				 * 控除項目スナップショットと保存金額をそのまま使用する。
 				 */
 				if (!savedItems.isEmpty()) {
 
@@ -163,7 +163,7 @@ public class DailyWagePaymentInputService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"일용직 급여 공제항목 조회 중 데이터베이스 오류가 발생했습니다.",
+				"日雇い給与の控除項目照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -193,7 +193,7 @@ public class DailyWagePaymentInputService {
 
 		if (currentDeductionInputs == null) {
 			throw new IllegalArgumentException(
-				"공제항목 정보가 올바르지 않습니다.");
+				"控除項目情報が正しくありません。");
 		}
 
 		Map<Integer, WagePaymentInputViewItem> baseItemMap = new LinkedHashMap<>();
@@ -205,12 +205,12 @@ public class DailyWagePaymentInputService {
 				|| !"D".equals(item.getItemType())) {
 
 				throw new IllegalStateException(
-					"공제항목 기준정보가 올바르지 않습니다.");
+					"控除項目の基準情報が正しくありません。");
 			}
 
 			if (baseItemMap.put(item.getWageTypeId(), item) != null) {
 				throw new IllegalStateException(
-					"중복된 공제항목 기준정보가 존재합니다.");
+					"重複した控除項目の基準情報が存在します。");
 			}
 		}
 
@@ -220,19 +220,19 @@ public class DailyWagePaymentInputService {
 
 			if (input == null || input.getWageTypeId() == null) {
 				throw new IllegalArgumentException(
-					"공제항목 정보가 올바르지 않습니다.");
+					"控除項目情報が正しくありません。");
 			}
 
 			Integer wageTypeId = input.getWageTypeId();
 
 			if (!baseItemMap.containsKey(wageTypeId)) {
 				throw new IllegalArgumentException(
-					"화면에 존재하지 않는 공제항목이 포함되어 있습니다.");
+					"画面に存在しない控除項目が含まれています。");
 			}
 
 			if (currentValueMap.containsKey(wageTypeId)) {
 				throw new IllegalArgumentException(
-					"중복된 공제항목이 포함되어 있습니다.");
+					"重複した控除項目が含まれています。");
 			}
 
 			long wageValue = input.getWageValue() == null
@@ -241,7 +241,7 @@ public class DailyWagePaymentInputService {
 
 			if (wageValue < 0L) {
 				throw new IllegalArgumentException(
-					"공제금액은 0원 이상이어야 합니다.");
+					"控除金額は0ウォン以上である必要があります。");
 			}
 
 			currentValueMap.put(wageTypeId, wageValue);
@@ -249,20 +249,20 @@ public class DailyWagePaymentInputService {
 
 		if (currentValueMap.size() != baseItems.size()) {
 			throw new IllegalArgumentException(
-				"공제항목 일부가 누락되었습니다.");
+				"控除項目の一部が欠落しています。");
 		}
 
 		long totalPayment = requireNonNegative(
 			workResult.getTotalPayment(),
-			"DAILY_WORK 지급총액");
+			"DAILY_WORKの支給総額");
 
 		long totalIncomeTax = requireNonNegative(
 			workResult.getTotalIncomeTax(),
-			"DAILY_WORK 소득세");
+			"DAILY_WORKの所得税");
 
 		long totalLocalTax = requireNonNegative(
 			workResult.getTotalLocalTax(),
-			"DAILY_WORK 지방소득세");
+			"DAILY_WORKの住民税");
 
 		List<WagePaymentItemInput> calculationInputs = new ArrayList<>();
 
@@ -298,6 +298,8 @@ public class DailyWagePaymentInputService {
 			new WagePaymentCalculationRequest(
 				employeeId,
 				normalizedWageMonth,
+				settlementStartDate,
+				settlementEndDate,
 				calculationInputs));
 
 		Map<Integer, Long> calculatedInsuranceMap = new LinkedHashMap<>();
@@ -306,7 +308,7 @@ public class DailyWagePaymentInputService {
 
 			if (item == null || item.getWageTypeId() == null) {
 				throw new IllegalStateException(
-					"자동계산 결과가 올바르지 않습니다.");
+					"自動計算結果が正しくありません。");
 			}
 
 			if (!isSocialInsuranceId(item.getWageTypeId())) {
@@ -322,7 +324,7 @@ public class DailyWagePaymentInputService {
 				wageValue) != null) {
 
 				throw new IllegalStateException(
-					"자동계산 결과에 중복된 보험항목이 있습니다.");
+					"自動計算結果に重複した保険項目が含まれています。");
 			}
 		}
 
@@ -383,7 +385,7 @@ public class DailyWagePaymentInputService {
 			|| calculationResult.getNetPayment() != netPayment) {
 
 			throw new IllegalStateException(
-				"일용직 급여 자동계산 결과의 합계가 일치하지 않습니다.");
+				"日雇い給与の自動計算結果の合計が一致しません。");
 		}
 
 		return new WagePaymentAutoCalculationResult(
@@ -421,12 +423,12 @@ public class DailyWagePaymentInputService {
 
 		if (baseItems == null) {
 			throw new IllegalStateException(
-				"공제항목 기준정보가 없습니다.");
+				"控除項目の基準情報がありません。");
 		}
 
 		if (currentDeductionInputs == null) {
 			throw new IllegalArgumentException(
-				"공제항목 정보가 올바르지 않습니다.");
+				"控除項目情報が正しくありません。");
 		}
 
 		Map<Integer, WagePaymentInputViewItem> baseItemMap = new LinkedHashMap<>();
@@ -439,7 +441,7 @@ public class DailyWagePaymentInputService {
 				|| !"D".equals(item.getItemType())) {
 
 				throw new IllegalStateException(
-					"공제항목 기준정보가 올바르지 않습니다.");
+					"控除項目の基準情報が正しくありません。");
 			}
 
 			if (baseItemMap.put(
@@ -447,7 +449,7 @@ public class DailyWagePaymentInputService {
 				item) != null) {
 
 				throw new IllegalStateException(
-					"중복된 공제항목 기준정보가 존재합니다.");
+					"重複した控除項目の基準情報が存在します。");
 			}
 		}
 
@@ -460,14 +462,14 @@ public class DailyWagePaymentInputService {
 				|| input.getWageTypeId() <= 0) {
 
 				throw new IllegalArgumentException(
-					"공제항목 정보가 올바르지 않습니다.");
+					"控除項目情報が正しくありません。");
 			}
 
 			Integer wageTypeId = input.getWageTypeId();
 
 			if (!baseItemMap.containsKey(wageTypeId)) {
 				throw new IllegalArgumentException(
-					"화면에 존재하지 않는 공제항목이 포함되어 있습니다.");
+					"画面に存在しない控除項目が含まれています。");
 			}
 
 			long wageValue = input.getWageValue() == null
@@ -476,7 +478,7 @@ public class DailyWagePaymentInputService {
 
 			if (wageValue < 0L) {
 				throw new IllegalArgumentException(
-					"공제금액은 0원 이상이어야 합니다.");
+					"控除金額は0ウォン以上である必要があります。");
 			}
 
 			if (currentValueMap.put(
@@ -484,27 +486,27 @@ public class DailyWagePaymentInputService {
 				wageValue) != null) {
 
 				throw new IllegalArgumentException(
-					"중복된 공제항목이 포함되어 있습니다.");
+					"重複した控除項目が含まれています。");
 			}
 		}
 
 		if (currentValueMap.size() != baseItemMap.size()) {
 
 			throw new IllegalArgumentException(
-				"공제항목 일부가 누락되었습니다.");
+				"控除項目の一部が欠落しています。");
 		}
 
 		long totalPayment = requireNonNegative(
 			workResult.getTotalPayment(),
-			"DAILY_WORK 지급총액");
+			"DAILY_WORKの支給総額");
 
 		long totalIncomeTax = requireNonNegative(
 			workResult.getTotalIncomeTax(),
-			"DAILY_WORK 소득세");
+			"DAILY_WORKの所得税");
 
 		long totalLocalTax = requireNonNegative(
 			workResult.getTotalLocalTax(),
-			"DAILY_WORK 지방소득세");
+			"DAILY_WORKの住民税");
 
 		List<WagePaymentInputViewItem> saveItems = new ArrayList<>();
 
@@ -517,8 +519,8 @@ public class DailyWagePaymentInputService {
 			long finalValue = currentValueMap.get(wageTypeId);
 
 			/*
-			 * 소득세와 지방소득세는 화면값 대신
-			 * DAILY_WORK 합계를 사용한다.
+			 * 所得税と住民税は画面の値ではなく
+			 * DAILY_WORKの合計を使用する。
 			 */
 			if (Integer.valueOf(
 				WageTypeSystemIds.INCOME_TAX_ID)
@@ -534,8 +536,8 @@ public class DailyWagePaymentInputService {
 			}
 
 			/*
-			 * 4대보험과 기타 공제는
-			 * 현재 화면에 표시된 값을 유지한다.
+			 * 4大保険とその他の控除は
+			 * 現在画面に表示されている値を維持する。
 			 */
 			saveItems.add(
 				new WagePaymentInputViewItem(
@@ -566,7 +568,7 @@ public class DailyWagePaymentInputService {
 			|| employeeId <= 0) {
 
 			throw new IllegalArgumentException(
-				"사원 정보가 올바르지 않습니다.");
+				"社員情報が正しくありません。");
 		}
 	}
 
@@ -578,14 +580,14 @@ public class DailyWagePaymentInputService {
 			|| settlementEndDate == null) {
 
 			throw new IllegalArgumentException(
-				"정산기간이 올바르지 않습니다.");
+				"精算期間が正しくありません。");
 		}
 
 		if (settlementStartDate.after(
 			settlementEndDate)) {
 
 			throw new IllegalArgumentException(
-				"정산 시작일은 종료일보다 늦을 수 없습니다.");
+				"精算開始日は終了日より後にすることはできません。");
 		}
 	}
 
@@ -637,16 +639,16 @@ public class DailyWagePaymentInputService {
 			wagePeriod);
 
 		/*
-		 * 저장된 일용직 사원이 있으면 기존 작업공간이다.
-		 * 당시 공제항목이 0개였더라도 현재 활성항목을 새로 추가하지 않는다.
+		 * 保存済みの日雇い社員がいる場合は既存のワークスペースである。
+		 * 当時の控除項目が0件であっても、現在使用中の項目を新たに追加しない。
 		 */
 		if (!savedEmployees.isEmpty()) {
 			return workspaceWageTypes;
 		}
 
 		/*
-		 * 일용직 급여가 한 건도 없는 신규 작업공간일 때만
-		 * 현재 usage='Y'인 공제항목을 사용한다.
+		 * 日雇い給与が1件もない新規ワークスペースの場合のみ
+		 * 現在usage='Y'の控除項目を使用する。
 		 */
 		List<WageType> activeWageTypes = wageTypeDao.selectActiveWageTypes(conn);
 
@@ -759,13 +761,13 @@ public class DailyWagePaymentInputService {
 		if (employmentType == null) {
 
 			throw new IllegalArgumentException(
-				"존재하지 않는 사원입니다.");
+				"存在しない社員です。");
 		}
 
 		if (!"일용직".equals(employmentType)) {
 
 			throw new IllegalArgumentException(
-				"일용직 사원만 급여입력할 수 있습니다.");
+				"日雇い社員のみ給与を入力できます。");
 		}
 	}
 
@@ -776,7 +778,7 @@ public class DailyWagePaymentInputService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		try {
@@ -787,7 +789,7 @@ public class DailyWagePaymentInputService {
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 	}
 
@@ -798,7 +800,7 @@ public class DailyWagePaymentInputService {
 			|| wagePeriod.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		try {
@@ -816,7 +818,7 @@ public class DailyWagePaymentInputService {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 	}
 
@@ -830,7 +832,7 @@ public class DailyWagePaymentInputService {
 
 		if (normalizedValue < 0L) {
 			throw new IllegalArgumentException(
-				fieldName + "은 0원 이상이어야 합니다.");
+				fieldName + "は0ウォン以上である必要があります。");
 		}
 
 		return normalizedValue;

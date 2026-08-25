@@ -7,11 +7,11 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>급여대장 상세</title>
+<title>給与台帳詳細</title>
 </head>
 <body>
 
-	<h2>급여대장 상세</h2>
+	<h2>給与台帳詳細</h2>
 
 	<c:if test="${not empty errorMessage}">
 		<p>
@@ -24,17 +24,17 @@
 		<c:set var="summary" value="${ledgerDetail.summary}" />
 
 		<p>
-			귀속연월:
+			帰属年月:
 			<c:out value="${summary.wageMonth}" />
-			&nbsp;&nbsp; 급여차수: 급여-
+			&nbsp;&nbsp; 給与回次: 給与-
 			<fmt:formatNumber value="${summary.wagePeriod}" pattern="00" />
-			차 &nbsp;&nbsp; 정산기간:
+			回 &nbsp;&nbsp; 精算期間:
 			<fmt:formatDate value="${summary.settlementPeriodStartDate}"
 				pattern="yyyy-MM-dd" />
 			~
 			<fmt:formatDate value="${summary.settlementPeriodEndDate}"
 				pattern="yyyy-MM-dd" />
-			&nbsp;&nbsp; 지급일:
+			&nbsp;&nbsp; 支給日:
 			<fmt:formatDate value="${summary.wagePaymentDate}"
 				pattern="yyyy-MM-dd" />
 		</p>
@@ -49,39 +49,39 @@
 					type="hidden" name="wagePeriod"
 					value="<c:out value='${summary.wagePeriod}' />">
 
-				<!-- 고용형태 -->
+				<!-- 雇用形態 -->
 				<select name="employmentType">
-					<option value="">전체</option>
+					<option value="">すべて</option>
 
 					<option value="정규직"
 						<c:if test="${employmentType eq '정규직'}">selected</c:if>>
-						정규직</option>
+						正社員</option>
 
 					<option value="계약직"
 						<c:if test="${employmentType eq '계약직'}">selected</c:if>>
-						계약직</option>
+						契約社員</option>
 
 					<option value="임시직"
 						<c:if test="${employmentType eq '임시직'}">selected</c:if>>
-						임시직</option>
+						臨時社員</option>
 
 					<option value="파견직"
 						<c:if test="${employmentType eq '파견직'}">selected</c:if>>
-						파견직</option>
+						派遣社員</option>
 
 					<option value="위촉직"
 						<c:if test="${employmentType eq '위촉직'}">selected</c:if>>
-						위촉직</option>
+						業務委託</option>
 
 					<option value="일용직"
 						<c:if test="${employmentType eq '일용직'}">selected</c:if>>
-						일용직</option>
+						日雇い</option>
 				</select>
 
 
-				<!-- 부서 -->
+				<!-- 部署 -->
 				<select name="departmentId">
-					<option value="">전체 부서</option>
+					<option value="">全部署</option>
 
 					<c:forEach var="department" items="${ledgerDetail.departments}">
 
@@ -97,48 +97,48 @@
 				</select>
 
 
-				<!-- 소득자 구분 -->
+				<!-- 所得者区分 -->
 				<select name="incomeType">
-					<option value="">전체</option>
+					<option value="">すべて</option>
 
 					<option value="worker"
 						<c:if test="${incomeType eq 'worker'}">selected</c:if>>
-						근로소득자</option>
+						給与所得者</option>
 
 					<option value="business"
 						<c:if test="${incomeType eq 'business'}">selected</c:if>>
-						사업소득자</option>
+						事業所得者</option>
 
 					<option value="daily"
 						<c:if test="${incomeType eq 'daily'}">selected</c:if>>
-						일용근로자</option>
+						日雇労働者</option>
 				</select>
 
-				<button type="submit">조회</button>
+				<button type="submit">照会</button>
 
 			</form>
 
 			<table border="1">
 				<thead>
 					<tr>
-						<th>구분</th>
-						<th>성명</th>
-						<th>입사일</th>
-						<th>부서</th>
-						<th>직위</th>
+						<th>区分</th>
+						<th>氏名</th>
+						<th>入社日</th>
+						<th>部署</th>
+						<th>役職</th>
 
 						<c:forEach var="type" items="${ledgerDetail.paymentTypes}">
 							<th><c:out value="${type.wageTypeName}" /></th>
 						</c:forEach>
 
-						<th>지급총액</th>
+						<th>支給総額</th>
 
 						<c:forEach var="type" items="${ledgerDetail.deductionTypes}">
 							<th><c:out value="${type.wageTypeName}" /></th>
 						</c:forEach>
 
-						<th>공제총액</th>
-						<th>실지급액</th>
+						<th>控除総額</th>
+						<th>差引支給額</th>
 					</tr>
 				</thead>
 
@@ -190,7 +190,7 @@
 
 				<tfoot>
 					<tr>
-						<th colspan="5">합계</th>
+						<th colspan="5">合計</th>
 
 						<c:forEach var="type" items="${ledgerDetail.paymentTypes}">
 							<th><fmt:formatNumber
@@ -222,7 +222,7 @@
 		<p>
 			<a
 				href="${pageContext.request.contextPath}/wage/ledger.do?year=${fn:substring(summary.wageMonth, 0, 4)}">
-				급여대장 목록 </a>
+				給与台帳一覧 </a>
 		</p>
 
 	</c:if>

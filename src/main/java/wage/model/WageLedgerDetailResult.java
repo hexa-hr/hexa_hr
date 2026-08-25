@@ -6,7 +6,7 @@ import java.util.Map;
 import master.model.Department;
 import master.model.WageTypeOption;
 
-// 급여대장 상세 조회 결과 DTO
+// 給与台帳詳細照会結果DTO
 public class WageLedgerDetailResult {
 
 	private WageLedgerSummary summary;

@@ -17,7 +17,7 @@ import wage.model.WagePaymentPeriodDefault;
 import wage.service.DailyWagePaymentInputService;
 import wage.service.WagePaymentInputService;
 
-// 급여입력/관리(일용직) 자동계산 Handler
+// 給与入力・管理（日雇い）自動計算Handler
 public class DailyWagePaymentInputCalculateHandler
 	implements CommandHandler {
 
@@ -45,8 +45,8 @@ public class DailyWagePaymentInputCalculateHandler
 		String wagePeriod;
 
 		/*
-		 * 월·차수 자체가 잘못된 요청은
-		 * 화면을 다시 만들 수 없으므로 400으로 처리한다.
+		 * 月・回次自体が不正なリクエストの場合は
+		 * 画面を再構成できないため、400として処理する。
 		 */
 		try {
 
@@ -94,8 +94,8 @@ public class DailyWagePaymentInputCalculateHandler
 		}
 
 		/*
-		 * 계산 성공·실패 모두 기존 조회 Handler가
-		 * 모달, 사원목록, 날짜, 월 합계 등을 다시 구성한다.
+		 * 計算の成功・失敗にかかわらず、既存の照会Handlerが
+		 * モーダル、社員一覧、日付、月間合計などを再構成する。
 		 */
 		DailyWagePaymentInputHandler
 			.prepareInternalCalculationRender(
@@ -144,8 +144,8 @@ public class DailyWagePaymentInputCalculateHandler
 		String[] wageValues = req.getParameterValues("wageValue");
 
 		/*
-		 * 공제항목이 없는 작업공간에서는
-		 * 두 파라미터가 모두 없는 것이 정상이다.
+		 * 控除項目がないワークスペースでは
+		 * 両方のパラメータが存在しない状態が正常である。
 		 */
 		if (wageTypeIds == null
 			&& wageValues == null) {
@@ -158,7 +158,7 @@ public class DailyWagePaymentInputCalculateHandler
 			|| wageTypeIds.length != wageValues.length) {
 
 			throw new IllegalArgumentException(
-				"공제항목 정보가 올바르지 않습니다.");
+				"控除項目情報が正しくありません。");
 		}
 
 		List<WagePaymentItemInput> result = new ArrayList<>();
@@ -193,7 +193,7 @@ public class DailyWagePaymentInputCalculateHandler
 			} catch (NumberFormatException e) {
 
 				throw new IllegalArgumentException(
-					"공제금액은 0원 이상의 정수로 입력해야 합니다.");
+					"控除金額は0ウォン以上の整数で入力する必要があります。");
 			}
 		}
 
@@ -222,7 +222,7 @@ public class DailyWagePaymentInputCalculateHandler
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 		}
 	}
 
@@ -233,7 +233,7 @@ public class DailyWagePaymentInputCalculateHandler
 
 		if (wageMonth == null) {
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		try {
@@ -244,7 +244,7 @@ public class DailyWagePaymentInputCalculateHandler
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 	}
 
@@ -255,7 +255,7 @@ public class DailyWagePaymentInputCalculateHandler
 
 		if (wagePeriod == null) {
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		try {
@@ -274,7 +274,7 @@ public class DailyWagePaymentInputCalculateHandler
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 	}
 

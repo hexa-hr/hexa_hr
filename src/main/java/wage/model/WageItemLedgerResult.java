@@ -3,7 +3,7 @@ package wage.model;
 import java.util.List;
 import java.util.Map;
 
-//항목별 대장 화면에 전달할 전체 조회 결과
+// 項目別台帳画面に渡す全体照会結果
 public class WageItemLedgerResult {
 
 	private List<String> months;

@@ -16,7 +16,7 @@ import wage.model.WagePaymentInputViewItem;
 import wage.model.WagePaymentItemInput;
 import wage.model.WagePaymentPeriodDefault;
 
-// 급여입력 화면 - 선택 사원 급여 저장 Service
+// 給与入力画面 - 選択社員の給与保存Service
 public class WagePaymentSaveService {
 
 	private WageDao wageDao = new WageDao();
@@ -41,15 +41,15 @@ public class WagePaymentSaveService {
 		if (currentItemInputs == null) {
 
 			throw new IllegalArgumentException(
-				"급여항목 정보가 올바르지 않습니다.");
+				"給与項目情報が正しくありません。");
 		}
 
 		/*
-		 * 해당 귀속연월/차수의 날짜를
-		 * 브라우저가 아니라 서버 기준으로 다시 결정한다.
+		 * 該当する帰属年月 / 給与回次の日付を
+		 * ブラウザではなくサーバーを基準に再決定する。
 		 *
-		 * 기존 차수 → DB 저장 날짜
-		 * 신규 차수 → 회사 급여지급정보 기본 날짜
+		 * 既存の給与回次 → DB保存日付
+		 * 新規給与回次 → 会社の給与支給情報の基本日付
 		 */
 		WageLedgerSummary periodSummary = wagePaymentInputService
 			.getPeriodSummary(
@@ -91,12 +91,12 @@ public class WagePaymentSaveService {
 		}
 
 		/*
-		 * 서버 기준으로
-		 * 이 사원의 화면에 존재해야 하는
-		 * 급여항목 스냅샷을 다시 조회한다.
+		 * サーバーを基準に
+		 * この社員の画面に存在すべき
+		 * 給与項目スナップショットを再照会する。
 		 *
-		 * 기존 저장 사원 → 기존 wage 스냅샷
-		 * 신규 사원 → 현재 활성/적용 가능 급여항목
+		 * 既存の保存済み社員 → 既存のwageスナップショット
+		 * 新規社員 → 現在有効 / 適用可能な給与項目
 		 */
 		List<WagePaymentInputViewItem> baseItems = wagePaymentInputService
 			.getViewItems(
@@ -109,7 +109,7 @@ public class WagePaymentSaveService {
 		if (baseItems.isEmpty()) {
 
 			throw new IllegalStateException(
-				"저장할 급여항목이 없습니다.");
+				"保存する給与項目がありません。");
 		}
 
 		Map<Integer, WagePaymentInputViewItem> baseItemMap = new LinkedHashMap<>();
@@ -129,7 +129,7 @@ public class WagePaymentSaveService {
 				|| input.getWageTypeId() == null) {
 
 				throw new IllegalArgumentException(
-					"급여항목 정보가 올바르지 않습니다.");
+					"給与項目情報が正しくありません。");
 			}
 
 			Integer wageTypeId = input.getWageTypeId();
@@ -138,14 +138,14 @@ public class WagePaymentSaveService {
 				wageTypeId)) {
 
 				throw new IllegalArgumentException(
-					"화면에 존재하지 않는 급여항목이 포함되어 있습니다.");
+					"画面に存在しない給与項目が含まれています。");
 			}
 
 			if (currentValueMap.containsKey(
 				wageTypeId)) {
 
 				throw new IllegalArgumentException(
-					"중복된 급여항목이 포함되어 있습니다.");
+					"重複した給与項目が含まれています。");
 			}
 
 			long wageValue = input.getWageValue() == null
@@ -155,7 +155,7 @@ public class WagePaymentSaveService {
 			if (wageValue < 0L) {
 
 				throw new IllegalArgumentException(
-					"급여금액은 0원 이상이어야 합니다.");
+					"給与金額は0ウォン以上である必要があります。");
 			}
 
 			currentValueMap.put(
@@ -164,19 +164,19 @@ public class WagePaymentSaveService {
 		}
 
 		/*
-		 * 서버에서 확인한 스냅샷과
-		 * 사용자가 전송한 급여항목 개수가
-		 * 정확히 같아야 한다.
+		 * サーバーで確認したスナップショットと
+		 * ユーザーが送信した給与項目数が
+		 * 正確に一致する必要がある。
 		 */
 		if (currentValueMap.size() != baseItems.size()) {
 
 			throw new IllegalArgumentException(
-				"급여항목 일부가 누락되었습니다.");
+				"給与項目の一部が欠落しています。");
 		}
 
 		/*
-		 * 검증이 전부 끝난 후에만
-		 * DB 변경을 시작한다.
+		 * すべての検証が完了した後にのみ
+		 * DB変更を開始する。
 		 */
 		try (Connection conn = ConnectionProvider.getConnection()) {
 
@@ -185,7 +185,7 @@ public class WagePaymentSaveService {
 			try {
 
 				/*
-				 * 선택 사원의 해당 월/차수만 삭제
+				 * 選択社員の該当月 / 給与回次のみ削除
 				 */
 				wageDao.deleteEmployeeWages(
 					conn,
@@ -194,10 +194,10 @@ public class WagePaymentSaveService {
 					normalizedWagePeriod);
 
 				/*
-				 * 서버 기준 스냅샷 순서대로
-				 * 모든 항목을 다시 저장한다.
+				 * サーバー基準のスナップショット順に
+				 * すべての項目を再保存する。
 				 *
-				 * 0원 항목도 제외하지 않는다.
+				 * 0ウォンの項目も除外しない。
 				 */
 				for (WagePaymentInputViewItem baseItem : baseItems) {
 
@@ -238,7 +238,7 @@ public class WagePaymentSaveService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"급여 저장 중 데이터베이스 오류가 발생했습니다.",
+				"給与保存中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -250,7 +250,7 @@ public class WagePaymentSaveService {
 			|| employeeId <= 0) {
 
 			throw new IllegalArgumentException(
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 		}
 	}
 
@@ -261,7 +261,7 @@ public class WagePaymentSaveService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		String normalized = wageMonth.trim();
@@ -274,7 +274,7 @@ public class WagePaymentSaveService {
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 
 		return normalized;
@@ -287,7 +287,7 @@ public class WagePaymentSaveService {
 			|| wagePeriod.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		int period;
@@ -306,7 +306,7 @@ public class WagePaymentSaveService {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 
 		return String.valueOf(
