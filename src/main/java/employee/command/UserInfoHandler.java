@@ -55,7 +55,7 @@ public class UserInfoHandler implements CommandHandler {
 
 			Map<String, String> dbData = new HashMap<>();
 
-			// 🏢 1. 회사 정보 파라미터 수집 (빠진 부분 모두 추가!)
+			// 1. 회사 정보
 			dbData.put("companyName", request.getParameter("companyName"));
 			dbData.put("repTitle", request.getParameter("repTitle"));
 			dbData.put("repName", request.getParameter("repName"));
@@ -66,37 +66,44 @@ public class UserInfoHandler implements CommandHandler {
 			dbData.put("bizType", request.getParameter("bizType"));
 			dbData.put("bizItem", request.getParameter("bizItem"));
 
-			// 회사 전화번호 합치기
 			String p1 = request.getParameter("phone1");
 			dbData.put("phoneNumber", (p1 != null && !p1.isEmpty()
 				? p1 + "-" + request.getParameter("phone2") + "-" + request.getParameter("phone3") : ""));
 
-			// 회사 팩스번호 합치기
 			String f1 = request.getParameter("fax1");
 			dbData.put("faxNumber", (f1 != null && !f1.isEmpty()
 				? f1 + "-" + request.getParameter("fax2") + "-" + request.getParameter("fax3") : ""));
 
+			// 🌟 설립일 자동 변환 마법 (20260825, 2026.08.25 -> 2026-08-25)
 			String estDate = request.getParameter("establishmentDate");
+			if (estDate != null) {
+				estDate = estDate.trim();
+				String onlyNums = estDate.replaceAll("[^0-9]", ""); // 숫자만 쏙 뽑아냄
+				if (onlyNums.length() >= 8) {
+					estDate = onlyNums.substring(0, 4) + "-" + onlyNums.substring(4, 6) + "-"
+						+ onlyNums.substring(6, 8);
+				} else if (estDate.length() >= 10) {
+					estDate = estDate.substring(0, 10);
+				}
+			}
 			dbData.put("establishmentDate",
 				(estDate != null && estDate.matches("\\d{4}-\\d{2}-\\d{2}")) ? estDate : "");
 
-			// 👤 2. 담당자 정보 파라미터 수집 (빠진 전화번호 추가!)
+			// 2. 담당자 정보
 			dbData.put("contactName", request.getParameter("contactName"));
 			dbData.put("departmentId", request.getParameter("departmentId"));
 			dbData.put("positionId", request.getParameter("positionId"));
 			dbData.put("email", request.getParameter("email"));
 
-			// 담당자 전화번호 합치기
 			String cp1 = request.getParameter("cPhone1");
 			dbData.put("conPhoneNumber", (cp1 != null && !cp1.isEmpty()
 				? cp1 + "-" + request.getParameter("cPhone2") + "-" + request.getParameter("cPhone3") : ""));
 
-			// 담당자 휴대폰번호 합치기
 			String mob1 = request.getParameter("mobile1");
 			dbData.put("mobileNumber", (mob1 != null && !mob1.isEmpty()
 				? mob1 + "-" + request.getParameter("mobile2") + "-" + request.getParameter("mobile3") : ""));
 
-			// 💰 3. 급여 설정 및 계좌 파라미터 수집
+			// 3. 급여 설정
 			Integer salaryCalc1 = parseInt(request.getParameter("salaryCalc1"));
 			Integer salaryCalc2 = parseInt(request.getParameter("salaryCalc2"));
 			Integer salaryPaymentDate = parseInt(request.getParameter("salaryPaymentDate"));
@@ -112,7 +119,6 @@ public class UserInfoHandler implements CommandHandler {
 				conn = ConnectionProvider.getConnection();
 				conn.setAutoCommit(false);
 
-				// DB 업데이트 실행
 				dao.updateUserInfo(conn, dbData);
 				dao.updateAllEmployeeSalaryDates(conn, salaryCalc1, salaryCalc2, salaryPaymentDate, calc1MonthType,
 					calc2MonthType, paymentMonthType, bankName, accountNumber, depositStocks);

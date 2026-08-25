@@ -24,19 +24,21 @@ public class UserInfoDao {
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
 			if (rs.next()) {
-				// 회사 정보 불러오기
 				info.put("companyName", rs.getString("company_name"));
 				info.put("repTitle", rs.getString("representative_title"));
 				info.put("repName", rs.getString("representative_name"));
 				info.put("businessNumber", rs.getString("business_number"));
 				info.put("corpNumber", rs.getString("corporation_number"));
-				info.put("establishmentDate", rs.getString("establishment_date"));
+
+				// 🌟 날짜를 문자열로 가져오지 않고 Date 형태로 가져와서 시간(00:00:00) 꼬리 떼어내기!
+				java.sql.Date eDate = rs.getDate("establishment_date");
+				info.put("establishmentDate", eDate != null ? eDate.toString() : "");
+
 				info.put("website", rs.getString("website"));
 				info.put("officeAddress", rs.getString("office_address"));
 				info.put("bizType", rs.getString("business_type"));
 				info.put("bizItem", rs.getString("business_item"));
 
-				// 회사 전화번호 쪼개기
 				String phone = rs.getString("phone_number");
 				if (phone != null && phone.split("-").length == 3) {
 					String[] p = phone.split("-");
@@ -44,7 +46,6 @@ public class UserInfoDao {
 					info.put("phone2", p[1]);
 					info.put("phone3", p[2]);
 				}
-				// 팩스번호 쪼개기
 				String fax = rs.getString("fax_number");
 				if (fax != null && fax.split("-").length == 3) {
 					String[] f = fax.split("-");
@@ -53,13 +54,11 @@ public class UserInfoDao {
 					info.put("fax3", f[2]);
 				}
 
-				// 담당자 정보 불러오기
 				info.put("contactName", rs.getString("contact_name"));
 				info.put("departmentId", rs.getString("department_id"));
 				info.put("positionId", rs.getString("position_id"));
 				info.put("email", rs.getString("email"));
 
-				// 담당자 전화번호 쪼개기
 				String cPhone = rs.getString("con_phone_number");
 				if (cPhone != null && cPhone.split("-").length == 3) {
 					String[] cp = cPhone.split("-");
@@ -67,7 +66,6 @@ public class UserInfoDao {
 					info.put("cPhone2", cp[1]);
 					info.put("cPhone3", cp[2]);
 				}
-				// 담당자 휴대폰번호 쪼개기
 				String mobile = rs.getString("mobile_number");
 				if (mobile != null && mobile.split("-").length == 3) {
 					String[] m = mobile.split("-");
@@ -191,10 +189,7 @@ public class UserInfoDao {
 		}
 	}
 
-	// 🌟 회사 정보 및 담당자 정보 모든 컬럼 저장 로직 반영!
 	public void updateUserInfo(Connection conn, Map<String, String> data) throws SQLException {
-
-		// 1. company_info 테이블 저장/수정
 		boolean companyExists = false;
 		try (PreparedStatement checkStmt = conn.prepareStatement("SELECT 1 FROM company_info WHERE company_id = 1");
 			ResultSet rs = checkStmt.executeQuery()) {
@@ -245,7 +240,6 @@ public class UserInfoDao {
 			}
 		}
 
-		// 2. contact_person_info 테이블 저장/수정
 		boolean contactExists = false;
 		try (
 			PreparedStatement checkStmt = conn
