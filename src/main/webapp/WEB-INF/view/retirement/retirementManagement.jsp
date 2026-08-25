@@ -1,247 +1,593 @@
-=<%@ page language="java" contentType="text/html; charset=UTF-8"
+<%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<!DOCTYPE html>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-<jsp:useBean id="now" class="java.util.Date" />
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>勤怠登録</title>
+<title>退職給与入力/管理</title>
 <style>
 body {
-	font-family: 'Malgun Gothic', dotum, sans-serif;
-	font-size: 13px;
+	font-family: 'Malgun Gothic', sans-serif;
+	font-size: 12px;
 	color: #333;
+	background-color: #f5f5f5;
+	margin: 0;
+	padding: 20px;
 }
 
-.form-table {
+.container {
+	background: #fff;
+	padding: 20px;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 	width: 100%;
-	max-width: 550px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+h2 {
+	font-size: 20px;
+	margin-bottom: 5px;
+}
+
+.sub-desc {
+	color: #666;
+	margin-bottom: 20px;
+}
+
+table {
+	width: 100%;
 	border-collapse: collapse;
-	margin: 20px 0;
+	text-align: center;
+	margin-bottom: 5px;
 }
 
-.form-table th, .form-table td {
-	padding: 8px 10px;
-	border-bottom: 1px solid #e2e2e2;
-	text-align: left;
+th, td {
+	border: 1px solid #ddd;
+	padding: 8px;
 }
 
-.form-table th {
-	width: 120px;
-	background-color: #fbfbfb;
+th {
+	background-color: #f9f9f9;
+	color: #3b5998;
 	font-weight: bold;
 }
 
-.top-border {
-	border-top: 2px solid #000;
+.table-hover tr:hover {
+	background-color: #f1f5fa;
+	cursor: pointer;
 }
 
-.text-red {
-	color: #d9534f;
+.selected-row {
+	background-color: #3b5998 !important;
+	color: white;
+}
+
+.calc-header-bar {
+	background-color: #555;
+	color: white;
+	padding: 10px;
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	font-weight: bold;
+	margin-bottom: 15px;
+}
+
+.calc-header-bar .emp-name {
+	font-size: 16px;
+	color: #ffeb3b;
+	width: 200px;
+}
+
+.calc-header-bar input {
+	padding: 4px;
+	text-align: center;
+	font-size: 12px;
+}
+
+.highlight-box {
+	background-color: #ffeb3b;
+	color: black;
+	padding: 4px 10px;
+	border-radius: 3px;
+}
+
+.flex-row {
+	display: flex;
+	gap: 20px;
+	margin-bottom: 20px;
+}
+
+.flex-col {
+	flex: 1;
+}
+
+.section-title {
+	font-weight: bold;
+	font-size: 14px;
+	margin-bottom: 10px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.btn {
+	padding: 5px 15px;
+	font-size: 12px;
+	border: none;
+	cursor: pointer;
+	border-radius: 3px;
+	color: white;
 }
 
 .btn-blue {
 	background-color: #5c7cba;
-	color: white;
-	border: none;
-	padding: 4px 8px;
-	font-size: 12px;
-	border-radius: 2px;
-	cursor: pointer;
 }
 
-.btn-group {
-	text-align: center;
-	margin-top: 15px;
+.btn-orange {
+	background-color: #e5502c;
+	font-size: 14px;
+	padding: 10px 30px;
+	font-weight: bold;
+	display: block;
+	margin: 20px auto;
 }
 
-.btn-submit {
-	background-color: #5c7cba;
-	color: white;
-	border: none;
-	padding: 6px 20px;
-	font-size: 13px;
-	border-radius: 3px;
-	cursor: pointer;
-}
-
-.btn-reset {
-	background-color: #999;
-	color: white;
-	border: none;
-	padding: 6px 15px;
-	font-size: 13px;
-	border-radius: 3px;
-	cursor: pointer;
-}
-
-input[type="date"], input[type="text"], input[type="number"], select {
-	padding: 3px 5px;
+input[type="text"], input[type="number"] {
+	width: 90%;
+	padding: 5px;
 	border: 1px solid #ccc;
-	font-size: 12px;
+	text-align: right;
 }
 
-input[type="number"] {
-	width: 110px;
+.text-center {
+	text-align: center !important;
+}
+
+.text-red {
+	color: #d9534f;
+	font-weight: bold;
+}
+
+.result-table th {
+	background-color: #f4f8fe;
+	color: #333;
+}
+
+.result-table td {
+	background-color: #ffffec;
+}
+
+.final-table th {
+	background-color: #000;
+	color: white;
+}
+
+.note-text {
+	font-size: 11px;
+	color: #d9534f;
+	margin-bottom: 15px;
 }
 </style>
 </head>
 <body>
 
-	<form id="attendanceForm"
-		action="${pageContext.request.contextPath}/attendance/save.do"
-		method="post">
-		<table class="form-table">
-			<tr class="top-border">
-				<th>入力日</th>
-				<td><fmt:formatDate value="${now}" pattern="yyyy-MM-dd" /></td>
-			</tr>
-			<tr>
-				<th>勤怠項目</th>
-				<td><select id="attendanceType" name="attendanceType">
-						<option value="" data-has-vacation="false" data-unit="">選択してください。</option>
-						<!-- サーバーから渡される勤怠項目リスト(attendanceList)を反復 -->
-						<c:forEach var="att" items="${attendanceList}">
-							<option value="${att.attendanceTypeId}" data-unit="${att.unit}"
-								data-has-vacation="${not empty att.vacationTypeId ? 'true' : 'false'}"
-								data-vacation-name="${att.vacationTypeName}"
-								data-start="<fmt:formatDate value='${att.applyPeriod1}' pattern='yyyy-MM-dd'/>"
-								data-end="<fmt:formatDate value='${att.applyPeriod2}' pattern='yyyy-MM-dd'/>">
-								${att.attendanceTypeName}</option>
+	<div class="container">
+		<h2>退職給与入力/管理</h2>
+		<p class="sub-desc">退職社員に対する退職給与情報を入力、保存、管理するメニューです。選択した社員の退職金内訳が自動的に計算されます。</p>
+
+		<!-- 退職社員リスト -->
+		<table class="table-hover" id="employeeListTable"
+			style="margin-bottom: 15px;">
+			<thead>
+				<tr>
+					<th>支給日</th>
+					<th>区分</th>
+					<th>姓名</th>
+					<th>職位</th>
+					<th>部署</th>
+					<th>算定期間</th>
+					<th>勤続日数</th>
+					<th>実支給額</th>
+					<th>支給方法</th>
+				</tr>
+			</thead>
+			<tbody>
+				<c:forEach var="emp" items="${retiredList}">
+					<tr
+						onclick="selectEmployee(this, ${emp.employeeId}, '${emp.empName}', '${emp.positionName}', '${emp.hireDate}', '${emp.resignationDate}', '${emp.bankName} ${emp.accountNumber}')">
+						<td>0000-00-00</td>
+						<td>退職精算</td>
+						<td>${emp.empName}</td>
+						<td>${emp.positionName}</td>
+						<td>${emp.deptName}</td>
+						<td class="td-period"></td>
+						<td class="td-days"></td>
+						<td class="td-actual"></td>
+						<td class="td-method">${empty emp.accountNumber ? '直接入力' : emp.bankName}</td>
+					</tr>
+				</c:forEach>
+			</tbody>
+		</table>
+
+		<!-- 退職計算ヘッダーバー -->
+		<div class="calc-header-bar">
+			<div class="emp-name" id="calcEmpNameTitle">社員を選択してください</div>
+			<div>
+				区分 <select><option>退職精算</option></select>
+			</div>
+			<div>
+				入社日 <input type="date" id="hireDate" readonly> ~ 退職日 <input
+					type="date" id="resignationDate" readonly>
+			</div>
+			<div>
+				勤続年数 <span class="highlight-box" id="yearsOfService">0年</span>
+			</div>
+			<div>
+				勤続日数 <span class="highlight-box" id="daysOfService">0日</span>
+			</div>
+			<div>
+				除外日数 <input type="number" id="excludedDays" value="0"
+					style="width: 50px;" onchange="calculateDays()">日
+			</div>
+		</div>
+
+		<!-- 中間領域: 給与内訳 & その他課税所得 -->
+		<div class="flex-row">
+			<!-- 左側: 給与内訳 -->
+			<div class="flex-col">
+				<div class="section-title">
+					給与内訳 <span
+						style="font-size: 11px; font-weight: normal; color: #666;">(事由発生日以前の直近3ヶ月)
+						支給合計金額</span>
+					<button type="button" class="btn btn-blue"
+						onclick="loadSalaryData()">給与内訳読み込み</button>
+				</div>
+				<table>
+					<thead>
+						<tr>
+							<th>算定期間</th>
+							<th>算定日数</th>
+							<th>給与総額</th>
+						</tr>
+					</thead>
+					<tbody id="salaryListBody">
+						<!-- 基本的に4つの空の行を表示しておきます -->
+						<c:forEach begin="1" end="4">
+							<tr>
+								<td class="text-center"><input type="text"
+									class="text-center" style="width: 40%;" readonly> ~ <input
+									type="text" class="text-center" style="width: 40%;" readonly>
+								</td>
+								<td><input type="number" class="text-center calc-days"
+									value="0" readonly></td>
+								<td><input type="text" class="calc-amount" value="0"
+									readonly></td>
+							</tr>
 						</c:forEach>
-				</select></td>
-			</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<td class="text-center"
+								style="background-color: #ffffec; font-weight: bold;">総合計</td>
+							<td style="background-color: #ffffec;"><input type="text"
+								id="totalCalcDays" class="text-center" readonly
+								style="background: transparent; border: none; font-weight: bold;"
+								value="0"></td>
+							<td style="background-color: #ffffec;"><input type="text"
+								id="displayTotalSalary" value="0" readonly
+								style="background: transparent; border: none; font-weight: bold;">
+							</td>
+						</tr>
+					</tfoot>
+				</table>
+				<div class="note-text">但し、中間日付の計算日の場合、該当月の支給合計金額から日数で割った値を基本として表示</div>
+			</div>
 
-			<!-- リフレッシュ休暇選択時にのみ露出する行 -->
-			<tr id="rewardVacationRow" style="display: none;">
-				<th class="text-red">休暇適用期間</th>
-				<td class="text-red"><span id="appliedStartDate">2017-01-01</span>
-					~ <span id="appliedEndDate">2017-12-31</span></td>
-			</tr>
+			<!-- 右側: その他課税所得 (ダミー) -->
+			<div class="flex-col">
+				<div class="section-title">
+					その他課税所得 <span
+						style="font-size: 11px; font-weight: normal; color: #666;">(事由発生日以前1年分の金額入力)</span>
+				</div>
+				<table>
+					<thead>
+						<tr>
+							<th>支給年月</th>
+							<th>支給項目</th>
+							<th>金額</th>
+						</tr>
+					</thead>
+					<tbody>
+						<c:forEach begin="1" end="4">
+							<tr>
+								<td><input type="text"></td>
+								<td><input type="text"></td>
+								<td><input type="text" value="0" class="text-center"></td>
+							</tr>
+						</c:forEach>
+					</tbody>
+				</table>
+			</div>
+		</div>
 
-			<tr>
-				<th>期間</th>
-				<td><input type="date" id="startDate" name="startDate">
-					~ <input type="date" id="endDate" name="endDate"></td>
-			</tr>
+		<!-- 追加手当および控除領域 -->
+		<div class="flex-row">
+			<div class="flex-col">
+				<table>
+					<tr>
+						<th>退職慰労金</th>
+						<th>解雇予告手当</th>
+					</tr>
+					<tr>
+						<td><input type="text" id="consolationPay" value="0"
+							oninput="formatNumber(this)"></td>
+						<td><input type="text" id="dismissalPay" value="0"
+							oninput="formatNumber(this)"></td>
+					</tr>
+				</table>
+			</div>
+			<div class="flex-col">
+				<table>
+					<tr>
+						<th>非課税退職給与</th>
+						<th>既納付税額</th>
+						<th>税額控除</th>
+					</tr>
+					<tr>
+						<td><input type="text" value="0"></td>
+						<td><input type="text" value="0"></td>
+						<td><input type="text" value="0"></td>
+					</tr>
+				</table>
+			</div>
+		</div>
 
+		<!-- 課税繰延口座 -->
+		<div class="section-title" style="margin-top: 20px;">
+			課税繰延口座 <span
+				style="font-size: 11px; font-weight: normal; color: #666;">(該当しない場合は入力しません。)</span>
+		</div>
+		<table>
 			<tr>
-				<th id="attendanceLabelTh">勤怠日数</th>
-				<td><input type="number" id="attendanceDays"
-					name="attendanceDays" min="0" step="0.5"> <span
-					id="unitText">日</span>
-					<button type="button" class="btn-blue">休暇日数現状</button></td>
+				<th>退職年金事業者名</th>
+				<th>事業者登録番号</th>
+				<th>口座番号</th>
+				<th>入金(振替)日</th>
+				<th>口座入金金額</th>
 			</tr>
 			<tr>
-				<th>金額(手当)</th>
-				<td><input type="number" id="wageAmount" name="wageAmount"
-					placeholder="0"> ウォン</td>
-			</tr>
-			<tr>
-				<th>摘要</th>
-				<td><input type="text" id="remark" name="remark"
-					style="width: 80%;"></td>
+				<td><input type="text"></td>
+				<td><input type="text"></td>
+				<td><input type="text" id="bankAccountInfo"
+					placeholder="銀行名および口座番号"></td>
+				<td><input type="date"></td>
+				<td><input type="text" value="0"></td>
 			</tr>
 		</table>
 
-		<div class="btn-group">
-			<button type="submit" class="btn-submit">保存</button>
+		<!-- 退職金計算ボタン -->
+		<button type="button" class="btn btn-orange"
+			onclick="calculateRetirementPay()">退職金計算</button>
 
-			<button type="button" id="btnReset" class="btn-reset">内容クリア</button>
-		</div>
-	</form>
+		<!-- 最終計算結果テーブル -->
+		<table class="result-table">
+			<tr>
+				<th>3ヶ月総計</th>
+				<th>1日平均賃金</th>
+				<th>1日通常賃金</th>
+				<th>退職所得</th>
+				<th>算出税額</th>
+			</tr>
+			<tr>
+				<td id="res_3month">0</td>
+				<td id="res_dailyAvg">0</td>
+				<td><input type="text" value="0" class="text-center"></td>
+				<td id="res_retirementIncome">0</td>
+				<td id="res_calcTax">0</td>
+			</tr>
+			<tr>
+				<th>退職所得税</th>
+				<th>住民税</th>
+				<th>繰延退職所得税</th>
+				<th>繰延住民税</th>
+				<th>その他控除</th>
+			</tr>
+			<tr>
+				<td id="res_incomeTax">0</td>
+				<td id="res_localTax">0</td>
+				<td>0</td>
+				<td>0</td>
+				<td>0</td>
+			</tr>
+		</table>
+
+		<!-- 最終受領額テーブル -->
+		<table class="final-table">
+			<tr>
+				<th>課税対象退職給与</th>
+				<th>差引源泉徴収税額</th>
+				<th>実受領額</th>
+				<th>支給方法</th>
+				<th>支給日</th>
+			</tr>
+			<tr>
+				<td class="text-red" id="final_taxable">0 ウォン</td>
+				<td class="text-red" id="final_tax">0 ウォン</td>
+				<td class="text-red" id="final_actual">0 ウォン</td>
+				<td><input type="text" id="final_method"></td>
+				<td><input type="date" id="final_date"></td>
+			</tr>
+		</table>
+	</div>
 
 	<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 既存変数の宣言
-    const attendanceForm = document.getElementById('attendanceForm');
-    const attendanceType = document.getElementById('attendanceType');
-    const rewardVacationRow = document.getElementById('rewardVacationRow');
-    const startDate = document.getElementById('startDate');
-    const endDate = document.getElementById('endDate');
-    const btnReset = document.getElementById('btnReset');
-    
-    // 単位変更のための変数
-    const unitText = document.getElementById('unitText');
-    const attendanceLabelTh = document.getElementById('attendanceLabelTh');
+    let selectedEmpId = 0;
 
-    function updateFormState() {
-        // 現在選択されている<option>タグを取得します。
-        const selectedOption = attendanceType.options[attendanceType.selectedIndex];
+    function selectEmployee(row, empId, name, position, hireStr, resigStr, accountInfo) {
+        document.querySelectorAll('#employeeListTable tbody tr').forEach(tr => tr.classList.remove('selected-row'));
+        row.classList.add('selected-row');
+
+        selectedEmpId = empId;
         
-        // <option>に隠しておいたデータを取り出します。
-        const hasVacation = selectedOption.getAttribute('data-has-vacation') === 'true';
-        const vName = selectedOption.getAttribute('data-vacation-name');
-        const vStart = selectedOption.getAttribute('data-start');
-        const vEnd = selectedOption.getAttribute('data-end');
-        const vUnit = selectedOption.getAttribute('data-unit'); 
+        document.getElementById('calcEmpNameTitle').innerText = name + " " + position + " 退職計算";
+        document.getElementById('hireDate').value = hireStr;
+        document.getElementById('resignationDate').value = resigStr;
+        
+        document.getElementById('bankAccountInfo').value = accountInfo !== 'null' ? accountInfo : '';
+        document.getElementById('final_method').value = accountInfo !== 'null' ? accountInfo : '口座振込';
 
-        // 単位によるテキスト変更 (日本語のみ対応)
-        if (vUnit === '時間') {
-            unitText.textContent = '時間';
-            attendanceLabelTh.textContent = '勤怠時間'; 
-        } else if (vUnit === '日') {
-            unitText.textContent = '日';
-            attendanceLabelTh.textContent = '勤怠日数'; 
-        } else {
-            unitText.textContent = '日'; // 基本値
-            attendanceLabelTh.textContent = '勤怠日数';
-        }
+        calculateDays();
+    }
 
-        // 選択した勤怠項目に連結された休暇がある場合
-        if (hasVacation && vStart && vEnd) {
-            rewardVacationRow.style.display = ''; // 行を表示
+    function calculateDays() {
+        const hire = new Date(document.getElementById('hireDate').value);
+        const resig = new Date(document.getElementById('resignationDate').value);
+        const exclude = parseInt(document.getElementById('excludedDays').value) || 0;
+
+        if (!isNaN(hire) && !isNaN(resig)) {
+            const diffTime = Math.abs(resig - hire);
+            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - exclude;
+            if(diffDays < 0) diffDays = 0;
+
+            const years = Math.floor(diffDays / 365);
             
-            // 画面テキストの変更
-            document.getElementById('appliedStartDate').textContent = vName + " " + vStart;
-            document.getElementById('appliedEndDate').textContent = vEnd;
+            document.getElementById('yearsOfService').innerText = years + "年";
+            document.getElementById('daysOfService').innerText = diffDays + "日";
             
-            // 期間入力inputのmin、max属性を動的設定
-            startDate.min = vStart;
-            startDate.max = vEnd;
-            endDate.min = vStart;
-            endDate.max = vEnd;
-
-            // もしすでに入力された日付が制限範囲から外れた場合、範囲内に強制調整
-            if (startDate.value && (startDate.value < vStart || startDate.value > vEnd)) {
-                startDate.value = vStart;
+            const selectedRow = document.querySelector('.selected-row');
+            if(selectedRow) {
+                selectedRow.querySelector('.td-period').innerText = document.getElementById('hireDate').value + " ~ " + document.getElementById('resignationDate').value;
+                selectedRow.querySelector('.td-days').innerText = diffDays;
             }
-            if (endDate.value && (endDate.value < vStart || endDate.value > vEnd)) {
-                endDate.value = vEnd;
-            }
-        } else {
-            // 連結された休暇がない一般勤怠項目(遅刻、残業など)の場合
-            rewardVacationRow.style.display = 'none'; // 行を隠す
-            
-            // 期間制限の解除
-            startDate.removeAttribute('min');
-            startDate.removeAttribute('max');
-            endDate.removeAttribute('min');
-            endDate.removeAttribute('max');
         }
     }
 
-    attendanceType.addEventListener('change', updateFormState);
+    // 3. AJAX: 給与内訳読み込み (期間別)
+    function loadSalaryData() {
+        if (selectedEmpId === 0) {
+            alert('社員を先に選択してください。');
+            return;
+        }
 
-    // 内容クリアボタンクリック時に入力値全体削除および状態初期化
-    btnReset.addEventListener('click', function() {
-        attendanceForm.reset();
-        rewardVacationRow.style.display = 'none';
+        const resigDate = document.getElementById('resignationDate').value;
         
-        startDate.removeAttribute('min');
-        startDate.removeAttribute('max');
-        endDate.removeAttribute('min');
-        endDate.removeAttribute('max');
-        
-        // 初期化時にテキスト復旧
-        unitText.textContent = '日';
-        attendanceLabelTh.textContent = '勤怠日数';
-    });
+        fetch('${pageContext.request.contextPath}/retirement/manage.do?action=getSalary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'employeeId=' + selectedEmpId + '&resignationDate=' + resigDate
+        })
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('salaryListBody');
+            tbody.innerHTML = '';
+            
+            // サーバーから渡された期間データを元に<tr>を生成
+            data.periods.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center">
+                        <input type="text" value="\${p.startDate}" class="text-center" style="width: 40%;" readonly> ~ 
+                        <input type="text" value="\${p.endDate}" class="text-center" style="width: 40%;" readonly>
+                    </td>
+                    <td><input type="number" class="text-center calc-days" value="\${p.days}" oninput="updateSalaryTotals()"></td>
+                    <td><input type="text" class="calc-amount" value="\${p.amount.toLocaleString()}" oninput="formatAndTotal(this)"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // 総合計の設定
+            document.getElementById('totalCalcDays').value = data.totalDays;
+            document.getElementById('displayTotalSalary').value = data.totalSalary.toLocaleString();
+            
+            // 邪魔だった成功のalertは削除しました。
+        })
+        .catch(error => {
+            alert('給与内訳の読み込み中にエラーが発生しました。');
+        });
+    }
 
-    updateFormState();
-});
+    // 桁区切りのカンマフォーマットとリアルタイム合計更新
+    function formatAndTotal(input) {
+        let val = input.value.replace(/[^0-9]/g, '');
+        if(val !== '') {
+            input.value = parseInt(val, 10).toLocaleString();
+        }
+        updateSalaryTotals();
+    }
+    
+    // 入力値が変更されるたびに日数の合計と金額の合計を再計算
+    function updateSalaryTotals() {
+        let totalDays = 0;
+        let totalSalary = 0;
+        
+        document.querySelectorAll('.calc-days').forEach(input => {
+            totalDays += parseInt(input.value) || 0;
+        });
+        
+        document.querySelectorAll('.calc-amount').forEach(input => {
+            totalSalary += parseInt(input.value.replace(/,/g, '')) || 0;
+        });
+        
+        document.getElementById('totalCalcDays').value = totalDays;
+        document.getElementById('displayTotalSalary').value = totalSalary.toLocaleString();
+    }
+
+    function formatNumber(input) {
+        let val = input.value.replace(/[^0-9]/g, '');
+        if(val !== '') {
+            input.value = parseInt(val, 10).toLocaleString();
+        }
+    }
+
+    // 4. 退職金の計算ロジック
+    function calculateRetirementPay() {
+        if (selectedEmpId === 0) {
+            alert('社員を選択し、給与を読み込んでください。');
+            return;
+        }
+
+        const totalSalary = parseInt(document.getElementById('displayTotalSalary').value.replace(/,/g, '')) || 0;
+        const consolationPay = parseInt(document.getElementById('consolationPay').value.replace(/,/g, '')) || 0;
+        const dismissalPay = parseInt(document.getElementById('dismissalPay').value.replace(/,/g, '')) || 0;
+        const totalServiceDays = parseInt(document.getElementById('daysOfService').innerText.replace('日','')) || 0;
+        
+        // 算定日数 (ここでは表示された合計算定日数を使用)
+        const calcDays = parseInt(document.getElementById('totalCalcDays').value) || 90; 
+
+        const dailyAvg = Math.floor(totalSalary / calcDays);
+        const baseRetirementPay = Math.floor(dailyAvg * 30 * (totalServiceDays / 365));
+        const retirementIncome = baseRetirementPay + consolationPay + dismissalPay;
+
+        const incomeTax = Math.floor(retirementIncome * 0.03);
+        const localTax = Math.floor(incomeTax * 0.1); 
+        const totalTax = incomeTax + localTax;
+        
+        const actualPayment = retirementIncome - totalTax;
+
+        document.getElementById('res_3month').innerText = totalSalary.toLocaleString();
+        document.getElementById('res_dailyAvg').innerText = dailyAvg.toLocaleString();
+        document.getElementById('res_retirementIncome').innerText = retirementIncome.toLocaleString();
+        document.getElementById('res_calcTax').innerText = incomeTax.toLocaleString();
+        document.getElementById('res_incomeTax').innerText = incomeTax.toLocaleString();
+        document.getElementById('res_localTax').innerText = localTax.toLocaleString();
+
+        document.getElementById('final_taxable').innerText = retirementIncome.toLocaleString() + " ウォン";
+        document.getElementById('final_tax').innerText = totalTax.toLocaleString() + " ウォン";
+        document.getElementById('final_actual').innerText = actualPayment.toLocaleString() + " ウォン";
+
+        const selectedRow = document.querySelector('.selected-row');
+        if(selectedRow) {
+            selectedRow.querySelector('.td-actual').innerText = actualPayment.toLocaleString();
+            const today = new Date().toISOString().split('T')[0];
+            selectedRow.cells[0].innerText = today;
+            document.getElementById('final_date').value = today;
+        }
+
+        alert('退職金の計算が完了しました。');
+    }
 </script>
-
 </body>
 </html>
