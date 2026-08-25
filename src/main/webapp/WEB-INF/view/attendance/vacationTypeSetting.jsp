@@ -216,8 +216,8 @@ tr:hover {
 									${vacation.applyPeriod2}</a></td>
 							<td style="padding: 5px 0;"><a
 								href="vacationDaysManage.do?attendanceTypeId=${vacation.vacationTypeId}"
-								target="_blank" class="btn-manage">管理</a></td>
-							<td><a href="${vacUrl}">${vacation.usage == 'Y' ? '使用' : '使用しない'}</a></td>
+								target="_blank" class="btn-manage">관리</a></td>
+							<td><a href="${vacUrl}">${vacation.usage == 'Y' ? '사용' : '사용안함'}</a></td>
 						</tr>
 					</c:forEach>
 				</tbody>
@@ -229,8 +229,8 @@ tr:hover {
 				<input type="hidden" name="vacationTypeId"
 					value="${param.selectedVacationId}" />
 				<div class="form-group">
-					<label>休暇項目</label> <input type="text" name="vacationTypeName"
-						value="${param.vacationTypeName}" placeholder="休暇項目を入力してください。">
+					<label>휴가항목</label> <input type="text" name="vacationTypeName"
+						value="${param.vacationTypeName}" placeholder="휴가항목을 입력해주세요.">
 				</div>
 				<div class="form-group">
 					<label>適用期間</label>
@@ -246,8 +246,8 @@ tr:hover {
 					<div class="radio-group">
 						<label><input type="radio" name="usage" value="Y"
 							${empty param.usage || param.usage == 'Y' ? 'checked' : ''}>
-							使用</label> <label><input type="radio" name="usage" value="N"
-							${param.usage == 'N' ? 'checked' : ''}> 使用しない</label>
+							사용</label> <label><input type="radio" name="usage" value="N"
+							${param.usage == 'N' ? 'checked' : ''}> 사용안함</label>
 					</div>
 				</div>
 				<div class="btn-group">
@@ -307,7 +307,7 @@ tr:hover {
 										</c:if>
 									</c:forEach> ${empty vacName ? '-' : vacName}
 							</a></td>
-							<td><a href="${attUrl}">${att.usage == 'Y' ? '使用' : '使用しない'}</a></td>
+							<td><a href="${attUrl}">${att.usage == 'Y' ? '사용' : '사용안함'}</a></td>
 						</tr>
 					</c:forEach>
 				</tbody>
@@ -323,10 +323,10 @@ tr:hover {
 						value="${param.attName}" placeholder="勤怠項目を入力してください。">
 				</div>
 				<div class="form-group">
-					<label>単位</label> <select name="unit">
-						<option value="">選択してください</option>
-						<option value="日" ${param.attUnit == '日' ? 'selected' : ''}>日</option>
-						<option value="時間" ${param.attUnit == '時間' ? 'selected' : ''}>時間</option>
+					<label>단위</label> <select name="unit">
+						<option value="">선택하세요</option>
+						<option value="일" ${param.attUnit == '일' ? 'selected' : ''}>일</option>
+						<option value="시간" ${param.attUnit == '시간' ? 'selected' : ''}>시간</option>
 					</select>
 				</div>
 				<div class="form-group">
@@ -357,8 +357,8 @@ tr:hover {
 					<div class="radio-group">
 						<label><input type="radio" name="usage" value="Y"
 							${empty param.attUsage || param.attUsage == 'Y' ? 'checked' : ''}>
-							使用</label> <label><input type="radio" name="usage" value="N"
-							${param.attUsage == 'N' ? 'checked' : ''}> 使用しない</label>
+							사용</label> <label><input type="radio" name="usage" value="N"
+							${param.attUsage == 'N' ? 'checked' : ''}> 사용안함</label>
 					</div>
 				</div>
 				<div class="btn-group">
