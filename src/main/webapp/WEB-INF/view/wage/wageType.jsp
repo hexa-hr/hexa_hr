@@ -535,7 +535,7 @@ table.data-table tr:hover {
 	<script>
 		// 支給項目削除前の警告ウィンドウ機能
 		function confirmWageDelete(wageName) {
-			if (wageName === '基本給') {
+			if (wageName === '기본급') {
 				alert('基本給は必須項目であるため削除できません。');
 				return false;
 			}
@@ -545,8 +545,8 @@ table.data-table tr:hover {
 		// 控除項目削除前の警告ウィンドウ機能
 		function confirmDeductDelete(dedName) {
 			const fixedItems = [
-				'国民年金', '健康保険', '介護保険', '雇用保険', 
-				'所得税', '住民税', '事業所得', '日雇給与'
+				'국민연금', '건강보험', '장기요양보험', '고용보험', 
+				'소득세', '지방소득세', '사업소득', '일용급여'
 			];
 			
 			if (fixedItems.includes(dedName)) {
@@ -581,7 +581,7 @@ table.data-table tr:hover {
 			const lumpSumRow = document.getElementById('lumpSumRow');
 			const lumpSumInput = document.getElementById('lumpSumInput');
 
-			if (selectVal === '一括支給') {
+			if (selectVal === '일괄지급') {
 				lumpSumRow.style.display = 'table-row';
 			} else {
 				lumpSumRow.style.display = 'none';

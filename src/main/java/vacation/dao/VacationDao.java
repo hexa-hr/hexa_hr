@@ -86,7 +86,7 @@ public class VacationDao {
 			sql.append("WHERE 1=1 ");
 
 			// 💡 2. 재직(在職) 상태인 사원만 조회되도록 조건 추가
-			sql.append("AND e.status = '在職' ");
+			sql.append("AND e.status = '재직' ");
 			if (vacationTypeId != null && !vacationTypeId.isEmpty()) {
 				sql.append("AND vt.vacation_type_id = ? ");
 			}
