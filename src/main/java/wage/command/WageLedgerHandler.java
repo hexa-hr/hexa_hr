@@ -9,7 +9,7 @@ import mvc.command.CommandHandler;
 import wage.model.WageLedgerSummaryResult;
 import wage.service.WageLedgerService;
 
-// 급여대장 급여차수 목록 조회 Handler
+// 給与台帳の給与回次一覧照会Handler
 public class WageLedgerHandler implements CommandHandler {
 
 	private static final String FORM_VIEW = "/WEB-INF/view/wage/wageLedger.jsp";
@@ -22,7 +22,7 @@ public class WageLedgerHandler implements CommandHandler {
 
 		String year = req.getParameter("year");
 
-		// 최초 진입 시 현재 연도를 기본값으로 사용
+		// 初回アクセス時は現在の年度を初期値として使用
 		if (year == null || year.trim().isEmpty()) {
 			year = String.valueOf(Year.now().getValue());
 		} else {
@@ -39,14 +39,14 @@ public class WageLedgerHandler implements CommandHandler {
 
 			req.setAttribute(
 				"deleteMessage",
-				"삭제 되었습니다.");
+				"削除されました。");
 
 		} else if ("notFound".equals(
 			deleteResult)) {
 
 			req.setAttribute(
 				"deleteMessage",
-				"삭제할 급여대장이 없습니다.");
+				"削除する給与台帳がありません。");
 		}
 
 		try {

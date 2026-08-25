@@ -8,7 +8,7 @@ import java.time.YearMonth;
 import jdbc.connection.ConnectionProvider;
 import wage.dao.WageDao;
 
-// 급여대장 - 귀속연월/급여차수 전체 급여 삭제 Service
+// 給与台帳 - 帰属年月・給与回次の全給与削除Service
 public class WageLedgerDeleteService {
 
 	private WageDao wageDao = new WageDao();
@@ -37,7 +37,7 @@ public class WageLedgerDeleteService {
 				if (deletedCount <= 0) {
 
 					throw new IllegalStateException(
-						"삭제할 급여대장이 없습니다.");
+						"削除する給与台帳がありません。");
 				}
 
 				conn.commit();
@@ -61,7 +61,7 @@ public class WageLedgerDeleteService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"급여대장 삭제 중 데이터베이스 오류가 발생했습니다.",
+				"給与台帳の削除中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -73,7 +73,7 @@ public class WageLedgerDeleteService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		String normalized = wageMonth.trim();
@@ -86,7 +86,7 @@ public class WageLedgerDeleteService {
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 
 		return normalized;
@@ -99,7 +99,7 @@ public class WageLedgerDeleteService {
 			|| wagePeriod.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		int period;
@@ -118,7 +118,7 @@ public class WageLedgerDeleteService {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 
 		return String.valueOf(

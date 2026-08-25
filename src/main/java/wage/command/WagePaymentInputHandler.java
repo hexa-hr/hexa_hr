@@ -20,7 +20,7 @@ import wage.model.WagePaymentPeriodDefault;
 import wage.service.WagePaymentInputService;
 import wage.service.WagePaymentPreviousCopyService;
 
-// 급여입력 화면 조회 Handler
+// 給与入力画面照会Handler
 public class WagePaymentInputHandler implements CommandHandler {
 
 	private static final String FORM_VIEW = "/WEB-INF/view/wage/wagePaymentInput.jsp";
@@ -46,9 +46,9 @@ public class WagePaymentInputHandler implements CommandHandler {
 		}
 
 		/*
-		 * 신규추가 기능에서 사용할 사원 선택 목록.
-		 * 현재 단계에서는 JSP에서 직접 사용하지 않지만
-		 * 다음 단계 연결을 위해 유지한다.
+		 * 新規追加機能で使用する社員選択一覧。
+		 * 現在の段階ではJSPで直接使用しないが
+		 * 次の段階との連携のために維持する。
 		 */
 		List<EmployeeSelectRow> employeeRows = employeeSelectService.getEmployeeRows(
 			null,
@@ -100,12 +100,12 @@ public class WagePaymentInputHandler implements CommandHandler {
 
 				req.setAttribute(
 					"successMessage",
-					"급여가 저장되었습니다.");
+					"給与が保存されました。");
 			}
 
 			/*
-			 * 최초 진입
-			 * → 현재 귀속연월 / 1차를 기본 작업공간으로 사용
+			 * 初回アクセス
+			 * → 現在の帰属年月 / 1回を基本ワークスペースとして使用
 			 */
 			if (wageMonth == null) {
 
@@ -136,8 +136,8 @@ public class WagePaymentInputHandler implements CommandHandler {
 					wagePeriod));
 
 			/*
-			 * 현재 귀속연월 + 급여차수에
-			 * 실제 저장된 사원 목록
+			 * 現在の帰属年月 + 給与回次に
+			 * 実際に保存された社員一覧
 			 */
 			List<WagePaymentEmployeeRow> allSavedEmployees = wagePaymentInputService
 				.getSavedEmployees(
@@ -165,15 +165,15 @@ public class WagePaymentInputHandler implements CommandHandler {
 
 				req.setAttribute(
 					"successMessage",
-					"[불러오기] 일반소득: "
+					"[読み込み] 一般所得: "
 						+ workerEmployeeCount
-						+ "건, 사업소득: "
+						+ "件、事業所得: "
 						+ businessEmployeeCount
-						+ "건");
+						+ "件");
 			}
 
 			/*
-			 * 모달에서 선택한 여러 사원을 검증한 뒤 pending으로 추가한다.
+			 * モーダルで選択した複数の社員を検証した後、pendingとして追加する。
 			 */
 			List<Integer> validatedAddEmployeeIds = new ArrayList<>();
 
@@ -186,7 +186,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 				if (addEmployee == null) {
 
 					throw new IllegalArgumentException(
-						"올바른 사원을 선택해야 합니다.");
+						"正しい社員を選択する必要があります。");
 				}
 
 				if (!isAvailableEmployeeForIncomeType(
@@ -194,7 +194,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 					incomeType)) {
 
 					throw new IllegalArgumentException(
-						"현재 소득구분에서 추가할 수 없는 사원입니다.");
+						"現在の所得区分では追加できない社員です。");
 				}
 
 				validatedAddEmployeeIds.add(
@@ -206,7 +206,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 			for (Integer addEmployeeId : validatedAddEmployeeIds) {
 
 				/*
-				 * 이미 저장됐거나 pending인 사원은 아무 처리도 하지 않는다.
+				 * すでに保存済み、またはpendingの社員は何も処理しない。
 				 */
 				if (containsSavedEmployee(
 					allSavedEmployees,
@@ -227,8 +227,8 @@ public class WagePaymentInputHandler implements CommandHandler {
 			}
 
 			/*
-			 * 실제로 새로 추가된 첫 번째 사원을 선택한다.
-			 * 전부 기존 사원이면 현재 선택 상태를 유지한다.
+			 * 実際に新しく追加された最初の社員を選択する。
+			 * すべて既存の社員の場合は、現在の選択状態を維持する。
 			 */
 			if (firstAddedEmployeeId != null) {
 
@@ -241,10 +241,10 @@ public class WagePaymentInputHandler implements CommandHandler {
 			}
 
 			/*
-			 * 요청 전체에서 유지할 미저장 사원.
+			 * リクエスト全体で維持する未保存社員。
 			 *
-			 * 소득구분 탭과 관계없이 유지하되
-			 * 저장 사원과 일용직은 제외한다.
+			 * 所得区分タブに関係なく維持するが
+			 * 保存済み社員と日雇いは除外する。
 			 */
 			List<EmployeeSelectRow> allPendingEmployees = buildAllPendingEmployees(
 				employeeRows,
@@ -256,7 +256,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 				allPendingEmployees);
 
 			/*
-			 * 현재 소득구분 탭에 표시할 저장 사원
+			 * 現在の所得区分タブに表示する保存済み社員
 			 */
 			List<WagePaymentEmployeeRow> savedEmployees = filterSavedEmployeesByIncomeType(
 				allSavedEmployees,
@@ -267,7 +267,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 				savedEmployees);
 
 			/*
-			 * 현재 소득구분 탭에 표시할 미저장 사원
+			 * 現在の所得区分タブに表示する未保存社員
 			 */
 			List<EmployeeSelectRow> pendingEmployees = filterEmployeesByIncomeType(
 				allPendingEmployees,
@@ -278,8 +278,8 @@ public class WagePaymentInputHandler implements CommandHandler {
 				pendingEmployees);
 
 			/*
-			 * 신규추가 후보는 현재 탭 사원 중
-			 * 전체 saved / pending 어디에도 없는 사원만 사용한다.
+			 * 新規追加候補には、現在のタブの社員のうち
+			 * 全体のsaved / pendingのいずれにも存在しない社員のみを使用する。
 			 */
 			List<EmployeeSelectRow> availableEmployees = buildAvailableEmployees(
 				employeeRows,
@@ -292,8 +292,8 @@ public class WagePaymentInputHandler implements CommandHandler {
 				availableEmployees);
 
 			/*
-			 * 현재 귀속연월 + 급여차수의
-			 * 저장된 기본정보 확인
+			 * 現在の帰属年月 + 給与回次の
+			 * 保存済み基本情報を確認
 			 */
 			WageLedgerSummary periodSummary = wagePaymentInputService.getPeriodSummary(
 				wageMonth,
@@ -305,8 +305,8 @@ public class WagePaymentInputHandler implements CommandHandler {
 			if (periodSummary != null) {
 
 				/*
-				 * 기존 급여차수
-				 * → wage에 저장된 날짜 사용
+				 * 既存の給与回次
+				 * → wageに保存された日付を使用
 				 */
 				settlementStartDate = toSqlDate(
 					periodSummary
@@ -342,8 +342,8 @@ public class WagePaymentInputHandler implements CommandHandler {
 			} else {
 
 				/*
-				 * 신규 급여차수
-				 * → 회사 급여지급정보의 기본 날짜 사용
+				 * 新規給与回次
+				 * → 会社の給与支給情報の基本日付を使用
 				 */
 				WagePaymentPeriodDefault defaultPeriod = wagePaymentInputService.getDefaultPeriod(
 					wageMonth);
@@ -375,8 +375,8 @@ public class WagePaymentInputHandler implements CommandHandler {
 			}
 
 			/*
-			 * 사원이 선택되지 않은 초기 화면에서도
-			 * 현재 사용 중인 급여항목 틀을 표시한다.
+			 * 社員が選択されていない初期画面でも
+			 * 現在使用中の給与項目の枠を表示する。
 			 */
 			req.setAttribute(
 				"wageItems",
@@ -385,10 +385,10 @@ public class WagePaymentInputHandler implements CommandHandler {
 					wagePeriod));
 
 			/*
-			 * 사원이 선택된 경우에만
-			 * 오른쪽 급여입력 항목을 조회한다.
+			 * 社員が選択された場合のみ
+			 * 右側の給与入力項目を照会する。
 			 *
-			 * employeeId는 작업공간의 필수키가 아니다.
+			 * employeeIdはワークスペースの必須キーではない。
 			 */
 			if (employeeIdParam != null) {
 
@@ -402,7 +402,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 				} catch (NumberFormatException e) {
 
 					throw new IllegalArgumentException(
-						"올바른 사원을 선택해야 합니다.");
+						"正しい社員を選択する必要があります。");
 				}
 
 				EmployeeSelectRow selectedEmployee = findEmployee(
@@ -412,7 +412,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 				if (selectedEmployee == null) {
 
 					throw new IllegalArgumentException(
-						"올바른 사원을 선택해야 합니다.");
+						"正しい社員を選択する必要があります。");
 				}
 
 				boolean selectedEmployeeSaved = containsSavedEmployee(
@@ -427,7 +427,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 					&& !selectedEmployeePending) {
 
 					throw new IllegalArgumentException(
-						"현재 급여차수에 등록되지 않은 사원입니다.");
+						"現在の給与回次に登録されていない社員です。");
 				}
 
 				req.setAttribute(
@@ -464,7 +464,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 		return FORM_VIEW;
 	}
 
-	// --- Helper 메서드 ---
+	// --- Helperメソッド ---
 
 	private EmployeeSelectRow findEmployee(
 		List<EmployeeSelectRow> employeeRows,
@@ -516,7 +516,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 			} catch (NumberFormatException e) {
 
 				throw new IllegalArgumentException(
-					"pending 사원 정보가 올바르지 않습니다.");
+					"pending社員情報が正しくありません。");
 			}
 		}
 
@@ -558,7 +558,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 			} catch (NumberFormatException e) {
 
 				throw new IllegalArgumentException(
-					"추가할 사원 정보가 올바르지 않습니다.");
+					"追加する社員情報が正しくありません。");
 			}
 		}
 
@@ -591,8 +591,8 @@ public class WagePaymentInputHandler implements CommandHandler {
 			}
 
 			/*
-			 * 일용직 급여는 별도 화면에서 처리하므로
-			 * 전체 pending 상태에도 포함하지 않는다.
+			 * 日雇給与は別画面で処理するため
+			 * 全体のpending状態にも含めない。
 			 */
 			if ("일용직".equals(
 				employee.getEmploymentType())) {
@@ -739,7 +739,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 		}
 
 		throw new IllegalArgumentException(
-			"올바른 소득구분을 선택해야 합니다.");
+			"正しい所得区分を選択する必要があります。");
 	}
 
 	private boolean isAvailableEmployeeForIncomeType(
@@ -790,7 +790,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 		if (value == null) {
 
 			throw new IllegalArgumentException(
-				fieldName + "을 입력해야 합니다.");
+				fieldName + "を入力する必要があります。");
 		}
 
 		try {
@@ -801,7 +801,7 @@ public class WagePaymentInputHandler implements CommandHandler {
 
 			throw new IllegalArgumentException(
 				fieldName
-					+ "은 YYYY-MM-DD 형식이어야 합니다.");
+					+ "はYYYY-MM-DD形式である必要があります。");
 		}
 	}
 

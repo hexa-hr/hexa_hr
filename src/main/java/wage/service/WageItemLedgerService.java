@@ -17,7 +17,7 @@ import wage.model.WageItemLedgerEmployeeRow;
 import wage.model.WageItemLedgerResult;
 import wage.model.WageItemLedgerRow;
 
-//항목별 대장 조회 서비스
+// 項目別台帳照会Service
 public class WageItemLedgerService {
 
 	private WageDao wageDao = new WageDao();
@@ -27,11 +27,11 @@ public class WageItemLedgerService {
 		String startMonth, String endMonth) {
 
 		if (wageTypeId == null || wageTypeId <= 0) {
-			throw new IllegalArgumentException("급여항목을 선택해야 합니다.");
+			throw new IllegalArgumentException("給与項目を選択する必要があります。");
 		}
 
 		if (startMonth == null || endMonth == null) {
-			throw new IllegalArgumentException("조회 기간을 입력해야 합니다.");
+			throw new IllegalArgumentException("照会期間を入力する必要があります。");
 		}
 
 		YearMonth start;
@@ -42,17 +42,17 @@ public class WageItemLedgerService {
 			end = YearMonth.parse(endMonth);
 		} catch (DateTimeParseException e) {
 			throw new IllegalArgumentException(
-				"조회 기간은 YYYY-MM 형식이어야 합니다.");
+				"照会期間はYYYY-MM形式である必要があります。");
 		}
 
 		if (start.isAfter(end)) {
 			throw new IllegalArgumentException(
-				"시작 월은 종료 월보다 늦을 수 없습니다.");
+				"開始月は終了月より後にすることはできません。");
 		}
 
 		if (start.plusMonths(11).isBefore(end)) {
 			throw new IllegalArgumentException(
-				"조회 기간은 최대 12개월까지 선택할 수 있습니다.");
+				"照会期間は最大12か月まで選択できます。");
 		}
 
 		List<String> months = createMonths(start, end);
@@ -62,10 +62,10 @@ public class WageItemLedgerService {
 			List<WageItemLedgerRow> rawRows = wageDao.selectItemLedger(
 				conn, wageTypeId, startMonth, endMonth);
 
-			// 사원의 조회 순서를 유지하기 위해 LinkedHashMap 사용
+			// 社員の照会順序を維持するためLinkedHashMapを使用
 			Map<Integer, WageItemLedgerEmployeeRow> employeeMap = new LinkedHashMap<>();
 
-			// 화면의 월 순서를 유지하기 위해 LinkedHashMap 사용
+			// 画面の月順序を維持するためLinkedHashMapを使用
 			Map<String, Long> monthlyTotals = new LinkedHashMap<>();
 
 			for (String month : months) {
@@ -76,10 +76,10 @@ public class WageItemLedgerService {
 
 			for (WageItemLedgerRow row : rawRows) {
 
-				// DAO 조회 결과가 요청한 조회 기간을 벗어나지 않았는지 확인
+				// DAOの照会結果が指定した照会期間外でないことを確認
 				if (!monthlyTotals.containsKey(row.getWageMonth())) {
 					throw new IllegalStateException(
-						"조회 기간을 벗어난 급여 데이터가 포함되어 있습니다.");
+						"照会期間外の給与データが含まれています。");
 				}
 
 				WageItemLedgerEmployeeRow employeeRow = employeeMap.get(row.getEmployeeId());
@@ -127,7 +127,7 @@ public class WageItemLedgerService {
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
-				"항목별 대장 조회 중 데이터베이스 오류가 발생했습니다.",
+				"項目別台帳の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -140,12 +140,12 @@ public class WageItemLedgerService {
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
-				"급여항목 목록 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与項目一覧の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
 
-	// 시작 월부터 종료 월까지의 월 목록 생성
+	// 開始月から終了月までの月一覧を生成
 	private List<String> createMonths(YearMonth start, YearMonth end) {
 
 		List<String> months = new ArrayList<>();

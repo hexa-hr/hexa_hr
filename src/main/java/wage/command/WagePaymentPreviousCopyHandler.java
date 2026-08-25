@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import mvc.command.CommandHandler;
 import wage.service.WagePaymentPreviousCopyService;
 
-// 급여입력 화면 - 지난급여 불러오기 Handler
+// 給与入力画面 - 過去給与の読み込みHandler
 public class WagePaymentPreviousCopyHandler
 	implements CommandHandler {
 
@@ -133,7 +133,7 @@ public class WagePaymentPreviousCopyHandler
 		}
 
 		throw new IllegalArgumentException(
-			"올바른 소득구분을 선택해야 합니다.");
+			"正しい所得区分を選択する必要があります。");
 	}
 
 	private String encode(

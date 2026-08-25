@@ -7,7 +7,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>급여입력</title>
+<title>給与入力</title>
 
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -532,7 +532,7 @@ th {
 	<c:set var="currentWageNetPayment"
 		value="${currentWageTotalPayment - currentWageTotalDeduction}" />
 
-	<h1>급여입력</h1>
+	<h1>給与入力</h1>
 
 	<c:if test="${not empty successMessage}">
 
@@ -554,7 +554,7 @@ th {
 
 			<input type="hidden" id="wageMonth" name="wageMonth"
 				value="<c:out value='${wageMonth}' />"> <label
-				for="wageYear">귀속연월</label> <select id="wageYear" required>
+				for="wageYear">帰属年月</label> <select id="wageYear" required>
 			</select> <select id="wageMonthPart" required>
 
 				<c:forEach var="month" begin="1" end="12">
@@ -562,12 +562,12 @@ th {
 					<fmt:formatNumber var="monthValue" value="${month}" pattern="00" />
 
 					<option value="${monthValue}">
-						<c:out value="${monthValue}" />월
+						<c:out value="${monthValue}" />月
 					</option>
 
 				</c:forEach>
 
-			</select> <label for="wagePeriod">급여차수</label> <select id="wagePeriod"
+			</select> <label for="wagePeriod">給与回次</label> <select id="wagePeriod"
 				name="wagePeriod" required>
 
 				<c:forEach var="period" begin="1" end="10">
@@ -577,7 +577,7 @@ th {
 							selected
 						</c:if>>
 
-						<c:out value="${period}" />차
+						<c:out value="${period}" />回
 
 					</option>
 
@@ -590,13 +590,13 @@ th {
 
 		<div class="form-row">
 
-			<label for="settlementStartDate"> 정산 시작일 </label> <input type="date"
+			<label for="settlementStartDate"> 精算開始日 </label> <input type="date"
 				id="settlementStartDate" name="settlementStartDate"
 				value="<c:out value='${settlementStartDate}' />" readonly> <label
-				for="settlementEndDate"> 정산 종료일 </label> <input type="date"
+				for="settlementEndDate"> 精算終了日 </label> <input type="date"
 				id="settlementEndDate" name="settlementEndDate"
 				value="<c:out value='${settlementEndDate}' />" readonly> <label
-				for="wagePaymentDate"> 급여 지급일 </label> <input type="date"
+				for="wagePaymentDate"> 給与支給日 </label> <input type="date"
 				id="wagePaymentDate" name="wagePaymentDate"
 				value="<c:out value='${wagePaymentDate}' />" readonly>
 
@@ -615,7 +615,7 @@ th {
 
 	<dialog id="previousWageDialog" class="previous-wage-dialog">
 
-	<h2>급여연월 선택</h2>
+	<h2>給与年月の選択</h2>
 
 	<form id="previousWageCopyForm" method="post"
 		action="${pageContext.request.contextPath}/wage/paymentPreviousCopy.do">
@@ -632,16 +632,16 @@ th {
 			name="replaceConfirmed" value="false"> <select
 			id="previousWageSourceSelect" required>
 
-			<option value="">귀속연월 차수 선택</option>
+			<option value="">帰属年月・給与回次を選択</option>
 
 			<c:forEach var="source" items="${previousWageSourceOptions}">
 
 				<option value="<c:out value='${source.wageMonth}' />"
 					data-wage-month="<c:out value='${source.wageMonth}' />"
 					data-wage-period="<c:out value='${source.wagePeriod}' />">
-					<c:out value="${fn:substring(source.wageMonth, 0, 4)}" />년
-					<c:out value="${fn:substring(source.wageMonth, 5, 7)}" />월
-					<fmt:formatNumber value="${source.wagePeriod}" pattern="00" />차
+					<c:out value="${fn:substring(source.wageMonth, 0, 4)}" />年
+					<c:out value="${fn:substring(source.wageMonth, 5, 7)}" />月
+					<fmt:formatNumber value="${source.wagePeriod}" pattern="00" />回
 				</option>
 
 			</c:forEach>
@@ -650,10 +650,10 @@ th {
 
 		<div class="previous-wage-dialog-actions">
 
-			<button type="button" id="previousWageSubmitButton">급여정보
-				불러오기</button>
+			<button type="button" id="previousWageSubmitButton">給与情報を
+				読み込む</button>
 
-			<button type="button" id="previousWageCloseButton">취소</button>
+			<button type="button" id="previousWageCloseButton">キャンセル</button>
 
 		</div>
 
@@ -663,7 +663,7 @@ th {
 
 	<dialog id="employeeSelectDialog" class="employee-select-dialog">
 
-	<h2>급여지급 사원선택</h2>
+	<h2>給与支給対象社員の選択</h2>
 
 	<form id="employeeModalAddForm" method="get"
 		action="${pageContext.request.contextPath}/wage/paymentInput.do">
@@ -693,18 +693,18 @@ th {
 			<div class="employee-modal-search">
 
 				<input type="search" id="employeeModalSearchInput"
-					placeholder="사원번호 또는 성명" autocomplete="off">
+					placeholder="社員番号または氏名" autocomplete="off">
 
-				<button type="button" id="employeeModalSearchButton">검색</button>
+				<button type="button" id="employeeModalSearchButton">検索</button>
 
 			</div>
 
-			<select id="employeeModalDepartmentFilter" aria-label="부서별">
-				<option value="">부서별</option>
-			</select> <select id="employeeModalPositionFilter" aria-label="직위별">
-				<option value="">직위별</option>
-			</select> <select id="employeeModalStatusFilter" aria-label="재직상태">
-				<option value="">재직상태</option>
+			<select id="employeeModalDepartmentFilter" aria-label="部署別">
+				<option value="">部署別</option>
+			</select> <select id="employeeModalPositionFilter" aria-label="役職別">
+				<option value="">役職別</option>
+			</select> <select id="employeeModalStatusFilter" aria-label="在職状態">
+				<option value="">在職状態</option>
 			</select>
 
 		</div>
@@ -716,13 +716,13 @@ th {
 				<thead>
 					<tr>
 						<th><input type="checkbox" id="employeeModalSelectAll"
-							aria-label="현재 페이지 전체 선택"></th>
-						<th>구분</th>
-						<th>사원번호</th>
-						<th>성명</th>
-						<th>부서</th>
-						<th>직위</th>
-						<th>상태</th>
+							aria-label="現在のページをすべて選択"></th>
+						<th>区分</th>
+						<th>社員番号</th>
+						<th>氏名</th>
+						<th>部署</th>
+						<th>役職</th>
+						<th>状態</th>
 					</tr>
 				</thead>
 
@@ -740,7 +740,7 @@ th {
 							<td><input type="checkbox" class="employee-modal-checkbox"
 								name="addEmployeeId"
 								value="<c:out value='${employee.employeeId}' />"
-								aria-label="<c:out value='${employee.koreanName}' /> 선택">
+								aria-label="<c:out value='${employee.koreanName}' />を選択">
 							</td>
 
 							<td><c:out value="${employee.employmentType}" /></td>
@@ -765,7 +765,7 @@ th {
 					</c:forEach>
 
 					<tr id="employeeModalNoResultRow" style="display: none;">
-						<td colspan="7">조건에 맞는 사원이 없습니다.</td>
+						<td colspan="7">条件に一致する社員がいません。</td>
 					</tr>
 
 				</tbody>
@@ -776,19 +776,19 @@ th {
 
 		<div class="employee-modal-pagination">
 
-			<button type="button" id="employeeModalPreviousPage">‹ 이전</button>
+			<button type="button" id="employeeModalPreviousPage">‹ 前へ</button>
 
 			<strong id="employeeModalPageInfo">1 / 1</strong>
 
-			<button type="button" id="employeeModalNextPage">다음 ›</button>
+			<button type="button" id="employeeModalNextPage">次へ ›</button>
 
 		</div>
 
 		<div class="employee-modal-actions">
 
-			<button type="submit" id="employeeModalSubmitButton">사원선택</button>
+			<button type="submit" id="employeeModalSubmitButton">社員選択</button>
 
-			<button type="button" id="employeeModalCloseButton">선택취소</button>
+			<button type="button" id="employeeModalCloseButton">キャンセル</button>
 
 		</div>
 
@@ -806,7 +806,7 @@ th {
 					<c:if test="${empty previousWageSourceOptions}">
 						disabled
 					</c:if>>
-					지난급여 불러오기</button>
+					過去給与の読み込み</button>
 
 				<form id="employeeDeleteForm" method="post"
 					action="${pageContext.request.contextPath}/wage/paymentInputDelete.do"
@@ -831,7 +831,7 @@ th {
 
 					</c:forEach>
 
-					<button type="submit" id="employeeDeleteButton">선택삭제</button>
+					<button type="submit" id="employeeDeleteButton">選択削除</button>
 
 				</form>
 
@@ -858,7 +858,7 @@ th {
 
 					</c:forEach>
 
-					<button type="submit" id="employeeDeleteAllButton">전체삭제</button>
+					<button type="submit" id="employeeDeleteAllButton">一括削除</button>
 
 				</form>
 
@@ -866,16 +866,16 @@ th {
 
 			<div class="employee-add-form">
 
-				<button type="button" id="employeeSelectOpenButton">신규추가</button>
+				<button type="button" id="employeeSelectOpenButton">新規追加</button>
 
 			</div>
 
-			<h2>사원 목록</h2>
+			<h2>社員一覧</h2>
 
 			<div style="margin-bottom: 10px;">
-				총
+				合計
 				<c:out value="${visibleEmployeeCount}" />
-				명
+				名
 			</div>
 
 			<div class="table-scroll">
@@ -883,13 +883,13 @@ th {
 
 					<thead>
 						<tr>
-							<th>사원ID</th>
-							<th>구분</th>
-							<th>성명</th>
-							<th>부서</th>
-							<th>지급총액</th>
-							<th>공제총액</th>
-							<th>실지급액</th>
+							<th>社員ID</th>
+							<th>区分</th>
+							<th>氏名</th>
+							<th>部署</th>
+							<th>支給総額</th>
+							<th>控除総額</th>
+							<th>差引支給額</th>
 						</tr>
 					</thead>
 
@@ -985,7 +985,7 @@ th {
 
 									</c:url> <a href="${pendingEmployeeSelectUrl}"> <c:out
 											value="${employee.koreanName}" />
-								</a> (미저장)</td>
+								</a>（未保存）</td>
 
 								<td><c:choose>
 										<c:when test="${empty employee.departmentName}">
@@ -1037,9 +1037,9 @@ th {
 
 				<a href="${workerIncomeUrl}"
 					class="income-tab ${incomeType eq 'worker' ? 'active' : ''}">
-					일반소득 </a> <a href="${businessIncomeUrl}"
+					一般所得 </a> <a href="${businessIncomeUrl}"
 					class="income-tab ${incomeType eq 'business' ? 'active' : ''}">
-					사업소득/기타소득 </a>
+					事業所得・雑所得 </a>
 
 			</div>
 
@@ -1075,7 +1075,7 @@ th {
 
 						<div class="wage-item-column">
 
-							<div class="wage-item-column-header payment-header">지급항목</div>
+							<div class="wage-item-column-header payment-header">支給項目</div>
 
 							<c:forEach var="item" items="${wageItems}">
 
@@ -1088,7 +1088,7 @@ th {
 											<c:out value="${item.wageTypeName}" />
 
 											<c:if test="${item.taxableYn eq 'N'}">
-												<span class="tax-free-mark">[비]</span>
+												<span class="tax-free-mark">[非課税]</span>
 											</c:if>
 
 										</div>
@@ -1115,11 +1115,11 @@ th {
 
 							<div class="wage-item-column-header deduction-header">
 
-								<span>공제항목</span>
+								<span>控除項目</span>
 
 								<button type="submit" class="wage-auto-calculate-button"
 									<c:if test="${not wageInputEnabled}">disabled</c:if>>
-									자동계산</button>
+									自動計算</button>
 
 							</div>
 
@@ -1156,23 +1156,23 @@ th {
 					<div class="wage-subtotals">
 
 						<div class="wage-subtotal">
-							<span>지급총액</span> <strong> <fmt:formatNumber
-									value="${currentWageTotalPayment}" pattern="#,##0" />원
+							<span>支給総額</span> <strong> <fmt:formatNumber
+									value="${currentWageTotalPayment}" pattern="#,##0" />ウォン
 							</strong>
 						</div>
 
 						<div class="wage-subtotal">
-							<span>공제총액</span> <strong> <fmt:formatNumber
-									value="${currentWageTotalDeduction}" pattern="#,##0" />원
+							<span>控除総額</span> <strong> <fmt:formatNumber
+									value="${currentWageTotalDeduction}" pattern="#,##0" />ウォン
 							</strong>
 						</div>
 
 					</div>
 
 					<div class="wage-net-total">
-						실지급액 :
+						差引支給額：
 						<fmt:formatNumber value="${currentWageNetPayment}" pattern="#,##0" />
-						원
+						ウォン
 					</div>
 
 					<c:url var="wageContentClearUrl" value="/wage/paymentInput.do">
@@ -1191,13 +1191,13 @@ th {
 
 						<button type="submit"
 							formaction="${pageContext.request.contextPath}/wage/paymentInputSave.do"
-							<c:if test="${not wageInputEnabled}">disabled</c:if>>저장
+							<c:if test="${not wageInputEnabled}">disabled</c:if>>保存
 						</button>
 
 						<button type="button" id="wageContentClearButton"
 							data-clear-url="<c:out value='${wageContentClearUrl}' />"
-							<c:if test="${not wageInputEnabled}">disabled</c:if>>내용
-							지우기</button>
+							<c:if test="${not wageInputEnabled}">disabled</c:if>>入力内容を
+							クリア</button>
 
 					</div>
 
@@ -1211,31 +1211,31 @@ th {
 
 	<section class="payroll-summary">
 
-		<h2>급여 종합정보</h2>
+		<h2>給与総合情報</h2>
 
 		<div class="payroll-summary-grid">
 
 			<div class="payroll-summary-card summary-count">
-				<span>월 합계</span> <strong> <c:out
-						value="${monthlyEmployeeCount}" />건
+				<span>月間合計</span> <strong> <c:out
+						value="${monthlyEmployeeCount}" />件
 				</strong>
 			</div>
 
 			<div class="payroll-summary-card summary-payment">
-				<span>지급 총액</span> <strong> <fmt:formatNumber
-						value="${monthlyTotalPayment}" pattern="#,##0" />원
+				<span>支給総額</span> <strong> <fmt:formatNumber
+						value="${monthlyTotalPayment}" pattern="#,##0" />ウォン
 				</strong>
 			</div>
 
 			<div class="payroll-summary-card summary-deduction">
-				<span>공제 총액</span> <strong> <fmt:formatNumber
-						value="${monthlyTotalDeduction}" pattern="#,##0" />원
+				<span>控除総額</span> <strong> <fmt:formatNumber
+						value="${monthlyTotalDeduction}" pattern="#,##0" />ウォン
 				</strong>
 			</div>
 
 			<div class="payroll-summary-card summary-net">
-				<span>실지급액</span> <strong> <fmt:formatNumber
-						value="${monthlyNetPayment}" pattern="#,##0" />원
+				<span>差引支給額</span> <strong> <fmt:formatNumber
+						value="${monthlyNetPayment}" pattern="#,##0" />ウォン
 				</strong>
 			</div>
 
@@ -1599,8 +1599,8 @@ th {
 				positionFilter.value = "";
 
 				/*
-				 * Payzon과 같이 재직 사원을 기본 표시한다.
-				 * 재직 상태값이 없으면 전체 상태로 표시한다.
+				 * Payzonと同様に、在職中の社員をデフォルトで表示する。
+				 * 在職の状態値がない場合は、すべての状態を表示する。
 				 */
 				const hasActiveStatus =
 					Array.from(
@@ -1763,7 +1763,7 @@ th {
 					event.preventDefault();
 
 					window.alert(
-						"추가할 사원을 선택해 주세요.");
+						"追加する社員を選択してください。");
 
 					return;
 				}
@@ -1817,8 +1817,8 @@ th {
 					function(event) {
 
 						/*
-						 * 사원 이름 링크를 클릭한 경우에는
-						 * 기존 링크 이동을 그대로 사용한다.
+						 * 社員名のリンクをクリックした場合は、
+						 * 既存のリンク遷移をそのまま使用する。
 						 */
 						if (event.target.closest("a")) {
 							return;
@@ -1856,14 +1856,14 @@ th {
 				if (!employeeIdInput.value.trim()) {
 
 					window.alert(
-						"선택된 사원이 없습니다.");
+						"選択された社員がいません。");
 
 					return;
 				}
 
 				const confirmed =
 					window.confirm(
-						"선택된 사원을 삭제 하시겠습니까?");
+						"選択した社員を削除しますか？");
 
 				if (!confirmed) {
 					return;
@@ -1926,15 +1926,15 @@ th {
 				if (!hasCurrentEmployees) {
 
 					window.alert(
-						"추가된 사원이 없습니다.");
+						"追加された社員がいません。");
 
 					return;
 				}
 
 				const confirmed =
 					window.confirm(
-						"■ 주의!!\n"
-						+ "- [전체] 급여입력 정보를 삭제 하시겠습니까?");
+						"■ 注意！\n"
+						+ "- [すべて] 給与入力情報を削除しますか？");
 
 				if (!confirmed) {
 					return;
@@ -1942,9 +1942,9 @@ th {
 
 				const finalConfirmed =
 					window.confirm(
-						"주의!!\n"
-						+ "삭제된 급여입력 정보는 복구할 수 없습니다.\n"
-						+ "삭제 하시겠습니까?");
+						"注意！\n"
+						+ "削除した給与入力情報は復元できません。\n"
+						+ "削除しますか？");
 
 				if (!finalConfirmed) {
 					return;
@@ -2049,7 +2049,7 @@ th {
 					|| !selectedOption) {
 
 					window.alert(
-						"불러올 귀속연월과 급여차수를 선택해 주세요.");
+						"読み込む帰属年月と給与回次を選択してください。");
 
 					return;
 				}
@@ -2062,9 +2062,9 @@ th {
 
 				const confirmed =
 					window.confirm(
-						"기등록된 급여테이블은 삭제되며,\n"
-						+ "불러오기 한 급여테이블로 교체됩니다.\n\n"
-						+ "불러오기 하시겠습니까?");
+						"登録済みの給与テーブルは削除され、\n"
+						+ "読み込んだ給与テーブルに置き換えられます。\n\n"
+						+ "読み込みますか？");
 
 				if (!confirmed) {
 					return;
@@ -2140,7 +2140,7 @@ th {
 				document.createElement("option");
 
 			option.value = String(year);
-			option.textContent = year + "년";
+			option.textContent = year + "年";
 
 			wageYearSelect.appendChild(option);
 		}
@@ -2286,10 +2286,10 @@ th {
 		}
 
 		/*
-		 * pendingEmployeeId는 주소에 남기지 않는다.
+		 * pendingEmployeeIdはURLに残さない。
 		 *
-		 * 따라서 현재 화면에서는 pending 목록이 유지되지만
-		 * F5 / 재진입 시에는 DB 저장 사원만 다시 조회된다.
+		 * そのため、現在の画面ではpendingリストが維持されるが、
+		 * F5／再アクセス時にはDBに保存された社員のみを再取得する。
 		 */
 		window.history.replaceState(
 			null,

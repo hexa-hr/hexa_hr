@@ -18,7 +18,7 @@ import wage.model.WagePaymentEmployeeRow;
 import wage.service.WagePaymentDeleteService;
 import wage.service.WagePaymentInputService;
 
-// 급여입력 화면 - 선택 사원 삭제 Handler
+// 給与入力画面 - 選択社員の削除Handler
 public class WagePaymentInputDeleteHandler
 	implements CommandHandler {
 
@@ -68,7 +68,7 @@ public class WagePaymentInputDeleteHandler
 			if (!deleteConfirmed) {
 
 				throw new IllegalArgumentException(
-					"삭제 확인이 필요합니다.");
+					"削除の確認が必要です。");
 			}
 
 			if ("all".equals(
@@ -78,7 +78,7 @@ public class WagePaymentInputDeleteHandler
 						"deleteFinalConfirmed"))) {
 
 				throw new IllegalArgumentException(
-					"최종 삭제 확인이 필요합니다.");
+					"削除の最終確認が必要です。");
 			}
 
 			List<Integer> pendingEmployeeIds = parsePendingEmployeeIds(
@@ -201,7 +201,7 @@ public class WagePaymentInputDeleteHandler
 			&& selectedPendingEmployee == null) {
 
 			throw new IllegalArgumentException(
-				"현재 급여 목록에 존재하지 않는 사원입니다.");
+				"現在の給与一覧に存在しない社員です。");
 		}
 
 		String employmentType = selectedSavedEmployee != null
@@ -213,7 +213,7 @@ public class WagePaymentInputDeleteHandler
 			incomeType)) {
 
 			throw new IllegalArgumentException(
-				"현재 소득구분에서 삭제할 수 없는 사원입니다.");
+				"現在の所得区分では削除できない社員です。");
 		}
 
 		if (selectedSavedEmployee != null) {
@@ -281,7 +281,7 @@ public class WagePaymentInputDeleteHandler
 			&& !hasCurrentPendingEmployee) {
 
 			throw new IllegalArgumentException(
-				"추가된 사원이 없습니다.");
+				"追加された社員がいません。");
 		}
 
 		if (!savedEmployeeIds.isEmpty()) {
@@ -315,7 +315,7 @@ public class WagePaymentInputDeleteHandler
 		}
 
 		throw new IllegalArgumentException(
-			"올바른 삭제 방식을 선택해야 합니다.");
+			"正しい削除方法を選択する必要があります。");
 	}
 
 	private Integer parseEmployeeId(
@@ -327,7 +327,7 @@ public class WagePaymentInputDeleteHandler
 		if (employeeIdValue == null) {
 
 			throw new IllegalArgumentException(
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 		}
 
 		try {
@@ -345,7 +345,7 @@ public class WagePaymentInputDeleteHandler
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 		}
 	}
 
@@ -387,7 +387,7 @@ public class WagePaymentInputDeleteHandler
 			} catch (NumberFormatException e) {
 
 				throw new IllegalArgumentException(
-					"pending 사원 정보가 올바르지 않습니다.");
+					"pending社員情報が正しくありません。");
 			}
 		}
 
@@ -508,7 +508,7 @@ public class WagePaymentInputDeleteHandler
 		if (wageMonth == null) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		try {
@@ -519,7 +519,7 @@ public class WagePaymentInputDeleteHandler
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 
 		return wageMonth;
@@ -534,7 +534,7 @@ public class WagePaymentInputDeleteHandler
 		if (wagePeriod == null) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		int period;
@@ -553,7 +553,7 @@ public class WagePaymentInputDeleteHandler
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 
 		return String.valueOf(
@@ -580,7 +580,7 @@ public class WagePaymentInputDeleteHandler
 		}
 
 		throw new IllegalArgumentException(
-			"올바른 소득구분을 선택해야 합니다.");
+			"正しい所得区分を選択する必要があります。");
 	}
 
 	private String encode(

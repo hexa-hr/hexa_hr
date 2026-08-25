@@ -23,7 +23,7 @@ import wage.model.WagePaymentCalculationResult;
 import wage.model.WagePaymentItemInput;
 import wage.model.WageTypeSystemIds;
 
-// 급여 자동계산 서비스
+// 給与自動計算Service
 public class WagePaymentCalculationService {
 
 	private static final double NATIONAL_PENSION_RATE = 0.0475;
@@ -42,17 +42,17 @@ public class WagePaymentCalculationService {
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
 
-			// 사원의 고용형태 조회
+			// 社員の雇用形態を照会
 			String employmentType = employeeDao.selectEmploymentType(
 				conn,
 				request.getEmployeeId());
 
 			if (employmentType == null) {
 				throw new IllegalArgumentException(
-					"존재하지 않는 사원입니다.");
+					"存在しない社員です。");
 			}
 
-			// 고용형태에 따른 급여 유형 판정
+			// 雇用形態に応じた給与区分の判定
 			String wageCategory = determineWageCategory(employmentType);
 
 			List<WageType> wageTypes = wageTypeDao.selectAllWageTypes(conn);
@@ -79,21 +79,21 @@ public class WagePaymentCalculationService {
 
 				if (input == null || input.getWageTypeId() == null) {
 					throw new IllegalArgumentException(
-						"급여항목 정보가 올바르지 않습니다.");
+						"給与項目情報が正しくありません。");
 				}
 
 				Integer wageTypeId = input.getWageTypeId();
 
 				if (!inputWageTypeIds.add(wageTypeId)) {
 					throw new IllegalArgumentException(
-						"중복된 급여항목이 포함되어 있습니다.");
+						"重複した給与項目が含まれています。");
 				}
 
 				WageType wageType = wageTypeMap.get(wageTypeId);
 
 				if (wageType == null) {
 					throw new IllegalArgumentException(
-						"존재하지 않는 급여항목입니다.");
+						"存在しない給与項目です。");
 				}
 
 				long wageValue = 0L;
@@ -104,7 +104,7 @@ public class WagePaymentCalculationService {
 
 				if (wageValue < 0) {
 					throw new IllegalArgumentException(
-						"급여금액은 0원 이상이어야 합니다.");
+						"給与金額は0ウォン以上である必要があります。");
 				}
 
 				WagePaymentCalculationItem item = new WagePaymentCalculationItem(
@@ -149,7 +149,7 @@ public class WagePaymentCalculationService {
 				} else {
 
 					throw new IllegalStateException(
-						"급여항목의 지급·공제 구분이 올바르지 않습니다.");
+						"給与項目の支給・控除区分が正しくありません。");
 				}
 			}
 
@@ -182,10 +182,10 @@ public class WagePaymentCalculationService {
 
 			if ("BUSINESS".equals(wageCategory)) {
 
-				// 사업소득 소득세 = 비과세 지급항목을 포함한 지급총액의 3%
+				// 事業所得の所得税 = 非課税支給項目を含む支給総額の3%
 				long incomeTax = totalPayment * 3 / 100;
 
-				// 지방소득세 = 소득세의 10%
+				// 住民税 = 所得税の10%
 				long localTax = roundToTen(
 					incomeTax * 0.1);
 
@@ -224,7 +224,7 @@ public class WagePaymentCalculationService {
 					insuranceAgency)) {
 
 					throw new IllegalStateException(
-						"중복된 보험 가입정보가 존재합니다: "
+						"重複した保険加入情報が存在します: "
 							+ insuranceAgency);
 				}
 
@@ -233,7 +233,7 @@ public class WagePaymentCalculationService {
 					insurance.getInsuranceAmount());
 			}
 
-			// 국민연금
+			// 国民年金
 			if (insuranceAmountMap.containsKey("국민연금")) {
 
 				long nationalPensionBase = resolveInsuranceBaseAmount(
@@ -253,7 +253,7 @@ public class WagePaymentCalculationService {
 					nationalPension);
 			}
 
-			// 건강보험
+			// 健康保険
 			if (insuranceAmountMap.containsKey("건강보험")) {
 
 				long healthInsuranceBase = resolveInsuranceBaseAmount(
@@ -273,7 +273,7 @@ public class WagePaymentCalculationService {
 					healthInsurance);
 			}
 
-			// 장기요양보험
+			// 介護保険
 			if (insuranceAmountMap.containsKey("장기요양보험")) {
 
 				long longTermCare = roundToTen(
@@ -289,7 +289,7 @@ public class WagePaymentCalculationService {
 					longTermCare);
 			}
 
-			// 고용보험
+			// 雇用保険
 			if (insuranceAmountMap.containsKey("고용보험")) {
 
 				long employmentInsuranceBase = resolveInsuranceBaseAmount(
@@ -322,12 +322,12 @@ public class WagePaymentCalculationService {
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
-				"급여 자동계산 중 데이터베이스 오류가 발생했습니다.",
+				"給与自動計算中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
 
-	// 고용형태에 따른 급여 유형 판정
+	// 雇用形態に応じた給与区分の判定
 	private String determineWageCategory(
 		String employmentType) {
 
@@ -412,12 +412,12 @@ public class WagePaymentCalculationService {
 				.equals(wageTypeId);
 	}
 
-	// 10원 단위 반올림
+	// 10ウォン単位で四捨五入
 	private long roundToTen(double value) {
 		return Math.round(value / 10.0) * 10L;
 	}
 
-	// 보험별 기준금액 결정
+	// 保険別の基準金額を決定
 	private long resolveInsuranceBaseAmount(
 		Long insuranceAmount,
 		long monthlyRemuneration) {
@@ -494,21 +494,21 @@ public class WagePaymentCalculationService {
 
 		if (request == null) {
 			throw new IllegalArgumentException(
-				"급여 계산 요청 정보가 없습니다.");
+				"給与計算リクエスト情報がありません。");
 		}
 
 		if (request.getEmployeeId() == null
 			|| request.getEmployeeId() <= 0) {
 
 			throw new IllegalArgumentException(
-				"사원 정보가 올바르지 않습니다.");
+				"社員情報が正しくありません。");
 		}
 
 		String wageMonth = request.getWageMonth();
 
 		if (wageMonth == null) {
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		wageMonth = wageMonth.trim();
@@ -517,26 +517,26 @@ public class WagePaymentCalculationService {
 			YearMonth.parse(wageMonth);
 		} catch (DateTimeParseException e) {
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 
 		if (request.getSettlementStartDate() == null
 			|| request.getSettlementEndDate() == null) {
 
 			throw new IllegalArgumentException(
-				"정산기간을 입력해야 합니다.");
+				"精算期間を入力する必要があります。");
 		}
 
 		if (request.getSettlementStartDate().after(
 			request.getSettlementEndDate())) {
 
 			throw new IllegalArgumentException(
-				"정산 시작일은 종료일보다 늦을 수 없습니다.");
+				"精算開始日は終了日より後にすることはできません。");
 		}
 
 		if (request.getItemInputs() == null) {
 			throw new IllegalArgumentException(
-				"급여항목 정보가 없습니다.");
+				"給与項目情報がありません。");
 		}
 	}
 }

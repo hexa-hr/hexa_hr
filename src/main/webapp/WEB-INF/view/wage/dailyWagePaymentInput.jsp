@@ -6,17 +6,20 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>급여입력/관리(일용직)</title>
+<title>給与入力・管理（日雇い）</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
 body {
 	font-family: Arial, sans-serif;
-    margin: 0;
+	margin: 0;
 	color: #222222;
 }
 
@@ -463,10 +466,10 @@ th {
 
 <body>
 
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<h1 class="page-title">급여입력/관리(일용직)</h1>
+	<h1 class="page-title">給与入力・管理（日雇い）</h1>
 
 	<c:if test="${not empty errorMessage}">
 		<div class="error-message">
@@ -487,7 +490,7 @@ th {
 
 			<input type="hidden" id="wageMonth" name="wageMonth"
 				value="<c:out value='${wageMonth}' />"> <label
-				for="wageYear">귀속연월</label> <select id="wageYear" required></select>
+				for="wageYear">帰属年月</label> <select id="wageYear" required></select>
 
 			<select id="wageMonthPart" required>
 
@@ -496,12 +499,12 @@ th {
 					<fmt:formatNumber var="monthValue" value="${month}" pattern="00" />
 
 					<option value="${monthValue}">
-						<c:out value="${monthValue}" />월
+						<c:out value="${monthValue}" />月
 					</option>
 
 				</c:forEach>
 
-			</select> <label for="wagePeriod">급여차수</label> <select id="wagePeriod"
+			</select> <label for="wagePeriod">給与回次</label> <select id="wagePeriod"
 				name="wagePeriod" required>
 
 				<c:forEach var="period" begin="1" end="10">
@@ -511,7 +514,7 @@ th {
 							selected
 						</c:if>>
 
-						<c:out value="${period}" />차
+						<c:out value="${period}" />回
 
 					</option>
 
@@ -523,11 +526,11 @@ th {
 
 		<div class="form-row">
 
-			<label>정산 시작일</label> <input type="date"
-				value="<c:out value='${settlementStartDate}' />" readonly> <label>정산
-				종료일</label> <input type="date"
-				value="<c:out value='${settlementEndDate}' />" readonly> <label>급여
-				지급일</label> <input type="date" value="<c:out value='${wagePaymentDate}' />"
+			<label>精算開始日</label> <input type="date"
+				value="<c:out value='${settlementStartDate}' />" readonly> <label>精算
+				終了日</label> <input type="date"
+				value="<c:out value='${settlementEndDate}' />" readonly> <label>給与
+				支給日</label> <input type="date" value="<c:out value='${wagePaymentDate}' />"
 				readonly>
 
 		</div>
@@ -536,7 +539,7 @@ th {
 
 	<dialog id="employeeSelectDialog" class="employee-select-dialog">
 
-	<h2>급여지급 사원선택</h2>
+	<h2>給与支給対象社員の選択</h2>
 
 	<form id="employeeModalAddForm" method="get"
 		action="${pageContext.request.contextPath}/wage/dailyPaymentInput.do">
@@ -564,18 +567,18 @@ th {
 			<div class="employee-modal-search">
 
 				<input type="search" id="employeeModalSearchInput"
-					placeholder="사원번호 또는 성명" autocomplete="off">
+					placeholder="社員番号または氏名" autocomplete="off">
 
-				<button type="button" id="employeeModalSearchButton">검색</button>
+				<button type="button" id="employeeModalSearchButton">検索</button>
 
 			</div>
 
 			<select id="employeeModalDepartmentFilter">
-				<option value="">부서별</option>
+				<option value="">部署別</option>
 			</select> <select id="employeeModalPositionFilter">
-				<option value="">직위별</option>
+				<option value="">役職別</option>
 			</select> <select id="employeeModalStatusFilter">
-				<option value="">재직상태</option>
+				<option value="">在職状態</option>
 			</select>
 
 		</div>
@@ -588,12 +591,12 @@ th {
 					<tr>
 						<th><input type="checkbox" id="employeeModalSelectAll">
 						</th>
-						<th>구분</th>
-						<th>사원번호</th>
-						<th>성명</th>
-						<th>부서</th>
-						<th>직위</th>
-						<th>상태</th>
+						<th>区分</th>
+						<th>社員番号</th>
+						<th>氏名</th>
+						<th>部署</th>
+						<th>役職</th>
+						<th>状態</th>
 					</tr>
 				</thead>
 
@@ -638,7 +641,7 @@ th {
 					</c:forEach>
 
 					<tr id="employeeModalNoResultRow" style="display: none;">
-						<td colspan="7">조건에 맞는 일용직 사원이 없습니다.</td>
+						<td colspan="7">条件に一致する日雇い社員がいません。</td>
 					</tr>
 
 				</tbody>
@@ -649,19 +652,19 @@ th {
 
 		<div class="employee-modal-pagination">
 
-			<button type="button" id="employeeModalPreviousPage">‹ 이전</button>
+			<button type="button" id="employeeModalPreviousPage">‹ 前へ</button>
 
 			<strong id="employeeModalPageInfo">1 / 1</strong>
 
-			<button type="button" id="employeeModalNextPage">다음 ›</button>
+			<button type="button" id="employeeModalNextPage">次へ ›</button>
 
 		</div>
 
 		<div class="employee-modal-actions">
 
-			<button type="submit" id="employeeModalSubmitButton">사원선택</button>
+			<button type="submit" id="employeeModalSubmitButton">社員選択</button>
 
-			<button type="button" id="employeeModalCloseButton">선택취소</button>
+			<button type="button" id="employeeModalCloseButton">キャンセル</button>
 
 		</div>
 
@@ -675,7 +678,7 @@ th {
 
 			<div class="employee-toolbar">
 
-				<button type="button" id="employeeSelectOpenButton">신규추가</button>
+				<button type="button" id="employeeSelectOpenButton">新規追加</button>
 
 				<form id="employeeDeleteAllForm" method="post"
 					action="${pageContext.request.contextPath}/wage/dailyPaymentInputDelete.do"
@@ -698,7 +701,7 @@ th {
 
 					</c:forEach>
 
-					<button type="submit" id="employeeDeleteAllButton">전체삭제</button>
+					<button type="submit" id="employeeDeleteAllButton">一括削除</button>
 
 				</form>
 
@@ -723,20 +726,20 @@ th {
 
 					</c:forEach>
 
-					<button type="submit" id="employeeDeleteButton">선택삭제</button>
+					<button type="submit" id="employeeDeleteButton">選択削除</button>
 
 				</form>
 
 			</div>
 
-			<h2>사원 목록</h2>
+			<h2>社員一覧</h2>
 
 			<div class="employee-count">
-				총
+				合計
 				<c:out
 					value="${empty visibleEmployeeCount
 					? 0 : visibleEmployeeCount}" />
-				명
+				名
 			</div>
 
 			<div class="table-scroll">
@@ -745,10 +748,10 @@ th {
 
 					<thead>
 						<tr>
-							<th>구분</th>
-							<th>성명</th>
-							<th>부서</th>
-							<th>실지급액</th>
+							<th>区分</th>
+							<th>氏名</th>
+							<th>部署</th>
+							<th>差引支給額</th>
 						</tr>
 					</thead>
 
@@ -830,7 +833,7 @@ th {
 								<td><a class="employee-name-link"
 									href="${pendingEmployeeSelectUrl}"> <c:out
 											value="${employee.koreanName}" />
-								</a> <span class="pending-mark">(미저장)</span></td>
+								</a> <span class="pending-mark">（未保存）</span></td>
 
 								<td><c:out
 										value="${empty employee.departmentName
@@ -848,7 +851,7 @@ th {
 							and empty pendingEmployees}">
 
 							<tr>
-								<td colspan="4" class="center">등록된 일용직 급여 사원이 없습니다.</td>
+								<td colspan="4" class="center">給与対象として登録された日雇い社員がいません。</td>
 							</tr>
 
 						</c:if>
@@ -887,11 +890,11 @@ th {
 
 							<thead>
 								<tr>
-									<th>일자</th>
-									<th>지급율</th>
-									<th>지급액</th>
-									<th>소득세</th>
-									<th>지방소득세</th>
+									<th>日付</th>
+									<th>支給率</th>
+									<th>支給額</th>
+									<th>所得税</th>
+									<th>住民税</th>
 								</tr>
 							</thead>
 
@@ -923,13 +926,13 @@ th {
 
 									<c:when test="${wageInputEnabled == true}">
 										<tr class="daily-empty-row">
-											<td colspan="5">정산기간 내 일용직 근무기록이 없습니다.</td>
+											<td colspan="5">精算期間内に日雇い勤務記録がありません。</td>
 										</tr>
 									</c:when>
 
 									<c:otherwise>
 										<tr class="daily-empty-row">
-											<td colspan="5">사원을 선택해 주세요.</td>
+											<td colspan="5">社員を選択してください。</td>
 										</tr>
 									</c:otherwise>
 
@@ -945,13 +948,13 @@ th {
 
 						<div class="deduction-header">
 
-							<strong>공제항목</strong>
+							<strong>控除項目</strong>
 
 							<div class="deduction-header-actions">
 
 								<button type="submit"
 									<c:if test="${not wageInputEnabled}">disabled</c:if>>
-									4대보험</button>
+									4大保険</button>
 
 							</div>
 
@@ -986,7 +989,7 @@ th {
 							</c:when>
 
 							<c:otherwise>
-								<div class="deduction-empty">현재 급여차수에 표시할 공제항목이 없습니다.</div>
+								<div class="deduction-empty">現在の給与回次に表示する控除項目はありません。</div>
 							</c:otherwise>
 
 						</c:choose>
@@ -998,30 +1001,30 @@ th {
 				<div class="daily-subtotals">
 
 					<div class="daily-subtotal">
-						<span>지급총액</span> <strong> <fmt:formatNumber
+						<span>支給総額</span> <strong> <fmt:formatNumber
 								value="${empty currentTotalPayment
 									? 0 : currentTotalPayment}"
-								pattern="#,##0" />원
+								pattern="#,##0" />ウォン
 						</strong>
 					</div>
 
 					<div class="daily-subtotal">
-						<span>공제총액</span> <strong> <fmt:formatNumber
+						<span>控除総額</span> <strong> <fmt:formatNumber
 								value="${empty currentTotalDeduction
 									? 0 : currentTotalDeduction}"
-								pattern="#,##0" />원
+								pattern="#,##0" />ウォン
 						</strong>
 					</div>
 
 				</div>
 
 				<div class="daily-net-total">
-					실지급액 :
+					差引支給額：
 					<fmt:formatNumber
 						value="${empty currentNetPayment
 							? 0 : currentNetPayment}"
 						pattern="#,##0" />
-					원
+					ウォン
 				</div>
 
 				<c:url var="dailyContentClearUrl" value="/wage/dailyPaymentInput.do">
@@ -1038,12 +1041,12 @@ th {
 
 					<button type="submit"
 						formaction="${pageContext.request.contextPath}/wage/dailyPaymentInputSave.do"
-						<c:if test="${not wageInputEnabled}">disabled</c:if>>저장</button>
+						<c:if test="${not wageInputEnabled}">disabled</c:if>>保存</button>
 
 					<button type="button" id="dailyContentClearButton"
 						data-clear-url="<c:out value='${dailyContentClearUrl}' />"
-						<c:if test="${not wageInputEnabled}">disabled</c:if>>내용
-						지우기</button>
+						<c:if test="${not wageInputEnabled}">disabled</c:if>>入力内容を
+						クリア</button>
 
 				</div>
 
@@ -1055,38 +1058,38 @@ th {
 
 	<section class="payroll-summary">
 
-		<h2>급여 종합정보</h2>
+		<h2>給与総合情報</h2>
 
 		<div class="payroll-summary-grid">
 
 			<div class="payroll-summary-card summary-count">
-				<span>월 합계</span> <strong> <c:out
+				<span>月間合計</span> <strong> <c:out
 						value="${empty monthlyEmployeeCount
-						? 0 : monthlyEmployeeCount}" />건
+						? 0 : monthlyEmployeeCount}" />件
 				</strong>
 			</div>
 
 			<div class="payroll-summary-card summary-payment">
-				<span>지급 총액</span> <strong> <fmt:formatNumber
+				<span>支給総額</span> <strong> <fmt:formatNumber
 						value="${empty monthlyTotalPayment
 							? 0 : monthlyTotalPayment}"
-						pattern="#,##0" />원
+						pattern="#,##0" />ウォン
 				</strong>
 			</div>
 
 			<div class="payroll-summary-card summary-deduction">
-				<span>공제 총액</span> <strong> <fmt:formatNumber
+				<span>控除総額</span> <strong> <fmt:formatNumber
 						value="${empty monthlyTotalDeduction
 							? 0 : monthlyTotalDeduction}"
-						pattern="#,##0" />원
+						pattern="#,##0" />ウォン
 				</strong>
 			</div>
 
 			<div class="payroll-summary-card summary-net">
-				<span>실지급액</span> <strong> <fmt:formatNumber
+				<span>差引支給額</span> <strong> <fmt:formatNumber
 						value="${empty monthlyNetPayment
 							? 0 : monthlyNetPayment}"
-						pattern="#,##0" />원
+						pattern="#,##0" />ウォン
 				</strong>
 			</div>
 
@@ -1483,7 +1486,7 @@ th {
 					event.preventDefault();
 
 					window.alert(
-						"추가할 사원을 선택해 주세요.");
+						"追加する社員を選択してください。");
 
 					return;
 				}
@@ -1568,14 +1571,14 @@ th {
 				if (!employeeIdInput.value.trim()) {
 
 					window.alert(
-						"선택된 사원이 없습니다.");
+						"選択された社員がいません。");
 
 					return;
 				}
 
 				const confirmed =
 					window.confirm(
-						"선택된 사원을 삭제 하시겠습니까?");
+						"選択した社員を削除しますか？");
 
 				if (!confirmed) {
 					return;
@@ -1639,15 +1642,15 @@ th {
 				if (!hasCurrentEmployees) {
 
 					window.alert(
-						"추가된 사원이 없습니다.");
+						"追加された社員がいません。");
 
 					return;
 				}
 
 				const confirmed =
 					window.confirm(
-						"■ 주의!!\n"
-						+ "- [전체] 급여입력 정보를 삭제 하시겠습니까?");
+						"■ 注意！\n"
+						+ "- [すべて] 給与入力情報を削除しますか？");
 
 				if (!confirmed) {
 					return;
@@ -1655,9 +1658,9 @@ th {
 
 				const finalConfirmed =
 					window.confirm(
-						"주의!!\n"
-						+ "삭제된 급여입력 정보는 복구할 수 없습니다.\n"
-						+ "삭제 하시겠습니까?");
+						"注意！\n"
+						+ "削除した給与入力情報は復元できません。\n"
+						+ "削除しますか？");
 
 				if (!finalConfirmed) {
 					return;
@@ -1731,7 +1734,7 @@ th {
 				document.createElement("option");
 
 			option.value = String(year);
-			option.textContent = year + "년";
+			option.textContent = year + "年";
 
 			wageYearSelect.appendChild(option);
 		}
@@ -1861,10 +1864,10 @@ th {
 		}
 
 		/*
-		 * pending은 현재 렌더링된 링크와 폼에서는 유지하지만
-		 * 주소에서는 제거한다.
+		 * pendingは現在レンダリングされているリンクとフォームでは維持するが
+		 * URLからは削除する。
 		 *
-		 * 따라서 F5 시 미저장 사원은 다시 나타나지 않는다.
+		 * したがって、F5時には未保存の社員は再表示されない。
 		 */
 		window.history.replaceState(
 			null,

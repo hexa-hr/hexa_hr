@@ -7,7 +7,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>급여항목 구성 통계</title>
+<title>給与項目構成統計</title>
 
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -265,10 +265,9 @@ button {
 	<jsp:include page="/WEB-INF/view/include/header.jsp" />
 	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<h1>급여항목 구성 통계</h1>
+	<h1>給与項目構成統計</h1>
 
-	<p class="description">귀속년월과 사원을 선택하면 해당 사원의 급여항목 구성표를 확인할 수 있습니다.
-	</p>
+	<p class="description">帰属年月と社員を選択すると、該当社員の給与項目構成表を確認できます。</p>
 
 	<jsp:useBean id="today" class="java.util.Date" />
 
@@ -289,7 +288,7 @@ button {
 		<div class="search-row">
 
 			<label for="wageYear"><span class="required-mark">*</span>
-				귀속년월을 선택해 주세요.</label> <select id="wageYear">
+				帰属年月を選択してください。</label> <select id="wageYear">
 
 				<c:forEach begin="0" end="9" var="offset">
 
@@ -297,7 +296,7 @@ button {
 
 					<option value="${yearOption}"
 						<c:if test="${yearOption == selectedYearValue}">selected</c:if>>${yearOption}
-						년</option>
+						年</option>
 
 				</c:forEach>
 
@@ -309,7 +308,7 @@ button {
 
 					<option value="${monthOption}"
 						<c:if test="${monthOption == selectedMonthValue}">selected</c:if>>${monthOption}
-						월</option>
+						月</option>
 
 				</c:forEach>
 
@@ -318,16 +317,16 @@ button {
 			<%-- Handler 가 받는 파라미터는 그대로 wageMonth 이므로 제출 직전에 연-월을 합쳐 넣는다 --%>
 			<input type="hidden" id="wageMonth" name="wageMonth"
 				value="${selectedYearValue}-${selectedMonthValue}"> <label
-				for="selectedEmployeeName">대상자를 선택해 주세요.</label> <input
+				for="selectedEmployeeName">対象社員を選択してください。</label> <input
 				type="hidden" id="employeeId" name="employeeId"
 				value="<c:out value='${selectedEmployeeId}' />"> <input
 				type="text" id="selectedEmployeeName" class="employee-name"
 				value="<c:out value='${selectedEmployeeName}' />"
-				placeholder="대상자를 선택해 주세요." readonly>
+				placeholder="対象社員を選択してください。" readonly>
 
-			<button type="button" id="openEmployeeModal">사원선택</button>
+			<button type="button" id="openEmployeeModal">社員選択</button>
 
-			<button type="submit" name="search" value="true">조회</button>
+			<button type="submit" name="search" value="true">照会</button>
 
 		</div>
 
@@ -346,21 +345,21 @@ button {
 		<div class="modal-content">
 
 			<div class="modal-header">
-				<h2>급여통계 사원선택</h2>
+				<h2>給与統計対象社員の選択</h2>
 
 				<button type="button" id="closeEmployeeModal">×</button>
 			</div>
 
 			<div class="employee-filter">
 
-				<input type="text" id="employeeKeyword" placeholder="사원검색">
+				<input type="text" id="employeeKeyword" placeholder="社員検索">
 
 				<select id="departmentFilter">
-					<option value="">전체 부서</option>
+					<option value="">全部署</option>
 				</select> <select id="statusFilter">
-					<option value="">전체 상태</option>
-					<option value="재직">재직</option>
-					<option value="퇴직">퇴직</option>
+					<option value="">すべての状態</option>
+					<option value="재직">在職</option>
+					<option value="퇴직">退職</option>
 				</select>
 
 			</div>
@@ -372,11 +371,11 @@ button {
 
 					<thead>
 						<tr>
-							<th>구분</th>
-							<th>성명</th>
-							<th>부서</th>
-							<th>직위</th>
-							<th>상태</th>
+							<th>区分</th>
+							<th>氏名</th>
+							<th>部署</th>
+							<th>役職</th>
+							<th>状態</th>
 						</tr>
 					</thead>
 
@@ -413,9 +412,9 @@ button {
 
 			<div class="modal-buttons">
 
-				<button type="button" id="selectEmployeeButton">사원선택</button>
+				<button type="button" id="selectEmployeeButton">社員選択</button>
 
-				<button type="button" id="cancelEmployeeButton">선택취소</button>
+				<button type="button" id="cancelEmployeeButton">キャンセル</button>
 
 			</div>
 
@@ -472,7 +471,7 @@ button {
 
 							<!-- 지급항목 : 항목명 -->
 							<tr>
-								<th class="row-head">지급항목</th>
+								<th class="row-head">支給項目</th>
 
 								<c:forEach var="row"
 									items="${itemCompositionStatistics.tablePaymentItems}">
@@ -485,14 +484,14 @@ button {
 									<th class="item-head"></th>
 								</c:forEach>
 
-								<th class="total-head">합계</th>
+								<th class="total-head">合計</th>
 
 								<td class="outside"></td>
 							</tr>
 
 							<!-- 지급항목 : 금액 -->
 							<tr>
-								<th class="sub-head">┗ 금액 (원)</th>
+								<th class="sub-head">┗ 金額（ウォン）</th>
 
 								<c:forEach var="row"
 									items="${itemCompositionStatistics.tablePaymentItems}">
@@ -515,7 +514,7 @@ button {
 
 							<!-- 지급항목 : 구성비율 -->
 							<tr>
-								<th class="sub-head">┗ 구성비율</th>
+								<th class="sub-head">┗ 構成比</th>
 
 								<c:forEach var="row"
 									items="${itemCompositionStatistics.tablePaymentItems}">
@@ -545,7 +544,7 @@ button {
 
 							<!-- 공제항목 : 항목명 -->
 							<tr>
-								<th class="row-head">공제항목</th>
+								<th class="row-head">控除項目</th>
 
 								<c:forEach var="row"
 									items="${itemCompositionStatistics.tableDeductionItems}">
@@ -558,14 +557,14 @@ button {
 									<th class="item-head"></th>
 								</c:forEach>
 
-								<th class="total-head">합계</th>
+								<th class="total-head">合計</th>
 
-								<th class="net-head">실지급액</th>
+								<th class="net-head">差引支給額</th>
 							</tr>
 
 							<!-- 공제항목 : 금액 -->
 							<tr>
-								<th class="sub-head">┗ 금액 (원)</th>
+								<th class="sub-head">┗ 金額（ウォン）</th>
 
 								<c:forEach var="row"
 									items="${itemCompositionStatistics.tableDeductionItems}">
@@ -590,7 +589,7 @@ button {
 
 							<!-- 공제항목 : 구성비율 -->
 							<tr>
-								<th class="sub-head">┗ 구성비율</th>
+								<th class="sub-head">┗ 構成比</th>
 
 								<c:forEach var="row"
 									items="${itemCompositionStatistics.tableDeductionItems}">
@@ -627,7 +626,7 @@ button {
 
 				<c:otherwise>
 
-					<div class="no-data">조회된 급여 데이터가 없습니다.</div>
+					<div class="no-data">照会された給与データがありません。</div>
 
 				</c:otherwise>
 
@@ -798,7 +797,7 @@ button {
 			selectButton.addEventListener("click", function() {
 
 				if (selectedRow == null) {
-					alert("사원을 선택해 주세요.");
+					alert("社員を選択してください。");
 					return;
 				}
 
@@ -1047,21 +1046,21 @@ button {
 		const summaryTotal = totalPayment + totalDeduction;
 
 		const summaryItems = [ {
-			name : "지급항목",
+			name : "支給項目",
 			amount : totalPayment,
 			rate : summaryTotal > 0 ? (totalPayment * 100) / summaryTotal : 0
 		}, {
-			name : "공제항목",
+			name : "控除項目",
 			amount : totalDeduction,
 			rate : summaryTotal > 0 ? (totalDeduction * 100) / summaryTotal : 0
 		} ];
 
-		createDonutChart("summaryDonut", "지급항목\n+\n공제항목", summaryItems, [
+		createDonutChart("summaryDonut", "支給項目\n+\n控除項目", summaryItems, [
 				"#1CA9E8", "#F5900C" ]);
 
-		createDonutChart("paymentDonut", "지급\n세부항목", paymentItems, bluePalette);
+		createDonutChart("paymentDonut", "支給\n詳細項目", paymentItems, bluePalette);
 
-		createDonutChart("deductionDonut", "공제\n세부항목", deductionItems,
+		createDonutChart("deductionDonut", "控除\n詳細項目", deductionItems,
 				orangePalette);
 	</script>
 

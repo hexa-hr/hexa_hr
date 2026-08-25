@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import mvc.command.CommandHandler;
 import wage.service.WageLedgerDeleteService;
 
-// 급여대장 - 귀속연월/급여차수 전체 급여 삭제 Handler
+// 給与台帳 - 帰属年月・給与回次の全給与削除Handler
 public class WageLedgerDeleteHandler
 	implements CommandHandler {
 
@@ -42,7 +42,7 @@ public class WageLedgerDeleteHandler
 					"deleteConfirmed"))) {
 
 				throw new IllegalArgumentException(
-					"삭제 확인이 필요합니다.");
+					"削除の確認が必要です。");
 			}
 
 			if (!"true".equals(
@@ -50,7 +50,7 @@ public class WageLedgerDeleteHandler
 					"deleteFinalConfirmed"))) {
 
 				throw new IllegalArgumentException(
-					"최종 삭제 확인이 필요합니다.");
+					"最終削除の確認が必要です。");
 			}
 
 			wageLedgerDeleteService.delete(

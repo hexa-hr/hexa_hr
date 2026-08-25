@@ -6,12 +6,15 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>월별 개인급여 통계</title>
+<title>月別個人給与統計</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <script
 	src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
@@ -22,7 +25,7 @@
 <style>
 body {
 	font-family: Arial, sans-serif;
-    margin: 0;
+	margin: 0;
 }
 
 .description {
@@ -208,12 +211,12 @@ button {
 
 <body>
 
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<h1>월별 개인급여 통계</h1>
+	<h1>月別個人給与統計</h1>
 
-	<p class="description">귀속년도와 사원을 선택하면 해당 사원의 월별 급여현황을 확인할 수 있습니다.</p>
+	<p class="description">帰属年度と社員を選択すると、該当社員の月別給与状況を確認できます。</p>
 
 	<jsp:useBean id="today" class="java.util.Date" />
 
@@ -224,8 +227,8 @@ button {
 
 		<div class="search-row">
 
-			<label for="year"><span class="required-mark">*</span> 귀속년도를
-				선택해 주세요.</label> <select id="year" name="year">
+			<label for="year"><span class="required-mark">*</span>
+				帰属年度を選択してください。</label> <select id="year" name="year">
 
 				<c:forEach begin="0" end="9" var="offset">
 
@@ -233,20 +236,20 @@ button {
 
 					<option value="${yearOption}"
 						<c:if test="${yearOption == selectedYear}">selected</c:if>>${yearOption}
-						년</option>
+						年</option>
 
 				</c:forEach>
 
-			</select> <label for="selectedEmployeeName">대상자를 선택해 주세요.</label> <input
+			</select> <label for="selectedEmployeeName">対象社員を選択してください。</label> <input
 				type="hidden" id="employeeId" name="employeeId"
 				value="<c:out value='${selectedEmployeeId}' />"> <input
 				type="text" id="selectedEmployeeName" class="employee-name"
 				value="<c:out value='${selectedEmployeeName}' />"
-				placeholder="대상자를 선택해 주세요." readonly>
+				placeholder="対象社員を選択してください。" readonly>
 
-			<button type="button" id="openEmployeeModal">사원선택</button>
+			<button type="button" id="openEmployeeModal">社員選択</button>
 
-			<button type="submit" name="search" value="true">조회</button>
+			<button type="submit" name="search" value="true">照会</button>
 
 		</div>
 
@@ -265,21 +268,21 @@ button {
 		<div class="modal-content">
 
 			<div class="modal-header">
-				<h2>급여통계 사원선택</h2>
+				<h2>給与統計対象社員の選択</h2>
 
 				<button type="button" id="closeEmployeeModal">×</button>
 			</div>
 
 			<div class="employee-filter">
 
-				<input type="text" id="employeeKeyword" placeholder="사원검색">
+				<input type="text" id="employeeKeyword" placeholder="社員検索">
 
 				<select id="departmentFilter">
-					<option value="">전체 부서</option>
+					<option value="">全部署</option>
 				</select> <select id="statusFilter">
-					<option value="">전체 상태</option>
-					<option value="재직">재직</option>
-					<option value="퇴직">퇴직</option>
+					<option value="">すべての状態</option>
+					<option value="재직">在職</option>
+					<option value="퇴직">退職</option>
 				</select>
 
 			</div>
@@ -291,11 +294,11 @@ button {
 
 					<thead>
 						<tr>
-							<th>구분</th>
-							<th>성명</th>
-							<th>부서</th>
-							<th>직위</th>
-							<th>상태</th>
+							<th>区分</th>
+							<th>氏名</th>
+							<th>部署</th>
+							<th>役職</th>
+							<th>状態</th>
 						</tr>
 					</thead>
 
@@ -332,9 +335,9 @@ button {
 
 			<div class="modal-buttons">
 
-				<button type="button" id="selectEmployeeButton">사원선택</button>
+				<button type="button" id="selectEmployeeButton">社員選択</button>
 
-				<button type="button" id="cancelEmployeeButton">선택취소</button>
+				<button type="button" id="cancelEmployeeButton">キャンセル</button>
 
 			</div>
 
@@ -369,16 +372,16 @@ button {
 				<thead>
 					<tr>
 
-						<th>구분</th>
+						<th>区分</th>
 
 						<c:forEach var="row" items="${monthlyPersonalStatistics.rows}"
 							varStatus="status">
 
-							<th>${status.count}월</th>
+							<th>${status.count}月</th>
 
 						</c:forEach>
 
-						<th class="total-column">합계</th>
+						<th class="total-column">合計</th>
 
 					</tr>
 				</thead>
@@ -388,7 +391,7 @@ button {
 
 					<tr>
 
-						<td class="row-title">월급여액 (천원)</td>
+						<td class="row-title">月間給与額（千ウォン）</td>
 
 						<c:forEach var="row" items="${monthlyPersonalStatistics.rows}">
 
@@ -406,7 +409,7 @@ button {
 
 					<tr>
 
-						<td class="sub-title">└ 공제액 (천원)</td>
+						<td class="sub-title">└ 控除額（千ウォン）</td>
 
 						<c:forEach var="row" items="${monthlyPersonalStatistics.rows}">
 
@@ -424,7 +427,7 @@ button {
 
 					<tr>
 
-						<td class="sub-title">└ 실지급액 (천원)</td>
+						<td class="sub-title">└ 差引支給額（千ウォン）</td>
 
 						<c:forEach var="row" items="${monthlyPersonalStatistics.rows}">
 
@@ -582,7 +585,7 @@ button {
 			selectButton.addEventListener("click", function() {
 
 				if (selectedRow == null) {
-					alert("사원을 선택해 주세요.");
+					alert("社員を選択してください。");
 					return;
 				}
 
@@ -610,8 +613,8 @@ button {
 	</script>
 
 	<script>
-		const monthLabels = [ "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월",
-				"9월", "10월", "11월", "12월" ];
+		const monthLabels = [ "1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月",
+				"9月", "10月", "11月", "12月" ];
 
 		const deductionData = [
 			<c:forEach var="row" items="${monthlyPersonalStatistics.rows}"
@@ -677,7 +680,7 @@ button {
 					datasets : [
 
 							{
-								label : "공제액 (천원)",
+								label : "控除額（千ウォン）",
 
 								data : deductionData,
 
@@ -714,7 +717,7 @@ button {
 							},
 
 							{
-								label : "실지급액 (천원)",
+								label : "差引支給額（千ウォン）",
 
 								data : netPaymentData,
 
@@ -810,7 +813,7 @@ button {
 										return "";
 									}
 
-									return "월급여액 (천원)  " + formatThousandWon(payment);
+									return "月間給与額（千ウォン）  " + formatThousandWon(payment);
 								},
 
 								label : function(context) {
@@ -853,7 +856,7 @@ button {
 
 							title : {
 								display : true,
-								text : "월급여액 (천원)",
+								text : "月間給与額（千ウォン）",
 								color : axisColor
 							},
 
