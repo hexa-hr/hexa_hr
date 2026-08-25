@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import employee.dao.UserInfoDao;
-import employee.service.EmployeeRegisterService; // 🌟 사원등록 서비스를 불러옵니다!
+import employee.service.EmployeeRegisterService;
 import jdbc.JdbcUtil;
 import jdbc.connection.ConnectionProvider;
 import mvc.command.CommandHandler;
@@ -17,7 +17,6 @@ import mvc.command.CommandHandler;
 public class UserInfoHandler implements CommandHandler {
 
 	private UserInfoDao dao = new UserInfoDao();
-	// 🌟 사원등록 페이지와 똑같은 DB 테이블을 바라보기 위해 서비스 객체 생성
 	private EmployeeRegisterService empService = new EmployeeRegisterService();
 
 	@Override
@@ -36,8 +35,6 @@ public class UserInfoHandler implements CommandHandler {
 				}
 
 				request.setAttribute("info", info);
-
-				// 🌟 핵심 변경: UserInfoDao가 아닌, 사원등록(EmployeeRegisterService)에서 쓰는 부서/직위 목록을 그대로 가져옵니다!
 				request.setAttribute("deptList", empService.getDepartments());
 				request.setAttribute("posList", empService.getPositions());
 
@@ -57,32 +54,55 @@ public class UserInfoHandler implements CommandHandler {
 			session.setAttribute("fakeData", fakeData);
 
 			Map<String, String> dbData = new HashMap<>();
+
+			// 🏢 1. 회사 정보 파라미터 수집 (빠진 부분 모두 추가!)
 			dbData.put("companyName", request.getParameter("companyName"));
+			dbData.put("repTitle", request.getParameter("repTitle"));
+			dbData.put("repName", request.getParameter("repName"));
 			dbData.put("businessNumber", request.getParameter("businessNumber"));
+			dbData.put("corpNumber", request.getParameter("corpNumber"));
 			dbData.put("officeAddress", request.getParameter("officeAddress"));
-			dbData.put("phoneNumber", request.getParameter("phone1") + "-" + request.getParameter("phone2") + "-"
-				+ request.getParameter("phone3"));
+			dbData.put("website", request.getParameter("website"));
+			dbData.put("bizType", request.getParameter("bizType"));
+			dbData.put("bizItem", request.getParameter("bizItem"));
+
+			// 회사 전화번호 합치기
+			String p1 = request.getParameter("phone1");
+			dbData.put("phoneNumber", (p1 != null && !p1.isEmpty()
+				? p1 + "-" + request.getParameter("phone2") + "-" + request.getParameter("phone3") : ""));
+
+			// 회사 팩스번호 합치기
+			String f1 = request.getParameter("fax1");
+			dbData.put("faxNumber", (f1 != null && !f1.isEmpty()
+				? f1 + "-" + request.getParameter("fax2") + "-" + request.getParameter("fax3") : ""));
+
+			String estDate = request.getParameter("establishmentDate");
+			dbData.put("establishmentDate",
+				(estDate != null && estDate.matches("\\d{4}-\\d{2}-\\d{2}")) ? estDate : "");
+
+			// 👤 2. 담당자 정보 파라미터 수집 (빠진 전화번호 추가!)
 			dbData.put("contactName", request.getParameter("contactName"));
 			dbData.put("departmentId", request.getParameter("departmentId"));
 			dbData.put("positionId", request.getParameter("positionId"));
 			dbData.put("email", request.getParameter("email"));
 
-			String estDate = request.getParameter("establishmentDate");
-			if (estDate != null && estDate.matches("\\d{4}-\\d{2}-\\d{2}")) {
-				dbData.put("establishmentDate", estDate);
-			} else {
-				dbData.put("establishmentDate", "");
-			}
+			// 담당자 전화번호 합치기
+			String cp1 = request.getParameter("cPhone1");
+			dbData.put("conPhoneNumber", (cp1 != null && !cp1.isEmpty()
+				? cp1 + "-" + request.getParameter("cPhone2") + "-" + request.getParameter("cPhone3") : ""));
 
-			// 화면에서 급여 설정값(날짜 등) 뽑아오기
+			// 담당자 휴대폰번호 합치기
+			String mob1 = request.getParameter("mobile1");
+			dbData.put("mobileNumber", (mob1 != null && !mob1.isEmpty()
+				? mob1 + "-" + request.getParameter("mobile2") + "-" + request.getParameter("mobile3") : ""));
+
+			// 💰 3. 급여 설정 및 계좌 파라미터 수집
 			Integer salaryCalc1 = parseInt(request.getParameter("salaryCalc1"));
 			Integer salaryCalc2 = parseInt(request.getParameter("salaryCalc2"));
 			Integer salaryPaymentDate = parseInt(request.getParameter("salaryPaymentDate"));
 			String calc1MonthType = request.getParameter("calc1MonthType");
 			String calc2MonthType = request.getParameter("calc2MonthType");
 			String paymentMonthType = request.getParameter("paymentMonthType");
-
-			// 추가된 부분: 은행, 계좌번호, 예금주 파라미터 뽑아오기
 			String bankName = request.getParameter("bankName");
 			String accountNumber = request.getParameter("accountNumber");
 			String depositStocks = request.getParameter("depositStocks");
@@ -92,12 +112,10 @@ public class UserInfoHandler implements CommandHandler {
 				conn = ConnectionProvider.getConnection();
 				conn.setAutoCommit(false);
 
-				// 1. 기존 회사 정보 업데이트
+				// DB 업데이트 실행
 				dao.updateUserInfo(conn, dbData);
-
-				// 2. 모든 사원의 급여일 테이블 일괄 업데이트 실행! (파라미터 3개 추가 연결 완료)
-				dao.updateAllEmployeeSalaryDates(conn, salaryCalc1, salaryCalc2, salaryPaymentDate,
-					calc1MonthType, calc2MonthType, paymentMonthType, bankName, accountNumber, depositStocks);
+				dao.updateAllEmployeeSalaryDates(conn, salaryCalc1, salaryCalc2, salaryPaymentDate, calc1MonthType,
+					calc2MonthType, paymentMonthType, bankName, accountNumber, depositStocks);
 
 				conn.commit();
 			} catch (Exception e) {
@@ -115,7 +133,6 @@ public class UserInfoHandler implements CommandHandler {
 		return null;
 	}
 
-	// 문자열을 안전하게 숫자로 바꿔주는 헬퍼 메서드
 	private Integer parseInt(String val) {
 		if (val == null || val.trim().isEmpty())
 			return null;

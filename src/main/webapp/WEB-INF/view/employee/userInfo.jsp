@@ -7,7 +7,6 @@
 <title>사용자 정보</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
 <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
 <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
 
@@ -123,12 +122,62 @@
                         <tr>
                             <th><span class="req">*</span>전화번호</th>
                             <td>
-                                <select name="phone1"><option>대표(없음)</option><option value="02" ${info.phone1 == '02' ? 'selected' : ''}>02</option></select> - 
+                                <select name="phone1">
+                                    <option value="">대표(없음)</option>
+                                    <option value="010" ${info.phone1 == '010' ? 'selected' : ''}>휴대폰(010)</option>
+                                    <option value="050" ${info.phone1 == '050' ? 'selected' : ''}>인터넷(050)</option>
+                                    <option value="0507" ${info.phone1 == '0507' ? 'selected' : ''}>인터넷(0507)</option>
+                                    <option value="070" ${info.phone1 == '070' ? 'selected' : ''}>인터넷(070)</option>
+                                    <option value="0303" ${info.phone1 == '0303' ? 'selected' : ''}>인터넷(0303)</option>
+                                    <option value="0504" ${info.phone1 == '0504' ? 'selected' : ''}>인터넷(0504)</option>
+                                    <option value="02" ${info.phone1 == '02' ? 'selected' : ''}>서울(02)</option>
+                                    <option value="051" ${info.phone1 == '051' ? 'selected' : ''}>부산(051)</option>
+                                    <option value="053" ${info.phone1 == '053' ? 'selected' : ''}>대구(053)</option>
+                                    <option value="032" ${info.phone1 == '032' ? 'selected' : ''}>인천(032)</option>
+                                    <option value="062" ${info.phone1 == '062' ? 'selected' : ''}>광주(062)</option>
+                                    <option value="042" ${info.phone1 == '042' ? 'selected' : ''}>대전(042)</option>
+                                    <option value="052" ${info.phone1 == '052' ? 'selected' : ''}>울산(052)</option>
+                                    <option value="044" ${info.phone1 == '044' ? 'selected' : ''}>세종(044)</option>
+                                    <option value="031" ${info.phone1 == '031' ? 'selected' : ''}>경기(031)</option>
+                                    <option value="033" ${info.phone1 == '033' ? 'selected' : ''}>강원(033)</option>
+                                    <option value="043" ${info.phone1 == '043' ? 'selected' : ''}>충북(043)</option>
+                                    <option value="041" ${info.phone1 == '041' ? 'selected' : ''}>충남(041)</option>
+                                    <option value="063" ${info.phone1 == '063' ? 'selected' : ''}>전북(063)</option>
+                                    <option value="061" ${info.phone1 == '061' ? 'selected' : ''}>전남(061)</option>
+                                    <option value="054" ${info.phone1 == '054' ? 'selected' : ''}>경북(054)</option>
+                                    <option value="055" ${info.phone1 == '055' ? 'selected' : ''}>경남(055)</option>
+                                    <option value="064" ${info.phone1 == '064' ? 'selected' : ''}>제주(064)</option>
+                                </select> - 
                                 <input type="text" name="phone2" value="${info.phone2}" style="width: 40px;"> - <input type="text" name="phone3" value="${info.phone3}" style="width: 40px;">
                             </td>
                             <th>팩스번호</th>
                             <td>
-                                <select name="fax1"><option>선택</option><option value="02" ${info.fax1 == '02' ? 'selected' : ''}>서울(02)</option></select> - 
+                                <select name="fax1">
+                                    <option value="">대표(없음)</option>
+                                    <option value="010" ${info.fax1 == '010' ? 'selected' : ''}>휴대폰(010)</option>
+                                    <option value="050" ${info.fax1 == '050' ? 'selected' : ''}>인터넷(050)</option>
+                                    <option value="0507" ${info.fax1 == '0507' ? 'selected' : ''}>인터넷(0507)</option>
+                                    <option value="070" ${info.fax1 == '070' ? 'selected' : ''}>인터넷(070)</option>
+                                    <option value="0303" ${info.fax1 == '0303' ? 'selected' : ''}>인터넷(0303)</option>
+                                    <option value="0504" ${info.fax1 == '0504' ? 'selected' : ''}>인터넷(0504)</option>
+                                    <option value="02" ${info.fax1 == '02' ? 'selected' : ''}>서울(02)</option>
+                                    <option value="051" ${info.fax1 == '051' ? 'selected' : ''}>부산(051)</option>
+                                    <option value="053" ${info.fax1 == '053' ? 'selected' : ''}>대구(053)</option>
+                                    <option value="032" ${info.fax1 == '032' ? 'selected' : ''}>인천(032)</option>
+                                    <option value="062" ${info.fax1 == '062' ? 'selected' : ''}>광주(062)</option>
+                                    <option value="042" ${info.fax1 == '042' ? 'selected' : ''}>대전(042)</option>
+                                    <option value="052" ${info.fax1 == '052' ? 'selected' : ''}>울산(052)</option>
+                                    <option value="044" ${info.fax1 == '044' ? 'selected' : ''}>세종(044)</option>
+                                    <option value="031" ${info.fax1 == '031' ? 'selected' : ''}>경기(031)</option>
+                                    <option value="033" ${info.fax1 == '033' ? 'selected' : ''}>강원(033)</option>
+                                    <option value="043" ${info.fax1 == '043' ? 'selected' : ''}>충북(043)</option>
+                                    <option value="041" ${info.fax1 == '041' ? 'selected' : ''}>충남(041)</option>
+                                    <option value="063" ${info.fax1 == '063' ? 'selected' : ''}>전북(063)</option>
+                                    <option value="061" ${info.fax1 == '061' ? 'selected' : ''}>전남(061)</option>
+                                    <option value="054" ${info.fax1 == '054' ? 'selected' : ''}>경북(054)</option>
+                                    <option value="055" ${info.fax1 == '055' ? 'selected' : ''}>경남(055)</option>
+                                    <option value="064" ${info.fax1 == '064' ? 'selected' : ''}>제주(064)</option>
+                                </select> - 
                                 <input type="text" name="fax2" value="${info.fax2}" style="width: 40px;"> - <input type="text" name="fax3" value="${info.fax3}" style="width: 40px;">
                             </td>
                         </tr>
@@ -167,11 +216,48 @@
                         </tr>
                         <tr>
                             <th>전화번호</th>
-                            <td><select name="cPhone1"><option>선택</option></select> - <input type="text" name="cPhone2" value="${info.cPhone2}" style="width: 40px;"> - <input type="text" name="cPhone3" value="${info.cPhone3}" style="width: 40px;"></td>
+                            <td>
+                                <select name="cPhone1">
+                                    <option value="">선택</option>
+                                    <option value="010" ${info.cPhone1 == '010' ? 'selected' : ''}>휴대폰(010)</option>
+                                    <option value="050" ${info.cPhone1 == '050' ? 'selected' : ''}>인터넷(050)</option>
+                                    <option value="0507" ${info.cPhone1 == '0507' ? 'selected' : ''}>인터넷(0507)</option>
+                                    <option value="070" ${info.cPhone1 == '070' ? 'selected' : ''}>인터넷(070)</option>
+                                    <option value="0303" ${info.cPhone1 == '0303' ? 'selected' : ''}>인터넷(0303)</option>
+                                    <option value="0504" ${info.cPhone1 == '0504' ? 'selected' : ''}>인터넷(0504)</option>
+                                    <option value="02" ${info.cPhone1 == '02' ? 'selected' : ''}>서울(02)</option>
+                                    <option value="051" ${info.cPhone1 == '051' ? 'selected' : ''}>부산(051)</option>
+                                    <option value="053" ${info.cPhone1 == '053' ? 'selected' : ''}>대구(053)</option>
+                                    <option value="032" ${info.cPhone1 == '032' ? 'selected' : ''}>인천(032)</option>
+                                    <option value="062" ${info.cPhone1 == '062' ? 'selected' : ''}>광주(062)</option>
+                                    <option value="042" ${info.cPhone1 == '042' ? 'selected' : ''}>대전(042)</option>
+                                    <option value="052" ${info.cPhone1 == '052' ? 'selected' : ''}>울산(052)</option>
+                                    <option value="044" ${info.cPhone1 == '044' ? 'selected' : ''}>세종(044)</option>
+                                    <option value="031" ${info.cPhone1 == '031' ? 'selected' : ''}>경기(031)</option>
+                                    <option value="033" ${info.cPhone1 == '033' ? 'selected' : ''}>강원(033)</option>
+                                    <option value="043" ${info.cPhone1 == '043' ? 'selected' : ''}>충북(043)</option>
+                                    <option value="041" ${info.cPhone1 == '041' ? 'selected' : ''}>충남(041)</option>
+                                    <option value="063" ${info.cPhone1 == '063' ? 'selected' : ''}>전북(063)</option>
+                                    <option value="061" ${info.cPhone1 == '061' ? 'selected' : ''}>전남(061)</option>
+                                    <option value="054" ${info.cPhone1 == '054' ? 'selected' : ''}>경북(054)</option>
+                                    <option value="055" ${info.cPhone1 == '055' ? 'selected' : ''}>경남(055)</option>
+                                    <option value="064" ${info.cPhone1 == '064' ? 'selected' : ''}>제주(064)</option>
+                                </select> - <input type="text" name="cPhone2" value="${info.cPhone2}" style="width: 40px;"> - <input type="text" name="cPhone3" value="${info.cPhone3}" style="width: 40px;">
+                            </td>
                         </tr>
                         <tr>
                             <th>휴대폰번호</th>
-                            <td><select name="mobile1"><option value="010">010</option></select> - <input type="text" name="mobile2" value="${info.mobile2}" style="width: 40px;"> - <input type="text" name="mobile3" value="${info.mobile3}" style="width: 40px;"></td>
+                            <td>
+                                <select name="mobile1">
+                                    <option value="">선택</option>
+                                    <option value="010" ${info.mobile1 == '010' ? 'selected' : ''}>010</option>
+                                    <option value="011" ${info.mobile1 == '011' ? 'selected' : ''}>011</option>
+                                    <option value="016" ${info.mobile1 == '016' ? 'selected' : ''}>016</option>
+                                    <option value="017" ${info.mobile1 == '017' ? 'selected' : ''}>017</option>
+                                    <option value="018" ${info.mobile1 == '018' ? 'selected' : ''}>018</option>
+                                    <option value="019" ${info.mobile1 == '019' ? 'selected' : ''}>019</option>
+                                </select> - <input type="text" name="mobile2" value="${info.mobile2}" style="width: 40px;"> - <input type="text" name="mobile3" value="${info.mobile3}" style="width: 40px;">
+                            </td>
                         </tr>
                         <tr><th>이메일</th><td><input type="text" name="email" value="${info.email}" style="width: 90%;"></td></tr>
                     </table>
@@ -194,7 +280,6 @@
                             <c:forEach var="day" begin="1" end="31">
                                 <option value="${day}" ${info.salaryCalc1 == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}일</option>
                             </c:forEach>
-                            <!-- 🌟 말일의 value를 0으로 명확히 지정 -->
                             <option value="0" ${info.salaryCalc1 != null && info.salaryCalc1 == 0 ? 'selected' : ''}>말일</option>
                         </select>
                         <span style="margin: 0 10px;">~</span>
@@ -208,7 +293,6 @@
                             <c:forEach var="day" begin="1" end="31">
                                 <option value="${day}" ${info.salaryCalc2 == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}일</option>
                             </c:forEach>
-                            <!-- 🌟 말일의 value를 0으로 명확히 지정 -->
                             <option value="0" ${info.salaryCalc2 != null && info.salaryCalc2 == 0 ? 'selected' : ''}>말일</option>
                         </select>
                     </td>
@@ -224,7 +308,6 @@
                             <c:forEach var="day" begin="1" end="31">
                                 <option value="${day}" ${info.salaryPaymentDate == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}일</option>
                             </c:forEach>
-                            <!-- 🌟 말일의 value를 0으로 명확히 지정 -->
                             <option value="0" ${info.salaryPaymentDate != null && info.salaryPaymentDate == 0 ? 'selected' : ''}>말일</option>
                         </select>
                     </td>
