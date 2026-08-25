@@ -13,7 +13,7 @@ public class AttendanceService {
 
 	private AttendanceDao attendanceDao = new AttendanceDao();
 
-	// 1. 근태 목록 전체 조회 메서드 추가
+	// 1. 勤怠リスト全体照会メソッドの追加
 	public List<AttendanceType> getAttendanceList() {
 		Connection conn = null;
 		try {
@@ -26,11 +26,15 @@ public class AttendanceService {
 		}
 	}
 
-	// 2. 근태 추가 메서드
+	// 2. 勤怠追加メソッド
 	public void addAttendance(AttendanceType att) {
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
+			// DAO 중복 체크 호출
+			if (attendanceDao.isDuplicateName(conn, att.getAttendanceTypeName())) {
+				throw new RuntimeException("이미 존재하는 근태 항목 이름입니다.");
+			}
 			attendanceDao.insert(conn, att);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
@@ -39,25 +43,24 @@ public class AttendanceService {
 		}
 	}
 
-	// 근태항목 수정
+	//근태항목수정 [유진 코드]
 	public void modifyAttendance(AttendanceType att) {
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
-			conn.setAutoCommit(false);
-
+			// DAO 중복 체크 호출
+			if (attendanceDao.isDuplicateNameForUpdate(conn, att.getAttendanceTypeId(), att.getAttendanceTypeName())) {
+				throw new RuntimeException("이미 존재하는 근태 항목 이름입니다.");
+			}
 			attendanceDao.update(conn, att);
-
-			conn.commit();
 		} catch (SQLException e) {
-			JdbcUtil.rollback(conn);
 			throw new RuntimeException(e);
 		} finally {
 			JdbcUtil.close(conn);
 		}
 	}
 
-	// 근태항목 삭제
+	// 勤怠項目の削除
 	public void removeAttendance(int attendanceTypeId) {
 		Connection conn = null;
 		try {
@@ -69,13 +72,13 @@ public class AttendanceService {
 			conn.commit();
 		} catch (SQLException e) {
 			JdbcUtil.rollback(conn);
-			throw new RuntimeException("근태항목 삭제 오류", e);
+			throw new RuntimeException("勤怠項目の削除エラー", e);
 		} finally {
 			JdbcUtil.close(conn);
 		}
 	}
 
-	// 근태 기록 저장 및 수정 (에스더 코드)
+	// 勤怠記録の保存および編集 (エスターのコード)
 	public boolean saveAttendance(attendance.model.AttendanceVO vo) {
 		Connection conn = null;
 		try {
@@ -83,7 +86,7 @@ public class AttendanceService {
 			conn.setAutoCommit(false);
 			int result = 0;
 
-			// attendanceId가 존재하면 수정, 아니면 신규 등록
+			// attendanceIdが存在する場合は編集、そうでない場合は新規登録
 			if (vo.getAttendanceId() > 0) {
 				result = attendanceDao.updateAttendance(conn, vo);
 			} else {
@@ -99,7 +102,7 @@ public class AttendanceService {
 			}
 		} catch (SQLException e) {
 			JdbcUtil.rollback(conn);
-			throw new RuntimeException("근태 기록 저장 중 오류 발생", e);
+			throw new RuntimeException("勤怠記録の保存中にエラーが発生", e);
 		} finally {
 			JdbcUtil.close(conn);
 		}

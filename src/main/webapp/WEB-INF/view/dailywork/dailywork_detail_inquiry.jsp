@@ -5,20 +5,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>일용직 근무 조회 - 상세 조회</title>
+<title>日雇い勤務照会 - 詳細照会</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
 body {
-    font-family: 'Malgun Gothic', dotum, sans-serif;
-    margin: 0;
+	font-family: 'Malgun Gothic', dotum, sans-serif;
+	margin: 0;
 }
 
-/* 상단 제목 및 탭 디자인 */
+/* 上部タイトルおよびタブデザイン */
 .page-header {
 	margin-bottom: 20px;
 }
@@ -72,7 +75,7 @@ body {
 	background-color: #a6a6a6;
 }
 
-/* 전체 레이아웃 (좌측 검색창, 우측 리스트) */
+/* 全体レイアウト (左側検索窓、右側リスト) */
 .container {
 	display: flex;
 	gap: 20px;
@@ -133,7 +136,7 @@ body {
 	font-weight: bold;
 }
 
-/* 우측 리스트(테이블) 디자인 */
+/* 右側リスト(テーブル)デザイン */
 .table-container {
 	flex: 1;
 	overflow-x: auto;
@@ -168,35 +171,35 @@ th {
 
 <body>
 
-	<!-- 상단 제목 영역 -->
+	<!-- 上部タイトル領域 -->
 	<div class="page-header">
 		<div class="title-area">
 
 			<div>
-				<h2>일용직 근무 조회</h2>
+				<h2>日雇い勤務照会</h2>
 
 			</div>
 		</div>
 		<hr class="divider">
 	</div>
 
-	<!-- 탭 버튼 영역 -->
+	<!-- タブボタン領域 -->
 	<div class="tab-group">
 		<button type="button" class="tab-btn tab-inactive"
-			onclick="location.href='monthly.do'">월별 조회</button>
+			onclick="location.href='monthly.do'">月別照会</button>
 		<button type="button" class="tab-btn tab-active"
-			onclick="location.href='detail.do'">상세 조회</button>
+			onclick="location.href='detail.do'">詳細照会</button>
 	</div>
 
 	<div class="container">
-		<!-- ==================== [왼쪽] 검색 폼 영역 ==================== -->
+		<!-- ==================== [左側] 検索フォーム領域 ==================== -->
 		<div class="search-box">
 			<form id="searchForm" action="detail.do" method="get">
 
 				<div class="search-row">
 					<input type="checkbox" id="chkDate"
 						onchange="toggleInput('chkDate', 'startDate', 'endDate')">
-					<label for="chkDate">근무일자</label>
+					<label for="chkDate">勤務日付</label>
 					<div style="display: flex; gap: 5px; align-items: center;">
 						<input type="date" id="startDate" name="startDate" disabled>
 						~ <input type="date" id="endDate" name="endDate" disabled>
@@ -206,17 +209,17 @@ th {
 				<div class="search-row">
 					<input type="checkbox" id="chkName"
 						onchange="toggleInput('chkName', 'empName')"> <label
-						for="chkName">성명</label> <input type="text" id="empName"
-						name="empName" placeholder="성명을 입력하세요." disabled>
+						for="chkName">姓名</label> <input type="text" id="empName"
+						name="empName" placeholder="姓名を入力してください。" disabled>
 				</div>
 
 				<div class="search-row">
 					<input type="checkbox" id="chkDept"
 						onchange="toggleInput('chkDept', 'deptId')"> <label
-						for="chkDept">부서</label> 
-					<!-- [수정된 부분] 하드코딩 지우고 DB 데이터 연동 -->
+						for="chkDept">部署</label>
+					<!-- [修正された部分] ハードコーディングを消してDBデータ連動 -->
 					<select id="deptId" name="deptId" disabled>
-						<option value="">선택하세요.</option>
+						<option value="">選択してください。</option>
 						<c:forEach var="dept" items="${deptList}">
 							<option value="${dept.id}">${dept.name}</option>
 						</c:forEach>
@@ -226,45 +229,45 @@ th {
 				<div class="search-row">
 					<input type="checkbox" id="chkProj"
 						onchange="toggleInput('chkProj', 'projectId')"> <label
-						for="chkProj">현장/프로젝트</label> <select id="projectId"
+						for="chkProj">現場/プロジェクト</label> <select id="projectId"
 						name="projectId" disabled>
-						<option value="">선택하세요.</option>
+						<option value="">選択してください。</option>
 						<c:forEach var="proj" items="${projectList}">
-							<!-- VO 클래스의 변수명에 맞게 projectName으로 유지 -->
+							<!-- VOクラスの変数名に合わせてprojectNameで維持 -->
 							<option value="${proj.fieldOrProjectId}">${proj.projectName}</option>
 						</c:forEach>
 					</select>
 				</div>
 
 				<div class="btn-group">
-					<button type="submit" class="btn-search">검색</button>
-					<button type="button" class="btn-all" onclick="viewAll()">전체보기</button>
+					<button type="submit" class="btn-search">検索</button>
+					<button type="button" class="btn-all" onclick="viewAll()">全体表示</button>
 				</div>
 			</form>
 		</div>
 
-		<!-- ==================== [오른쪽] 상세 데이터 테이블 ==================== -->
+		<!-- ==================== [右側] 詳細データテーブル ==================== -->
 		<div class="table-container">
 			<table>
 				<thead>
 					<tr>
-						<th class="text-blue">근무일자</th>
-						<th class="text-blue">사원번호</th>
-						<th class="text-blue">성명</th>
-						<th class="text-blue">부서</th>
-						<th class="text-blue">현장/프로젝트</th>
-						<th>일당</th>
-						<th>지급율</th>
-						<th>소득세</th>
-						<th>지방소득세</th>
-						<th>실지급액</th>
+						<th class="text-blue">勤務日付</th>
+						<th class="text-blue">社員番号</th>
+						<th class="text-blue">姓名</th>
+						<th class="text-blue">部署</th>
+						<th class="text-blue">現場/プロジェクト</th>
+						<th>日当</th>
+						<th>支給率</th>
+						<th>所得税</th>
+						<th>住民税</th>
+						<th>実支給額</th>
 					</tr>
 				</thead>
 				<tbody>
 					<c:choose>
 						<c:when test="${empty detailList}">
 							<tr>
-								<td colspan="10" style="padding: 30px;">조회된 상세 근무 기록이 없습니다.</td>
+								<td colspan="10" style="padding: 30px;">照会された詳細勤務記録がありません。</td>
 							</tr>
 						</c:when>
 						<c:otherwise>
@@ -292,7 +295,7 @@ th {
 	</div>
 
 	<script>
-        // 체크박스 클릭 시 입력창 활성화/비활성화 처리
+        // チェックボックスクリック時に入力窓の活性化/非活性化処理
         function toggleInput(chkId, ...inputIds) {
             const isChecked = document.getElementById(chkId).checked;
             
@@ -307,7 +310,7 @@ th {
             });
         }
 
-        // 페이지 로드 시 URL을 확인하여 사원명 세팅
+        // ページロード時にURLを確認して社員名をセッティング
         window.onload = function() {
             
             const urlParams = new URLSearchParams(window.location.search);
@@ -323,7 +326,7 @@ th {
             }
         };
 
-        // 전체보기 버튼 클릭 시 로직
+        // 全体表示ボタンクリック時のロジック
         function viewAll() {
             window.location.href = "detail.do"; 
         }

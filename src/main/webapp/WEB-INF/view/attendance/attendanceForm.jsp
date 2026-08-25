@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>근태 등록</title>
+<title>勤怠登録</title>
 <style>
 body {
 	font-family: 'Malgun Gothic', dotum, sans-serif;
@@ -94,14 +94,14 @@ input[type="number"] {
 		method="post">
 		<table class="form-table">
 			<tr class="top-border">
-				<th>입력일자</th>
+				<th>入力日</th>
 				<td><fmt:formatDate value="${now}" pattern="yyyy-MM-dd" /></td>
 			</tr>
 			<tr>
-				<th>근태항목</th>
+				<th>勤怠項目</th>
 				<td><select id="attendanceType" name="attendanceType">
-						<option value="" data-has-vacation="false">선택하세요.</option>
-						<!-- 서버에서 넘겨주는 근태항목 리스트(attendanceList)를 반복 -->
+						<option value="" data-has-vacation="false">選択してください。</option>
+						<!-- サーバーから渡される勤怠項目リスト(attendanceList)を反復 -->
 						<c:forEach var="att" items="${attendanceList}">
 							<option value="${att.attendanceTypeId}"
 								data-has-vacation="${not empty att.vacationTypeId ? 'true' : 'false'}"
@@ -113,57 +113,57 @@ input[type="number"] {
 				</select></td>
 			</tr>
 
-			<!-- 포상휴가 선택 시에만 노출되는 행 -->
+			<!-- リフレッシュ休暇選択時にのみ露出する行 -->
 			<tr id="rewardVacationRow" style="display: none;">
-				<th class="text-red">휴가적용기간</th>
+				<th class="text-red">休暇適用期間</th>
 				<td class="text-red"><span id="appliedStartDate">2017-01-01</span>
 					~ <span id="appliedEndDate">2017-12-31</span></td>
 			</tr>
 
 			<tr>
-				<th>기간</th>
+				<th>期間</th>
 				<td><input type="date" id="startDate" name="startDate">
 					~ <input type="date" id="endDate" name="endDate"></td>
 			</tr>
 
 			<tr>
-				<th>근태일수</th>
+				<th>勤怠日数</th>
 				<td><input type="number" id="attendanceDays"
-					name="attendanceDays" min="0" step="0.5"> 일
-					<button type="button" class="btn-blue">휴가일수 현황</button></td>
+					name="attendanceDays" min="0" step="0.5"> 日
+					<button type="button" class="btn-blue">休暇日数現状</button></td>
 			</tr>
 			<tr>
-				<th>금액(수당)</th>
+				<th>金額(手当)</th>
 				<td>
-					<!-- [수정 2] 입력 가능한 숫자 전용 input 칸으로 변경 --> <input type="number"
-					id="wageAmount" name="wageAmount" placeholder="0"> 원
+					<!-- [修正 2] 入力可能な数字専用のinput欄に変更 --> <input type="number"
+					id="wageAmount" name="wageAmount" placeholder="0"> ウォン
 				</td>
 			</tr>
 			<tr>
-				<th>적요</th>
+				<th>摘要</th>
 				<td><input type="text" id="remark" name="remark"
 					style="width: 80%;"></td>
 			</tr>
 		</table>
 
 		<div class="btn-group">
-			<button type="submit" class="btn-submit">저장</button>
+			<button type="submit" class="btn-submit">保存</button>
 
-			<button type="button" id="btnReset" class="btn-reset">내용 지우기</button>
+			<button type="button" id="btnReset" class="btn-reset">内容クリア</button>
 		</div>
 	</form>
 
 	<script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 오늘 날짜 구해서 '입력일자'에 표시
+    // 今日の日付を求めて「入力日」に表示
     const currentDateElement = document.getElementById('currentDate');
     const today = new Date();
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1, 1자리일 경우 앞에 '0' 붙임
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // 月は0から始まるため+1、1桁の場合は前に「0」を付ける
     const day = String(today.getDate()).padStart(2, '0');
     currentDateElement.textContent = `${year}-${month}-${day}`;
 
-    // 기존 변수 선언
+    // 既存変数の宣言
     const attendanceForm = document.getElementById('attendanceForm');
     const attendanceType = document.getElementById('attendanceType');
     const rewardVacationRow = document.getElementById('rewardVacationRow');
@@ -171,35 +171,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const endDate = document.getElementById('endDate');
     const btnReset = document.getElementById('btnReset');
     
-    // 포상휴가 허용 범위 날짜
+    // リフレッシュ休暇許容範囲の日付
     const minRange = "2017-01-01";
     const maxRange = "2017-12-31";
 
     function updateFormState() {
-        // 현재 선택된 <option> 태그를 가져옵니다.
+        // 現在選択されている<option>タグを取得します。
         const selectedOption = attendanceType.options[attendanceType.selectedIndex];
         
-        // <option>에 숨겨둔 데이터들을 꺼냅니다.
+        // <option>に隠しておいたデータを取り出します。
         const hasVacation = selectedOption.getAttribute('data-has-vacation') === 'true';
         const vName = selectedOption.getAttribute('data-vacation-name');
         const vStart = selectedOption.getAttribute('data-start');
         const vEnd = selectedOption.getAttribute('data-end');
 
-        // 선택한 근태항목에 연결된 휴가가 있는 경우
+        // 選択した勤怠項目に連結された休暇がある場合
         if (hasVacation && vStart && vEnd) {
-            rewardVacationRow.style.display = ''; // 행 보이기
+            rewardVacationRow.style.display = ''; // 行を表示
             
-            // 화면 텍스트 변경 (예: 어쩌구휴가 2026-01-01 ~ 2026-12-31)
+            // 画面テキストの変更（例：何とか休暇 2026-01-01 ~ 2026-12-31）
             document.getElementById('appliedStartDate').textContent = vName + " " + vStart;
             document.getElementById('appliedEndDate').textContent = vEnd;
             
-            // 기간 입력 input의 min, max 속성 동적 설정
+            // 期間入力inputのmin、max属性を動的設定
             startDate.min = vStart;
             startDate.max = vEnd;
             endDate.min = vStart;
             endDate.max = vEnd;
 
-            // 만약 이미 입력된 날짜가 제한 범위를 벗어났다면 범위 안으로 강제 조정
+            // もしすでに入力された日付が制限範囲から外れた場合、範囲内に強制調整
             if (startDate.value && (startDate.value < vStart || startDate.value > vEnd)) {
                 startDate.value = vStart;
             }
@@ -207,10 +207,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 endDate.value = vEnd;
             }
         } else {
-            // 연결된 휴가가 없는 일반 근태항목(지각, 연장근무 등)일 경우
-            rewardVacationRow.style.display = 'none'; // 행 숨기기
+            // 連結された休暇がない一般勤怠項目(遅刻、残業など)の場合
+            rewardVacationRow.style.display = 'none'; // 行を隠す
             
-            // 기간 제한 해제
+            // 期間制限の解除
             startDate.removeAttribute('min');
             startDate.removeAttribute('max');
             endDate.removeAttribute('min');
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     attendanceType.addEventListener('change', updateFormState);
 
-    // 내용 지우기 버튼 클릭 시 입력값 전체 삭제 및 상태 초기화
+    // 内容クリアボタンクリック時に入力値全体削除および状態初期化
     btnReset.addEventListener('click', function() {
         attendanceForm.reset();
         rewardVacationRow.style.display = 'none';

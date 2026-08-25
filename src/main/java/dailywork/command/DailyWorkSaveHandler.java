@@ -20,10 +20,10 @@ public class DailyWorkSaveHandler implements CommandHandler {
 		PrintWriter out = res.getWriter();
 
 		try {
-			// 1. 파라미터 안전한 파싱 (빈 값 에러 방지)
+			// 1. パラメータの安全なパース (空値エラー防止)
 			String empIdStr = req.getParameter("employee_id");
 			if (empIdStr == null || empIdStr.isEmpty()) {
-				out.println("<script>alert('사원이 선택되지 않았습니다.'); history.back();</script>");
+				out.println("<script>alert('社員が選択されていません。'); history.back();</script>");
 				return null;
 			}
 			int employeeId = Integer.parseInt(empIdStr);
@@ -35,43 +35,43 @@ public class DailyWorkSaveHandler implements CommandHandler {
 			String projIdStr = req.getParameter("field_or_project_id");
 			int fieldProjectId = (projIdStr != null && !projIdStr.isEmpty()) ? Integer.parseInt(projIdStr) : 0;
 
-			// 콤마 제거 및 숫자 파싱
+			// カンマの除去および数値パース
 			Long dailyWage = parseLongSafe(req.getParameter("daily_wage"));
 			Double paymentRate = parseDoubleSafe(req.getParameter("payment_rate"));
 			Long incomeTax = parseLongSafe(req.getParameter("income_tax"));
 			Long localTax = parseLongSafe(req.getParameter("local_tax"));
 			Long actualPayment = parseLongSafe(req.getParameter("actual_payment"));
 
-			// 수정(UPDATE)을 위한 work_id 수집 (신규 등록이면 0)
+			// 修正(UPDATE)のためのwork_id収集 (新規登録であれば0)
 			String workIdStr = req.getParameter("work_id");
 			Integer workId = (workIdStr != null && !workIdStr.trim().isEmpty()) ? Integer.parseInt(workIdStr) : null;
 
-			// 2. VO 객체 생성
+			// 2. VOオブジェクトの生成
 			DailyWorkVO vo = new DailyWorkVO(workId, employeeId, workDate, fieldProjectId, dailyWage, paymentRate,
 					incomeTax, localTax, actualPayment);
 
-			// 3. Service 호출
+			// 3. Serviceの呼び出し
 			boolean isSuccess = workService.saveDailyWork(vo);
 
-			// 4. 결과 출력
+			// 4. 結果出力
 			if (isSuccess) {
-				String msg = (workId != null && workId > 0) ? "근무 기록이 수정되었습니다." : "근무 기록이 등록되었습니다.";
+				String msg = (workId != null && workId > 0) ? "勤務記録が修正されました。" : "勤務記録が登録されました。";
 				out.println("<script>alert('" + msg + "'); location.href='" + req.getContextPath()
 						+ "/dailywork/manage.do';</script>");
 			} else {
-				out.println("<script>alert('저장에 실패했습니다.'); history.back();</script>");
+				out.println("<script>alert('保存に失敗しました。'); history.back();</script>");
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			out.println("<script>alert('오류 발생: " + e.getMessage().replace("'", "\\'") + "'); history.back();</script>");
+			out.println("<script>alert('エラー発生: " + e.getMessage().replace("'", "\\'") + "'); history.back();</script>");
 		} finally {
 			out.flush();
 		}
 		return null;
 	}
 
-	// 콤마(,)가 포함되었거나 비어있는 문자열을 안전하게 Long으로 변환하는 메서드
+	// カンマ(,)が含まれているか、空の文字列を安全にLongに変換するメソッド
 	private Long parseLongSafe(String val) {
 		if (val == null || val.trim().isEmpty())
 			return 0L;

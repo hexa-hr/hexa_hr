@@ -22,16 +22,16 @@ public class VacationTypeSettingHandler implements CommandHandler {
 	@Override
 	public String process(HttpServletRequest req, HttpServletResponse res) throws Exception {
 
-		// 1. 휴가항목 목록 조회
+		// 1. 休暇項目リストの取得
 		List<VacationType> vacationList = vacationService.getVacationList();
 
-		// 2. 근태항목 목록 조회
+		// 2. 勤怠項目リストの取得
 		List<AttendanceType> attendanceList = attendanceService.getAttendanceList();
 
-		// 3. 근태그룹 목록 조회 (드롭다운 용)
+		// 3. 勤怠グループリストの取得 (ドロップダウン用)
 		List<AttendanceGroup> attendanceGroupList = groupService.getGroupList();
 
-		// 4. Request 전달 영역 저장
+		// 4. リクエスト領域に保存
 		req.setAttribute("vacationList", vacationList);
 		req.setAttribute("attendanceList", attendanceList);
 		req.setAttribute("attendanceGroupList", attendanceGroupList);

@@ -174,4 +174,64 @@ public class WageTypeDao {
 		}
 	}
 
+	// [추가] 신규 등록 시 이름 중복 확인
+	public boolean isDuplicateName(Connection conn, String wageTypeName) throws SQLException {
+		String sql = "SELECT COUNT(*) FROM wage_type WHERE wage_type_name = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, wageTypeName);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next())
+					return rs.getInt(1) > 0;
+			}
+		}
+		return false;
+	}
+
+	// [추가] 수정 시 자기 자신을 제외하고 이름 중복 확인
+	public boolean isDuplicateNameForUpdate(Connection conn, int wageTypeId, String wageTypeName)
+		throws SQLException {
+		String sql = "SELECT COUNT(*) FROM wage_type WHERE wage_type_name = ? AND wage_type_id != ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, wageTypeName);
+			pstmt.setInt(2, wageTypeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next())
+					return rs.getInt(1) > 0;
+			}
+		}
+		return false;
+	}
+
+	// [추가] ID로 특정 지급/공제 항목 조회
+	public WageType selectById(Connection conn, int wageTypeId) throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = "SELECT wage_type_id, wage_type_name, number_cut, attendance_or_lumpsum, "
+			+ "attendance_or_lumpsum_content, usage, item_type, taxable_yn, tax_free_limit, tax_free_name "
+			+ "FROM wage_type WHERE wage_type_id = ?";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, wageTypeId);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				return new WageType(
+					rs.getInt("wage_type_id"),
+					rs.getString("wage_type_name"),
+					rs.getString("number_cut"),
+					rs.getString("attendance_or_lumpsum"),
+					rs.getString("attendance_or_lumpsum_content"),
+					rs.getString("usage"),
+					rs.getString("item_type"),
+					rs.getString("taxable_yn"),
+					rs.getLong("tax_free_limit"),
+					rs.getString("tax_free_name"));
+			}
+			return null;
+		} finally {
+			JdbcUtil.close(rs);
+			JdbcUtil.close(pstmt);
+		}
+	}
+
 }

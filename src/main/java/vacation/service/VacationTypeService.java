@@ -13,53 +13,53 @@ public class VacationTypeService {
 
 	private VacationTypeDao vacationDao = new VacationTypeDao();
 
-	// 목록 가져오기
+	// 一覧取得
 	public List<VacationType> getVacationList() {
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
 			return vacationDao.selectAll(conn);
 		} catch (SQLException e) {
-			throw new RuntimeException("DB 조회 오류 발생", e);
+			throw new RuntimeException("DB照会エラー発生", e);
 		} finally {
 			JdbcUtil.close(conn);
 		}
 	}
 
-	// 휴가 항목 추가하기
+	// 休暇項目の追加
 	public void addVacationType(VacationType vacation) {
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
-			conn.setAutoCommit(false); // 트랜잭션 시작
+			conn.setAutoCommit(false); // トランザクション開始
 
 			vacationDao.insert(conn, vacation);
 
 			conn.commit();
 		} catch (SQLException e) {
 			JdbcUtil.rollback(conn);
-			throw new RuntimeException("DB 저장 오류 발생", e);
+			throw new RuntimeException("DB保存エラー発生", e);
 		} finally {
 			JdbcUtil.close(conn);
 		}
 	}
 
-	// 휴가 항목 수정하기 (추가된 메서드)
+	// 休暇項目の修正 (追加されたメソッド)
 	public void updateVacationType(VacationType vacation) {
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
-			conn.setAutoCommit(false); // 트랜잭션 시작
+			conn.setAutoCommit(false); // トランザクション開始
 
 			int updatedRows = vacationDao.update(conn, vacation);
 			if (updatedRows == 0) {
-				throw new RuntimeException("수정할 휴가 항목이 존재하지 않습니다.");
+				throw new RuntimeException("修正すべき休暇項目は存在しません。");
 			}
 
 			conn.commit();
 		} catch (SQLException e) {
 			JdbcUtil.rollback(conn);
-			throw new RuntimeException("DB 수정 오류 발생", e);
+			throw new RuntimeException("DB修正エラー発生", e);
 		} finally {
 			JdbcUtil.close(conn);
 		}

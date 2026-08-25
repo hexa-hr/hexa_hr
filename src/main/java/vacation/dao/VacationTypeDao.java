@@ -12,7 +12,7 @@ import vacation.model.VacationType;
 
 public class VacationTypeDao {
 
-	// 전체 목록 조회
+	// 全体目録照会
 	public List<VacationType> selectAll(Connection conn) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -38,8 +38,27 @@ public class VacationTypeDao {
 		}
 	}
 
-	// 신규 항목 저장 (Oracle 시퀀스 vacation_type_seq 사용 예시)
+	// 👉 [追加] 同じ休暇項目名が既に存在するか確認するメソッド
+	public boolean isDuplicateName(Connection conn, String vacationTypeName) throws SQLException {
+		String sql = "SELECT COUNT(*) FROM vacation_type WHERE vacation_type_name = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, vacationTypeName);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt(1) > 0;
+				}
+			}
+		}
+		return false;
+	}
+
+	// 休暇項目を追加（重複チェックロジックを含む）
 	public void insert(Connection conn, VacationType vacation) throws SQLException {
+		// 1. 登録しようとする名前がすでに存在するか検査
+		if (isDuplicateName(conn, vacation.getVacationTypeName())) {
+			throw new SQLException("既に存在する休暇項目の名前です。"); // 重複時の例外発生
+		}
+
 		PreparedStatement pstmt = null;
 		String sql = "INSERT INTO vacation_type (vacation_type_id, vacation_type_name, apply_period1, apply_period2, usage) "
 			+ "VALUES (vacation_type_seq.NEXTVAL, ?, ?, ?, ?)";
@@ -57,6 +76,11 @@ public class VacationTypeDao {
 	}
 
 	public int update(Connection conn, VacationType vacation) throws SQLException {
+		// 👉 [追加] 修正しようとする名前が自分を除いてすでに存在するかを検査
+		if (isDuplicateNameForUpdate(conn, vacation.getVacationTypeId(), vacation.getVacationTypeName())) {
+			throw new SQLException("既に存在する休暇項目の名前です。"); // 重複時の例外発生
+		}
+
 		String sql = "UPDATE vacation_type SET "
 			+ " vacation_type_name = ?, "
 			+ " apply_period1 = ?, "
@@ -67,7 +91,6 @@ public class VacationTypeDao {
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setString(1, vacation.getVacationTypeName());
 
-			// java.util.Date -> java.sql.Date 내부 변환
 			if (vacation.getApplyPeriod1() != null) {
 				pstmt.setDate(2, new java.sql.Date(vacation.getApplyPeriod1().getTime()));
 			} else {
@@ -94,5 +117,47 @@ public class VacationTypeDao {
 			pstmt.setInt(1, vacationTypeId);
 			return pstmt.executeUpdate();
 		}
+	}
+
+	public boolean isDuplicateNameForUpdate(Connection conn, int vacationTypeId, String vacationTypeName)
+		throws SQLException {
+		String sql = "SELECT COUNT(*) FROM vacation_type WHERE vacation_type_name = ? AND vacation_type_id != ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, vacationTypeName);
+			pstmt.setInt(2, vacationTypeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt(1) > 0;
+				}
+			}
+		}
+		return false;
+	}
+
+	// 該当する休暇項目が別のテーブル（vacation_days, attendance_type)で使用中か確認
+	public boolean isUsedInVacationDays(Connection conn, int vacationTypeId) throws SQLException {
+		// 1. vacation_daysテーブルの参照確認
+		String sql1 = "SELECT COUNT(*) FROM vacation_days WHERE vacation_type_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql1)) {
+			pstmt.setInt(1, vacationTypeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next() && rs.getInt(1) > 0) {
+					return true;
+				}
+			}
+		}
+
+		// 2. attendance_typeテーブルの参照確認
+		String sql2 = "SELECT COUNT(*) FROM attendance_type WHERE vacation_type_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql2)) {
+			pstmt.setInt(1, vacationTypeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next() && rs.getInt(1) > 0) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>휴가조회</title>
+<title>休暇照会</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -165,8 +165,8 @@ table.data-table tr:hover {
 					설정하기</option>
 
 				<!-- 2. 기본 안내 옵션 (선택 안 함) -->
-				<option value="" ${empty param.vacationTypeId ? 'selected' : ''}>전체
-					휴가항목</option>
+<%-- 				<option value="" ${empty param.vacationTypeId ? 'selected' : ''}>전체
+					휴가항목</option> --%>
 
 				<!-- 3. 사용여부가 'Y'인 휴가항목 리스트 출력 -->
 				<c:forEach var="vType" items="${activeVacationTypeList}">
@@ -220,7 +220,7 @@ table.data-table tr:hover {
 
 			<!-- 데이터 반복 출력 (행 클릭 시 상세 페이지 이동) -->
 			<c:forEach var="vac" items="${vacationList}">
-				<tr onclick="location.href='${pageContext.request.contextPath}/vacationDetail.do?employeeId=${vac.employeeId}'">
+				<tr onclick="location.href='${pageContext.request.contextPath}/vacationDetail.do?employeeId=${vac.employeeId}&vacationTypeId=${param.vacationTypeId}'">
 					<td>${vac.employmentType}</td>
 					<td>No-${vac.employeeNumber}</td>
 					<td style="color: #2563eb; text-decoration: underline; font-weight: bold;">${vac.koreanName}</td>
