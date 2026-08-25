@@ -6,12 +6,15 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>연도별 전체급여 통계</title>
+<title>年度別全体給与統計</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <script
 	src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
@@ -22,7 +25,7 @@
 <style>
 body {
 	font-family: Arial, sans-serif;
-    margin: 0;
+	margin: 0;
 }
 
 .description {
@@ -138,13 +141,12 @@ button {
 
 <body>
 
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<h1>연도별 전체급여 통계</h1>
+	<h1>年度別全体給与統計</h1>
 
-	<p class="description">귀속년도를 선택하면 선택연도를 포함한 최근 10개년의 전체 급여액과 인원현황을
-		확인할 수 있습니다.</p>
+	<p class="description">帰属年度を選択すると、選択年度を含む直近10年間の全体給与額と人数を確認できます。</p>
 
 	<jsp:useBean id="today" class="java.util.Date" />
 
@@ -155,8 +157,8 @@ button {
 
 		<div class="search-row">
 
-			<label for="year"><span class="required-mark">*</span> 귀속년도를
-				선택해 주세요.</label> <select id="year" name="year"
+			<label for="year"><span class="required-mark">*</span>
+				帰属年度を選択してください。</label> <select id="year" name="year"
 				onchange="this.form.submit();">
 
 				<c:forEach begin="0" end="9" var="offset">
@@ -165,7 +167,7 @@ button {
 
 					<option value="${yearOption}"
 						<c:if test="${yearOption == selectedYear}">selected</c:if>>${yearOption}
-						년</option>
+						年</option>
 
 				</c:forEach>
 
@@ -204,11 +206,11 @@ button {
 
 				<thead>
 					<tr>
-						<th>구분</th>
+						<th>区分</th>
 
 						<c:forEach var="row" items="${yearlyTotalStatistics.rows}">
 
-							<th><c:out value="${row.year}" />년</th>
+							<th><c:out value="${row.year}" />年</th>
 
 						</c:forEach>
 					</tr>
@@ -218,7 +220,7 @@ button {
 				<tbody>
 
 					<tr>
-						<td class="row-title">전체 급여액 (천원)</td>
+						<td class="row-title">全体給与額（千ウォン）</td>
 
 						<c:forEach var="row" items="${yearlyTotalStatistics.rows}">
 
@@ -230,7 +232,7 @@ button {
 
 
 					<tr>
-						<td class="growth-title">└ 증감률</td>
+						<td class="growth-title">└ 増減率</td>
 
 						<c:forEach var="row" items="${yearlyTotalStatistics.rows}">
 
@@ -263,7 +265,7 @@ button {
 
 
 					<tr>
-						<td class="row-title">인원 (명)</td>
+						<td class="row-title">人数（名）</td>
 
 						<c:forEach var="row" items="${yearlyTotalStatistics.rows}">
 
@@ -275,7 +277,7 @@ button {
 
 
 					<tr>
-						<td class="growth-title">└ 증감률</td>
+						<td class="growth-title">└ 増減率</td>
 
 						<c:forEach var="row" items="${yearlyTotalStatistics.rows}">
 
@@ -319,7 +321,7 @@ button {
 			<c:forEach var="row" items="${yearlyTotalStatistics.rows}"
 				varStatus="status">
 
-				"${row.year}년"
+				"${row.year}年"
 
 				<c:if test="${!status.last}">
 					,
@@ -376,7 +378,7 @@ button {
 							{
 								type : "bar",
 
-								label : "전체 급여액 (천원)",
+								label : "全体給与額（千ウォン）",
 
 								data : yearlyPaymentData,
 
@@ -417,7 +419,7 @@ button {
 							{
 								type : "line",
 
-								label : "인원 (명)",
+								label : "人数（名）",
 
 								data : yearlyEmployeeData,
 
@@ -551,7 +553,7 @@ button {
 
 							title : {
 								display : true,
-								text : "전체 급여액 (천원)",
+								text : "全体給与額（千ウォン）",
 								color : axisColor
 							},
 
@@ -575,7 +577,7 @@ button {
 
 							title : {
 								display : true,
-								text : "인원 (명)",
+								text : "人数（名）",
 								color : axisColor
 							},
 
