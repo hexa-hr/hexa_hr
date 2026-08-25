@@ -173,13 +173,13 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 					</tr>
 					<tr>
 						<th>銀行名</th>
-						<td><input type="text" name="bankName" value="${account.bankName}" placeholder="例: 国民銀行"></td>
+						<td><input type="text" name="dummy_bankName" value="" placeholder="例: 国民銀行"></td>
 						<th>口座番号</th>
-						<td><input type="text" name="accountNumber" value="${account.accountNumber}" placeholder="- を除いて入力"></td>
+						<td><input type="text" name="dummy_accountNumber" value="" placeholder="- を除いて入力"></td>
 					</tr>
 					<tr>
 						<th>口座名義人</th>
-						<td colspan="3"><input type="text" name="depositStocks" value="${account.depositStocks}" style="width: 36%;"></td>
+						<td colspan="3"><input type="text" name="dummy_depositStocks" value="" style="width: 36%;"></td>
 					</tr>
 				</table>
 
