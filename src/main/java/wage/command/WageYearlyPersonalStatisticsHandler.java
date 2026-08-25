@@ -56,7 +56,7 @@ public class WageYearlyPersonalStatisticsHandler implements CommandHandler {
 
 			req.setAttribute(
 				"errorMessage",
-				"사원을 선택해야 합니다.");
+				"社員を選択する必要があります。");
 
 			return FORM_VIEW;
 		}
@@ -79,7 +79,7 @@ public class WageYearlyPersonalStatisticsHandler implements CommandHandler {
 
 			if (selectedEmployee == null) {
 				throw new IllegalArgumentException(
-					"올바른 사원을 선택해야 합니다.");
+					"正しい社員を選択する必要があります。");
 			}
 
 			req.setAttribute(
@@ -99,7 +99,7 @@ public class WageYearlyPersonalStatisticsHandler implements CommandHandler {
 
 			req.setAttribute(
 				"errorMessage",
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 
 		} catch (IllegalArgumentException e) {
 

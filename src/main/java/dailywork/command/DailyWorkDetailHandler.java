@@ -1,20 +1,26 @@
 package dailywork.command;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import attendance.dao.AttendanceDao;
 import dailywork.model.FieldOrProjectVO;
 import dailywork.service.DailyWorkService;
 import dailywork.service.FieldOrProjectService;
+import jdbc.connection.ConnectionProvider;
 import mvc.command.CommandHandler;
 
 public class DailyWorkDetailHandler implements CommandHandler {
 
 	private DailyWorkService dailyWorkService = new DailyWorkService();
 	private FieldOrProjectService fieldOrProjectService = new FieldOrProjectService();
+
+	// [추가 1] 부서 목록 조회를 위해 이미 만들어져 있는 AttendanceDao 객체를 가져옵니다.
+	private AttendanceDao attendanceDao = new AttendanceDao();
 
 	@Override
 	public String process(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -34,9 +40,18 @@ public class DailyWorkDetailHandler implements CommandHandler {
 		// 3. 왼쪽 검색창의 "현장/프로젝트" 드롭다운(select)에 띄워줄 현장 목록 가져오기
 		List<FieldOrProjectVO> projectList = fieldOrProjectService.getVisibleProjects();
 
+		// [추가 2] DB에서 부서 목록 데이터(deptList) 가져오기
+		List<Map<String, String>> deptList = null;
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			deptList = attendanceDao.getDepartments(conn);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		// 4. 받아온 데이터들을 JSP 화면으로 넘겨주기
 		request.setAttribute("detailList", detailList);
 		request.setAttribute("projectList", projectList);
+		request.setAttribute("deptList", deptList); // [추가 3] 부서 리스트를 화면(JSP)으로 넘겨줍니다.
 
 		// 5. 상세조회 JSP 파일 경로 지정
 		return "/WEB-INF/view/dailywork/dailywork_detail_inquiry.jsp";

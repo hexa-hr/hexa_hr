@@ -2,8 +2,11 @@ package employee.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 import employee.model.Appointment;
 import jdbc.JdbcUtil;
@@ -32,5 +35,32 @@ public class AppointmentDao {
 		} finally {
 			JdbcUtil.close(pstmt);
 		}
+	}
+
+	// 🌟 새로 추가
+	public List<Appointment> selectAllByEmployeeId(Connection conn, int employeeId) throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<Appointment> result = new ArrayList<>();
+		try {
+			pstmt = prepareStatement("SELECT * FROM appointment WHERE employee_id = ? ORDER BY appointment_id ASC");
+			pstmt.setInt(1, employeeId);
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				result.add(new Appointment(rs.getInt("appointment_id"), rs.getInt("employee_id"),
+					rs.getString("appointment_type"),
+					rs.getDate("appointment_date"), rs.getInt("department_id"), rs.getInt("position_id"),
+					rs.getString("position_type"), rs.getString("remarks3")));
+			}
+			return result;
+		} finally {
+			JdbcUtil.close(rs);
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// 헬퍼 메서드용 내부 처리
+	private PreparedStatement prepareStatement(String sql) throws SQLException {
+		return jdbc.connection.ConnectionProvider.getConnection().prepareStatement(sql);
 	}
 }

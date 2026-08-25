@@ -19,6 +19,7 @@ import wage.model.WageMonthlyTotalStatisticsRow;
 import wage.model.WagePaymentCalculationItem;
 import wage.model.WagePaymentEmployeeRow;
 import wage.model.WagePaymentPreviousSourceOption;
+import wage.model.WageTypeSystemIds;
 
 public class WageDao {
 
@@ -32,11 +33,11 @@ public class WageDao {
 			+ "       d.department_name, "
 			+ "       p.position_name, "
 			+ "       w.wage_month, "
-			+ "       SUM(w.wage_value) AS wage_value " // 한 귀속연월에 여러 급여차수가 있을 수 있으므로 합산
+			+ "       SUM(w.wage_value) AS wage_value " // 1つの帰属年月に複数の給与回次が存在する可能性があるため合算
 			+ "FROM wage w "
 			+ "JOIN employee e "
 			+ "  ON e.employee_id = w.employee_id "
-			+ "LEFT JOIN department d " // 부서·직위가 없는 사원도 조회에 포함되도록 LEFT JOIN
+			+ "LEFT JOIN department d " // 部署・役職がない社員も照会対象に含めるためLEFT JOIN
 			+ "  ON d.department_id = e.department_id "
 			+ "LEFT JOIN position p "
 			+ "  ON p.position_id = e.position_id "
@@ -299,17 +300,23 @@ public class WageDao {
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_payment, "
 			+ "       SUM(CASE WHEN wt.item_type = 'D' "
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS total_deduction, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '국민연금' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.NATIONAL_PENSION_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS national_pension, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '건강보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.HEALTH_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS health_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '장기요양보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.LONG_TERM_CARE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS long_term_care_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '고용보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.EMPLOYMENT_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS employment_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '소득세' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.INCOME_TAX_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS income_tax, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '지방소득세' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.LOCAL_INCOME_TAX_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS local_income_tax "
 			+ "FROM wage w "
 			+ "JOIN wage_type wt "
@@ -364,13 +371,17 @@ public class WageDao {
 			+ "       e.hire_date, "
 			+ "       d.department_name, "
 			+ "       p.position_name, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '국민연금' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.NATIONAL_PENSION_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS national_pension, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '건강보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.HEALTH_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS health_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '장기요양보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.LONG_TERM_CARE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS long_term_care_insurance, "
-			+ "       SUM(CASE WHEN wt.wage_type_name = '고용보험' "
+			+ "       SUM(CASE WHEN w.wage_type_id = "
+			+ WageTypeSystemIds.EMPLOYMENT_INSURANCE_ID
 			+ "                THEN NVL(w.wage_value, 0) ELSE 0 END) AS employment_insurance "
 			+ "FROM wage w "
 			+ "JOIN employee e "
@@ -602,7 +613,8 @@ public class WageDao {
 		String wageMonth)
 		throws SQLException {
 
-		String sql = "SELECT wt.wage_type_name, "
+		String sql = "SELECT w.wage_type_id, "
+			+ "       wt.wage_type_name, "
 			+ "       wt.item_type, "
 			+ "       SUM(NVL(w.wage_value, 0)) AS amount "
 			+ "FROM wage w "
@@ -610,8 +622,11 @@ public class WageDao {
 			+ "  ON wt.wage_type_id = w.wage_type_id "
 			+ "WHERE w.employee_id = ? "
 			+ "  AND w.wage_month = ? "
-			+ "GROUP BY wt.wage_type_name, wt.item_type "
-			+ "ORDER BY wt.item_type DESC, wt.wage_type_name";
+			+ "GROUP BY w.wage_type_id, "
+			+ "         wt.wage_type_name, "
+			+ "         wt.item_type "
+			+ "ORDER BY wt.item_type DESC, "
+			+ "         w.wage_type_id";
 
 		List<WageItemCompositionStatisticsRow> result = new ArrayList<>();
 
@@ -637,7 +652,7 @@ public class WageDao {
 		return result;
 	}
 
-	// 지난급여 불러오기 - 원본 귀속연월/급여차수 목록 조회
+	// 過去給与の読み込み - コピー元の帰属年月・給与回次一覧照会
 	public List<WagePaymentPreviousSourceOption> selectWagePaymentPreviousSourceOptions(
 		Connection conn,
 		String targetWageMonth,
@@ -698,7 +713,7 @@ public class WageDao {
 		return result;
 	}
 
-	// 급여입력용 - 사원별 저장된 급여항목 조회
+	// 給与入力用 - 社員別の保存済み給与項目照会
 	public List<WagePaymentCalculationItem> selectEmployeeWageItems(
 		Connection conn,
 		Integer employeeId,
@@ -754,7 +769,7 @@ public class WageDao {
 		return result;
 	}
 
-	// 급여입력용 - 귀속연월/급여차수별 저장 사원 목록 조회
+	// 給与入力用 - 帰属年月・給与回次別の保存済み社員一覧照会
 	public List<WagePaymentEmployeeRow> selectWagePaymentEmployeeRows(
 		Connection conn,
 		String wageMonth,
@@ -817,7 +832,7 @@ public class WageDao {
 		return result;
 	}
 
-	// 일용직 급여입력용 - 귀속연월/급여차수별 저장 사원 목록 조회
+	// 日雇給与入力用 - 帰属年月・給与回次別の保存済み社員一覧照会
 	public List<WagePaymentEmployeeRow> selectDailyWagePaymentEmployeeRows(
 		Connection conn,
 		String wageMonth,
@@ -881,7 +896,27 @@ public class WageDao {
 		return result;
 	}
 
-	// 지난급여 불러오기 - 대상 월/차수의 일반·사업 급여 전체 삭제
+	// 給与台帳 - 選択した帰属年月・給与回次の全給与を削除
+	public int deleteWageLedgerRows(
+		Connection conn,
+		String wageMonth,
+		String wagePeriod)
+		throws SQLException {
+
+		String sql = "DELETE FROM wage "
+			+ "WHERE wage_month = ? "
+			+ "  AND wage_period = ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, wageMonth);
+			pstmt.setString(2, wagePeriod);
+
+			return pstmt.executeUpdate();
+		}
+	}
+
+	// 過去給与の読み込み - 対象月・回次の一般所得・事業所得給与をすべて削除
 	public int deleteWagePaymentWorkspaceRows(
 		Connection conn,
 		String wageMonth,
@@ -912,7 +947,7 @@ public class WageDao {
 		}
 	}
 
-	// 지난급여 불러오기 - 원본 월/차수 급여를 대상 작업공간으로 복사
+	// 過去給与の読み込み - コピー元の月・回次の給与を対象ワークスペースへコピー
 	public int insertWagePaymentWorkspaceFromSource(
 		Connection conn,
 		String sourceWageMonth,
@@ -986,7 +1021,7 @@ public class WageDao {
 		}
 	}
 
-	// 급여입력용 - 사원의 해당 귀속연월/급여차수 급여 삭제
+	// 給与入力用 - 社員の該当帰属年月・給与回次の給与を削除
 	public int deleteEmployeeWages(
 		Connection conn,
 		Integer employeeId,
@@ -1017,7 +1052,7 @@ public class WageDao {
 		}
 	}
 
-	// 급여입력용 - 사원의 급여항목 한 건 저장
+	// 給与入力用 - 社員の給与項目を1件保存
 	public void insertEmployeeWage(
 		Connection conn,
 		Integer employeeId,

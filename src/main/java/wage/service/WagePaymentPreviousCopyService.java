@@ -15,7 +15,7 @@ import wage.model.WagePaymentPeriodDefault;
 import wage.model.WagePaymentPreviousCopyResult;
 import wage.model.WagePaymentPreviousSourceOption;
 
-// 지난급여 불러오기 Service
+// 過去給与の読み込みService
 public class WagePaymentPreviousCopyService {
 
 	private WageDao wageDao = new WageDao();
@@ -42,7 +42,7 @@ public class WagePaymentPreviousCopyService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"지난 급여 목록 조회 중 데이터베이스 오류가 발생했습니다.",
+				"過去給与一覧の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -72,13 +72,13 @@ public class WagePaymentPreviousCopyService {
 				normalizedTargetWagePeriod)) {
 
 			throw new IllegalArgumentException(
-				"원본 급여와 대상 급여가 같을 수 없습니다.");
+				"コピー元の給与と対象の給与を同一にすることはできません。");
 		}
 
 		if (!replaceConfirmed) {
 
 			throw new IllegalArgumentException(
-				"지난 급여 불러오기를 확인해야 합니다.");
+				"過去給与の読み込みを確認する必要があります。");
 		}
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
@@ -113,7 +113,7 @@ public class WagePaymentPreviousCopyService {
 					&& businessEmployeeCount == 0) {
 
 					throw new IllegalStateException(
-						"불러올 지난 급여가 없습니다.");
+						"読み込む過去給与がありません。");
 				}
 
 				WageLedgerSummary targetSummary = wageDao.selectWageLedgerSummary(
@@ -169,7 +169,7 @@ public class WagePaymentPreviousCopyService {
 				if (copiedItemCount <= 0) {
 
 					throw new IllegalStateException(
-						"불러올 지난 급여항목이 없습니다.");
+						"読み込む過去給与項目がありません。");
 				}
 
 				conn.commit();
@@ -199,7 +199,7 @@ public class WagePaymentPreviousCopyService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"지난 급여 불러오기 중 데이터베이스 오류가 발생했습니다.",
+				"過去給与の読み込み中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -211,7 +211,7 @@ public class WagePaymentPreviousCopyService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		String normalized = wageMonth.trim();
@@ -224,7 +224,7 @@ public class WagePaymentPreviousCopyService {
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 
 		return normalized;
@@ -237,7 +237,7 @@ public class WagePaymentPreviousCopyService {
 			|| wagePeriod.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		int period;
@@ -256,7 +256,7 @@ public class WagePaymentPreviousCopyService {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 
 		return String.valueOf(

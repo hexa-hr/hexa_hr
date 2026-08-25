@@ -19,7 +19,7 @@ import wage.model.WagePaymentItemInput;
 import wage.service.DailyWagePaymentInputService;
 import wage.service.DailyWagePaymentSaveService;
 
-// 급여입력/관리(일용직) - 선택 사원 급여 저장 Handler
+// 給与入力・管理（日雇い）- 選択した社員の給与保存Handler
 public class DailyWagePaymentInputSaveHandler
 	implements CommandHandler {
 
@@ -71,7 +71,7 @@ public class DailyWagePaymentInputSaveHandler
 					selectedEmployee.getEmploymentType())) {
 
 				throw new IllegalArgumentException(
-					"일용직 사원만 급여를 저장할 수 있습니다.");
+					"日雇い社員のみ給与を保存できます。");
 			}
 
 			List<WagePaymentEmployeeRow> savedEmployees = dailyWagePaymentInputService.getSavedEmployees(
@@ -95,14 +95,14 @@ public class DailyWagePaymentInputSaveHandler
 				&& !selectedEmployeePending) {
 
 				throw new IllegalArgumentException(
-					"현재 급여차수에 등록되지 않은 사원입니다.");
+					"現在の給与回次に登録されていない社員です。");
 			}
 
 			List<WagePaymentItemInput> deductionInputs = parseDeductionInputs(req);
 
 			/*
-			 * Service가 DAILY_WORK와 공제항목 틀을
-			 * 서버에서 다시 조회하고 계산한 뒤 저장한다.
+			 * ServiceがDAILY_WORKと控除項目構成を
+			 * サーバーで再照会し、計算後に保存する。
 			 */
 			dailyWagePaymentSaveService.save(
 				employeeId,
@@ -113,8 +113,8 @@ public class DailyWagePaymentInputSaveHandler
 			/*
 			 * PRG(Post-Redirect-Get)
 			 *
-			 * 저장된 사원은 pending에서 제외하고,
-			 * 다른 미저장 사원은 유지한다.
+			 * 保存済みの社員はpendingから除外し、
+			 * その他の未保存社員は維持する。
 			 */
 			StringBuilder redirectUrl = new StringBuilder();
 
@@ -188,8 +188,8 @@ public class DailyWagePaymentInputSaveHandler
 			"wageValue");
 
 		/*
-		 * 공제항목이 0개로 고정된 작업공간에서는
-		 * 두 파라미터가 없는 것이 정상이다.
+		 * 控除項目が0件で固定されたワークスペースでは
+		 * 両方のパラメータが存在しない状態が正常である。
 		 */
 		if (wageTypeIds == null
 			&& wageValues == null) {
@@ -202,7 +202,7 @@ public class DailyWagePaymentInputSaveHandler
 			|| wageTypeIds.length != wageValues.length) {
 
 			throw new IllegalArgumentException(
-				"공제항목 정보가 올바르지 않습니다.");
+				"控除項目情報が正しくありません。");
 		}
 
 		List<WagePaymentItemInput> result = new ArrayList<>();
@@ -243,7 +243,7 @@ public class DailyWagePaymentInputSaveHandler
 			} catch (NumberFormatException e) {
 
 				throw new IllegalArgumentException(
-					"공제금액은 0원 이상의 정수로 입력해야 합니다.");
+					"控除金額は0ウォン以上の整数で入力する必要があります。");
 			}
 		}
 
@@ -286,7 +286,7 @@ public class DailyWagePaymentInputSaveHandler
 			} catch (NumberFormatException e) {
 
 				throw new IllegalArgumentException(
-					"미저장 사원 정보가 올바르지 않습니다.");
+					"未保存社員情報が正しくありません。");
 			}
 		}
 
@@ -351,7 +351,7 @@ public class DailyWagePaymentInputSaveHandler
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 		}
 	}
 
@@ -405,7 +405,7 @@ public class DailyWagePaymentInputSaveHandler
 		if (wageMonth == null) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		try {
@@ -416,7 +416,7 @@ public class DailyWagePaymentInputSaveHandler
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 	}
 
@@ -429,7 +429,7 @@ public class DailyWagePaymentInputSaveHandler
 		if (wagePeriod == null) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		try {
@@ -449,7 +449,7 @@ public class DailyWagePaymentInputSaveHandler
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 	}
 

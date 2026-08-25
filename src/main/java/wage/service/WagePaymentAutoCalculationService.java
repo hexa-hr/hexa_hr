@@ -13,7 +13,7 @@ import wage.model.WagePaymentCalculationResult;
 import wage.model.WagePaymentInputViewItem;
 import wage.model.WagePaymentItemInput;
 
-// 급여입력 화면 자동계산 처리 Service
+// 給与入力画面自動計算処理Service
 public class WagePaymentAutoCalculationService {
 
 	private WagePaymentInputService wagePaymentInputService = new WagePaymentInputService();
@@ -31,15 +31,15 @@ public class WagePaymentAutoCalculationService {
 		if (currentItemInputs == null) {
 
 			throw new IllegalArgumentException(
-				"급여항목 정보가 올바르지 않습니다.");
+				"給与項目情報が正しくありません。");
 		}
 
 		/*
-		 * DB 기준으로 화면에 존재해야 하는 급여항목과
-		 * active / calculable 정보를 다시 조회한다.
+		 * DBを基準に画面に存在すべき給与項目と
+		 * active / calculable情報を再照会する。
 		 *
-		 * 브라우저가 보내는 active/calculable 값을
-		 * 신뢰하지 않는다.
+		 * ブラウザから送信されたactive / calculable値を
+		 * 信頼しない。
 		 */
 		List<WagePaymentInputViewItem> baseItems = wagePaymentInputService.getViewItems(
 			employeeId,
@@ -58,8 +58,8 @@ public class WagePaymentAutoCalculationService {
 		}
 
 		/*
-		 * 사용자가 화면에서 입력한 현재 금액을
-		 * 급여항목 ID 기준으로 구성한다.
+		 * ユーザーが画面で入力した現在の金額を
+		 * 給与項目IDを基準に構成する。
 		 */
 		Map<Integer, Long> currentValueMap = new LinkedHashMap<>();
 
@@ -69,7 +69,7 @@ public class WagePaymentAutoCalculationService {
 				|| input.getWageTypeId() == null) {
 
 				throw new IllegalArgumentException(
-					"급여항목 정보가 올바르지 않습니다.");
+					"給与項目情報が正しくありません。");
 			}
 
 			Integer wageTypeId = input.getWageTypeId();
@@ -78,14 +78,14 @@ public class WagePaymentAutoCalculationService {
 				wageTypeId)) {
 
 				throw new IllegalArgumentException(
-					"화면에 존재하지 않는 급여항목이 포함되어 있습니다.");
+					"画面に存在しない給与項目が含まれています。");
 			}
 
 			if (currentValueMap.containsKey(
 				wageTypeId)) {
 
 				throw new IllegalArgumentException(
-					"중복된 급여항목이 포함되어 있습니다.");
+					"重複した給与項目が含まれています。");
 			}
 
 			long wageValue = input.getWageValue() == null
@@ -95,7 +95,7 @@ public class WagePaymentAutoCalculationService {
 			if (wageValue < 0L) {
 
 				throw new IllegalArgumentException(
-					"급여금액은 0원 이상이어야 합니다.");
+					"給与金額は0ウォン以上である必要があります。");
 			}
 
 			currentValueMap.put(
@@ -104,15 +104,15 @@ public class WagePaymentAutoCalculationService {
 		}
 
 		/*
-		 * 화면에 표시된 모든 급여항목이
-		 * POST 데이터에도 존재해야 한다.
+		 * 画面に表示されたすべての給与項目が
+		 * POSTデータにも存在する必要がある。
 		 *
-		 * 과거 비활성 급여항목의 유실 방지 목적.
+		 * 過去の非アクティブ給与項目の欠落防止が目的。
 		 */
 		if (currentValueMap.size() != baseItems.size()) {
 
 			throw new IllegalArgumentException(
-				"급여항목 일부가 누락되었습니다.");
+				"給与項目の一部が欠落しています。");
 		}
 
 		List<WagePaymentInputViewItem> currentItems = new ArrayList<>();
@@ -136,8 +136,8 @@ public class WagePaymentAutoCalculationService {
 			currentItems.add(currentItem);
 
 			/*
-			 * 자동계산 가능 항목만
-			 * 기존 계산 Service에 전달한다.
+			 * 自動計算可能な項目のみ
+			 * 既存の計算Serviceに渡す。
 			 */
 			if (baseItem.isCalculable()) {
 
@@ -155,6 +155,8 @@ public class WagePaymentAutoCalculationService {
 			WagePaymentCalculationRequest request = new WagePaymentCalculationRequest(
 				employeeId,
 				wageMonth,
+				settlementStartDate,
+				settlementEndDate,
 				calculationInputs);
 
 			WagePaymentCalculationResult calculationResult = wagePaymentCalculationService.calculate(
@@ -181,10 +183,10 @@ public class WagePaymentAutoCalculationService {
 			if (currentItem.isCalculable()) {
 
 				/*
-				 * 계산 가능한 항목은 계산 결과로 갱신한다.
+				 * 計算可能な項目は計算結果で更新する。
 				 *
-				 * 계산 결과에 없는 보험 항목 등은
-				 * 0원으로 처리한다.
+				 * 計算結果にない保険項目などは
+				 * 0ウォンとして処理する。
 				 */
 				Long calculatedValue = calculatedValueMap.remove(
 					currentItem.getWageTypeId());
@@ -196,8 +198,8 @@ public class WagePaymentAutoCalculationService {
 			} else {
 
 				/*
-				 * 연말정산 등 계산 제외 항목은
-				 * 사용자가 입력한 현재 값을 그대로 유지한다.
+				 * 年末調整などの計算対象外項目は
+				 * ユーザーが入力した現在の値をそのまま維持する。
 				 */
 				finalValue = currentItem.getWageValue() == null
 					? 0L
@@ -228,10 +230,10 @@ public class WagePaymentAutoCalculationService {
 		}
 
 		/*
-		 * 계산 Service가 현재 화면에 없는 급여항목을 반환할 수 있다.
+		 * 計算Serviceが現在の画面にない給与項目を返す場合がある。
 		 *
-		 * 기존 저장 급여는 저장 당시의 급여항목 구성을 유지해야 하므로,
-		 * 화면 스냅샷에 존재하지 않는 계산 결과는 반영하지 않는다.
+		 * 既存の保存済み給与は保存当時の給与項目構成を維持する必要があるため、
+		 * 画面スナップショットに存在しない計算結果は反映しない。
 		 */
 
 		long netPayment = totalPayment - totalDeduction;
@@ -257,14 +259,14 @@ public class WagePaymentAutoCalculationService {
 				|| item.getWageTypeId() == null) {
 
 				throw new IllegalStateException(
-					"자동계산 결과의 급여항목 정보가 올바르지 않습니다.");
+					"自動計算結果の給与項目情報が正しくありません。");
 			}
 
 			if (calculatedValueMap.containsKey(
 				item.getWageTypeId())) {
 
 				throw new IllegalStateException(
-					"자동계산 결과에 중복된 급여항목이 포함되어 있습니다.");
+					"自動計算結果に重複した給与項目が含まれています。");
 			}
 
 			long wageValue = item.getWageValue() == null

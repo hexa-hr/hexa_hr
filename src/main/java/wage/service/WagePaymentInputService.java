@@ -60,7 +60,7 @@ public class WagePaymentInputService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"급여입력 초기값 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与入力初期値の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -73,7 +73,7 @@ public class WagePaymentInputService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		String normalizedWageMonth;
@@ -86,14 +86,14 @@ public class WagePaymentInputService {
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 
 		if (wagePeriod == null
 			|| wagePeriod.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		int wagePeriodNumber;
@@ -112,7 +112,7 @@ public class WagePaymentInputService {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 
 		String normalizedWagePeriod = String.valueOf(wagePeriodNumber);
@@ -129,11 +129,11 @@ public class WagePaymentInputService {
 			for (WageType wageType : wageTypes) {
 
 				/*
-				 * 저장된 작업공간이 없을 때만
-				 * 현재 신규 급여입력 항목 기준을 적용한다.
+				 * 保存済みワークスペースがない場合のみ
+				 * 現在の新規給与入力項目基準を適用する。
 				 *
-				 * 저장된 작업공간이 있으면 당시 실제 저장된
-				 * 급여항목 틀을 그대로 표시한다.
+				 * 保存済みワークスペースがある場合は当時実際に保存された
+				 * 給与項目の枠をそのまま表示する。
 				 */
 				if (!isDisplayableWageType(
 					"WORKER",
@@ -160,7 +160,7 @@ public class WagePaymentInputService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"급여입력 기본 항목 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与入力基本項目の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -196,14 +196,14 @@ public class WagePaymentInputService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		if (wagePeriod == null
 			|| wagePeriod.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		int wagePeriodNumber;
@@ -222,7 +222,7 @@ public class WagePaymentInputService {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
@@ -233,7 +233,7 @@ public class WagePaymentInputService {
 				wageMonth.trim(),
 				wagePeriod.trim());
 
-			// 저장된 급여가 없는 경우 → 신규 급여
+			// 保存済み給与がない場合 → 新規給与
 			if (savedItems.isEmpty()) {
 
 				validateSettlementPeriod(
@@ -265,20 +265,20 @@ public class WagePaymentInputService {
 			}
 
 			/*
-			 * 기존 급여인 경우
+			 * 既存給与の場合
 			 *
-			 * 저장 당시 실제 존재했던 급여항목만 반환한다.
-			 * 현재 활성 급여항목을 추가하지 않는다.
+			 * 保存時に実際に存在した給与項目のみを返す。
+			 * 現在有効な給与項目は追加しない。
 			 *
-			 * wage 행의 집합 자체가
-			 * 해당 사원의 당시 급여항목 스냅샷이다.
+			 * wage行の集合自体が
+			 * 該当社員の当時の給与項目スナップショットである。
 			 */
 			return savedItems;
 
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"급여입력 항목 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与入力項目の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -291,8 +291,8 @@ public class WagePaymentInputService {
 		Date settlementEndDate) {
 
 		/*
-		 * 신규/기존 여부에 따라 실제 화면에 표시할
-		 * 급여항목과 금액을 먼저 조회한다.
+		 * 新規/既存の区分に応じて、実際に画面に表示する
+		 * 給与項目と金額を先に照会する。
 		 */
 		List<WagePaymentCalculationItem> items = getItems(
 			employeeId,
@@ -309,14 +309,14 @@ public class WagePaymentInputService {
 
 			if (employmentType == null) {
 				throw new IllegalArgumentException(
-					"존재하지 않는 사원입니다.");
+					"存在しない社員です。");
 			}
 
 			String wageCategory = determineWageCategory(employmentType);
 
 			/*
-			 * 현재 사용 중인 급여항목을 ID 기준으로 구성한다.
-			 * 이 Map에 없으면 현재 usage='N'인 항목이다.
+			 * 現在使用中の給与項目をID基準で構成する。
+			 * このMapにない場合は、現在usage='N'の項目である。
 			 */
 			List<WageType> activeWageTypes = wageTypeDao.selectActiveWageTypes(conn);
 
@@ -358,7 +358,7 @@ public class WagePaymentInputService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"급여입력 화면 항목 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与入力画面項目の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -371,14 +371,14 @@ public class WagePaymentInputService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		if (wagePeriod == null
 			|| wagePeriod.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
@@ -391,7 +391,7 @@ public class WagePaymentInputService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"급여차수 기본정보 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与回次基本情報の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -404,14 +404,14 @@ public class WagePaymentInputService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		if (wagePeriod == null
 			|| wagePeriod.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"급여차수를 입력해야 합니다.");
+				"給与回次を入力する必要があります。");
 		}
 
 		int wagePeriodNumber;
@@ -430,7 +430,7 @@ public class WagePaymentInputService {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalArgumentException(
-				"급여차수는 1 이상 10 이하의 숫자여야 합니다.");
+				"給与回次は1以上10以下の数値である必要があります。");
 		}
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
@@ -443,7 +443,7 @@ public class WagePaymentInputService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"급여입력 사원 목록 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与入力社員一覧の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -455,7 +455,7 @@ public class WagePaymentInputService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속연월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		YearMonth baseMonth;
@@ -468,7 +468,7 @@ public class WagePaymentInputService {
 		} catch (DateTimeException e) {
 
 			throw new IllegalArgumentException(
-				"귀속연월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
@@ -478,9 +478,8 @@ public class WagePaymentInputService {
 				COMPANY_ID);
 
 			if (account == null) {
-
-				throw new IllegalStateException(
-					"급여지급정보가 등록되어 있지 않습니다.");
+				throw new IllegalArgumentException(
+					"給与算定期間と支給日が設定されていません。ユーザー情報で給与支給情報を先に設定してください。");
 			}
 
 			LocalDate settlementStartDate = resolveCalculationDate(
@@ -502,7 +501,7 @@ public class WagePaymentInputService {
 				settlementEndDate)) {
 
 				throw new IllegalStateException(
-					"급여지급정보의 정산기간 설정이 올바르지 않습니다.");
+					"給与支給情報の精算期間設定が正しくありません。");
 			}
 
 			return new WagePaymentPeriodDefault(
@@ -513,7 +512,7 @@ public class WagePaymentInputService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"급여 기본 날짜 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与基本日付の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -533,7 +532,7 @@ public class WagePaymentInputService {
 
 		if (employmentType == null) {
 			throw new IllegalArgumentException(
-				"존재하지 않는 사원입니다.");
+				"存在しない社員です。");
 		}
 
 		String wageCategory = determineWageCategory(employmentType);
@@ -552,8 +551,8 @@ public class WagePaymentInputService {
 			long wageValue = 0L;
 
 			/*
-			 * 신규 급여일 때만
-			 * 일괄지급 / 근태연결 초기값 적용
+			 * 新規給与の場合のみ
+			 * 一括支給 / 勤怠連動の初期値を適用
 			 */
 			if (applyInitialValues
 				&& "P".equals(
@@ -588,7 +587,7 @@ public class WagePaymentInputService {
 					} catch (NumberFormatException e) {
 
 						throw new IllegalStateException(
-							"일괄지급 금액이 올바르지 않습니다: "
+							"一括支給金額が正しくありません: "
 								+ wageType.getWageTypeName(),
 							e);
 					}
@@ -643,8 +642,8 @@ public class WagePaymentInputService {
 		WageType wageType) {
 
 		/*
-		 * 사원이 선택되지 않았으므로 기본급과 근태연결은 0원이다.
-		 * 일괄지급 항목만 급여항목 설정의 금액을 표시한다.
+		 * 社員が選択されていないため、基本給と勤怠連動は0ウォンである。
+		 * 一括支給項目のみ給与項目設定の金額を表示する。
 		 */
 		if (!"P".equals(wageType.getItemType())
 			|| !"일괄지급".equals(
@@ -669,7 +668,7 @@ public class WagePaymentInputService {
 		} catch (NumberFormatException e) {
 
 			throw new IllegalStateException(
-				"일괄지급 금액이 올바르지 않습니다: "
+				"一括支給金額が正しくありません: "
 					+ wageType.getWageTypeName(),
 				e);
 		}
@@ -682,7 +681,7 @@ public class WagePaymentInputService {
 			|| employeeId <= 0) {
 
 			throw new IllegalArgumentException(
-				"사원 정보가 올바르지 않습니다.");
+				"社員情報が正しくありません。");
 		}
 	}
 
@@ -694,14 +693,14 @@ public class WagePaymentInputService {
 			|| settlementEndDate == null) {
 
 			throw new IllegalArgumentException(
-				"정산기간이 올바르지 않습니다.");
+				"精算期間が正しくありません。");
 		}
 
 		if (settlementStartDate.after(
 			settlementEndDate)) {
 
 			throw new IllegalArgumentException(
-				"정산 시작일은 종료일보다 늦을 수 없습니다.");
+				"精算開始日は終了日より後にすることはできません。");
 		}
 	}
 
@@ -757,7 +756,7 @@ public class WagePaymentInputService {
 		if (monthType == null) {
 
 			throw new IllegalStateException(
-				"정산월 구분이 설정되어 있지 않습니다.");
+				"精算月区分が設定されていません。");
 		}
 
 		YearMonth targetMonth;
@@ -773,7 +772,7 @@ public class WagePaymentInputService {
 		} else {
 
 			throw new IllegalStateException(
-				"올바르지 않은 정산월 구분입니다: "
+				"精算月区分が正しくありません: "
 					+ monthType);
 		}
 
@@ -790,7 +789,7 @@ public class WagePaymentInputService {
 		if (monthType == null) {
 
 			throw new IllegalStateException(
-				"지급월 구분이 설정되어 있지 않습니다.");
+				"支給月区分が設定されていません。");
 		}
 
 		YearMonth targetMonth;
@@ -806,7 +805,7 @@ public class WagePaymentInputService {
 		} else {
 
 			throw new IllegalStateException(
-				"올바르지 않은 지급월 구분입니다: "
+				"支給月区分が正しくありません: "
 					+ monthType);
 		}
 
@@ -822,11 +821,11 @@ public class WagePaymentInputService {
 		if (day == null) {
 
 			throw new IllegalStateException(
-				"급여 날짜가 설정되어 있지 않습니다.");
+				"給与日付が設定されていません。");
 		}
 
 		/*
-		 * DB 설정값 0은 해당 월의 말일을 의미한다.
+		 * DB設定値0は該当月の末日を意味する。
 		 */
 		if (day == 0) {
 
@@ -837,7 +836,7 @@ public class WagePaymentInputService {
 			|| day > targetMonth.lengthOfMonth()) {
 
 			throw new IllegalStateException(
-				"급여 날짜 설정이 올바르지 않습니다: "
+				"給与日付設定が正しくありません: "
 					+ day);
 		}
 

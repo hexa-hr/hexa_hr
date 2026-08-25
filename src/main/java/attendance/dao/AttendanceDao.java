@@ -24,18 +24,14 @@ public class AttendanceDao {
 		if (obj == null)
 			return null;
 		if (obj instanceof Number) {
-			return ((Number)obj).intValue();
+			return ((Number) obj).intValue();
 		}
 		return Integer.parseInt(obj.toString());
 	}
 
-	private Long getLong(
-		ResultSet rs,
-		String columnName)
-		throws SQLException {
+	private Long getLong(ResultSet rs, String columnName) throws SQLException {
 
-		Object value = rs.getObject(
-			columnName);
+		Object value = rs.getObject(columnName);
 
 		if (value == null) {
 			return null;
@@ -43,30 +39,42 @@ public class AttendanceDao {
 
 		if (value instanceof Number) {
 
-			return ((Number)value).longValue();
+			return ((Number) value).longValue();
 		}
 
-		return Long.valueOf(
-			value.toString());
+		return Long.valueOf(value.toString());
 	}
 
-	// 1. 전체 목록 조회 (master 패키지 DTO 수정 없이 기본 필드만 조회) - 유진님 코드
+	// 1. 전체 목록 조회
 	public List<AttendanceType> selectAll(Connection conn) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-			pstmt = conn.prepareStatement(
-				"SELECT attendance_type_id, attendance_type_name, unit, attendance_group_id, vacation_type_id, \"USAGE\" "
-					+ "FROM attendance_type ORDER BY attendance_type_id ASC");
+			// 쿼리 변경: a."USAGE" 와 v.usage 를 모두 가져오도록 별칭(AS) 적용
+			pstmt = conn.prepareStatement("SELECT a.attendance_type_id, a.attendance_type_name, a.unit, "
+					+ "a.attendance_group_id, a.vacation_type_id, a.\"USAGE\" AS att_usage, "
+					+ "v.vacation_type_name, v.apply_period1, v.apply_period2, v.usage AS vac_usage "
+					+ "FROM attendance_type a "
+					+ "LEFT JOIN vacation_type v ON a.vacation_type_id = v.vacation_type_id "
+					+ "ORDER BY a.attendance_type_id ASC");
 			rs = pstmt.executeQuery();
 			List<AttendanceType> list = new ArrayList<>();
 			while (rs.next()) {
 				Integer groupId = rs.getObject("attendance_group_id") != null ? rs.getInt("attendance_group_id") : null;
 				Integer vacationId = rs.getObject("vacation_type_id") != null ? rs.getInt("vacation_type_id") : null;
 
+				// 별칭으로 가져온 att_usage 세팅
 				AttendanceType att = new AttendanceType(rs.getInt("attendance_type_id"),
-					rs.getString("attendance_type_name"), rs.getString("unit"), groupId, vacationId,
-					rs.getString("USAGE"));
+						rs.getString("attendance_type_name"), rs.getString("unit"), groupId, vacationId,
+						rs.getString("att_usage"));
+
+				att.setVacationTypeName(rs.getString("vacation_type_name"));
+				att.setApplyPeriod1(rs.getDate("apply_period1"));
+				att.setApplyPeriod2(rs.getDate("apply_period2"));
+
+				// [추가] 휴가 사용여부 세팅
+				att.setVacationUsage(rs.getString("vac_usage"));
+
 				list.add(att);
 			}
 			return list;
@@ -78,15 +86,20 @@ public class AttendanceDao {
 
 	// 1. 전체 사원 목록 조회 (JOIN department, position) - 나(에스더) 코드
 	public List<EmployeeVO> selectAllEmployees(Connection conn) throws SQLException {
-		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, " + "d.department_name, p.position_name "
-			+ "FROM employee e " + "LEFT JOIN department d ON e.department_id = d.department_id "
-			+ "LEFT JOIN position p ON e.position_id = p.position_id " + "ORDER BY e.employee_id ASC";
+		// 쿼리에 e.basic_pay 추가
+		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, "
+				+ "d.department_name, p.position_name, e.basic_pay " + "FROM employee e "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id "
+				+ "LEFT JOIN position p ON e.position_id = p.position_id " + "ORDER BY e.employee_id ASC";
 
 		List<EmployeeVO> list = new ArrayList<>();
 		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				list.add(new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
-					rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name")));
+				EmployeeVO vo = new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
+						rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name"));
+
+				vo.setBasicPay(rs.getLong("basic_pay"));
+				list.add(vo);
 			}
 		}
 		return list;
@@ -96,7 +109,7 @@ public class AttendanceDao {
 	public void insert(Connection conn, AttendanceType att) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql = "INSERT INTO attendance_type (attendance_type_id, attendance_type_name, unit, attendance_group_id, vacation_type_id, \"USAGE\") "
-			+ "VALUES ((SELECT NVL(MAX(attendance_type_id), 0) + 1 FROM attendance_type), ?, ?, ?, ?, ?)";
+				+ "VALUES ((SELECT NVL(MAX(attendance_type_id), 0) + 1 FROM attendance_type), ?, ?, ?, ?, ?)";
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, att.getAttendanceTypeName());
@@ -124,9 +137,9 @@ public class AttendanceDao {
 	// 2. 특정 사원의 근태 기록 조회 (모달용) - 나(에스더) 코드
 	public List<AttendanceVO> selectAttendanceByEmpId(Connection conn, int employeeId) throws SQLException {
 		String sql = "SELECT a.attendance_id, a.employee_id, a.input_date, "
-			+ "t.attendance_type_name, a.start_date, a.end_date, " + "a.attendance_days, a.amount, a.summary "
-			+ "FROM attendance a " + "JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id "
-			+ "WHERE a.employee_id = ? " + "ORDER BY a.input_date DESC, a.attendance_id DESC";
+				+ "t.attendance_type_name, a.start_date, a.end_date, " + "a.attendance_days, a.amount, a.summary "
+				+ "FROM attendance a " + "JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id "
+				+ "WHERE a.employee_id = ? " + "ORDER BY a.input_date DESC, a.attendance_id DESC";
 
 		List<AttendanceVO> list = new ArrayList<>();
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -154,8 +167,8 @@ public class AttendanceDao {
 	public void update(Connection conn, AttendanceType att) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql = "UPDATE attendance_type "
-			+ "SET attendance_type_name = ?, unit = ?, attendance_group_id = ?, vacation_type_id = ?, \"USAGE\" = ? "
-			+ "WHERE attendance_type_id = ?";
+				+ "SET attendance_type_name = ?, unit = ?, attendance_group_id = ?, vacation_type_id = ?, \"USAGE\" = ? "
+				+ "WHERE attendance_type_id = ?";
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, att.getAttendanceTypeName());
@@ -184,8 +197,8 @@ public class AttendanceDao {
 	// 3. 근태 기록 저장 (신규 등록) - 나(에스더) 코드
 	public int insertAttendance(Connection conn, AttendanceVO vo) throws SQLException {
 		String sql = "INSERT INTO attendance (attendance_id, employee_id, input_date, attendance_type_id, "
-			+ "start_date, end_date, attendance_days, amount, summary) "
-			+ "VALUES (attendance_seq.NEXTVAL, ?, SYSDATE, ?, ?, ?, ?, ?, ?)";
+				+ "start_date, end_date, attendance_days, amount, summary) "
+				+ "VALUES (attendance_seq.NEXTVAL, ?, SYSDATE, ?, ?, ?, ?, ?, ?)";
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setInt(1, vo.getEmployeeId());
@@ -202,7 +215,7 @@ public class AttendanceDao {
 	// 3. 근태 기록 수정 (UPDATE) - 나(에스더) 코드 추가
 	public int updateAttendance(Connection conn, AttendanceVO vo) throws SQLException {
 		String sql = "UPDATE attendance SET " + "attendance_type_id = ?, " + "start_date = ?, " + "end_date = ?, "
-			+ "attendance_days = ?, " + "amount = ?, " + "summary = ? " + "WHERE attendance_id = ?";
+				+ "attendance_days = ?, " + "amount = ?, " + "summary = ? " + "WHERE attendance_id = ?";
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setInt(1, vo.getAttendanceTypeId());
@@ -242,10 +255,10 @@ public class AttendanceDao {
 	// 5. 월별 전체 사원 근태 기록 조회 (YYYY-MM 기준)
 	public List<AttendanceVO> selectMonthlyAttendance(Connection conn, String yearMonth) throws SQLException {
 		String sql = "SELECT a.attendance_id, a.employee_id, a.input_date, "
-			+ "t.attendance_type_name, a.start_date, a.end_date, " + "a.attendance_days, a.amount, a.summary "
-			+ "FROM attendance a " + "JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id "
-			+ "WHERE TO_CHAR(a.start_date, 'YYYY-MM') <= ? " + "AND TO_CHAR(a.end_date, 'YYYY-MM') >= ? "
-			+ "ORDER BY a.employee_id ASC, a.start_date ASC";
+				+ "t.attendance_type_name, a.start_date, a.end_date, " + "a.attendance_days, a.amount, a.summary "
+				+ "FROM attendance a " + "JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id "
+				+ "WHERE TO_CHAR(a.start_date, 'YYYY-MM') <= ? " + "AND TO_CHAR(a.end_date, 'YYYY-MM') >= ? "
+				+ "ORDER BY a.employee_id ASC, a.start_date ASC";
 
 		List<AttendanceVO> list = new ArrayList<>();
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -338,18 +351,18 @@ public class AttendanceDao {
 
 	// 5. 체크박스 조건에 따른 동적 검색 쿼리 (JSON 문자열 반환)
 	public String searchAttendanceDetailsJson(Connection conn, java.util.Map<String, String> params)
-		throws SQLException {
+			throws SQLException {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT TO_CHAR(a.input_date, 'YYYY-MM-DD') as input_date, ")
-			.append("e.employment_type, e.korean_name, d.department_name, p.position_name, ")
-			.append("t.attendance_type_name, ")
-			.append("TO_CHAR(a.start_date, 'YY-MM-DD') || ' ~ ' || TO_CHAR(a.end_date, 'YY-MM-DD') as att_period, ")
-			.append("a.attendance_days, NVL(a.amount, 0) as amount, NVL(a.summary, '') as summary ")
-			.append("FROM attendance a ").append("JOIN employee e ON a.employee_id = e.employee_id ")
-			.append("LEFT JOIN department d ON e.department_id = d.department_id ")
-			.append("LEFT JOIN position p ON e.position_id = p.position_id ")
-			.append("LEFT JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id ")
-			.append("WHERE 1=1 ");
+				.append("e.employment_type, e.korean_name, d.department_name, p.position_name, ")
+				.append("t.attendance_type_name, ")
+				.append("TO_CHAR(a.start_date, 'YY-MM-DD') || ' ~ ' || TO_CHAR(a.end_date, 'YY-MM-DD') as att_period, ")
+				.append("a.attendance_days, NVL(a.amount, 0) as amount, NVL(a.summary, '') as summary ")
+				.append("FROM attendance a ").append("JOIN employee e ON a.employee_id = e.employee_id ")
+				.append("LEFT JOIN department d ON e.department_id = d.department_id ")
+				.append("LEFT JOIN position p ON e.position_id = p.position_id ")
+				.append("LEFT JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id ")
+				.append("WHERE 1=1 ");
 
 		// 동적 WHERE 조건 추가 (체크박스가 선택된 항목만 params에 들어옴)
 		if (params.containsKey("inputDate"))
@@ -396,20 +409,20 @@ public class AttendanceDao {
 					if (!first)
 						json.append(",");
 					json.append("{").append("\"inputDate\":\"").append(rs.getString("input_date")).append("\",")
-						.append("\"empType\":\"")
-						.append(rs.getString("employment_type") == null ? "" : rs.getString("employment_type"))
-						.append("\",").append("\"empName\":\"").append(rs.getString("korean_name")).append("\",")
-						.append("\"deptName\":\"")
-						.append(rs.getString("department_name") == null ? "" : rs.getString("department_name"))
-						.append("\",").append("\"positionName\":\"")
-						.append(rs.getString("position_name") == null ? "" : rs.getString("position_name"))
-						.append("\",").append("\"attTypeName\":\"")
-						.append(rs.getString("attendance_type_name") == null ? ""
-							: rs.getString("attendance_type_name"))
-						.append("\",").append("\"attPeriod\":\"").append(rs.getString("att_period")).append("\",")
-						.append("\"attDays\":\"").append(rs.getDouble("attendance_days")).append("\",")
-						.append("\"amount\":\"").append(String.format("%,d", rs.getInt("amount"))).append("\",")
-						.append("\"summary\":\"").append(rs.getString("summary")).append("\"}");
+							.append("\"empType\":\"")
+							.append(rs.getString("employment_type") == null ? "" : rs.getString("employment_type"))
+							.append("\",").append("\"empName\":\"").append(rs.getString("korean_name")).append("\",")
+							.append("\"deptName\":\"")
+							.append(rs.getString("department_name") == null ? "" : rs.getString("department_name"))
+							.append("\",").append("\"positionName\":\"")
+							.append(rs.getString("position_name") == null ? "" : rs.getString("position_name"))
+							.append("\",").append("\"attTypeName\":\"")
+							.append(rs.getString("attendance_type_name") == null ? ""
+									: rs.getString("attendance_type_name"))
+							.append("\",").append("\"attPeriod\":\"").append(rs.getString("att_period")).append("\",")
+							.append("\"attDays\":\"").append(rs.getDouble("attendance_days")).append("\",")
+							.append("\"amount\":\"").append(String.format("%,d", rs.getInt("amount"))).append("\",")
+							.append("\"summary\":\"").append(rs.getString("summary")).append("\"}");
 					first = false;
 				}
 			}
@@ -443,13 +456,13 @@ public class AttendanceDao {
 			List<Map<String, Object>> list = new ArrayList<>();
 			while (rs.next()) {
 				Employee emp = new Employee(rs.getInt("employee_id"), getInteger(rs, "account_id"),
-					getInteger(rs, "company_id"), getInteger(rs, "person_id"), rs.getString("employment_type"),
-					rs.getString("korean_name"), rs.getString("english_name"), rs.getDate("hire_date"),
-					rs.getDate("resignation_date"), getInteger(rs, "department_id"), getInteger(rs, "position_id"),
-					rs.getString("foreign_or_domestic"), rs.getString("resident_number1"),
-					rs.getString("resident_number2"), rs.getString("address"), rs.getString("tel_phone"),
-					rs.getString("mobile"), rs.getString("email"), rs.getString("sns"),
-					rs.getString("other_details"), rs.getString("status"), getLong(rs, "basic_pay"));
+						getInteger(rs, "company_id"), getInteger(rs, "person_id"), rs.getString("employment_type"),
+						rs.getString("korean_name"), rs.getString("english_name"), rs.getDate("hire_date"),
+						rs.getDate("resignation_date"), getInteger(rs, "department_id"), getInteger(rs, "position_id"),
+						rs.getString("foreign_or_domestic"), rs.getString("resident_number1"),
+						rs.getString("resident_number2"), rs.getString("address"), rs.getString("tel_phone"),
+						rs.getString("mobile"), rs.getString("email"), rs.getString("sns"),
+						rs.getString("other_details"), rs.getString("status"), getLong(rs, "basic_pay"));
 
 				Integer days = getInteger(rs, "vacation_value"); // vacation_value 가져오기
 				int vacationDays = (days != null) ? days : 0;
@@ -509,20 +522,12 @@ public class AttendanceDao {
 	}
 
 	// 급여 연동용 - 사원별 근태연결 수당 합계 조회
-	public long selectLinkedAllowanceAmount(
-		Connection conn,
-		int employeeId,
-		String attendanceTypeName,
-		Date settlementStartDate,
-		Date settlementEndDate) throws SQLException {
+	public long selectLinkedAllowanceAmount(Connection conn, int employeeId, String attendanceTypeName,
+			Date settlementStartDate, Date settlementEndDate) throws SQLException {
 
-		String sql = "SELECT NVL(SUM(NVL(a.amount, 0)), 0) AS total_amount "
-			+ "FROM attendance a "
-			+ "JOIN attendance_type t "
-			+ "ON a.attendance_type_id = t.attendance_type_id "
-			+ "WHERE a.employee_id = ? "
-			+ "AND t.attendance_type_name = ? "
-			+ "AND a.start_date BETWEEN ? AND ?";
+		String sql = "SELECT NVL(SUM(NVL(a.amount, 0)), 0) AS total_amount " + "FROM attendance a "
+				+ "JOIN attendance_type t " + "ON a.attendance_type_id = t.attendance_type_id "
+				+ "WHERE a.employee_id = ? " + "AND t.attendance_type_name = ? " + "AND a.start_date BETWEEN ? AND ?";
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -544,19 +549,23 @@ public class AttendanceDao {
 
 	// 일용직 사원만 조회 (employment_type이 '일용직'인 경우) -나(에스더)코드
 	public List<EmployeeVO> selectDailyWorkers(Connection conn) throws SQLException {
-		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, " + "d.department_name, p.position_name "
-			+ "FROM employee e " + "LEFT JOIN department d ON e.department_id = d.department_id "
-			+ "LEFT JOIN position p ON e.position_id = p.position_id " + "WHERE e.employment_type = '일용직' " // <--
-																																																																													// 요렇게
-																																																																													// 일용직만
-																																																																													// 필터링!
-			+ "ORDER BY e.employee_id ASC";
+		// 쿼리에 e.basic_pay 추가
+		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, "
+				+ "d.department_name, p.position_name, e.basic_pay " + "FROM employee e "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id "
+				+ "LEFT JOIN position p ON e.position_id = p.position_id " + "WHERE e.employment_type = '일용직' "// 다시
+																												// 칸고쿠고
+
+				+ "ORDER BY e.employee_id ASC";
 
 		List<EmployeeVO> list = new ArrayList<>();
 		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				list.add(new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
-					rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name")));
+				EmployeeVO vo = new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
+						rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name"));
+
+				vo.setBasicPay(rs.getLong("basic_pay"));
+				list.add(vo);
 			}
 		}
 		return list;

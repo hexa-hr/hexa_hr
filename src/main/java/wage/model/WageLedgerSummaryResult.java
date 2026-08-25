@@ -2,7 +2,7 @@ package wage.model;
 
 import java.util.List;
 
-// 급여대장 급여차수 목록 조회 결과 DTO
+// 給与台帳の給与回次一覧照会結果DTO
 public class WageLedgerSummaryResult {
 
 	private List<WageLedgerSummary> summaries;

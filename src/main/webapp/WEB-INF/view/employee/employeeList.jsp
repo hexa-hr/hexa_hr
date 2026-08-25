@@ -8,7 +8,6 @@
 <title>사원 명부 (Employee List)</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
 <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
 <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
 
@@ -38,6 +37,7 @@
     .btn-blue { background-color: #3b71ca; }
     .btn-gray { background-color: #9e9e9e; }
     .btn-green { background-color: #14a44d; }
+    .btn-orange { background-color: #f6c23e; color: #fff; } /* 퇴직 버튼 색상 */
 </style>
 <script>
     // 전체 선택/해제 기능
@@ -62,6 +62,32 @@
     function changeLimit(selectObj) {
         let limit = selectObj.value;
         location.href = '<%=request.getContextPath()%>/employee/list.do?limit=' + limit;
+    }
+
+    // 🌟 퇴직 처리 페이지로 이동하는 마법의 함수!
+    function processRetirement() {
+        let checked = document.querySelectorAll('input[name="empIds"]:checked');
+        
+        if (checked.length === 0) {
+            alert("퇴직 처리할 사원을 선택해주세요.");
+            return;
+        }
+        if (checked.length > 1) {
+            alert("퇴직 처리는 한 번에 1명씩만 가능합니다. 한 명만 선택해주세요.");
+            return;
+        }
+        
+        let empId = checked[0].value;
+        
+        // 방금 저희가 만든 사원정보 2페이지의 '퇴직' 탭으로 사원번호를 쥐고 바로 넘어갑니다!
+        location.href = '<%=request.getContextPath()%>/employee/register2.do?employeeId=' + empId + '&tab=retirement';
+        
+        /* 
+        💡 만약, 사원정보 2페이지가 아니라 직접 만드신 퇴직 전용 페이지(employeeRetirement.jsp)로 
+           보내고 싶으시다면 위 location.href 코드를 지우고 아래 코드를 쓰시면 됩니다!
+        
+        location.href = '<%=request.getContextPath()%>/employee/retirement.do?searchEmpId=' + empId;
+        */
     }
 </script>
 </head>
@@ -106,10 +132,8 @@
                         </c:if>
                         
                         <c:forEach var="emp" items="${employeeList}">
-                            <!-- 행(tr) 클릭 시 사원정보 페이지로 이동하도록 설정! -->
                             <tr class="clickable-row" onclick="location.href='<%=request.getContextPath()%>/employee/register.do?employeeId=${emp.employeeId}'">
                                 
-                                <!-- 체크박스 칸을 클릭했을 때는 페이지 이동을 막는 마법의 코드(stopPropagation) -->
                                 <td onclick="event.stopPropagation();">
                                     <input type="checkbox" name="empIds" value="${emp.employeeId}">
                                 </td>
@@ -120,6 +144,7 @@
                                 <td>${emp.positionName != null ? emp.positionName : '-'}</td>
                                 <td>${emp.employmentType}</td>
                                 <td>
+                                    <!-- 퇴사자는 빨간색으로 눈에 띄게 표시해줍니다 -->
                                     <span style="color: ${emp.status == '재직' ? 'blue' : (emp.status == '퇴사' ? 'red' : 'black')}; font-weight: bold;">
                                         ${emp.status}
                                     </span>
@@ -130,11 +155,12 @@
                     </tbody>
                 </table>
 
-                <!-- 하단 버튼 영역 -->
+                <!-- 🌟 하단 버튼 영역에 [퇴직 처리] 버튼을 추가했습니다! -->
                 <div class="btn-wrap">
                     <button type="button" class="btn-blue" onclick="location.href='<%=request.getContextPath()%>/employee/register.do'">신규사원 등록</button>
                     <button type="button" class="btn-blue" onclick="alert('일괄등록 기능은 준비중입니다.');">신규사원 일괄등록</button>
                     <button type="submit" class="btn-gray">선택 삭제</button>
+                    <button type="button" class="btn-orange" onclick="processRetirement()">퇴직 처리</button>
                     <button type="button" class="btn-green" onclick="alert('엑셀 다운로드 기능은 준비중입니다.');">엑셀 다운로드</button>
                 </div>
             </form>

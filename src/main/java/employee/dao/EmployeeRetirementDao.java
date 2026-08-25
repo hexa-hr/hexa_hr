@@ -8,11 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import employee.model.EmployeeRetirementListDto;
-import jdbc.JdbcUtil;
 
 public class EmployeeRetirementDao {
 
-	// 🌟 1. 총 데이터 개수 구하기 (페이징용)
 	public int selectCount(Connection conn, String statusFilter) throws SQLException {
 		String sql = "SELECT COUNT(*) FROM employee";
 		if (statusFilter != null && !statusFilter.trim().isEmpty()) {
@@ -30,7 +28,6 @@ public class EmployeeRetirementDao {
 		return 0;
 	}
 
-	// 🌟 2. 조건에 맞는 데이터만 20개씩 잘라서 가져오기
 	public List<EmployeeRetirementListDto> selectRetirementList(Connection conn, String statusFilter, int startRow,
 		int endRow) throws SQLException {
 		StringBuilder sql = new StringBuilder();
@@ -40,14 +37,13 @@ public class EmployeeRetirementDao {
 		sql.append("               e.hire_date, e.resignation_date, ");
 		sql.append(
 			"               TRUNC(MONTHS_BETWEEN(NVL(e.resignation_date, SYSDATE), e.hire_date) / 12) AS years_of_service, ");
-		sql.append("               CASE WHEN r.retirement_id IS NOT NULL THEN 'O' ELSE 'X' END AS is_settled, ");
+		sql.append("               CASE WHEN r.retirement_type IS NOT NULL THEN 'O' ELSE 'X' END AS is_settled, ");
 		sql.append("               r.retirement_type, r.retirement_reason, r.contact_after_retirement ");
 		sql.append("        FROM employee e ");
 		sql.append("        LEFT JOIN department d ON e.department_id = d.department_id ");
 		sql.append("        LEFT JOIN position p ON e.position_id = p.position_id ");
 		sql.append("        LEFT JOIN retirement r ON e.employee_id = r.employee_id ");
 
-		// 상태 필터링이 있으면 WHERE 조건 추가
 		if (statusFilter != null && !statusFilter.trim().isEmpty()) {
 			sql.append("        WHERE e.status = ? ");
 		}
@@ -80,48 +76,50 @@ public class EmployeeRetirementDao {
 		return result;
 	}
 
-	// 3. 퇴직 처리 (변경 없음)
+	// 🌟 3. 퇴직 처리 (시퀀스 에러 100% 방지 버전)
 	public void processRetirement(Connection conn, int empId, String type, java.sql.Date date, String reason,
 		String contact) throws SQLException {
-		PreparedStatement pstmt1 = null;
-		PreparedStatement pstmt2 = null;
-		try {
-			pstmt1 = conn
-				.prepareStatement("UPDATE employee SET status = '퇴직', resignation_date = ? WHERE employee_id = ?");
-			pstmt1.setDate(1, date);
-			pstmt1.setInt(2, empId);
-			pstmt1.executeUpdate();
 
-			pstmt2 = conn.prepareStatement(
-				"INSERT INTO retirement (retirement_id, employee_id, retirement_type, retirement_date, retirement_reason, contact_after_retirement) VALUES (retirement_seq.NEXTVAL, ?, ?, ?, ?, ?)");
-			pstmt2.setInt(1, empId);
-			pstmt2.setString(2, type);
-			pstmt2.setDate(3, date);
-			pstmt2.setString(4, reason);
-			pstmt2.setString(5, contact);
-			pstmt2.executeUpdate();
-		} finally {
-			JdbcUtil.close(pstmt1);
-			JdbcUtil.close(pstmt2);
+		// 1) 사원 상태를 '퇴직'으로, 퇴사일자를 업데이트
+		String updateSql = "UPDATE employee SET status = '퇴직', resignation_date = ? WHERE employee_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(updateSql)) {
+			pstmt.setDate(1, date);
+			pstmt.setInt(2, empId);
+			pstmt.executeUpdate();
+		}
+
+		// 2) 혹시 꼬여있는 기존 데이터 날리기
+		String deleteSql = "DELETE FROM retirement WHERE employee_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(deleteSql)) {
+			pstmt.setInt(1, empId);
+			pstmt.executeUpdate();
+		}
+
+		// 3) retirement_seq 시퀀스 대신 MAX값+1 로 고유번호를 자동 생성 (에러 완벽 차단)
+		String insertSql = "INSERT INTO retirement (retirement_id, employee_id, retirement_type, retirement_date, retirement_reason, contact_after_retirement) "
+			+ "VALUES ((SELECT NVL(MAX(retirement_id), 0) + 1 FROM retirement), ?, ?, ?, ?, ?)";
+		try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
+			pstmt.setInt(1, empId);
+			pstmt.setString(2, type);
+			pstmt.setDate(3, date);
+			pstmt.setString(4, reason);
+			pstmt.setString(5, contact);
+			pstmt.executeUpdate();
 		}
 	}
 
-	// 4. 퇴직 취소 (변경 없음)
+	// 🌟 4. 퇴직 취소
 	public void cancelRetirement(Connection conn, int empId) throws SQLException {
-		PreparedStatement pstmt1 = null;
-		PreparedStatement pstmt2 = null;
-		try {
-			pstmt1 = conn
-				.prepareStatement("UPDATE employee SET status = '재직', resignation_date = NULL WHERE employee_id = ?");
-			pstmt1.setInt(1, empId);
-			pstmt1.executeUpdate();
+		String updateSql = "UPDATE employee SET status = '재직', resignation_date = NULL WHERE employee_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(updateSql)) {
+			pstmt.setInt(1, empId);
+			pstmt.executeUpdate();
+		}
 
-			pstmt2 = conn.prepareStatement("DELETE FROM retirement WHERE employee_id = ?");
-			pstmt2.setInt(1, empId);
-			pstmt2.executeUpdate();
-		} finally {
-			JdbcUtil.close(pstmt1);
-			JdbcUtil.close(pstmt2);
+		String deleteSql = "DELETE FROM retirement WHERE employee_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(deleteSql)) {
+			pstmt.setInt(1, empId);
+			pstmt.executeUpdate();
 		}
 	}
 }

@@ -1,195 +1,347 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<jsp:useBean id="now" class="java.util.Date" />
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>근태기록/관리</title>
+<title>勤怠記録/管理</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
-    body { font-family: 'Malgun Gothic', dotum, sans-serif; font-size: 13px; color: #333; margin: 0; background-color: #f5f5f5;}
-    
-    /* Layout */
-    .container { display: flex; gap: 30px; background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .left-panel { flex: 6; overflow-y: auto; max-height: 600px; }
-    .right-panel { flex: 4; border-left: 1px solid #ddd; padding-left: 30px; }
+body {
+	font-family: 'Malgun Gothic', dotum, sans-serif;
+	font-size: 13px;
+	color: #333;
+	margin: 0;
+	background-color: #f5f5f5;
+}
 
-    /* Table Styles */
-    table { width: 100%; border-collapse: collapse; text-align: center; }
-    th, td { border: 1px solid #e2e2e2; padding: 10px; }
-    th { background-color: #f4f4f4; }
-    .selected-row { background-color: #e8f0fe !important; font-weight: bold; }
+/* Layout */
+.container {
+	display: flex;
+	gap: 30px;
+	background: #fff;
+	padding: 20px;
+	border-radius: 5px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-    /* Button Styles */
-    .btn-manage { background: white; border: 1px solid #ccc; padding: 4px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; }
-    .btn-manage:hover { background: #eee; }
-    .btn-delete { background: #ff4d4f; color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; }
-    .btn-delete:hover { background: #ff7875; }
-    .btn-submit { background-color: #5c7cba; color: white; border: none; padding: 6px 20px; border-radius: 3px; cursor: pointer; }
-    .btn-reset { background-color: #999; color: white; border: none; padding: 6px 15px; border-radius: 3px; cursor: pointer; }
+.left-panel {
+	flex: 6;
+	overflow-y: auto;
+	max-height: 600px;
+}
 
-    /* Modal Styles */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
-    .modal-content { background: white; width: 850px; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-    .modal-header { font-size: 18px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; }
-    .btn-close-modal { cursor: pointer; font-size: 20px; background: none; border: none; }
-    
-    /* Form Styles */
-    .form-table th { width: 120px; text-align: left; background-color: #fbfbfb; }
-    .form-table td { text-align: left; }
-    input[type="date"], input[type="text"], input[type="number"], select { padding: 3px; border: 1px solid #ccc; }
+.right-panel {
+	flex: 4;
+	border-left: 1px solid #ddd;
+	padding-left: 30px;
+}
+
+/* Table Styles */
+table {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: center;
+}
+
+th, td {
+	border: 1px solid #e2e2e2;
+	padding: 10px;
+}
+
+th {
+	background-color: #f4f4f4;
+}
+
+.selected-row {
+	background-color: #e8f0fe !important;
+	font-weight: bold;
+}
+
+/* Button Styles */
+.btn-manage {
+	background: white;
+	border: 1px solid #ccc;
+	padding: 4px 8px;
+	cursor: pointer;
+	border-radius: 3px;
+	font-size: 12px;
+}
+
+.btn-manage:hover {
+	background: #eee;
+}
+
+.btn-delete {
+	background: #ff4d4f;
+	color: white;
+	border: none;
+	padding: 4px 8px;
+	cursor: pointer;
+	border-radius: 3px;
+	font-size: 12px;
+}
+
+.btn-delete:hover {
+	background: #ff7875;
+}
+
+.btn-submit {
+	background-color: #5c7cba;
+	color: white;
+	border: none;
+	padding: 6px 20px;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.btn-reset {
+	background-color: #999;
+	color: white;
+	border: none;
+	padding: 6px 15px;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+/* Modal Styles */
+.modal-overlay {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 100;
+	justify-content: center;
+	align-items: center;
+}
+
+.modal-content {
+	background: white;
+	width: 850px;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+	font-size: 18px;
+	font-weight: bold;
+	margin-bottom: 15px;
+	display: flex;
+	justify-content: space-between;
+}
+
+.btn-close-modal {
+	cursor: pointer;
+	font-size: 20px;
+	background: none;
+	border: none;
+}
+
+/* Form Styles */
+.form-table th {
+	width: 120px;
+	text-align: left;
+	background-color: #fbfbfb;
+}
+
+.form-table td {
+	text-align: left;
+}
+
+input[type="date"], input[type="text"], input[type="number"], select {
+	padding: 3px;
+	border: 1px solid #ccc;
+}
 </style>
 </head>
 <body>
 
-<jsp:include page="/WEB-INF/view/include/header.jsp" />
-<jsp:include page="/WEB-INF/view/include/nav.jsp" />
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-<div class="container">
-    <!-- 좌측 리스트 영역 -->
-    <div class="left-panel">
-        <h2>근태기록/관리</h2>
-        <table id="employeeTable">
-            <thead>
-                <tr>
-                    <th>선택</th>
-                    <th>구분</th>
-                    <th>사원번호</th>
-                    <th>성명</th>
-                    <th>부서</th>
-                    <th>직위</th>
-                    <th>근태기록</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- DB 동적 목록 조회를 위한 JSTL 반복문 -->
-                <c:forEach var="emp" items="${empList}">
-                    <tr>
-                        <td><input type="checkbox" class="emp-checkbox" value="${emp.employeeId}" data-name="${emp.koreanName}"></td>
-                        <td>${emp.employmentType}</td>
-                        <td>No-${emp.employeeId}</td>
-                        <td>${emp.koreanName}</td>
-                        <td>${emp.departmentName}</td>
-                        <td>${emp.positionName}</td>
-                        <td>
-                            <button type="button" class="btn-manage" onclick="openModal('${emp.employeeId}', '${emp.koreanName}', '${emp.departmentName}', '${emp.positionName}')">관리</button>
-                        </td>
-                    </tr>
-                </c:forEach>
-            </tbody>
-        </table>
-    </div>
+	<div class="container">
+		<!-- 左側のリスト領域 -->
+		<div class="left-panel">
+			<h2>勤怠記録/管理</h2>
+			<table id="employeeTable">
+				<thead>
+					<tr>
+						<th>選択</th>
+						<th>区分</th>
+						<th>社員番号</th>
+						<th>姓名</th>
+						<th>部署</th>
+						<th>職位</th>
+						<th>勤怠記録</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- DB動的リスト照会のためのJSTL繰り返し文 -->
+					<c:forEach var="emp" items="${empList}">
+						<tr>
+							<td><input type="checkbox" class="emp-checkbox"
+								value="${emp.employeeId}" data-name="${emp.koreanName}"></td>
+							<td>${emp.employmentType}</td>
+							<td>No-${emp.employeeId}</td>
+							<td>${emp.koreanName}</td>
+							<td>${emp.departmentName}</td>
+							<td>${emp.positionName}</td>
+							<td>
+								<button type="button" class="btn-manage"
+									onclick="openModal('${emp.employeeId}', '${emp.koreanName}', '${emp.departmentName}', '${emp.positionName}')">管理</button>
+							</td>
+						</tr>
+					</c:forEach>
+				</tbody>
+			</table>
+		</div>
 
-    <!-- 우측 폼 영역 -->
-    <div class="right-panel">
-        <!-- [수정됨 1] 폼 데이터가 attendanceSaveProcess.jsp로 넘어가도록 action 주소 변경 -->
-			<form id="attendanceForm" action="${pageContext.request.contextPath}/attendance/save.do" method="post" onsubmit="return validateForm();">
-            
-            <input type="hidden" id="selectedEmpNo" name="employee_id">
-            <input type="hidden" id="attendanceId" name="attendance_id"> <!-- 수정할 때 사용할 근태기록 ID -->
-            <input type="hidden" id="inputDate" name="input_date" value="2026-08-06"> <!-- 고정 입력일자 -->
-            
-            <div id="selectedEmpInfoDisplay" style="margin-bottom: 10px; font-weight: bold; color: #5c7cba;">
-                [사원을 먼저 좌측 체크박스에서 선택하세요]
-            </div>
+		<!-- 右側のフォーム領域 -->
+		<div class="right-panel">
+			<form id="attendanceForm"
+				action="${pageContext.request.contextPath}/attendance/save.do"
+				method="post" onsubmit="return validateForm();">
 
-            <table class="form-table">
-                <tr style="border-top: 2px solid #000;">
-                    <th>입력일자</th>
-                    <td id="currentDateDisplay">2026-08-06</td>
-                </tr>
-                <tr>
-                    <th>근태항목</th>
-                    <td>
-                        <select id="attendanceType" name="attendance_type_id" onchange="toggleVacationPeriod()" required>
-                            <option value="">선택하세요.</option>
-                            <!-- [수정됨 2] 백엔드에서 에러가 나지 않도록 value를 고유 숫자로 변경 -->
-                            <option value="1">연차</option>
-                            <option value="2">반차</option>
-                            <option value="3">지각</option>
-                            <option value="4">조퇴</option>
-                            <option value="5">외근</option>
-                            <option value="6">휴일근무</option>
-                            <option value="7">연장근무</option>
-                            <option value="8">포상휴가</option>
-                            <option value="9">야간근무</option>
-                            <option value="10">청원휴가</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr id="vacationPeriodRow" style="display: none;">
-                    <th style="color: #e53935;">휴가적용기간</th>
-                    <td style="color: #e53935; font-weight: bold;">
-                        2026-01-01 ~ 2026-12-31
-                    </td>
-                </tr>        
-                <tr>
-                    <th>기간</th>
-                    <td>
-                        <input type="date" id="startDate" name="start_date" required> ~ 
-                        <input type="date" id="endDate" name="end_date" required>
-                    </td>
-                </tr>
-                <tr>
-                    <th>근태일수</th>
-                    <td><input type="number" id="attendanceDays" name="attendance_days" min="0" step="0.5" value="1" required> 일</td>
-                </tr>
-                <tr>
-                    <th>금액(수당)</th>
-                    <td><input type="number" id="wageAmount" name="amount" value="0"> 원</td>
-                </tr>
-                <tr>
-                    <th>적요</th>
-                    <td><input type="text" id="remark" name="summary" style="width: 80%;"></td>
-                </tr>
-            </table>
-            <div style="text-align: center; margin-top: 20px;">
-                <button type="submit" class="btn-submit">저장</button>
-                <button type="button" class="btn-reset" onclick="resetForm();">내용 지우기</button>
-            </div>
-        </form>
-    </div>
-</div>
+				<input type="hidden" id="selectedEmpNo" name="employee_id">
+				<input type="hidden" id="attendanceId" name="attendance_id">
 
-<!-- 모달 팝업 영역 -->
-<div id="recordModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span>사원별 근태기록</span>
-            <button class="btn-close-modal" onclick="closeModal()">×</button>
-        </div>
-        <div style="margin-bottom: 10px; font-weight: bold;" id="modalEmpInfo">
-            <!-- JS로 이름, 부서, 직위 입력 -->
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>번호</th>
-                    <th>입력일자</th>
-                    <th>근태항목</th>
-                    <th>근태기간</th>
-                    <th>근태일수</th>
-                    <th>금액</th>
-                    <th>적요</th>
-                    <th>수정/삭제</th>
-                </tr>
-            </thead>
-            <tbody id="modalTableBody">
-                <!-- 동적 렌더링 영역 -->
-            </tbody>
-        </table>
-    </div>
-</div>
+				<!-- [修正] valueを空にしてJSが今日の日付を設定するように変更 -->
+				<input type="hidden" id="inputDate" name="input_date">
 
-<script>
+				<div id="selectedEmpInfoDisplay"
+					style="margin-bottom: 10px; font-weight: bold; color: #5c7cba;">
+					[社員を左側のチェックボックスから選択してください]</div>
+
+				<table class="form-table">
+					<tr style="border-top: 2px solid #000;">
+						<th>入力日</th>
+						<!-- [修正] 固定テキスト削除およびJSで連結 -->
+						<td id="currentDateDisplay"></td>
+					</tr>
+					<tr>
+						<th>勤怠項目</th>
+						<td><select id="attendanceType" name="attendance_type_id"
+							onchange="toggleVacationPeriod()" required>
+								<option value="" data-has-vacation="false" data-unit="日">選択してください。</option>
+								<c:forEach var="att" items="${attendanceList}">
+									<option value="${att.attendanceTypeId}"
+										data-has-vacation="${not empty att.vacationTypeId and att.vacationTypeId != 0 ? 'true' : 'false'}"
+										data-vacation-name="${att.vacationTypeName}"
+										data-start="<fmt:formatDate value='${att.applyPeriod1}' pattern='yyyy-MM-dd'/>"
+										data-end="<fmt:formatDate value='${att.applyPeriod2}' pattern='yyyy-MM-dd'/>"
+										data-unit="${att.unit}" data-att-usage="${att.usage}"
+										data-vac-usage="${att.vacationUsage}">
+										${att.attendanceTypeName}</option>
+								</c:forEach>
+						</select></td>
+					</tr>
+					<tr id="vacationPeriodRow" style="display: none;">
+						<th style="color: #e53935;">休暇適用期間</th>
+						<!-- [修正] 固定テキスト削除およびid(vacationPeriodDisplay)付与 -->
+						<td id="vacationPeriodDisplay"
+							style="color: #e53935; font-weight: bold;"></td>
+					</tr>
+					<tr>
+						<th>期間</th>
+						<td><input type="date" id="startDate" name="start_date"
+							required> ~ <input type="date" id="endDate"
+							name="end_date" required></td>
+					</tr>
+					<tr>
+						<th>勤怠日数</th>
+						<td><input type="number" id="attendanceDays"
+							name="attendance_days" min="0" step="0.5" value="1" required>
+							<span id="unitText">日</span></td>
+					</tr>
+					<tr>
+						<th>金額(手当)</th>
+						<td><input type="number" id="wageAmount" name="amount"
+							value="0"> ウォン</td>
+					</tr>
+					<tr>
+						<th>摘要</th>
+						<td><input type="text" id="remark" name="summary"
+							style="width: 80%;"></td>
+					</tr>
+				</table>
+				<div style="text-align: center; margin-top: 20px;">
+					<button type="submit" class="btn-submit">保存</button>
+					<button type="button" class="btn-reset" onclick="resetForm();">内容クリア</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- モーダルポップアップ領域 -->
+	<div id="recordModal" class="modal-overlay">
+		<div class="modal-content">
+			<div class="modal-header">
+				<span>社員別勤怠記録</span>
+				<button class="btn-close-modal" onclick="closeModal()">×</button>
+			</div>
+			<div style="margin-bottom: 10px; font-weight: bold;"
+				id="modalEmpInfo">
+				<!-- JSで名前、部署、職位を入力 -->
+			</div>
+			<table>
+				<thead>
+					<tr>
+						<th>番号</th>
+						<th>入力日</th>
+						<th>勤怠項目</th>
+						<th>勤怠期間</th>
+						<th>勤怠日数</th>
+						<th>金額</th>
+						<th>摘要</th>
+						<th>編集/削除</th>
+					</tr>
+				</thead>
+				<tbody id="modalTableBody">
+					<!-- 動的レンダリング領域 -->
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<script>
     var currentModalEmpNo = '';
 
-    // 1. 체크박스 선택 시 사번 저장 및 UI 표시
+    // [追加] 今日の日付自動セッティング関数
+    function setTodayDate() {
+        var today = new Date();
+        var yyyy = today.getFullYear();
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var dd = String(today.getDate()).padStart(2, '0');
+        var formattedDate = yyyy + '-' + mm + '-' + dd;
+        
+        var inputDateEl = document.getElementById('inputDate');
+        var displayEl = document.getElementById('currentDateDisplay');
+        
+        if(inputDateEl) inputDateEl.value = formattedDate;
+        if(displayEl) displayEl.innerText = formattedDate;
+    }
+
+    // DOMロード時に即時今日の日付をセッティング
+    document.addEventListener("DOMContentLoaded", function() {
+        setTodayDate();
+    });
+
+    // 1. チェックボックス選択時に社員番号保存およびUI表示
     var checkboxes = document.querySelectorAll('.emp-checkbox');
     checkboxes.forEach(function(cb) {
         cb.addEventListener('change', function() {
@@ -199,63 +351,64 @@
             if(this.checked) {
                 this.closest('tr').classList.add('selected-row');
                 document.getElementById('selectedEmpNo').value = this.value; 
-                document.getElementById('selectedEmpInfoDisplay').innerText = '선택된 사원: ' + this.dataset.name + ' (No-' + this.value + ')';
+                document.getElementById('selectedEmpInfoDisplay').innerText = '選択された社員: ' + this.dataset.name + ' (No-' + this.value + ')';
             } else {
                 document.getElementById('selectedEmpNo').value = "";
-                document.getElementById('selectedEmpInfoDisplay').innerText = "[사원을 먼저 좌측 체크박스에서 선택하세요]";
+                document.getElementById('selectedEmpInfoDisplay').innerText = "[社員を左側のチェックボックスから選択してください]";
             }
         });
     });
 
-    // 2. 저장 전 사원 선택 여부 검증
+    // 2. 保存前に社員選択有無を検証
     function validateForm() {
         var selectedEmpNo = document.getElementById('selectedEmpNo').value;
         if (!selectedEmpNo) {
-            alert('좌측 목록에서 근태를 등록할 사원을 체크(선택)해 주세요.');
+            alert('左側のリストから勤怠を登録する社員をチェック（選択）してください。');
             return false;
         }
         return true;
     }
 
-    // 3. 폼 리셋
+    // 3. フォームリセット
     function resetForm() {
         document.getElementById('attendanceForm').reset();
-        document.getElementById('attendanceId').value = ''; // 수정 모드 해제
+        document.getElementById('attendanceId').value = ''; // 編集モード解除
         
-        // 체크박스 상태에 따라 상단 텍스트 복구
+        // チェックボックスの状態に応じて上部テキストを復元
         var checkedBox = document.querySelector('.emp-checkbox:checked');
         if(checkedBox) {
-            document.getElementById('selectedEmpInfoDisplay').innerText = '선택된 사원: ' + checkedBox.dataset.name + ' (No-' + checkedBox.value + ')';
+            document.getElementById('selectedEmpInfoDisplay').innerText = '選択された社員: ' + checkedBox.dataset.name + ' (No-' + checkedBox.value + ')';
             document.getElementById('selectedEmpInfoDisplay').style.color = '#5c7cba';
         } else {
             document.getElementById('selectedEmpNo').value = '';
-            document.getElementById('selectedEmpInfoDisplay').innerText = "[사원을 먼저 좌측 체크박스에서 선택하세요]";
+            document.getElementById('selectedEmpInfoDisplay').innerText = "[社員を左側のチェックボックスから選択してください]";
             document.getElementById('selectedEmpInfoDisplay').style.color = '#5c7cba';
         }
         
+        setTodayDate(); // 初期化時にも固定値の代わりに無条件で今日の日付を維持
         toggleVacationPeriod();
     }
 
-    // 4. 모달 열기 및 Ajax 데이터 동적 로드
+    // 4. モーダルを開き、Ajaxデータを動的ロード
     function openModal(empNo, name, dept, position) {
         currentModalEmpNo = empNo;
         document.getElementById('recordModal').style.display = 'flex';
-        document.getElementById('modalEmpInfo').innerText = '• 성명: ' + name + ' (No-' + empNo + ') • 부서: ' + dept + ' • 직위: ' + position;
+        document.getElementById('modalEmpInfo').innerText = '• 姓名: ' + name + ' (No-' + empNo + ') • 部署: ' + dept + ' • 職位: ' + position;
         
         loadAttendanceList(empNo);
     }
 
-    // 5. 서버에서 특정 사원의 근태 목록 가져오기
+    // 5. サーバーから特定の社員の勤怠リストを取得
     function loadAttendanceList(empNo) {
         var tbody = document.getElementById('modalTableBody');
-        tbody.innerHTML = '<tr><td colspan="8">데이터를 불러오는 중입니다...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8">データを読み込み中です···</td></tr>';
 
         fetch('${pageContext.request.contextPath}/attendance/list.do?empNo=' + empNo)
             .then(function(response) { return response.json(); })
             .then(function(data) {
                 tbody.innerHTML = '';
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8">등록된 근태 기록이 없습니다.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8">登録された勤怠記録はありません。</td></tr>';
                     return;
                 }
 
@@ -280,38 +433,37 @@
                         '<td>' + amount + '</td>' +
                         '<td>' + summary + '</td>' +
                         '<td>' +
-                            '<button type="button" class="btn-manage" onclick="editRecord(' + attendanceId + ', \'' + attendanceTypeName + '\', \'' + startDate + '\', \'' + endDate + '\', ' + attendanceDays + ', ' + amount + ', \'' + summary + '\')">🔄수정</button> ' +
-                            '<button type="button" class="btn-delete" onclick="deleteRecord(' + attendanceId + ')">🗑️삭제</button>' +
+                            '<button type="button" class="btn-manage" onclick="editRecord(' + attendanceId + ', \'' + attendanceTypeName + '\', \'' + startDate + '\', \'' + endDate + '\', ' + attendanceDays + ', ' + amount + ', \'' + summary + '\')">🔄編集</button> ' +
+                            '<button type="button" class="btn-delete" onclick="deleteRecord(' + attendanceId + ')">🗑️削除</button>' +
                         '</td>';
                         
                     tbody.appendChild(tr);
                 });
             })
             .catch(function(err) {
-                tbody.innerHTML = '<tr><td colspan="8">데이터 조회 중 오류가 발생했습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8">データ照会中にエラーが発生しました。</td></tr>';
             });
     }
 
-    // 6. 모달 닫기
+    // 6. モーダルを閉じる
     function closeModal() {
         document.getElementById('recordModal').style.display = 'none';
     }
 
-    // 7. 모달 내 '수정' 클릭 시 우측 폼으로 데이터 전달
+    // 7. モーダル内の「編集」クリック時に右側のフォームへデータを伝達
     function editRecord(attId, type, start, end, days, amount, remark) {
         closeModal();
         
-        // 데이터 ID 및 사원 번호 강제 세팅
+        // データIDおよび社員番号の強制セッティング
         document.getElementById('attendanceId').value = attId;
         document.getElementById('selectedEmpNo').value = currentModalEmpNo;
         
-        // 모달창 텍스트에서 이름만 추출하여 표시
+        // モーダル画面のテキストから名前のみを抽出して表示
         var modalTitle = document.getElementById('modalEmpInfo').innerText;
-        var empName = modalTitle.split('• 성명: ')[1].split(' (')[0];
-        document.getElementById('selectedEmpInfoDisplay').innerText = '[수정 모드] 선택된 사원: ' + empName + ' (No-' + currentModalEmpNo + ')';
-        document.getElementById('selectedEmpInfoDisplay').style.color = '#e53935'; // 빨간색으로 변경
+        var empName = modalTitle.split('• 姓名: ')[1].split(' (')[0];
+        document.getElementById('selectedEmpInfoDisplay').innerText = '[編集モード] 選択された社員: ' + empName + ' (No-' + currentModalEmpNo + ')';
+        document.getElementById('selectedEmpInfoDisplay').style.color = '#e53935'; 
         
-        // [수정됨 3] 드롭다운 값이 숫자로 바뀌었으므로, 한글 이름(type)과 일치하는 항목을 찾아 선택되도록 수정
         var selectEl = document.getElementById('attendanceType');
         for(var i=0; i<selectEl.options.length; i++) {
             if(selectEl.options[i].text === type) {
@@ -332,34 +484,97 @@
         setTimeout(function() { document.querySelector('.right-panel').style.outline = "none"; }, 1000);
     }
 
-    // 8. 모달 내 '삭제' 버튼 클릭 시 실시간 DB 삭제 처리
+    // 8. モーダル内の「削除」ボタンクリック時にリアルタイムDB削除処理
     function deleteRecord(attendanceId) {
-        if (!confirm('해당 근태 기록을 정말 삭제하시겠습니까?')) return;
+        if (!confirm('この勤怠記録を本当に削除しますか？')) return;
 
         fetch('${pageContext.request.contextPath}/attendance/delete.do?attendanceId=' + attendanceId, {
             method: 'POST'
         })
         .then(function(response) {
             if (response.ok) {
-                alert('정상적으로 삭제되었습니다.');
+                alert('正常に削除されました。');
                 loadAttendanceList(currentModalEmpNo);
             } else {
-                alert('삭제 처리에 실패했습니다.');
+                alert('削除処理に失敗しました。');
             }
         })
-        .catch(function(err) { alert('서버 통신 오류가 발생했습니다.'); });
+        .catch(function(err) { alert('サーバー通信エラーが発生しました。'); });
     }
 
-    // 9. 포상휴가 선택 시 휴가기간 표시 토글
+    // [追加] 消えていた期間制限および単位表示の動的関数を復旧
     function toggleVacationPeriod() {
         var typeSelect = document.getElementById('attendanceType');
-        var vacationRow = document.getElementById('vacationPeriodRow');
+        var selectedOption = typeSelect.options[typeSelect.selectedIndex];
         
-        // [수정됨 4] value가 숫자로 바뀌었으므로 텍스트명으로 조건 검사하도록 수정
-        if (typeSelect.options[typeSelect.selectedIndex].text === '포상휴가') {
-            vacationRow.style.display = 'table-row';
+        var vacationRow = document.getElementById('vacationPeriodRow');
+        var displayTd = document.getElementById('vacationPeriodDisplay');
+        
+        var startDateInput = document.getElementById('startDate');
+        var endDateInput = document.getElementById('endDate');
+        
+        // 単位テキスト要素
+        var unitTextSpan = document.getElementById('unitText');
+
+        if (!selectedOption) return; // 防御コード
+
+        // optionタグに隠しておいたデータを取り出します。
+        var hasVacation = selectedOption.getAttribute('data-has-vacation') === 'true';
+        var vName = selectedOption.getAttribute('data-vacation-name');
+        var vStart = selectedOption.getAttribute('data-start');
+        var vEnd = selectedOption.getAttribute('data-end');
+        var unit = selectedOption.getAttribute('data-unit');
+        
+        // 追加された使用有無データ
+        var attUsage = selectedOption.getAttribute('data-att-usage');
+        var vacUsage = selectedOption.getAttribute('data-vac-usage');
+        
+        // 単位が「時間」なら時間、そうでなければデフォルトの「日」に変更
+        if (unit === '時間') {
+            if(unitTextSpan) unitTextSpan.innerText = '時間';
         } else {
-            vacationRow.style.display = 'none';
+            if(unitTextSpan) unitTextSpan.innerText = '日';
+        }
+        
+        // 両方「使用」（またはDB値「Y」）状態か確認
+        var isBothUsed = (attUsage === 'Y' || attUsage === '使用') && (vacUsage === 'Y' || vacUsage === '使用');
+        
+        // 選択した勤怠項目に連結された休暇控除が存在し、両方「使用」の場合
+        if (hasVacation && vStart && vEnd && isBothUsed) {
+            if(vacationRow) vacationRow.style.display = 'table-row';
+            
+            if(displayTd) displayTd.innerText = vName + " (" + vStart + " ~ " + vEnd + ")";
+            
+            // カレンダー選択範囲を強制制限
+            if(startDateInput) {
+                startDateInput.min = vStart;
+                startDateInput.max = vEnd;
+            }
+            if(endDateInput) {
+                endDateInput.min = vStart;
+                endDateInput.max = vEnd;
+            }
+            
+            if (startDateInput && startDateInput.value && (startDateInput.value < vStart || startDateInput.value > vEnd)) {
+                startDateInput.value = vStart;
+            }
+            if (endDateInput && endDateInput.value && (endDateInput.value < vStart || endDateInput.value > vEnd)) {
+                endDateInput.value = vEnd;
+            }
+        } else {
+            // 連結された休暇がない一般勤怠項目、または使用しない場合
+            if(vacationRow) vacationRow.style.display = 'none';
+            if(displayTd) displayTd.innerText = "";
+            
+            // 一般勤怠項目はカレンダー制限を解除
+            if(startDateInput) {
+                startDateInput.removeAttribute('min');
+                startDateInput.removeAttribute('max');
+            }
+            if(endDateInput) {
+                endDateInput.removeAttribute('min');
+                endDateInput.removeAttribute('max');
+            }
         }
     }
 </script>

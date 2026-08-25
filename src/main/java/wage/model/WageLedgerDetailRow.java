@@ -2,7 +2,7 @@ package wage.model;
 
 import java.util.Date;
 
-// 급여대장 상세 조회용 원본 DTO
+// 給与台帳詳細照会用の元データDTO
 public class WageLedgerDetailRow {
 
 	private Integer employeeId;

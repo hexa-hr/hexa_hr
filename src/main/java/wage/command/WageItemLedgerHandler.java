@@ -10,7 +10,7 @@ import mvc.command.CommandHandler;
 import wage.model.WageItemLedgerResult;
 import wage.service.WageItemLedgerService;
 
-//항목별 대장 화면 요청 처리
+// 項目別台帳画面のリクエスト処理
 public class WageItemLedgerHandler implements CommandHandler {
 
 	private static final String FORM_VIEW = "/WEB-INF/view/wage/wageItemLedger.jsp";
@@ -21,7 +21,7 @@ public class WageItemLedgerHandler implements CommandHandler {
 	public String process(HttpServletRequest req,
 		HttpServletResponse res) throws Exception {
 
-		// 검색 화면의 급여항목 선택 목록
+		// 検索画面の給与項目選択リスト
 		List<WageTypeOption> wageTypeOptions = wageItemLedgerService.getWageTypeOptions();
 
 		req.setAttribute("wageTypeOptions", wageTypeOptions);
@@ -30,13 +30,13 @@ public class WageItemLedgerHandler implements CommandHandler {
 		String startMonth = trim(req.getParameter("startMonth"));
 		String endMonth = trim(req.getParameter("endMonth"));
 
-		// 검색 후에도 사용자가 선택한 조건을 유지
+		// 検索後もユーザーが選択した条件を維持
 		req.setAttribute(
 			"selectedWageTypeId", wageTypeIdParam);
 		req.setAttribute("startMonth", startMonth);
 		req.setAttribute("endMonth", endMonth);
 
-		// 처음 화면에 들어온 경우에는 검색하지 않음
+		// 初回アクセス時は検索しない
 		boolean hasSearchCondition = wageTypeIdParam != null
 			|| startMonth != null
 			|| endMonth != null;
@@ -48,7 +48,7 @@ public class WageItemLedgerHandler implements CommandHandler {
 		try {
 			if (wageTypeIdParam == null) {
 				throw new IllegalArgumentException(
-					"급여항목을 선택해야 합니다.");
+					"給与項目を選択する必要があります。");
 			}
 
 			Integer wageTypeId = Integer.valueOf(wageTypeIdParam);
@@ -64,7 +64,7 @@ public class WageItemLedgerHandler implements CommandHandler {
 		} catch (NumberFormatException e) {
 			req.setAttribute(
 				"errorMessage",
-				"올바른 급여항목을 선택해야 합니다.");
+				"正しい給与項目を選択する必要があります。");
 
 		} catch (IllegalArgumentException e) {
 			req.setAttribute(

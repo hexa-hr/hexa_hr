@@ -2,6 +2,9 @@ package attendance.model;
 
 public class AttendanceType {
 
+	private java.util.Date applyPeriod1;
+	private java.util.Date applyPeriod2;
+
 	private int attendanceTypeId; // 근태항목 ID (PK)
 	private String name; // 근태항목명
 	private String unit; // 단위 (일, 시간 등)
@@ -14,7 +17,8 @@ public class AttendanceType {
 	private String vacationTypeName; // 휴가공제명
 
 	// 기본 생성자
-	public AttendanceType() {}
+	public AttendanceType() {
+	}
 
 	// Getter & Setter
 	public int getAttendanceTypeId() {
@@ -79,5 +83,21 @@ public class AttendanceType {
 
 	public void setVacationTypeName(String vacationTypeName) {
 		this.vacationTypeName = vacationTypeName;
+	}
+
+	public java.util.Date getApplyPeriod1() {
+		return applyPeriod1;
+	}
+
+	public void setApplyPeriod1(java.util.Date applyPeriod1) {
+		this.applyPeriod1 = applyPeriod1;
+	}
+
+	public java.util.Date getApplyPeriod2() {
+		return applyPeriod2;
+	}
+
+	public void setApplyPeriod2(java.util.Date applyPeriod2) {
+		this.applyPeriod2 = applyPeriod2;
 	}
 }

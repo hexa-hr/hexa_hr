@@ -6,17 +6,20 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>4대보험 공제내역</title>
+<title>4大保険控除内訳</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
 body {
 	font-family: Arial, sans-serif;
-    margin: 0;
+	margin: 0;
 }
 
 .search-form {
@@ -116,23 +119,23 @@ button {
 </head>
 
 <body>
-    
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<h1>4대보험 공제내역</h1>
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<p>귀속연월 및 급여차수를 기준으로 근로자와 사업주의 4대보험 부담내역을 조회합니다.</p>
+	<h1>4大保険控除内訳</h1>
+
+	<p>帰属年月および給与回次を基準に、労働者と事業主の4大保険負担内訳を照会します。</p>
 
 	<form class="search-form" method="get"
 		action="${pageContext.request.contextPath}/wage/insuranceDeduction.do">
 
 		<div class="search-row">
 
-			<label for="wageMonth">귀속연월</label> <input type="month"
+			<label for="wageMonth">帰属年月</label> <input type="month"
 				id="wageMonth" name="wageMonth"
 				value="<c:out value='${selectedWageMonth}' />" required> <label
-				for="wagePeriod">급여차수</label> <select id="wagePeriod"
+				for="wagePeriod">給与回次</label> <select id="wagePeriod"
 				name="wagePeriod" required>
 
 				<c:forEach var="period" begin="1" end="10">
@@ -141,15 +144,15 @@ button {
 						<c:if test="${selectedWagePeriod == period}">
 							selected
 						</c:if>>
-						급여-
-						<fmt:formatNumber value="${period}" pattern="00" />차
+						給与-
+						<fmt:formatNumber value="${period}" pattern="00" />回
 					</option>
 
 				</c:forEach>
 
 			</select>
 
-			<button type="submit">공제내역 조회</button>
+			<button type="submit">控除内訳照会</button>
 
 		</div>
 
@@ -168,7 +171,7 @@ button {
 
 			<c:when test="${empty insuranceDeduction.rows}">
 
-				<div class="no-data">4대보험 공제내역 데이터가 없습니다.</div>
+				<div class="no-data">4大保険控除内訳のデータがありません。</div>
 
 			</c:when>
 
@@ -177,7 +180,7 @@ button {
 				<div class="summary-info">
 
 					<div>
-						<strong>정산기간:</strong>
+						<strong>精算期間:</strong>
 
 						<fmt:formatDate
 							value="${insuranceDeduction.summary.settlementPeriodStartDate}"
@@ -191,7 +194,7 @@ button {
 					</div>
 
 					<div>
-						<strong>급여지급일:</strong>
+						<strong>給与支給日:</strong>
 
 						<fmt:formatDate
 							value="${insuranceDeduction.summary.wagePaymentDate}"
@@ -209,47 +212,47 @@ button {
 
 							<tr>
 
-								<th colspan="5">사원정보</th>
+								<th colspan="5">社員情報</th>
 
-								<th colspan="3" class="group-pension">국민연금</th>
+								<th colspan="3" class="group-pension">国民年金</th>
 
-								<th colspan="3" class="group-health">건강보험</th>
+								<th colspan="3" class="group-health">健康保険</th>
 
-								<th colspan="3" class="group-care">노인장기요양보험</th>
+								<th colspan="3" class="group-care">介護保険</th>
 
-								<th colspan="3" class="group-employment">고용보험</th>
+								<th colspan="3" class="group-employment">雇用保険</th>
 
-								<th colspan="3" class="group-total">총 합계</th>
+								<th colspan="3" class="group-total">総合計</th>
 
 							</tr>
 
 							<tr>
 
-								<th>구분</th>
-								<th>성명</th>
-								<th>입사일</th>
-								<th>부서</th>
-								<th>직위</th>
+								<th>区分</th>
+								<th>氏名</th>
+								<th>入社日</th>
+								<th>部署</th>
+								<th>役職</th>
 
-								<th>사업주</th>
-								<th>근로자</th>
-								<th>합계</th>
+								<th>事業主</th>
+								<th>労働者</th>
+								<th>合計</th>
 
-								<th>사업주</th>
-								<th>근로자</th>
-								<th>합계</th>
+								<th>事業主</th>
+								<th>労働者</th>
+								<th>合計</th>
 
-								<th>사업주</th>
-								<th>근로자</th>
-								<th>합계</th>
+								<th>事業主</th>
+								<th>労働者</th>
+								<th>合計</th>
 
-								<th>사업주</th>
-								<th>근로자</th>
-								<th>합계</th>
+								<th>事業主</th>
+								<th>労働者</th>
+								<th>合計</th>
 
-								<th>사업주</th>
-								<th>근로자</th>
-								<th>합계</th>
+								<th>事業主</th>
+								<th>労働者</th>
+								<th>合計</th>
 
 							</tr>
 
@@ -343,7 +346,7 @@ button {
 
 							<tr>
 
-								<th colspan="5">합계</th>
+								<th colspan="5">合計</th>
 
 
 								<th><fmt:formatNumber
@@ -422,6 +425,11 @@ button {
 		</c:choose>
 
 	</c:if>
+
+	<p>
+		<a href="${pageContext.request.contextPath}/wage/ledger.do"> 給与台帳
+			一覧 </a>
+	</p>
 
 </body>
 </html>

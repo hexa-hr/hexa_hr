@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import employee.dao.UserInfoDao;
+import employee.service.EmployeeRegisterService;
 import jdbc.JdbcUtil;
 import jdbc.connection.ConnectionProvider;
 import mvc.command.CommandHandler;
@@ -16,6 +17,7 @@ import mvc.command.CommandHandler;
 public class UserInfoHandler implements CommandHandler {
 
 	private UserInfoDao dao = new UserInfoDao();
+	private EmployeeRegisterService empService = new EmployeeRegisterService();
 
 	@Override
 	public String process(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -33,8 +35,9 @@ public class UserInfoHandler implements CommandHandler {
 				}
 
 				request.setAttribute("info", info);
-				request.setAttribute("deptList", dao.selectDepartments(conn));
-				request.setAttribute("posList", dao.selectPositions(conn));
+				request.setAttribute("deptList", empService.getDepartments());
+				request.setAttribute("posList", empService.getPositions());
+
 				return "/WEB-INF/view/employee/userInfo.jsp";
 			}
 		}
@@ -51,32 +54,62 @@ public class UserInfoHandler implements CommandHandler {
 			session.setAttribute("fakeData", fakeData);
 
 			Map<String, String> dbData = new HashMap<>();
+
+			// 1. 회사 정보
 			dbData.put("companyName", request.getParameter("companyName"));
+			dbData.put("repTitle", request.getParameter("repTitle"));
+			dbData.put("repName", request.getParameter("repName"));
 			dbData.put("businessNumber", request.getParameter("businessNumber"));
+			dbData.put("corpNumber", request.getParameter("corpNumber"));
 			dbData.put("officeAddress", request.getParameter("officeAddress"));
-			dbData.put("phoneNumber", request.getParameter("phone1") + "-" + request.getParameter("phone2") + "-"
-				+ request.getParameter("phone3"));
+			dbData.put("website", request.getParameter("website"));
+			dbData.put("bizType", request.getParameter("bizType"));
+			dbData.put("bizItem", request.getParameter("bizItem"));
+
+			String p1 = request.getParameter("phone1");
+			dbData.put("phoneNumber", (p1 != null && !p1.isEmpty()
+				? p1 + "-" + request.getParameter("phone2") + "-" + request.getParameter("phone3") : ""));
+
+			String f1 = request.getParameter("fax1");
+			dbData.put("faxNumber", (f1 != null && !f1.isEmpty()
+				? f1 + "-" + request.getParameter("fax2") + "-" + request.getParameter("fax3") : ""));
+
+			// 🌟 설립일 자동 변환 마법 (20260825, 2026.08.25 -> 2026-08-25)
+			String estDate = request.getParameter("establishmentDate");
+			if (estDate != null) {
+				estDate = estDate.trim();
+				String onlyNums = estDate.replaceAll("[^0-9]", ""); // 숫자만 쏙 뽑아냄
+				if (onlyNums.length() >= 8) {
+					estDate = onlyNums.substring(0, 4) + "-" + onlyNums.substring(4, 6) + "-"
+						+ onlyNums.substring(6, 8);
+				} else if (estDate.length() >= 10) {
+					estDate = estDate.substring(0, 10);
+				}
+			}
+			dbData.put("establishmentDate",
+				(estDate != null && estDate.matches("\\d{4}-\\d{2}-\\d{2}")) ? estDate : "");
+
+			// 2. 담당자 정보
 			dbData.put("contactName", request.getParameter("contactName"));
 			dbData.put("departmentId", request.getParameter("departmentId"));
 			dbData.put("positionId", request.getParameter("positionId"));
 			dbData.put("email", request.getParameter("email"));
 
-			String estDate = request.getParameter("establishmentDate");
-			if (estDate != null && estDate.matches("\\d{4}-\\d{2}-\\d{2}")) {
-				dbData.put("establishmentDate", estDate);
-			} else {
-				dbData.put("establishmentDate", "");
-			}
+			String cp1 = request.getParameter("cPhone1");
+			dbData.put("conPhoneNumber", (cp1 != null && !cp1.isEmpty()
+				? cp1 + "-" + request.getParameter("cPhone2") + "-" + request.getParameter("cPhone3") : ""));
 
-			// 🌟 화면에서 급여 설정값(날짜 등) 뽑아오기
+			String mob1 = request.getParameter("mobile1");
+			dbData.put("mobileNumber", (mob1 != null && !mob1.isEmpty()
+				? mob1 + "-" + request.getParameter("mobile2") + "-" + request.getParameter("mobile3") : ""));
+
+			// 3. 급여 설정
 			Integer salaryCalc1 = parseInt(request.getParameter("salaryCalc1"));
 			Integer salaryCalc2 = parseInt(request.getParameter("salaryCalc2"));
 			Integer salaryPaymentDate = parseInt(request.getParameter("salaryPaymentDate"));
 			String calc1MonthType = request.getParameter("calc1MonthType");
 			String calc2MonthType = request.getParameter("calc2MonthType");
 			String paymentMonthType = request.getParameter("paymentMonthType");
-
-			// 🌟 추가된 부분: 은행, 계좌번호, 예금주 파라미터 뽑아오기
 			String bankName = request.getParameter("bankName");
 			String accountNumber = request.getParameter("accountNumber");
 			String depositStocks = request.getParameter("depositStocks");
@@ -86,12 +119,9 @@ public class UserInfoHandler implements CommandHandler {
 				conn = ConnectionProvider.getConnection();
 				conn.setAutoCommit(false);
 
-				// 1. 기존 회사 정보 업데이트
 				dao.updateUserInfo(conn, dbData);
-
-				// 2. 🌟 모든 사원의 급여일 테이블 일괄 업데이트 실행! (파라미터 3개 추가 연결 완료)
-				dao.updateAllEmployeeSalaryDates(conn, salaryCalc1, salaryCalc2, salaryPaymentDate,
-					calc1MonthType, calc2MonthType, paymentMonthType, bankName, accountNumber, depositStocks);
+				dao.updateAllEmployeeSalaryDates(conn, salaryCalc1, salaryCalc2, salaryPaymentDate, calc1MonthType,
+					calc2MonthType, paymentMonthType, bankName, accountNumber, depositStocks);
 
 				conn.commit();
 			} catch (Exception e) {
@@ -109,7 +139,6 @@ public class UserInfoHandler implements CommandHandler {
 		return null;
 	}
 
-	// 문자열을 안전하게 숫자로 바꿔주는 헬퍼 메서드
 	private Integer parseInt(String val) {
 		if (val == null || val.trim().isEmpty())
 			return null;

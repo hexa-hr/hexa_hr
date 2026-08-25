@@ -1,6 +1,6 @@
 package wage.model;
 
-// 항목별 대장 조회 결과 한 행 (사원 x 귀속연월 단위)
+// 項目別台帳照会結果の1行（社員 × 帰属年月単位）
 public class WageItemLedgerRow {
 
 	private Integer employeeId;
