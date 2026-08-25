@@ -55,11 +55,11 @@ public class VacationDao {
 			// 1. 各社員の「使用済み日数」を計算するためにサブクエリまたはJOINを使用
 			sql.append("SELECT e.employee_id AS employeeId, ");
 			sql.append("       e.employment_type AS employmentType, ");
-			sql.append("       e.account_id AS employeeNumber, ");
+			sql.append("       e.employee_id AS employeeNumber, ");
 			sql.append("       e.korean_name AS koreanName, ");
 			sql.append("       d.department_name AS departmentName, ");
 			sql.append("       p.position_name AS positionName, ");
-			sql.append("       vt.vacation_type_name AS vacationTypeName, ");
+			sql.append("       vt.vacation_type_name AS \"vacationTypeName\", ");
 			sql.append("       vd.vacation_value AS totalDays, ");
 
 			// 使用日数の計算（attendanceテーブルで該当社員の該当休暇タイプの総使用量合計）
@@ -85,6 +85,8 @@ public class VacationDao {
 			sql.append("LEFT JOIN position p ON e.position_id = p.position_id ");
 			sql.append("WHERE 1=1 ");
 
+			// 💡 2. 재직(在職) 상태인 사원만 조회되도록 조건 추가
+			sql.append("AND e.status = '在職' ");
 			if (vacationTypeId != null && !vacationTypeId.isEmpty()) {
 				sql.append("AND vt.vacation_type_id = ? ");
 			}
@@ -142,8 +144,9 @@ public class VacationDao {
 		}
 	}
 
-	// 社員別詳細休暇履歴の取得（勤怠項目テーブルを結合して実際のDB値を取得するように修正）
-	public List<VacationDetail> selectVacationDetail(Connection conn, int employeeId) throws SQLException {
+	// 社員別詳細休暇履歴の取得
+	public List<VacationDetail> selectVacationDetail(Connection conn, int employeeId, String vacationTypeId)
+		throws SQLException {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT d.department_name AS departmentName, ");
 		sql.append("       e.korean_name AS koreanName, ");
@@ -155,19 +158,31 @@ public class VacationDao {
 			"       TO_CHAR(a.start_date, 'YYYY-MM-DD') || ' ~ ' || TO_CHAR(a.end_date, 'YYYY-MM-DD') AS period, ");
 		sql.append("       a.attendance_days AS days, ");
 		sql.append("       a.summary AS remarks, ");
-		sql.append("       vd.vacation_value AS totalDays ");
+		sql.append("       NVL(vd.vacation_value, 0) AS totalDays ");
 		sql.append("FROM attendance a ");
 		sql.append("JOIN employee e ON a.employee_id = e.employee_id ");
 		sql.append("JOIN attendance_type at ON a.attendance_type_id = at.attendance_type_id ");
 		sql.append("JOIN vacation_type vt ON at.vacation_type_id = vt.vacation_type_id ");
 		sql.append("LEFT JOIN department d ON e.department_id = d.department_id ");
 		sql.append(
-			"LEFT JOIN vacation_days vd ON a.employee_id = vd.employee_id AND vt.vacation_type_id = vd.vacation_type_id ");
+			"LEFT JOIN vacation_days vd ON a.employee_id = vd.employee_id AND vd.vacation_type_id = vt.vacation_type_id ");
 		sql.append("WHERE a.employee_id = ? ");
+
+		// 💡 선택된 휴가 항목이 있는 경우 조건 추가
+		if (vacationTypeId != null && !vacationTypeId.isEmpty()) {
+			sql.append("AND vt.vacation_type_id = ? ");
+		}
+
 		sql.append("ORDER BY a.start_date DESC");
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
 			pstmt.setInt(1, employeeId);
+
+			// 💡 vacationTypeId 바인딩
+			if (vacationTypeId != null && !vacationTypeId.isEmpty()) {
+				pstmt.setInt(2, Integer.parseInt(vacationTypeId));
+			}
+
 			try (ResultSet rs = pstmt.executeQuery()) {
 				List<VacationDetail> list = new ArrayList<>();
 				while (rs.next()) {

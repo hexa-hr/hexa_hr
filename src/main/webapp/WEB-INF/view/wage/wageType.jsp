@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>급여 항목 설정</title>
+<title>給与項目設定</title>
 
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -229,26 +229,26 @@ table.data-table tr:hover {
 	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<div class="page-header">
-		<h1>💰 급여 항목 설정</h1>
-		<p>급여와 연관된 지급 및 공제 항목을 설정하는 메뉴입니다. 회사실정에 맞추어 설정하실 수 있습니다.</p>
+		<h1>💰 給与項目設定</h1>
+		<p>給与に関連する支給および控除項目を設定するメニューです。会社の状況に合わせて設定できます。</p>
 	</div>
 
-	<!-- [상단] 지급항목 설정 영역 -->
+	<!-- [上部] 支給項目設定エリア -->
 	<div class="container">
 		<div class="table-section">
 			<div class="section-title">
-				지급항목 설정 <span class="count">(항목 수: ${wageList != null ? wageList.size() : 0}개)</span>
+				支給項目設定 <span class="count">(項目数: ${wageList != null ? wageList.size() : 0}個)</span>
 			</div>
 
 			<table class="data-table">
 				<thead>
 					<tr>
-						<th style="width: 18%;">지급항목</th>
-						<th style="width: 27%;">과세여부</th>
-						<th style="width: 15%;">비과세한도액</th>
-						<th style="width: 10%;">절사단위</th>
-						<th style="width: 20%;">근태연결/일괄지급</th>
-						<th style="width: 10%;">사용여부</th>
+						<th style="width: 18%;">支給項目</th>
+						<th style="width: 27%;">課税有無</th>
+						<th style="width: 15%;">非課税限度額</th>
+						<th style="width: 10%;">端数処理</th>
+						<th style="width: 20%;">勤怠連動/一括支給</th>
+						<th style="width: 10%;">使用有無</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -259,10 +259,10 @@ table.data-table tr:hover {
 							<td><a href="${wageUrl}">${wage.wageTypeName}</a></td>
 							<td><a href="${wageUrl}"> <c:choose>
 										<c:when test="${wage.taxableYn eq 'N'}">
-											비과세_${wage.taxFreeName}
+											非課税_${wage.taxFreeName}
 										</c:when>
 										<c:otherwise>
-											전체과세
+											全体課税
 										</c:otherwise>
 									</c:choose>
 							</a></td>
@@ -271,10 +271,10 @@ table.data-table tr:hover {
 										<fmt:formatNumber value="${wage.taxFreeLimit}" pattern="#,##0" />
 									</c:if>
 							</a></td>
-							<td><a href="${wageUrl}">${empty wage.numberCut ? '없음' : wage.numberCut}</a></td>
+							<td><a href="${wageUrl}">${empty wage.numberCut ? 'なし' : wage.numberCut}</a></td>
 							<td><a href="${wageUrl}"> <c:choose>
-										<c:when test="${wage.attendanceOrLumpsum eq '일괄지급'}">
-											일괄지급_<fmt:formatNumber
+										<c:when test="${wage.attendanceOrLumpsum eq '一括支給'}">
+											一括支給_<fmt:formatNumber
 												value="${wage.attendanceOrLumpsumContent}" pattern="#,##0" />
 										</c:when>
 										<c:otherwise>
@@ -297,7 +297,7 @@ table.data-table tr:hover {
 			</table>
 		</div>
 
-		<!-- 지급항목 입력/수정 폼 -->
+	<!-- 支給項目入力/修正フォーム -->
 		<div class="form-section">
 			<form id="wageForm" method="post"
 				onsubmit="enableInputsBeforeSubmit()">
@@ -307,137 +307,135 @@ table.data-table tr:hover {
 
 				<table class="form-table">
 					<tr>
-						<th>지급항목</th>
+						<th>支給項目</th>
 						<td><input type="text" name="wageTypeName"
 							value="${param.wageTypeName}" class="input-text"
-							placeholder="지급 항목을 입력해주세요."></td>
+							placeholder="支給項目を入力してください。"></td>
 					</tr>
 					<tr>
-						<th>과세여부</th>
+						<th>課税有無</th>
 						<td><label class="radio-label"> <input type="radio"
 								name="taxableYn" value="Y"
 								${empty param.taxableYn || param.taxableYn == 'Y' ? 'checked' : ''}
-								onclick="toggleTaxFree()"> 전체과세
+								onclick="toggleTaxFree()"> 全体課税
 						</label> <label class="radio-label"> <input type="radio"
 								name="taxableYn" value="N"
 								${param.taxableYn == 'N' ? 'checked' : ''}
-								onclick="toggleTaxFree()"> 비과세
+								onclick="toggleTaxFree()"> 非課税
 						</label></td>
 					</tr>
 					<tr>
-						<th>비과세명</th>
+						<th>非課税名</th>
 						<td><input type="text" id="taxFreeNameInput"
 							name="taxFreeName" value="${param.taxFreeName}"
-							class="input-text" placeholder="비과세 명칭을 입력하세요."></td>
+							class="input-text" placeholder="非課税名称を入力してください。"></td>
 					</tr>
 					<tr>
-						<th>비과세 한도액</th>
+						<th>非課税限度額</th>
 						<td><input type="number" id="taxFreeLimitInput"
 							name="taxFreeLimit"
 							value="${empty param.taxFreeLimit ? 0 : param.taxFreeLimit}"
 							class="input-text" style="width: 80%; text-align: right;">
-							원</td>
+							ウォン</td>
 					</tr>
 					<tr>
-						<th>절사단위</th>
+						<th>端数処理</th>
 						<td><select name="numberCut" class="select-box">
-								<option value="없음"
-									${empty param.numberCut || param.numberCut == '없음' ? 'selected' : ''}>없음</option>
-								<option value="1원"
-									${param.numberCut == '1원' || param.numberCut == '원' ? 'selected' : ''}>1원
-									단위</option>
-								<option value="10원"
-									${param.numberCut == '10원' || param.numberCut == '십원' ? 'selected' : ''}>10원
-									단위</option>
-								<option value="100원"
-									${param.numberCut == '100원' ? 'selected' : ''}>100원 단위</option>
+								<option value="なし"
+									${empty param.numberCut || param.numberCut == 'なし' ? 'selected' : ''}>なし</option>
+								<option value="1ウォン単位"
+									${param.numberCut == '1ウォン単位' || param.numberCut == 'ウォン' ? 'selected' : ''}>1ウォン単位</option>
+								<option value="10ウォン単位"
+									${param.numberCut == '10ウォン単位' || param.numberCut == '10ウォン単位' ? 'selected' : ''}>10ウォン単位</option>
+								<option value="100ウォン単位"
+									${param.numberCut == '100ウォン単位' ? 'selected' : ''}>100ウォン単位</option>
 						</select></td>
 					</tr>
 					<tr>
-						<th>근태연결/일괄지급</th>
+						<th>勤怠連動/一括支給</th>
 						<td><select name="attendanceOrLumpsum"
 							id="attendanceOrLumpsumSelect" class="select-box"
 							onchange="toggleLumpSum()">
-								<option value="">선택하세요.</option>
-								<option value="연차"
-									${param.attendanceOrLumpsum == '연차' ? 'selected' : ''}>연차</option>
-								<option value="반차"
-									${param.attendanceOrLumpsum == '반차' ? 'selected' : ''}>반차</option>
-								<option value="지각"
-									${param.attendanceOrLumpsum == '지각' ? 'selected' : ''}>지각</option>
-								<option value="조퇴"
-									${param.attendanceOrLumpsum == '조퇴' ? 'selected' : ''}>조퇴</option>
-								<option value="외근"
-									${param.attendanceOrLumpsum == '외근' ? 'selected' : ''}>외근</option>
-								<option value="휴일근무"
-									${param.attendanceOrLumpsum == '휴일근무' ? 'selected' : ''}>휴일근무</option>
-								<option value="연장근무"
-									${param.attendanceOrLumpsum == '연장근무' ? 'selected' : ''}>연장근무</option>
-								<option value="포상휴가"
-									${param.attendanceOrLumpsum == '포상휴가' ? 'selected' : ''}>포상휴가</option>
-								<option value="야간근무"
-									${param.attendanceOrLumpsum == '야간근무' ? 'selected' : ''}>야간근무</option>
-								<option value="청원휴가"
-									${param.attendanceOrLumpsum == '청원휴가' ? 'selected' : ''}>청원휴가</option>
-								<option value="일괄지급"
-									${param.attendanceOrLumpsum == '일괄지급' ? 'selected' : ''}>일괄지급</option>
+								<option value="">選択してください。</option>
+								<option value="有給休暇"
+									${param.attendanceOrLumpsum == '有給休暇' ? 'selected' : ''}>有給休暇</option>
+								<option value="半休"
+									${param.attendanceOrLumpsum == '半休' ? 'selected' : ''}>半休</option>
+								<option value="遅刻"
+									${param.attendanceOrLumpsum == '遅刻' ? 'selected' : ''}>遅刻</option>
+								<option value="早退"
+									${param.attendanceOrLumpsum == '早退' ? 'selected' : ''}>早退</option>
+								<option value="外出"
+									${param.attendanceOrLumpsum == '外出' ? 'selected' : ''}>外出</option>
+								<option value="休日出勤"
+									${param.attendanceOrLumpsum == '休日出勤' ? 'selected' : ''}>休日出勤</option>
+								<option value="残業"
+									${param.attendanceOrLumpsum == '残業' ? 'selected' : ''}>残業</option>
+								<option value="リフレッシュ休暇"
+									${param.attendanceOrLumpsum == 'リフレッシュ休暇' ? 'selected' : ''}>リフレッシュ休暇</option>
+								<option value="深夜勤務"
+									${param.attendanceOrLumpsum == '深夜勤務' ? 'selected' : ''}>深夜勤務</option>
+								<option value="慶弔休暇"
+									${param.attendanceOrLumpsum == '慶弔休暇' ? 'selected' : ''}>慶弔休暇</option>
+								<option value="一括支給"
+									${param.attendanceOrLumpsum == '一括支給' ? 'selected' : ''}>一括支給</option>
 						</select></td>
 					</tr>
 
 					<tr class="lump-sum-row" id="lumpSumRow">
-						<th>일괄지급액</th>
+						<th>一括支給額</th>
 						<td><input type="text" id="lumpSumInput"
 							name="attendanceOrLumpsumContent"
-							value="${param.attendanceOrLumpsum == '일괄지급' ? param.attendanceOrLumpsumContent : ''}"
+							value="${param.attendanceOrLumpsum == '一括支給' ? param.attendanceOrLumpsumContent : ''}"
 							class="input-text" style="width: 80%; text-align: right;"
-							placeholder="금액 입력"> 원</td>
+							placeholder="金額入力"> ウォン</td>
 					</tr>
 
 					<tr>
-						<th>사용여부</th>
+						<th>使用有無</th>
 						<td><label class="radio-label"> <input type="radio"
 								name="usage" value="Y"
 								${empty param.usage || param.usage == 'Y' ? 'checked' : ''}>
-								사용
+								使用
 						</label> <label class="radio-label"> <input type="radio"
 								name="usage" value="N" ${param.usage == 'N' ? 'checked' : ''}>
-								사용안함
+								使用しない
 						</label></td>
 					</tr>
 				</table>
 
 				<div class="btn-group">
 					<button type="submit" class="btn btn-blue"
-						formaction="${pageContext.request.contextPath}/wageTypeSave.do">추가</button>
+						formaction="${pageContext.request.contextPath}/wageTypeSave.do">追加</button>
 					<button type="submit" class="btn btn-blue"
-						formaction="${pageContext.request.contextPath}/wageTypeUpdate.do">수정</button>
+						formaction="${pageContext.request.contextPath}/wageTypeUpdate.do">修正</button>
 					<button type="submit" class="btn btn-gray"
 						formaction="${pageContext.request.contextPath}/wageTypeDelete.do"
-						onclick="return confirmWageDelete('${param.wageTypeName}');">삭제</button>
+						onclick="return confirmWageDelete('${param.wageTypeName}');">削除</button>
 					<a href="${pageContext.request.contextPath}/wageTypeSetting.do"
-						class="btn btn-gray">내용 지우기</a>
+						class="btn btn-gray">内容クリア</a>
 				</div>
 			</form>
 		</div>
 	</div>
 
-	<!-- 섹션 구분선 -->
+	<!-- セクション区切り線 -->
 	<hr class="section-divider">
 
-	<!-- [하단] 공제항목 설정 영역 -->
+	<!-- [下部] 控除項目設定エリア -->
 	<div class="container">
 		<div class="table-section">
 			<div class="section-title">
-				공제항목 설정 <span class="count">(항목 수: ${deductionList != null ? deductionList.size() : 0}개)</span>
+				控除項目設定 <span class="count">(項目数: ${deductionList != null ? deductionList.size() : 0}個)</span>
 			</div>
 
 			<table class="data-table">
 				<thead>
 					<tr>
-						<th style="width: 30%;">공제항목</th>
-						<th style="width: 20%;">절사단위</th>
-						<th style="width: 15%;">사용여부</th>
-						<th style="width: 35%;">비고</th>
+						<th style="width: 30%;">控除項目</th>
+						<th style="width: 20%;">端数処理</th>
+						<th style="width: 15%;">使用有無</th>
+						<th style="width: 35%;">備考</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -446,7 +444,7 @@ table.data-table tr:hover {
 							value="wageTypeSetting.do?selectedDedId=${ded.wageTypeId}&dedName=${ded.wageTypeName}&numberCut=${ded.numberCut}&usage=${ded.usage}&calcMethod=${ded.attendanceOrLumpsumContent}&note=${ded.taxFreeName}" />
 						<tr>
 							<td><a href="${dedUrl}">${ded.wageTypeName}</a></td>
-							<td><a href="${dedUrl}">${empty ded.numberCut ? '없음' : ded.numberCut}</a></td>
+							<td><a href="${dedUrl}">${empty ded.numberCut ? 'なし' : ded.numberCut}</a></td>
 							<td><a href="${dedUrl}"> <c:choose>
 										<c:when test="${ded.usage == 'Y'}">
 											<span class="badge-use">O</span>
@@ -463,7 +461,7 @@ table.data-table tr:hover {
 			</table>
 		</div>
 
-		<!-- 공제항목 입력/수정 폼 -->
+		<!-- 控除項目入力/修正フォーム -->
 		<div class="form-section">
 			<form id="deductionForm" method="post">
 				<input type="hidden" name="wageTypeId"
@@ -472,93 +470,90 @@ table.data-table tr:hover {
 
 				<table class="form-table">
 					<tr>
-						<th>공제항목</th>
+						<th>控除項目</th>
 						<td><input type="text" name="wageTypeName"
 							value="${param.dedName}" class="input-text"
-							placeholder="공제항목을 입력해주세요."></td>
+							placeholder="控除項目を入力してください。"></td>
 					</tr>
 					<tr>
-						<th>계산방법</th>
+						<th>計算方法</th>
 						<td><input type="text" name="attendanceOrLumpsumContent"
 							value="${param.calcMethod}" class="input-text"
-							placeholder="계산방법을 입력해주세요.">
+							placeholder="計算方法を入力してください。">
 							<div style="font-size: 11px; color: #666; margin-top: 4px;">
-								<input type="checkbox"> 예시)
+								<input type="checkbox"> 例）
 							</div></td>
 					</tr>
 					<tr>
-						<th>절사단위</th>
+						<th>端数処理</th>
 						<td><select name="numberCut" class="select-box">
-								<option value="없음"
-									${empty param.numberCut || param.numberCut == '없음' ? 'selected' : ''}>없음</option>
-								<option value="1원 단위"
-									${param.numberCut == '1원 단위' || param.numberCut == '1원' ? 'selected' : ''}>1원
-									단위</option>
-								<option value="10원 단위"
-									${param.numberCut == '10원 단위' || param.numberCut == '10원' ? 'selected' : ''}>10원
-									단위</option>
-								<option value="100원 단위"
-									${param.numberCut == '100원 단위' || param.numberCut == '100원' ? 'selected' : ''}>100원
-									단위</option>
+								<option value="なし"
+									${empty param.numberCut || param.numberCut == 'なし' ? 'selected' : ''}>なし</option>
+								<option value="1ウォン単位"
+									${param.numberCut == '1ウォン単位' || param.numberCut == '1ウォン単位' ? 'selected' : ''}>1ウォン単位</option>
+								<option value="10ウォン単位"
+									${param.numberCut == '10ウォン単位' || param.numberCut == '10ウォン単位' ? 'selected' : ''}>10ウォン単位</option>
+								<option value="100ウォン単位"
+									${param.numberCut == '100ウォン単位' || param.numberCut == '100ウォン単位' ? 'selected' : ''}>100ウォン単位</option>
 						</select></td>
 					</tr>
 					<tr>
-						<th>비고</th>
+						<th>備考</th>
 						<td><input type="text" name="taxFreeName"
-							value="${empty param.note ? '기본항목' : param.note}"
-							class="input-text" placeholder="비고 입력"></td>
+							value="${empty param.note ? '基本項目' : param.note}"
+							class="input-text" placeholder="備考入力"></td>
 					</tr>
 					<tr>
-						<th>사용여부</th>
+						<th>使用有無</th>
 						<td><label class="radio-label"> <input type="radio"
 								name="usage" value="Y"
 								${empty param.usage || param.usage == 'Y' ? 'checked' : ''}>
-								사용
+								使用
 						</label> <label class="radio-label"> <input type="radio"
 								name="usage" value="N" ${param.usage == 'N' ? 'checked' : ''}>
-								사용안함
+								使用しない
 						</label></td>
 					</tr>
 				</table>
 
 				<div class="btn-group">
 					<button type="submit" class="btn btn-blue"
-						formaction="${pageContext.request.contextPath}/wageTypeSave.do">추가</button>
+						formaction="${pageContext.request.contextPath}/wageTypeSave.do">追加</button>
 					<button type="submit" class="btn btn-blue"
-						formaction="${pageContext.request.contextPath}/wageTypeUpdate.do">수정</button>
+						formaction="${pageContext.request.contextPath}/wageTypeUpdate.do">修正</button>
 					<button type="submit" class="btn btn-gray"
 						formaction="${pageContext.request.contextPath}/wageTypeDelete.do"
-						onclick="return confirmDeductDelete('${param.dedName}');">삭제</button>
+						onclick="return confirmDeductDelete('${param.dedName}');">削除</button>
 					<a href="${pageContext.request.contextPath}/wageTypeSetting.do"
-						class="btn btn-gray">내용 지우기</a>
+						class="btn btn-gray">内容クリア</a>
 				</div>
 			</form>
 		</div>
 	</div>
 
-	<!-- 자바스크립트 제어 영역 -->
+	<!-- JavaScript コントロール テーブル -->
 	<script>
-		// 지급항목 삭제 전 경고창 기능
+		// 支給項目削除前の警告ウィンドウ機能
 		function confirmWageDelete(wageName) {
-			if (wageName === '기본급') {
-				alert('기본급은 필수 항목이므로 삭제할 수 없습니다.');
+			if (wageName === '基本給') {
+				alert('基本給は必須項目であるため削除できません。');
 				return false;
 			}
-			return confirm('정말 삭제하시겠습니까?');
+			return confirm('本当に削除しますか？');
 		}
 
-		// 공제항목 삭제 전 경고창 기능
+		// 控除項目削除前の警告ウィンドウ機能
 		function confirmDeductDelete(dedName) {
 			const fixedItems = [
-				'국민연금', '건강보험', '장기요양보험', '고용보험', 
-				'소득세', '지방소득세', '사업소득', '일용급여'
+				'国民年金', '健康保険', '介護保険', '雇用保険', 
+				'所得税', '住民税', '事業所得', '日雇給与'
 			];
 			
 			if (fixedItems.includes(dedName)) {
-				alert(dedName + ' 항목은 필수 공제항목이므로 삭제할 수 없습니다.');
+				alert(dedName + ' 項目は必須控除項目であるため削除できません。');
 				return false;
 			}
-			return confirm('정말 삭제하시겠습니까?');
+			return confirm('本当に削除しますか？');
 		}
 
 		function toggleTaxFree() {
@@ -586,7 +581,7 @@ table.data-table tr:hover {
 			const lumpSumRow = document.getElementById('lumpSumRow');
 			const lumpSumInput = document.getElementById('lumpSumInput');
 
-			if (selectVal === '일괄지급') {
+			if (selectVal === '一括支給') {
 				lumpSumRow.style.display = 'table-row';
 			} else {
 				lumpSumRow.style.display = 'none';

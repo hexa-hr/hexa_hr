@@ -418,27 +418,26 @@ public class AttendanceDao {
 		return json.toString();
 	}
 
-	// 5. 사원별 휴가일수 목록 조회 (LEFT JOIN) - 유진님 코드
-	public List<Map<String, Object>> selectEmployeeVacationList(Connection conn, int attendanceTypeId)
+	// 5. 사원별 휴가일수 목록 조회 [유진]
+	public List<Map<String, Object>> selectEmployeeVacationList(Connection conn, int vacationTypeId)
 		throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		// 👉 SELECT e.* 대신 컬럼을 직접 나열하고 basic_pay를 명시적으로 가져오도록 수정
 		String sql = "SELECT e.employee_id, e.account_id, e.company_id, e.person_id, e.employment_type, "
 			+ "e.korean_name, e.english_name, e.hire_date, e.resignation_date, e.department_id, e.position_id, "
 			+ "e.foreign_or_domestic, e.resident_number1, e.resident_number2, e.address, e.tel_phone, "
 			+ "e.mobile, e.email, e.sns, e.other_details, e.status, NVL(e.basic_pay, 0) AS basic_pay, "
-			+ "d.department_name, p.position_name, a.attendance_days "
+			+ "d.department_name, p.position_name, v.vacation_value "
 			+ "FROM employee e "
 			+ "LEFT JOIN department d ON e.department_id = d.department_id "
 			+ "LEFT JOIN position p ON e.position_id = p.position_id "
-			+ "LEFT JOIN attendance a ON e.employee_id = a.employee_id AND a.attendance_type_id = ? "
+			+ "LEFT JOIN vacation_days v ON e.employee_id = v.employee_id AND v.vacation_type_id = ? "
 			+ "ORDER BY e.employee_id ASC";
 
 		try {
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, attendanceTypeId);
+			pstmt.setInt(1, vacationTypeId);
 			rs = pstmt.executeQuery();
 
 			List<Map<String, Object>> list = new ArrayList<>();
@@ -452,14 +451,14 @@ public class AttendanceDao {
 					rs.getString("mobile"), rs.getString("email"), rs.getString("sns"),
 					rs.getString("other_details"), rs.getString("status"), getLong(rs, "basic_pay"));
 
-				Integer days = getInteger(rs, "attendance_days");
-				int attendanceDays = (days != null) ? days : 0;
+				Integer days = getInteger(rs, "vacation_value"); // vacation_value 가져오기
+				int vacationDays = (days != null) ? days : 0;
 
 				Map<String, Object> map = new HashMap<>();
 				map.put("emp", emp);
 				map.put("departmentName", rs.getString("department_name"));
 				map.put("positionName", rs.getString("position_name"));
-				map.put("attendanceDays", attendanceDays);
+				map.put("attendanceDays", vacationDays); // 뷰단에서 쓰는 키 이름에 맞춤 (또는 vacationDays)
 				list.add(map);
 			}
 			return list;
@@ -469,21 +468,25 @@ public class AttendanceDao {
 		}
 	}
 
-	// 6. 사원별 휴가일수 저장 (MERGE 구문 사용) - 유진님 코드
-	public void saveEmployeeVacationDays(Connection conn, int attendanceTypeId, int employeeId, int days)
+	// 6. 사원별 휴가일수 저장[cite: 1] [유진]
+	public void saveEmployeeVacationDays(Connection conn, int vacationTypeId, int employeeId, int days)
 		throws SQLException {
+
 		PreparedStatement pstmt = null;
-		String sql = "MERGE INTO attendance a " + "USING DUAL ON (a.employee_id = ? AND a.attendance_type_id = ?) "
-			+ "WHEN MATCHED THEN " + "  UPDATE SET a.attendance_days = ? " + "WHEN NOT MATCHED THEN "
-			+ "  INSERT (attendance_id, employee_id, attendance_type_id, attendance_days) "
-			+ "  VALUES ((SELECT NVL(MAX(attendance_id), 0) + 1 FROM attendance), ?, ?, ?)";
+		String sql = "MERGE INTO vacation_days v "
+			+ "USING DUAL ON (v.employee_id = ? AND v.vacation_type_id = ?) "
+			+ "WHEN MATCHED THEN "
+			+ "  UPDATE SET v.vacation_value = ? "
+			+ "WHEN NOT MATCHED THEN "
+			+ "  INSERT (vacation_days_id, employee_id, vacation_type_id, vacation_value) "
+			+ "  VALUES ((SELECT NVL(MAX(vacation_days_id), 0) + 1 FROM vacation_days), ?, ?, ?)";
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, employeeId);
-			pstmt.setInt(2, attendanceTypeId);
+			pstmt.setInt(2, vacationTypeId);
 			pstmt.setInt(3, days);
 			pstmt.setInt(4, employeeId);
-			pstmt.setInt(5, attendanceTypeId);
+			pstmt.setInt(5, vacationTypeId);
 			pstmt.setInt(6, days);
 			pstmt.executeUpdate();
 		} finally {
@@ -491,14 +494,14 @@ public class AttendanceDao {
 		}
 	}
 
-	// 선택된 사원의 휴가일수 삭제 (DELETE 처리) - 유진님 코드
-	public void deleteEmployeeVacationDays(Connection conn, int attendanceTypeId, int employeeId) throws SQLException {
+	// 선택된 사원의 휴가일수 삭제 (수정)[cite: 1] [유진]
+	public void deleteEmployeeVacationDays(Connection conn, int vacationTypeId, int employeeId) throws SQLException {
 		PreparedStatement pstmt = null;
-		String sql = "DELETE FROM attendance WHERE employee_id = ? AND attendance_type_id = ?";
+		String sql = "DELETE FROM vacation_days WHERE employee_id = ? AND vacation_type_id = ?";
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, employeeId);
-			pstmt.setInt(2, attendanceTypeId);
+			pstmt.setInt(2, vacationTypeId);
 			pstmt.executeUpdate();
 		} finally {
 			JdbcUtil.close(pstmt);
@@ -585,5 +588,19 @@ public class AttendanceDao {
 			}
 		}
 		return false;
+	}
+
+	// vacation_type_id를 이용해 실제 attendance_type_id를 찾아오는 메서드 [유진]
+	private int getActualAttendanceTypeId(Connection conn, int vacationTypeId) throws SQLException {
+		String sql = "SELECT attendance_type_id FROM attendance_type WHERE vacation_type_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, vacationTypeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt("attendance_type_id");
+				}
+			}
+		}
+		throw new SQLException("해당 휴가항목에 매핑된 근태항목이 없습니다. (vacation_type_id: " + vacationTypeId + ")");
 	}
 }
