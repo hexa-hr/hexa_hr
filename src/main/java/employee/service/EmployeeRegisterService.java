@@ -10,30 +10,29 @@ import employee.dao.CareerDao;
 import employee.dao.DegreeDao;
 import employee.dao.DependentsDao;
 import employee.dao.EmployeeDao;
-import employee.dao.EmployeeSalaryAccountDao;
 import employee.dao.InsuranceDao;
 import employee.dao.MilitaryServiceDao;
 import employee.model.Career;
 import employee.model.Degree;
 import employee.model.Dependents;
 import employee.model.Employee;
-import employee.model.EmployeeSalaryAccount;
 import employee.model.Insurance;
 import employee.model.MilitaryService;
 import jdbc.JdbcUtil;
 import jdbc.connection.ConnectionProvider;
+import master.dao.ContactPersonInfoDao;
 
 public class EmployeeRegisterService {
 
 	private EmployeeDao employeeDao = new EmployeeDao();
-	private EmployeeSalaryAccountDao accountDao = new EmployeeSalaryAccountDao();
 	private DependentsDao dependentsDao = new DependentsDao();
 	private DegreeDao degreeDao = new DegreeDao();
 	private InsuranceDao insuranceDao = new InsuranceDao();
 	private CareerDao careerDao = new CareerDao();
 	private MilitaryServiceDao militaryDao = new MilitaryServiceDao();
+	private ContactPersonInfoDao contactDao = new ContactPersonInfoDao();
 
-	public Integer register(Employee employee, EmployeeSalaryAccount account, List<Dependents> dependentsList,
+	public Integer register(Employee employee, List<Dependents> dependentsList,
 		List<Degree> degreeList, List<Insurance> insuranceList, List<Career> careerList,
 		List<MilitaryService> militaryList) {
 		Connection conn = null;
@@ -41,23 +40,32 @@ public class EmployeeRegisterService {
 			conn = ConnectionProvider.getConnection();
 			conn.setAutoCommit(false);
 
+			// 🌟 [핵심] 클라이언트 요청 파라미터 무시하고 서버에서 값 강제 지정
+			employee.setCompanyId(1);
+			employee.setAccountId(null);
+
+			// company_id=1인 담당자 중 가장 작은 person_id 가져오기
+			Integer minPersonId = contactDao.selectMinPersonIdByCompanyId(conn, 1);
+			employee.setPersonId(minPersonId); // 담당자가 없으면 자연스럽게 null 세팅됨
+
 			Integer empId = employee.getEmployeeId();
 
-			// 🌟 [핵심] 사원번호가 없으면 신규등록(INSERT), 있으면 기존사원 수정(UPDATE)!
 			if (empId == null || empId == 0) {
 				// 신규 등록
-				Integer accountId = accountDao.getNextId(conn);
-				account.setAccountId(accountId);
-				accountDao.insert(conn, account);
+				employee.setStatus("재직"); // 신규 사원은 상태를 '재직'으로 강제 고정
 
 				empId = employeeDao.getNextId(conn);
 				employee.setEmployeeId(empId);
-				employee.setAccountId(accountId);
 				employeeDao.insert(conn, employee);
 			} else {
 				// 기존 사원 수정 (UPDATE)
+				// DB에서 기존 사원 정보를 조회하여 상태(status) 값을 그대로 유지시킴
+				Employee existingEmp = employeeDao.selectById(conn, empId);
+				if (existingEmp != null) {
+					employee.setStatus(existingEmp.getStatus());
+				}
+
 				updateEmployee(conn, employee);
-				updateAccountByEmpId(conn, account, empId);
 
 				// 기존 다중 행 표 데이터 싹 다 지우기 (Delete & Insert 방식)
 				deleteOldData(conn, "dependents", empId);
@@ -134,7 +142,7 @@ public class EmployeeRegisterService {
 
 	// 🌟 사원 인적사항 단일 행 UPDATE 메서드
 	private void updateEmployee(Connection conn, Employee emp) throws SQLException {
-		String sql = "UPDATE employee SET employment_type=?, korean_name=?, english_name=?, hire_date=?, resignation_date=?, "
+		String sql = "UPDATE employee SET account_id=NULL, employment_type=?, korean_name=?, english_name=?, hire_date=?, resignation_date=?, "
 			+ "department_id=?, position_id=?, foreign_or_domestic=?, resident_number1=?, resident_number2=?, "
 			+ "address=?, tel_phone=?, mobile=?, email=?, sns=?, other_details=?, status=?, basic_pay=? "
 			+ "WHERE employee_id=?";
@@ -172,18 +180,6 @@ public class EmployeeRegisterService {
 		}
 	}
 
-	// 🌟 급여계좌 단일 행 UPDATE 메서드
-	private void updateAccountByEmpId(Connection conn, EmployeeSalaryAccount acc, int employeeId) throws SQLException {
-		String sql = "UPDATE employee_salary_account SET bank_name=?, account_number=?, deposit_stocks=? WHERE account_id = (SELECT account_id FROM employee WHERE employee_id=?)";
-		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setString(1, acc.getBankName());
-			pstmt.setString(2, acc.getAccountNumber());
-			pstmt.setString(3, acc.getDepositStocks());
-			pstmt.setInt(4, employeeId);
-			pstmt.executeUpdate();
-		}
-	}
-
 	public Employee getEmployee(int employeeId) {
 		Connection conn = null;
 		try {
@@ -201,18 +197,6 @@ public class EmployeeRegisterService {
 		try {
 			conn = ConnectionProvider.getConnection();
 			return dependentsDao.selectByEmployeeId(conn, employeeId);
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		} finally {
-			JdbcUtil.close(conn);
-		}
-	}
-
-	public EmployeeSalaryAccount getAccount(int employeeId) {
-		Connection conn = null;
-		try {
-			conn = ConnectionProvider.getConnection();
-			return accountDao.selectByEmployeeId(conn, employeeId);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		} finally {

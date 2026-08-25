@@ -124,10 +124,10 @@ public class EmployeeDao {
 					"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 			pstmt.setInt(1, employee.getEmployeeId());
-			if (employee.getAccountId() != null)
-				pstmt.setInt(2, employee.getAccountId());
-			else
-				pstmt.setNull(2, java.sql.Types.INTEGER);
+
+			// 🌟 무조건 NULL 처리
+			pstmt.setNull(2, java.sql.Types.INTEGER);
+
 			if (employee.getCompanyId() != null)
 				pstmt.setInt(3, employee.getCompanyId());
 			else

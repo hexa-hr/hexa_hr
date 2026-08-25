@@ -133,11 +133,21 @@
                                 <td style="font-weight: bold;">${emp.koreanName}</td>
                                 <td>${emp.departmentName != null ? emp.departmentName : '-'}</td>
                                 <td>${emp.positionName != null ? emp.positionName : '-'}</td>
-                                <td>${emp.employmentType == '정규직' ? '正社員' : (emp.employmentType == '계약직' ? '契約社員' : (emp.employmentType == '인턴' ? 'インターン' : emp.employmentType))}</td>
+                                
+                                <!-- 🌟 雇用形態の表示変更 -->
                                 <td>
-                                    <!-- 退社者は赤色で目立つように表示 -->
-                                    <span style="color: ${emp.status == '재직' ? 'blue' : (emp.status == '퇴사' ? 'red' : 'black')}; font-weight: bold;">
-                                        ${emp.status == '재직' ? '在職' : (emp.status == '퇴사' ? '退社' : emp.status)}
+                                    ${emp.employmentType == '정규직' ? '正社員' : 
+                                      (emp.employmentType == '계약직' ? '契約社員' : 
+                                      (emp.employmentType == '파견직' ? '派遣社員' : 
+                                      (emp.employmentType == '위촉직' ? '業務委託' : 
+                                      (emp.employmentType == '임시직' ? '臨時社員' : 
+                                      (emp.employmentType == '일용직' ? '日雇い' : emp.employmentType)))))}
+                                </td>
+                                
+                                <td>
+                                    <!-- 🌟 退社者は赤色で目立つように表示し、テキストを更新 -->
+                                    <span style="color: ${emp.status == '재직' ? 'blue' : (emp.status == '퇴직' ? 'red' : 'black')}; font-weight: bold;">
+                                        ${emp.status == '재직' ? '在職' : (emp.status == '퇴직' ? '退職' : emp.status)}
                                     </span>
                                 </td>
                                 <td><fmt:formatDate value="${emp.hireDate}" pattern="yyyy-MM-dd"/></td>

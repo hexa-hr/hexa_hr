@@ -38,28 +38,75 @@ public class EmployeeSalaryAccountDao {
 			if (account.getAccountId() == null)
 				account.setAccountId(getNextId(conn));
 			pstmt.setInt(1, account.getAccountId());
+
 			if (account.getCompanyId() != null)
 				pstmt.setInt(2, account.getCompanyId());
 			else
 				pstmt.setNull(2, java.sql.Types.INTEGER);
+
 			pstmt.setString(3, account.getBankName());
 			pstmt.setString(4, account.getAccountNumber());
 			pstmt.setString(5, account.getDepositStocks());
+
 			if (account.getSalaryCalculation1() != null)
 				pstmt.setInt(6, account.getSalaryCalculation1());
 			else
 				pstmt.setNull(6, java.sql.Types.INTEGER);
+
 			if (account.getSalaryCalculation2() != null)
 				pstmt.setInt(7, account.getSalaryCalculation2());
 			else
 				pstmt.setNull(7, java.sql.Types.INTEGER);
+
 			if (account.getSalaryPaymentDate() != null)
 				pstmt.setInt(8, account.getSalaryPaymentDate());
 			else
 				pstmt.setNull(8, java.sql.Types.INTEGER);
+
 			pstmt.setString(9, account.getCalc1MonthType());
 			pstmt.setString(10, account.getCalc2MonthType());
 			pstmt.setString(11, account.getPaymentMonthType());
+			pstmt.executeUpdate();
+		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// [추가됨] account_id를 조건으로 안전하게 업데이트하는 메서드
+	public void update(Connection conn, EmployeeSalaryAccount account) throws SQLException {
+		PreparedStatement pstmt = null;
+		try {
+			String sql = "UPDATE employee_salary_account SET "
+				+ "bank_name=?, account_number=?, deposit_stocks=?, "
+				+ "salary_calculation1=?, salary_calculation2=?, salary_payment_date=?, "
+				+ "calc1_month_type=?, calc2_month_type=?, payment_month_type=? "
+				+ "WHERE account_id=?";
+			pstmt = conn.prepareStatement(sql);
+
+			pstmt.setString(1, account.getBankName());
+			pstmt.setString(2, account.getAccountNumber());
+			pstmt.setString(3, account.getDepositStocks());
+
+			if (account.getSalaryCalculation1() != null)
+				pstmt.setInt(4, account.getSalaryCalculation1());
+			else
+				pstmt.setNull(4, java.sql.Types.INTEGER);
+
+			if (account.getSalaryCalculation2() != null)
+				pstmt.setInt(5, account.getSalaryCalculation2());
+			else
+				pstmt.setNull(5, java.sql.Types.INTEGER);
+
+			if (account.getSalaryPaymentDate() != null)
+				pstmt.setInt(6, account.getSalaryPaymentDate());
+			else
+				pstmt.setNull(6, java.sql.Types.INTEGER);
+
+			pstmt.setString(7, account.getCalc1MonthType());
+			pstmt.setString(8, account.getCalc2MonthType());
+			pstmt.setString(9, account.getPaymentMonthType());
+			pstmt.setInt(10, account.getAccountId());
+
 			pstmt.executeUpdate();
 		} finally {
 			JdbcUtil.close(pstmt);

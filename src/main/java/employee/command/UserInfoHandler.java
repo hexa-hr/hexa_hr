@@ -1,14 +1,14 @@
 package employee.command;
 
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
+import employee.dao.EmployeeSalaryAccountDao;
 import employee.dao.UserInfoDao;
+import employee.model.EmployeeSalaryAccount;
 import employee.service.EmployeeRegisterService;
 import jdbc.JdbcUtil;
 import jdbc.connection.ConnectionProvider;
@@ -17,24 +17,22 @@ import mvc.command.CommandHandler;
 public class UserInfoHandler implements CommandHandler {
 
 	private UserInfoDao dao = new UserInfoDao();
+	private EmployeeSalaryAccountDao accDao = new EmployeeSalaryAccountDao();
 	private EmployeeRegisterService empService = new EmployeeRegisterService();
 
 	@Override
 	public String process(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		HttpSession session = request.getSession();
-
 		if (request.getMethod().equalsIgnoreCase("GET")) {
 			try (java.sql.Connection conn = ConnectionProvider.getConnection()) {
+				// 1. 회사 및 담당자 기본 정보 조회
 				Map<String, String> info = dao.selectCompanyInfo(conn);
 
-				@SuppressWarnings("unchecked") Map<String, String> fakeData = (Map<String, String>)session
-					.getAttribute("fakeData");
-				if (fakeData != null) {
-					info.putAll(fakeData);
-				}
+				// 2. 회사 급여 지급정보 조회 (company_id = 1)
+				EmployeeSalaryAccount account = accDao.selectByCompanyId(conn, 1);
 
 				request.setAttribute("info", info);
+				request.setAttribute("account", account); // JSP에 account 객체 전달
 				request.setAttribute("deptList", empService.getDepartments());
 				request.setAttribute("posList", empService.getPositions());
 
@@ -44,14 +42,6 @@ public class UserInfoHandler implements CommandHandler {
 
 		if (request.getMethod().equalsIgnoreCase("POST")) {
 			request.setCharacterEncoding("UTF-8");
-
-			Map<String, String> fakeData = new HashMap<>();
-			Enumeration<String> params = request.getParameterNames();
-			while (params.hasMoreElements()) {
-				String name = params.nextElement();
-				fakeData.put(name, request.getParameter(name));
-			}
-			session.setAttribute("fakeData", fakeData);
 
 			Map<String, String> dbData = new HashMap<>();
 
@@ -103,27 +93,37 @@ public class UserInfoHandler implements CommandHandler {
 			dbData.put("mobileNumber", (mob1 != null && !mob1.isEmpty()
 				? mob1 + "-" + request.getParameter("mobile2") + "-" + request.getParameter("mobile3") : ""));
 
-			// 3. 급여 설정
-			Integer salaryCalc1 = parseInt(request.getParameter("salaryCalc1"));
-			Integer salaryCalc2 = parseInt(request.getParameter("salaryCalc2"));
-			Integer salaryPaymentDate = parseInt(request.getParameter("salaryPaymentDate"));
-			String calc1MonthType = request.getParameter("calc1MonthType");
-			String calc2MonthType = request.getParameter("calc2MonthType");
-			String paymentMonthType = request.getParameter("paymentMonthType");
-			String bankName = request.getParameter("bankName");
-			String accountNumber = request.getParameter("accountNumber");
-			String depositStocks = request.getParameter("depositStocks");
+			// 3. 급여 설정 객체 매핑
+			EmployeeSalaryAccount accToSave = new EmployeeSalaryAccount();
+			accToSave.setCompanyId(1); // 회사 ID 고정
+			accToSave.setBankName(request.getParameter("bankName"));
+			accToSave.setAccountNumber(request.getParameter("accountNumber"));
+			accToSave.setDepositStocks(request.getParameter("depositStocks"));
+			accToSave.setSalaryCalculation1(parseInt(request.getParameter("salaryCalc1")));
+			accToSave.setSalaryCalculation2(parseInt(request.getParameter("salaryCalc2")));
+			accToSave.setSalaryPaymentDate(parseInt(request.getParameter("salaryPaymentDate")));
+			accToSave.setCalc1MonthType(request.getParameter("calc1MonthType"));
+			accToSave.setCalc2MonthType(request.getParameter("calc2MonthType"));
+			accToSave.setPaymentMonthType(request.getParameter("paymentMonthType"));
 
 			java.sql.Connection conn = null;
 			try {
 				conn = ConnectionProvider.getConnection();
-				conn.setAutoCommit(false);
+				conn.setAutoCommit(false); // 트랜잭션 시작
 
+				// 기존 정보 업데이트 (회사, 담당자 등)
 				dao.updateUserInfo(conn, dbData);
-				dao.updateAllEmployeeSalaryDates(conn, salaryCalc1, salaryCalc2, salaryPaymentDate, calc1MonthType,
-					calc2MonthType, paymentMonthType, bankName, accountNumber, depositStocks);
 
-				conn.commit();
+				// 급여 정보 등록 또는 업데이트 로직
+				EmployeeSalaryAccount existingAcc = accDao.selectByCompanyId(conn, 1);
+				if (existingAcc != null) {
+					accToSave.setAccountId(existingAcc.getAccountId());
+					accDao.update(conn, accToSave); // 기존 행이 있으면 UPDATE
+				} else {
+					accDao.insert(conn, accToSave); // 없으면 시퀀스 발급 후 INSERT
+				}
+
+				conn.commit(); // 트랜잭션 종료
 			} catch (Exception e) {
 				JdbcUtil.rollback(conn);
 				throw e;
@@ -132,7 +132,7 @@ public class UserInfoHandler implements CommandHandler {
 			}
 
 			response.setContentType("text/html; charset=UTF-8");
-			response.getWriter().println("<script>alert('사용자 정보와 급여일 설정이 성공적으로 저장되었습니다!'); location.href='"
+			response.getWriter().println("<script>alert('ユーザー情報と給与日が正常に保存されました！'); location.href='"
 				+ request.getContextPath() + "/employee/userInfo.do';</script>");
 			return null;
 		}
