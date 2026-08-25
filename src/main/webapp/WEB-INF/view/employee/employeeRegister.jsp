@@ -94,8 +94,8 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 								<option value="계약직" ${emp.employmentType == '계약직' ? 'selected' : ''}>契約社員</option>
 								<option value="인턴" ${emp.employmentType == '인턴' ? 'selected' : ''}>インターン</option>
 						</select></td>
-						<th>* 在職状態</th>
-						<td><select name="status" required>
+						<th>在職状態</th>
+						<td><select name="status">
 								<option value="재직" ${emp.status == '재직' ? 'selected' : ''}>在職</option>
 								<option value="휴직" ${emp.status == '휴직' ? 'selected' : ''}>休職</option>
 								<option value="퇴사" ${emp.status == '퇴사' ? 'selected' : ''}>退社</option>
@@ -108,18 +108,18 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 						<td><input type="date" name="resignationDate" value="<fmt:formatDate value='${emp.resignationDate}' pattern='yyyy-MM-dd'/>"></td>
 					</tr>
 					<tr>
-						<th>* 部署</th>
+						<th>部署</th>
 						<td>
-							<select name="departmentId" required>
+							<select name="departmentId">
 								<option value="">選択</option>
 								<c:forEach var="dept" items="${deptList}">
 									<option value="${dept.id}" ${emp.departmentId == dept.id ? 'selected' : ''}>${dept.name}</option>
 								</c:forEach>
 							</select>
 						</td>
-						<th>* 役職</th>
+						<th>役職</th>
 						<td>
-							<select name="positionId" required>
+							<select name="positionId">
 								<option value="">選択</option>
 								<c:forEach var="pos" items="${posList}">
 									<option value="${pos.id}" ${emp.positionId == pos.id ? 'selected' : ''}>${pos.name}</option>
@@ -133,10 +133,10 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 							<input type="radio" name="foreignOrDomestic" value="내국인" ${emp == null || emp.foreignOrDomestic == '내국인' ? 'checked' : ''}> 内国人 
 							<input type="radio" name="foreignOrDomestic" value="외국인" ${emp != null && emp.foreignOrDomestic == '외국인' ? 'checked' : ''}> 外国人
 						</td>
-						<th>* 住民登録番号</th>
+						<th>住民登録番号</th>
 						<td>
-							<input type="text" name="residentNumber1" value="${emp.residentNumber1}" maxlength="6" style="width: 30%;" placeholder="前6桁" required> - 
-							<input type="password" name="residentNumber2" value="${emp.residentNumber2}" maxlength="7" style="width: 30%;" placeholder="後7桁" required>
+							<input type="text" name="residentNumber1" value="${emp.residentNumber1}" maxlength="6" style="width: 30%;" placeholder="前6桁"> - 
+							<input type="password" name="residentNumber2" value="${emp.residentNumber2}" maxlength="7" style="width: 30%;" placeholder="後7桁">
 						</td>
 					</tr>
 					<tr>
@@ -150,8 +150,8 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 						<td><input type="text" name="mobile" value="${emp.mobile}"></td>
 					</tr>
 					<tr>
-						<th>* メールアドレス</th>
-						<td><input type="email" name="email" value="${emp.email}" required></td>
+						<th>メールアドレス</th>
+						<td><input type="email" name="email" value="${emp.email}"></td>
 						<th>SNS</th>
 						<td><input type="text" name="sns" value="${emp.sns}"></td>
 					</tr>
@@ -234,9 +234,9 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 				</table>
 
 				<!-- 家族事項 -->
-				<div class="section-title" id="dependents">* 家族事項<button type="button" class="add-btn" onclick="addDependentRow()">+ 家族追加</button></div>
+				<div class="section-title" id="dependents">家族事項<button type="button" class="add-btn" onclick="addDependentRow()">+ 家族追加</button></div>
 				<table id="dependentTable">
-					<tr><th style="width: 15%;">* 続柄</th><th style="width: 20%;">* 氏名</th><th style="width: 15%;">内国人/外国人</th><th style="width: 20%;">住民番号 前半</th><th style="width: 20%;">住民番号 後半</th><th style="width: 10%;">削除</th></tr>
+					<tr><th style="width: 15%;">続柄</th><th style="width: 20%;">氏名</th><th style="width: 15%;">内国人/外国人</th><th style="width: 20%;">住民番号 前半</th><th style="width: 20%;">住民番号 後半</th><th style="width: 10%;">削除</th></tr>
 					<c:if test="${not empty depList}">
 						<c:forEach var="dep" items="${depList}">
 							<tr>
@@ -288,7 +288,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 					</c:if>
 				</table>
 
-				<!-- 経歴事項 (ページ1へ移動) -->
+				<!-- 🌟 経歴事項 (ページ1へ移動) -->
 				<div class="section-title" id="career">経歴事項<button type="button" class="add-btn" style="background-color: #4e73df;" onclick="addCareerRow()">+ 経歴追加</button></div>
 				<table id="careerTable">
 					<tr><th style="width: 20%;">会社名</th><th style="width: 15%;">入社日</th><th style="width: 15%;">退社日</th><th style="width: 15%;">職級</th><th style="width: 25%;">担当業務</th><th style="width: 10%;">削除</th></tr>
@@ -430,15 +430,12 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 		        return false;
 		    }
 
-		    var relationships = document.getElementsByName("relationship");
-		    var parentsNames = document.getElementsByName("parentsName");
-		    var hasDependent = false;
-		    for (var i = 0; i < relationships.length; i++) {
-		        if (relationships[i].value.trim() !== "" && parentsNames[i].value.trim() !== "") {
-		            hasDependent = true; break;
-		        }
-		    }
-		    if (!hasDependent) { alert("家族事項を最低1名以上入力してください。（続柄および氏名は必須）"); return false; }
+            // 4대보험을 1개 이상 선택했는지 체크
+            var insuranceChecked = document.querySelectorAll('input[name="insuranceAgency"]:checked').length > 0;
+            if (!insuranceChecked) {
+                alert("4大保険を1つ以上選択してください。"); // 4대보험을 1개 이상 선택해주세요.
+                return false;
+            }
 
 		    isSubmitting = true;
 		    setTimeout(function() { isSubmitting = false; }, 3000); 
