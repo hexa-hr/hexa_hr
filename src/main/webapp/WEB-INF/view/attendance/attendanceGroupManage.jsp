@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>근태그룹 관리</title>
+<title>勤怠グループ管理</title>
 <style>
     body { font-family: 'malgun gothic', sans-serif; padding: 20px; color: #333; margin: 0; }
     .manage-box { width: 280px; margin: 0 auto; text-align: left; }
@@ -26,15 +26,15 @@
 <body>
 
 <div class="manage-box">
-    <h2>근태그룹 관리</h2>
+    <h2>勤怠グループ管理</h2>
 
     <div class="group-container">
-        <!-- Handler에서 건네주는 groupList 목록 조회 -->
+        <!-- Handlerから渡されるgroupList一覧取得 -->
         <c:forEach var="group" items="${groupList}">
             <div class="group-item">
                 <c:choose>
                     <c:when test="${param.mode == 'edit' && param.editId == group.attendanceGroupId}">
-                        <!-- 수정 모드 -->
+                        <!-- 修正モード -->
                         <form action="${pageContext.request.contextPath}/attendanceGroupUpdate.do" method="post" style="display:flex; width:100%; justify-content:space-between; align-items:center;">
                             <input type="hidden" name="attendanceGroupId" value="${group.attendanceGroupId}">
                             <div class="item-left">
@@ -42,56 +42,56 @@
                                 <input type="text" name="groupName" class="edit-input" value="${group.attendanceGroupName}">
                             </div>
                             <div>
-                                <button type="submit" class="action-btn" style="background:none; border:none; padding:0;">저장</button>
+                                <button type="submit" class="action-btn" style="background:none; border:none; padding:0;">保存</button>
                                 <span class="btn-divider">|</span>
-                                <a href="${pageContext.request.contextPath}/attendanceGroupManage.do" class="action-btn">취소</a>
+                                <a href="${pageContext.request.contextPath}/attendanceGroupManage.do" class="action-btn">キャンセル</a>
                             </div>
                         </form>
                     </c:when>
                     <c:otherwise>
-                        <!-- 일반 모드 -->
+                        <!-- 一般モード -->
                         <div class="item-left">
                             <span class="drag-handle">▲<br>▼</span>
                             <span>${group.attendanceGroupName}</span>
                         </div>
                         <div>
-                            <a href="${pageContext.request.contextPath}/attendanceGroupManage.do?mode=edit&editId=${group.attendanceGroupId}" class="action-btn">수정</a>
+                            <a href="${pageContext.request.contextPath}/attendanceGroupManage.do?mode=edit&editId=${group.attendanceGroupId}" class="action-btn">修正</a>
                             <span class="btn-divider">|</span>
-                            <a href="${pageContext.request.contextPath}/attendanceGroupDelete.do?attendanceGroupId=${group.attendanceGroupId}" class="action-btn">삭제</a>
+                            <a href="${pageContext.request.contextPath}/attendanceGroupDelete.do?attendanceGroupId=${group.attendanceGroupId}" class="action-btn">削除</a>
                         </div>
                     </c:otherwise>
                 </c:choose>
             </div>
         </c:forEach>
 
-        <!-- 추가 모드 -->
+        <!-- 追加モード -->
         <c:if test="${param.mode == 'add'}">
             <div class="group-item">
                 <form action="${pageContext.request.contextPath}/attendanceGroupSave.do" method="post" style="display:flex; width:100%; justify-content:space-between; align-items:center;">
                     <div class="item-left">
                         <span class="drag-handle">▲<br>▼</span>
-                        <input type="text" name="groupName" class="edit-input" placeholder="그룹명 입력">
+                        <input type="text" name="groupName" class="edit-input" placeholder="グループ名入力">
                     </div>
                     <div>
-                        <button type="submit" class="action-btn" style="background:none; border:none; padding:0;">저장</button>
+                        <button type="submit" class="action-btn" style="background:none; border:none; padding:0;">保存</button>
                         <span class="btn-divider">|</span>
-                        <a href="${pageContext.request.contextPath}/attendanceGroupManage.do" class="action-btn">취소</a>
+                        <a href="${pageContext.request.contextPath}/attendanceGroupManage.do" class="action-btn">キャンセル</a>
                     </div>
                 </form>
             </div>
         </c:if>
     </div>
 
-    <!-- 추가하기 버튼 -->
+    <!-- 追加ボタン -->
     <div class="add-bar">
-        <a href="${pageContext.request.contextPath}/attendanceGroupManage.do?mode=add" class="add-bar-btn">+ 추가하기</a>
+        <a href="${pageContext.request.contextPath}/attendanceGroupManage.do?mode=add" class="add-bar-btn">+ 追加</a>
     </div>
 
-    <p class="notice-text">* 드래그로 순서변경이 가능합니다.</p>
+    <p class="notice-text">* ドラッグで順序の変更が可能です。</p>
 
-    <!-- 초기화 버튼 -->
+    <!-- 初期化ボタン -->
     <div class="bottom-btn-group">
-        <a href="${pageContext.request.contextPath}/attendanceGroupReset.do" class="btn-reset">초기화</a>
+        <a href="${pageContext.request.contextPath}/attendanceGroupReset.do" class="btn-reset">初期化</a>
     </div>
 </div>
 

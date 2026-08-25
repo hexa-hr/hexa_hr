@@ -31,6 +31,10 @@ public class AttendanceService {
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
+			// DAO 중복 체크 호출
+			if (attendanceDao.isDuplicateName(conn, att.getAttendanceTypeName())) {
+				throw new RuntimeException("이미 존재하는 근태 항목 이름입니다.");
+			}
 			attendanceDao.insert(conn, att);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
@@ -39,18 +43,17 @@ public class AttendanceService {
 		}
 	}
 
-	// 勤怠項目の編集
+	//근태항목수정 [유진 코드]
 	public void modifyAttendance(AttendanceType att) {
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
-			conn.setAutoCommit(false);
-
+			// DAO 중복 체크 호출
+			if (attendanceDao.isDuplicateNameForUpdate(conn, att.getAttendanceTypeId(), att.getAttendanceTypeName())) {
+				throw new RuntimeException("이미 존재하는 근태 항목 이름입니다.");
+			}
 			attendanceDao.update(conn, att);
-
-			conn.commit();
 		} catch (SQLException e) {
-			JdbcUtil.rollback(conn);
 			throw new RuntimeException(e);
 		} finally {
 			JdbcUtil.close(conn);

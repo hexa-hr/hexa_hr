@@ -56,7 +56,17 @@ public class WageTypeUpdateHandler implements CommandHandler {
 			taxFreeName);
 
 		// 수정 처리
-		wageService.modifyWageType(wageType);
+		try {
+			wageService.modifyWageType(wageType);
+		} catch (RuntimeException e) {
+			String errorMessage = e.getMessage();
+			if (errorMessage == null || errorMessage.trim().isEmpty()) {
+				errorMessage = "이미 존재하는 지급/공제 항목 이름입니다.";
+			}
+			req.getSession().setAttribute("errorMessage", errorMessage);
+			res.sendRedirect(req.getContextPath() + "/wageTypeSetting.do");
+			return null;
+		}
 
 		// 목록 화면으로 이동
 		res.sendRedirect(req.getContextPath() + "/wageTypeSetting.do");

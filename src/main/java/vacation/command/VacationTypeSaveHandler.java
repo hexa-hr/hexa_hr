@@ -22,13 +22,13 @@ public class VacationTypeSaveHandler implements CommandHandler {
 			return null;
 		}
 
-		// 1. 파라미터 수신
+		// 1. パラメータ受信
 		String vacationTypeName = req.getParameter("vacationTypeName");
 		String applyPeriod1 = req.getParameter("applyPeriod1");
 		String applyPeriod2 = req.getParameter("applyPeriod2");
 		String usage = req.getParameter("usage");
 
-		// 2. 유효성 검증
+		// 2. 入力値検証
 		Map<String, Boolean> errors = new HashMap<>();
 		req.setAttribute("errors", errors);
 
@@ -40,13 +40,13 @@ public class VacationTypeSaveHandler implements CommandHandler {
 			errors.put("applyPeriod", Boolean.TRUE);
 		}
 
-		// 검증 에러 시 기존 페이지로 돌아감
+		// 検証エラー時、元のページに戻る
 		if (!errors.isEmpty()) {
 			req.setAttribute("vacationList", vacationService.getVacationList());
-			return "/WEB-INF/view/attendance/vacationTypeSetting.jsp"; // 작성하신 JSP 경로 지정
+			return "/WEB-INF/view/attendance/vacationTypeSetting.jsp"; // 作成したJSPパスを指定
 		}
 
-		// VacationTypeSaveHandler.java 내부 process 메소드 파트
+		// VacationTypeSaveHandler.java 内部の process メソッド部分
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 		VacationType vacation = new VacationType();
@@ -55,9 +55,23 @@ public class VacationTypeSaveHandler implements CommandHandler {
 		vacation.setApplyPeriod2(sdf.parse(applyPeriod2));
 		vacation.setUsage(usage != null ? usage : "Y");
 
-		vacationService.addVacationType(vacation);
+		try {
+			// 重複例外発生箇所
+			vacationService.addVacationType(vacation);
+		} catch (RuntimeException e) {
+			String errorMessage = e.getMessage();
+			if (e.getCause() != null && e.getCause().getMessage() != null) {
+				errorMessage = e.getCause().getMessage();
+			}
 
-		// 4. 저장 완료 후 목록 URL로 리다이렉트
+			// 👉 [修正] requestではなく session にエラーメッセージを保存
+			req.getSession().setAttribute("errorMessage", errorMessage);
+
+			// 👉 [修正] setting.doへリダイレクト後、終了
+			res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
+			return null;
+		}
+
 		res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
 		return null;
 	}

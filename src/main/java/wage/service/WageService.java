@@ -11,7 +11,8 @@ import master.model.WageType;
 import wage.dao.WageTypeDao;
 
 public class WageService {
-
+	private static final List<String> PROTECTED_WAGE_NAMES = Arrays.asList(
+		"기본급", "국민연금", "건강보험", "장기요양보험", "고용보험", "소득세", "지방소득세");
 	private WageTypeDao wageTypeDao = new WageTypeDao();
 
 	public List<WageType> getWageTypeList() {
@@ -45,22 +46,43 @@ public class WageService {
 	}
 
 	public void addWageType(WageType wageType) {
-		WageType newWage = processAttendanceType(wageType);
-
 		try (Connection conn = ConnectionProvider.getConnection()) {
-			wageTypeDao.insert(conn, newWage);
+			// 1. 이름 중복 체크
+			boolean isDuplicate = wageTypeDao.isDuplicateName(conn, wageType.getWageTypeName());
+			if (isDuplicate) {
+				throw new RuntimeException("이미 존재하는 지급/공제 항목 이름입니다.");
+			}
+			// 2. 신규 등록
+			wageTypeDao.insert(conn, wageType);
 		} catch (SQLException e) {
-			throw new RuntimeException("급여 항목 등록 오류", e);
+			throw new RuntimeException(e);
 		}
 	}
 
 	public void modifyWageType(WageType wageType) {
-		WageType newWage = processAttendanceType(wageType);
-
 		try (Connection conn = ConnectionProvider.getConnection()) {
-			wageTypeDao.update(conn, newWage);
+			// 1. 기존 데이터 조회 (원래 이름 확인용)[cite: 10]
+			WageType origin = wageTypeDao.selectById(conn, wageType.getWageTypeId());
+			if (origin != null) {
+				// 원래 이름이 보호 대상 시스템 항목이고, 입력된 이름이 기존과 다를 경우 (이름을 변경하려고 할 때)
+				if (PROTECTED_WAGE_NAMES.contains(origin.getWageTypeName())) {
+					if (!origin.getWageTypeName().equals(wageType.getWageTypeName())) {
+						throw new RuntimeException("시스템 기본 항목(" + origin.getWageTypeName() + ")의 이름은 수정할 수 없습니다.");
+					}
+				}
+			}
+
+			// 2. 수정 시 자기 자신을 제외하고 이름 중복 체크[cite: 10]
+			boolean isDuplicate = wageTypeDao.isDuplicateNameForUpdate(conn, wageType.getWageTypeId(),
+				wageType.getWageTypeName());
+			if (isDuplicate) {
+				throw new RuntimeException("이미 존재하는 지급/공제 항목 이름입니다.");
+			}
+
+			// 3. 수정 실행[cite: 10]
+			wageTypeDao.update(conn, wageType);
 		} catch (SQLException e) {
-			throw new RuntimeException("급여 항목 수정 오류", e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -111,4 +133,5 @@ public class WageService {
 			type, content, w.getUsage(), w.getItemType(),
 			w.getTaxableYn(), w.getTaxFreeLimit(), w.getTaxFreeName());
 	}
+
 }

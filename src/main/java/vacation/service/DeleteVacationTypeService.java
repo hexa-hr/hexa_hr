@@ -15,19 +15,29 @@ public class DeleteVacationTypeService {
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
-			conn.setAutoCommit(false); // 트랜잭션 시작
+			conn.setAutoCommit(false); // トランザクション開始
 
-			int deletedRows = vacationTypeDao.delete(conn, vacationTypeId);
-			if (deletedRows == 0) {
-				throw new RuntimeException("삭제할 휴가항목이 존재하지 않습니다.");
+			VacationTypeDao dao = new VacationTypeDao();
+
+			// [追加] 使用中かどうかの検査
+			if (dao.isUsedInVacationDays(conn, vacationTypeId)) {
+				throw new IllegalStateException("現在使用中の休暇項目のため削除できません。");
 			}
 
-			conn.commit(); // 트랜잭션 커밋
+			int deletedRows = dao.delete(conn, vacationTypeId);
+			if (deletedRows == 0) {
+				throw new RuntimeException("削除する休暇項目が存在しません。");
+			}
+
+			conn.commit(); // トランザクションコミット
 		} catch (SQLException e) {
-			JdbcUtil.rollback(conn); // 예외 발생 시 롤백
-			throw new RuntimeException("DB 삭제 처리 중 오류가 발생했습니다: " + e.getMessage(), e);
+			JdbcUtil.rollback(conn); // 例外発生時のロールバック
+			throw new RuntimeException("DB削除処理中にエラーが発生しました: " + e.getMessage(), e);
+		} catch (IllegalStateException e) {
+			JdbcUtil.rollback(conn);
+			throw e; // 使用中の例外はそのままスローしてハンドラーでキャッチできるようにする
 		} finally {
-			JdbcUtil.close(conn); // 커넥션 닫기
+			JdbcUtil.close(conn); // コネクションを閉じる
 		}
 	}
 }
