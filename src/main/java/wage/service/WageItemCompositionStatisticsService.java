@@ -38,7 +38,7 @@ public class WageItemCompositionStatisticsService {
 
 			if (employmentType == null) {
 				throw new IllegalArgumentException(
-					"올바른 사원을 선택해야 합니다.");
+					"正しい社員を選択する必要があります。");
 			}
 
 			// 실제 저장된 급여항목은 usage와 관계없이 조회
@@ -119,7 +119,7 @@ public class WageItemCompositionStatisticsService {
 		} catch (SQLException e) {
 
 			throw new RuntimeException(
-				"급여항목 구성 통계 조회 중 데이터베이스 오류가 발생했습니다.",
+				"給与項目構成統計の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
@@ -128,7 +128,7 @@ public class WageItemCompositionStatisticsService {
 
 		if (employeeId == null || employeeId <= 0) {
 			throw new IllegalArgumentException(
-				"올바른 사원을 선택해야 합니다.");
+				"正しい社員を選択する必要があります。");
 		}
 	}
 
@@ -139,7 +139,7 @@ public class WageItemCompositionStatisticsService {
 			|| wageMonth.trim().isEmpty()) {
 
 			throw new IllegalArgumentException(
-				"귀속년월을 입력해야 합니다.");
+				"帰属年月を入力する必要があります。");
 		}
 
 		String normalizedWageMonth = wageMonth.trim();
@@ -151,7 +151,7 @@ public class WageItemCompositionStatisticsService {
 		} catch (DateTimeParseException e) {
 
 			throw new IllegalArgumentException(
-				"귀속년월은 YYYY-MM 형식이어야 합니다.");
+				"帰属年月はYYYY-MM形式である必要があります。");
 		}
 
 		return normalizedWageMonth;
@@ -184,7 +184,7 @@ public class WageItemCompositionStatisticsService {
 
 		tableItems.add(
 			new WageItemCompositionStatisticsDetail(
-				"그 외(" + otherCount + ")",
+				"その他(" + otherCount + ")",
 				itemType,
 				otherAmount,
 				calculateCompositionRate(
