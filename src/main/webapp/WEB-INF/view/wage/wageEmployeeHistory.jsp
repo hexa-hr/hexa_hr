@@ -7,7 +7,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>사원별 급여내역</title>
+<title>社員別給与履歴</title>
 
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -184,28 +184,28 @@ button {
 	<jsp:include page="/WEB-INF/view/include/header.jsp" />
 	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<h1>사원별 급여내역</h1>
+	<h1>社員別給与履歴</h1>
 
 	<form class="search-form" method="get"
 		action="${pageContext.request.contextPath}/wage/employeeHistory.do">
 
 		<div class="search-row">
 
-			<label for="startMonth">기간선택</label> <input type="month"
+			<label for="startMonth">期間選択</label> <input type="month"
 				id="startMonth" name="startMonth"
 				value="<c:out value='${startMonth}' />" required> <span>~</span>
 
 			<input type="month" id="endMonth" name="endMonth"
 				value="<c:out value='${endMonth}' />" required> <label
-				for="selectedEmployeeName">사원선택</label> <input type="hidden"
+				for="selectedEmployeeName">社員選択</label> <input type="hidden"
 				id="employeeId" name="employeeId"
 				value="<c:out value='${selectedEmployeeId}' />"> <input
 				type="text" id="selectedEmployeeName" class="employee-name"
 				value="<c:out value='${selectedEmployeeName}' />" readonly>
 
-			<button type="button" id="openEmployeeModal">사원선택</button>
+			<button type="button" id="openEmployeeModal">社員選択</button>
 
-			<button type="submit" name="search" value="true">급여내역 조회</button>
+			<button type="submit" name="search" value="true">給与履歴照会</button>
 
 		</div>
 
@@ -222,20 +222,20 @@ button {
 		<div class="modal-content">
 
 			<div class="modal-header">
-				<h2>급여내역 조회 사원선택</h2>
+				<h2>給与履歴照会対象社員の選択</h2>
 				<button type="button" id="closeEmployeeModal">×</button>
 			</div>
 
 			<div class="employee-filter">
 
-				<input type="text" id="employeeKeyword" placeholder="사원검색">
+				<input type="text" id="employeeKeyword" placeholder="社員検索">
 
 				<select id="departmentFilter">
-					<option value="">전체 부서</option>
+					<option value="">全部署</option>
 				</select> <select id="statusFilter">
-					<option value="">전체 상태</option>
-					<option value="재직">재직</option>
-					<option value="퇴직">퇴직</option>
+					<option value="">すべての状態</option>
+					<option value="재직">在職</option>
+					<option value="퇴직">退職</option>
 				</select>
 
 			</div>
@@ -246,11 +246,11 @@ button {
 
 					<thead>
 						<tr>
-							<th>구분</th>
-							<th>성명</th>
-							<th>부서</th>
-							<th>직위</th>
-							<th>상태</th>
+							<th>区分</th>
+							<th>氏名</th>
+							<th>部署</th>
+							<th>役職</th>
+							<th>状態</th>
 						</tr>
 					</thead>
 
@@ -285,9 +285,9 @@ button {
 			</div>
 
 			<div class="modal-buttons">
-				<button type="button" id="selectEmployeeButton">사원선택</button>
+				<button type="button" id="selectEmployeeButton">社員選択</button>
 
-				<button type="button" id="cancelEmployeeButton">선택취소</button>
+				<button type="button" id="cancelEmployeeButton">キャンセル</button>
 			</div>
 
 		</div>
@@ -302,7 +302,7 @@ button {
 			<c:choose>
 
 				<c:when test="${empty employeeHistory.rows}">
-					<p>조회된 급여내역이 없습니다.</p>
+					<p>照会された給与履歴がありません。</p>
 				</c:when>
 
 				<c:otherwise>
@@ -312,24 +312,24 @@ button {
 						<thead>
 
 							<tr>
-								<th colspan="5" class="group-payroll">월별 급여내역</th>
+								<th colspan="5" class="group-payroll">月別給与履歴</th>
 
-								<th colspan="6" class="group-insurance">4대보험 및 갑근세 내역</th>
+								<th colspan="6" class="group-insurance">4大保険および所得税内訳</th>
 							</tr>
 
 							<tr>
-								<th>급여월(차수)</th>
-								<th>보수월액</th>
-								<th>지급합계</th>
-								<th>공제합계</th>
-								<th>실지급액</th>
+								<th>給与月（回次）</th>
+								<th>報酬月額</th>
+								<th>支給合計</th>
+								<th>控除合計</th>
+								<th>差引支給額</th>
 
-								<th>국민연금</th>
-								<th>건강보험</th>
-								<th>노인장기요양보험</th>
-								<th>고용보험</th>
-								<th>소득세</th>
-								<th>주민세</th>
+								<th>国民年金</th>
+								<th>健康保険</th>
+								<th>介護保険</th>
+								<th>雇用保険</th>
+								<th>所得税</th>
+								<th>住民税</th>
 							</tr>
 
 						</thead>
@@ -384,7 +384,7 @@ button {
 
 							<tr>
 
-								<th>합계</th>
+								<th>合計</th>
 
 								<th><fmt:formatNumber
 										value="${employeeHistory.totalMonthlyRemuneration}"
@@ -439,8 +439,8 @@ button {
 	</c:if>
 
 	<p>
-		<a href="${pageContext.request.contextPath}/wage/ledger.do"> 급여대장
-			목록 </a>
+		<a href="${pageContext.request.contextPath}/wage/ledger.do"> 給与台帳
+			一覧 </a>
 	</p>
 
 	<script>
@@ -474,7 +474,7 @@ button {
 
 			let selectedRow = null;
 
-			// 사원 목록을 기준으로 부서 선택 목록 구성
+			// 社員一覧を基に部署選択リストを構成
 			const departments = new Set();
 
 			employeeRows.forEach(function(row) {
@@ -569,7 +569,7 @@ button {
 			selectButton.addEventListener("click", function() {
 
 				if (selectedRow == null) {
-					alert("사원을 선택해 주세요.");
+					alert("社員を選択してください。");
 					return;
 				}
 

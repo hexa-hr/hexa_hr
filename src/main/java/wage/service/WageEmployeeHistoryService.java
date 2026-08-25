@@ -23,12 +23,12 @@ public class WageEmployeeHistoryService {
 
 		if (employeeId == null || employeeId <= 0) {
 			throw new IllegalArgumentException(
-				"사원을 선택해야 합니다.");
+				"社員を選択する必要があります。");
 		}
 
 		if (startMonth == null || endMonth == null) {
 			throw new IllegalArgumentException(
-				"조회 기간을 입력해야 합니다.");
+				"照会期間を入力する必要があります。");
 		}
 
 		startMonth = startMonth.trim();
@@ -36,7 +36,7 @@ public class WageEmployeeHistoryService {
 
 		if (startMonth.isEmpty() || endMonth.isEmpty()) {
 			throw new IllegalArgumentException(
-				"조회 기간을 입력해야 합니다.");
+				"照会期間を入力する必要があります。");
 		}
 
 		YearMonth start;
@@ -47,17 +47,17 @@ public class WageEmployeeHistoryService {
 			end = YearMonth.parse(endMonth);
 		} catch (DateTimeParseException e) {
 			throw new IllegalArgumentException(
-				"조회 기간은 YYYY-MM 형식이어야 합니다.");
+				"照会期間はYYYY-MM形式である必要があります。");
 		}
 
 		if (start.isAfter(end)) {
 			throw new IllegalArgumentException(
-				"시작 월은 종료 월보다 늦을 수 없습니다.");
+				"開始月は終了月より後にすることはできません。");
 		}
 
 		if (start.plusMonths(11).isBefore(end)) {
 			throw new IllegalArgumentException(
-				"조회 기간은 최대 12개월까지 선택할 수 있습니다.");
+				"照会期間は最大12か月まで選択できます。");
 		}
 
 		try (Connection conn = ConnectionProvider.getConnection()) {
@@ -131,7 +131,7 @@ public class WageEmployeeHistoryService {
 
 		} catch (SQLException e) {
 			throw new RuntimeException(
-				"사원별 급여내역 조회 중 데이터베이스 오류가 발생했습니다.",
+				"社員別給与履歴の照会中にデータベースエラーが発生しました。",
 				e);
 		}
 	}
