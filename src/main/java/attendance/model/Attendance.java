@@ -2,7 +2,7 @@ package attendance.model;
 
 import java.util.Date;
 
-// 근태 및 일용직 기록
+// 勤怠および日雇い記録
 public class Attendance {
 	private Integer attendanceId;
 	private Integer employeeId;
@@ -16,7 +16,8 @@ public class Attendance {
 	private String summary;
 
 	public Attendance(Integer attendanceId, Integer employeeId, Date inputDate, Integer attendanceTypeId,
-		Integer fieldOrProjectId, Date startDate, Date endDate, Integer attendanceDays, Long amount, String summary) {
+			Integer fieldOrProjectId, Date startDate, Date endDate, Integer attendanceDays, Long amount,
+			String summary) {
 		this.attendanceId = attendanceId;
 		this.employeeId = employeeId;
 		this.inputDate = inputDate;

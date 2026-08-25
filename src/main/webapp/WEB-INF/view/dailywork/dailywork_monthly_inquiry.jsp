@@ -6,20 +6,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>일용직 근무 조회 - 월별</title>
+<title>日雇い勤務照会 - 月別</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon"
+	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
 body {
-    font-family: 'Malgun Gothic', dotum, sans-serif;
-    margin: 0;
+	font-family: 'Malgun Gothic', dotum, sans-serif;
+	margin: 0;
 }
 
-/* 상단 제목 및 탭 디자인 */
+/* 上部タイトルおよびタブデザイン */
 .page-header {
 	margin-bottom: 20px;
 }
@@ -73,7 +76,7 @@ body {
 	background-color: #a6a6a6;
 }
 
-/* 테이블 디자인 */
+/* テーブルデザイン */
 table {
 	border-collapse: collapse;
 	width: 100%;
@@ -104,57 +107,57 @@ th {
 	margin: auto;
 }
 
-/* 주말 연한 배경색 */
+/* 週末の薄い背景色 */
 .bg-sun {
 	background-color: #fff0f0;
-} /* 연한 빨강 */
+} /* 薄い赤 */
 .bg-sat {
 	background-color: #f0f8ff;
-} /* 연한 파랑 */
+} /* 薄い青 */
 
-/* 🌟 수정된 디자인: 사원 1명의 데이터(2줄)를 묶어서 전체 하이라이트 및 클릭 처리 */
+/* 🌟 修正されたデザイン: 社員1名のデータ(2行)をまとめて全体ハイライトおよびクリック処理 */
 .emp-row-group {
 	cursor: pointer;
 }
 
 .emp-row-group:hover td {
 	background-color: #f0f4f8 !important;
-} /* 마우스를 올리면 그룹 안의 모든 칸이 옅은 파란회색으로 변함 */
+} /* マウスを乗せるとグループ内のすべてのセルが薄い青灰色に変わる */
 </style>
 </head>
 <body>
 
-    <jsp:include page="/WEB-INF/view/include/header.jsp" />
-    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
+	<jsp:include page="/WEB-INF/view/include/header.jsp" />
+	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
-	<!-- 상단 제목 영역 -->
+	<!-- 上部タイトル領域 -->
 	<div class="page-header">
 		<div class="title-area">
 
 			<div>
-				<h2>일용직 근무 조회</h2>
+				<h2>日雇い勤務照会</h2>
 
 			</div>
 		</div>
 		<hr class="divider">
 	</div>
 
-	<!-- 탭 버튼 영역 -->
+	<!-- タブボタン領域 -->
 	<div class="tab-group">
 		<button type="button" class="tab-btn tab-active"
-			onclick="location.href='monthly.do'">월별 조회</button>
+			onclick="location.href='monthly.do'">月別照会</button>
 		<button type="button" class="tab-btn tab-inactive"
-			onclick="location.href='detail.do'">상세 조회</button>
+			onclick="location.href='detail.do'">詳細照会</button>
 	</div>
 
 	<table>
 		<thead>
-			<!-- 헤더 1번째 줄 (1~16일) -->
+			<!-- ヘッダー1行目 (1~16日) -->
 			<tr>
-				<th rowspan="2">구분</th>
-				<th rowspan="2">사원번호</th>
-				<th rowspan="2">성명</th>
-				<th rowspan="2">부서</th>
+				<th rowspan="2">区分</th>
+				<th rowspan="2">社員番号</th>
+				<th rowspan="2">姓名</th>
+				<th rowspan="2">部署</th>
 
 				<c:forEach var="day" begin="1" end="16">
 					<c:set var="bgClass" value="" />
@@ -167,12 +170,12 @@ th {
 					<th class="cal-cell ${bgClass}" style="${dayColors[day]}">${day}</th>
 				</c:forEach>
 
-				<th rowspan="2">합계</th>
-				<th rowspan="2">소득세</th>
-				<th rowspan="2">지방소득세</th>
-				<th rowspan="2">실지급합계</th>
+				<th rowspan="2">合計</th>
+				<th rowspan="2">所得税</th>
+				<th rowspan="2">住民税</th>
+				<th rowspan="2">実支給合計</th>
 			</tr>
-			<!-- 헤더 2번째 줄 (17~31일) -->
+			<!-- ヘッダー2行目 (17~31日) -->
 			<tr>
 				<c:forEach var="day" begin="17" end="31">
 					<c:set var="bgClass" value="" />
@@ -192,9 +195,9 @@ th {
 		<c:forEach var="vo" items="${summaryList}">
 			<tbody class="emp-row-group"
 				onclick="location.href='detail.do?empName=${vo.empName}'">
-				<!-- 사원 데이터 1번째 줄 (1~16일) -->
+				<!-- 社員データ1行目 (1~16日) -->
 				<tr>
-					<td rowspan="2">일용직</td>
+					<td rowspan="2">日雇い</td>
 					<td rowspan="2">${vo.empNo}</td>
 					<td rowspan="2">${vo.empName}</td>
 					<td rowspan="2">${vo.department}</td>
@@ -219,7 +222,7 @@ th {
 					<td rowspan="2"><fmt:formatNumber
 							value="${vo.totalActualPayment}" /></td>
 				</tr>
-				<!-- 사원 데이터 2번째 줄 (17~31일) -->
+				<!-- 社員データ2行目 (17~31日) -->
 				<tr>
 					<c:forEach var="day" begin="17" end="31">
 						<c:set var="bgClass" value="" />
