@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>사용자 정보</title>
+<title>ユーザー情報</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
@@ -59,23 +59,23 @@
     };
     function openModal(modalId) { document.getElementById(modalId).style.display = 'block'; }
     function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; history.replaceState({}, null, location.pathname); }
-    function cancelEdit() { if(confirm("수정한 내용을 취소하시겠습니까?")) location.href = location.pathname; }
+    function cancelEdit() { if(confirm("修正した内容をキャンセルしますか？")) location.href = location.pathname; }
 
     function manageItem(type, action, id, currentName) {
         let form = document.getElementById('manageForm');
         form.type.value = type; form.action.value = action; form.id.value = id;
         if (action === 'edit') {
-            let newName = prompt('새로운 이름을 입력하세요:', currentName);
+            let newName = prompt('新しい名前を入力してください:', currentName);
             if (newName && newName.trim() !== '' && newName !== currentName) { form.name.value = newName.trim(); form.submit(); }
         } else if (action === 'delete') {
-            if (confirm('[' + currentName + '] 항목을 삭제하시겠습니까?')) form.submit();
+            if (confirm('[' + currentName + '] 項目を削除しますか？')) form.submit();
         }
     }
     function showAddRow(type) { document.getElementById(type + 'AddBtn').style.display = 'none'; document.getElementById(type + 'AddRow').style.display = 'flex'; }
     function hideAddRow(type) { document.getElementById(type + 'AddBtn').style.display = 'block'; document.getElementById(type + 'AddRow').style.display = 'none'; document.getElementById(type + 'NewName').value = ''; }
     function saveNewItem(type) {
         let newName = document.getElementById(type + 'NewName').value;
-        if (newName.trim() === '') { alert('추가할 이름을 입력해주세요.'); return; }
+        if (newName.trim() === '') { alert('追加する名前を入力してください。'); return; }
         let form = document.getElementById('manageForm');
         form.type.value = type; form.action.value = 'add'; form.id.value = '0'; form.name.value = newName.trim(); form.submit();
     }
@@ -84,172 +84,173 @@
 <body>
     
     <div class="wrap">
-        <h2>사용자 정보</h2>
+        <h2>ユーザー情報</h2>
         
         <form action="<%=request.getContextPath()%>/employee/userInfo.do" method="post">
             <div class="grid-container">
                 <div>
-                    <div class="section-title" style="margin-top:0;">회사정보</div>
+                    <div class="section-title" style="margin-top:0;">会社情報</div>
                     <table class="info-table">
                         <tr>
-                            <th style="width:25%;"><span class="req">*</span>상호</th>
+                            <th style="width:25%;"><span class="req">*</span>商号</th>
                             <td><input type="text" name="companyName" value="${info.companyName}"></td>
-                            <th style="width:25%;"><span class="req">*</span>대표자직급/대표자</th>
+                            <th style="width:25%;"><span class="req">*</span>代表者役職/代表者</th>
                             <td>
+                                <!-- DB 연동을 위해 JSTL 조건문의 '대표이사'는 유지했습니다 -->
                                 <input type="text" name="repTitle" value="${info.repTitle != null ? info.repTitle : '대표이사'}" style="width: 60px;"> / 
                                 <input type="text" name="repName" value="${info.repName}" style="width: 80px;">
                             </td>
                         </tr>
                         <tr>
-                            <th><span class="req">*</span>사업자번호</th>
+                            <th><span class="req">*</span>事業者番号</th>
                             <td><input type="text" name="businessNumber" value="${info.businessNumber}"></td>
-                            <th>법인등록번호</th>
+                            <th>法人登録番号</th>
                             <td><input type="text" name="corpNumber" value="${info.corpNumber}"></td>
                         </tr>
                         <tr>
-                            <th>설립일</th>
+                            <th>設立日</th>
                             <td><input type="text" name="establishmentDate" value="${info.establishmentDate}" placeholder="YYYY-MM-DD"></td>
-                            <th>홈페이지</th>
+                            <th>ホームページ</th>
                             <td><input type="text" name="website" value="${info.website}"></td>
                         </tr>
                         <tr>
-                            <th><span class="req">*</span>사업장 주소</th>
+                            <th><span class="req">*</span>事業所住所</th>
                             <td colspan="3">
-                                <input type="text" name="zipCode" value="${info.zipCode}" style="width: 60px;"> <button type="button" class="btn-gray">우편번호</button> 
+                                <input type="text" name="zipCode" value="${info.zipCode}" style="width: 60px;"> <button type="button" class="btn-gray">郵便番号</button> 
                                 <input type="text" name="officeAddress" value="${info.officeAddress}" style="width: 300px;">
                             </td>
                         </tr>
                         <tr>
-                            <th><span class="req">*</span>전화번호</th>
+                            <th><span class="req">*</span>電話番号</th>
                             <td>
                                 <select name="phone1">
-                                    <option value="">대표(없음)</option>
-                                    <option value="010" ${info.phone1 == '010' ? 'selected' : ''}>휴대폰(010)</option>
-                                    <option value="050" ${info.phone1 == '050' ? 'selected' : ''}>인터넷(050)</option>
-                                    <option value="0507" ${info.phone1 == '0507' ? 'selected' : ''}>인터넷(0507)</option>
-                                    <option value="070" ${info.phone1 == '070' ? 'selected' : ''}>인터넷(070)</option>
-                                    <option value="0303" ${info.phone1 == '0303' ? 'selected' : ''}>인터넷(0303)</option>
-                                    <option value="0504" ${info.phone1 == '0504' ? 'selected' : ''}>인터넷(0504)</option>
-                                    <option value="02" ${info.phone1 == '02' ? 'selected' : ''}>서울(02)</option>
-                                    <option value="051" ${info.phone1 == '051' ? 'selected' : ''}>부산(051)</option>
-                                    <option value="053" ${info.phone1 == '053' ? 'selected' : ''}>대구(053)</option>
-                                    <option value="032" ${info.phone1 == '032' ? 'selected' : ''}>인천(032)</option>
-                                    <option value="062" ${info.phone1 == '062' ? 'selected' : ''}>광주(062)</option>
-                                    <option value="042" ${info.phone1 == '042' ? 'selected' : ''}>대전(042)</option>
-                                    <option value="052" ${info.phone1 == '052' ? 'selected' : ''}>울산(052)</option>
-                                    <option value="044" ${info.phone1 == '044' ? 'selected' : ''}>세종(044)</option>
-                                    <option value="031" ${info.phone1 == '031' ? 'selected' : ''}>경기(031)</option>
-                                    <option value="033" ${info.phone1 == '033' ? 'selected' : ''}>강원(033)</option>
-                                    <option value="043" ${info.phone1 == '043' ? 'selected' : ''}>충북(043)</option>
-                                    <option value="041" ${info.phone1 == '041' ? 'selected' : ''}>충남(041)</option>
-                                    <option value="063" ${info.phone1 == '063' ? 'selected' : ''}>전북(063)</option>
-                                    <option value="061" ${info.phone1 == '061' ? 'selected' : ''}>전남(061)</option>
-                                    <option value="054" ${info.phone1 == '054' ? 'selected' : ''}>경북(054)</option>
-                                    <option value="055" ${info.phone1 == '055' ? 'selected' : ''}>경남(055)</option>
-                                    <option value="064" ${info.phone1 == '064' ? 'selected' : ''}>제주(064)</option>
+                                    <option value="">代表(なし)</option>
+                                    <option value="010" ${info.phone1 == '010' ? 'selected' : ''}>携帯電話(010)</option>
+                                    <option value="050" ${info.phone1 == '050' ? 'selected' : ''}>インターネット(050)</option>
+                                    <option value="0507" ${info.phone1 == '0507' ? 'selected' : ''}>インターネット(0507)</option>
+                                    <option value="070" ${info.phone1 == '070' ? 'selected' : ''}>インターネット(070)</option>
+                                    <option value="0303" ${info.phone1 == '0303' ? 'selected' : ''}>インターネット(0303)</option>
+                                    <option value="0504" ${info.phone1 == '0504' ? 'selected' : ''}>インターネット(0504)</option>
+                                    <option value="02" ${info.phone1 == '02' ? 'selected' : ''}>ソウル(02)</option>
+                                    <option value="051" ${info.phone1 == '051' ? 'selected' : ''}>釜山(051)</option>
+                                    <option value="053" ${info.phone1 == '053' ? 'selected' : ''}>大邱(053)</option>
+                                    <option value="032" ${info.phone1 == '032' ? 'selected' : ''}>仁川(032)</option>
+                                    <option value="062" ${info.phone1 == '062' ? 'selected' : ''}>光州(062)</option>
+                                    <option value="042" ${info.phone1 == '042' ? 'selected' : ''}>大田(042)</option>
+                                    <option value="052" ${info.phone1 == '052' ? 'selected' : ''}>蔚山(052)</option>
+                                    <option value="044" ${info.phone1 == '044' ? 'selected' : ''}>世宗(044)</option>
+                                    <option value="031" ${info.phone1 == '031' ? 'selected' : ''}>京畿(031)</option>
+                                    <option value="033" ${info.phone1 == '033' ? 'selected' : ''}>江原(033)</option>
+                                    <option value="043" ${info.phone1 == '043' ? 'selected' : ''}>忠北(043)</option>
+                                    <option value="041" ${info.phone1 == '041' ? 'selected' : ''}>忠南(041)</option>
+                                    <option value="063" ${info.phone1 == '063' ? 'selected' : ''}>全北(063)</option>
+                                    <option value="061" ${info.phone1 == '061' ? 'selected' : ''}>全南(061)</option>
+                                    <option value="054" ${info.phone1 == '054' ? 'selected' : ''}>慶北(054)</option>
+                                    <option value="055" ${info.phone1 == '055' ? 'selected' : ''}>慶南(055)</option>
+                                    <option value="064" ${info.phone1 == '064' ? 'selected' : ''}>済州(064)</option>
                                 </select> - 
                                 <input type="text" name="phone2" value="${info.phone2}" style="width: 40px;"> - <input type="text" name="phone3" value="${info.phone3}" style="width: 40px;">
                             </td>
-                            <th>팩스번호</th>
+                            <th>FAX番号</th>
                             <td>
                                 <select name="fax1">
-                                    <option value="">대표(없음)</option>
-                                    <option value="010" ${info.fax1 == '010' ? 'selected' : ''}>휴대폰(010)</option>
-                                    <option value="050" ${info.fax1 == '050' ? 'selected' : ''}>인터넷(050)</option>
-                                    <option value="0507" ${info.fax1 == '0507' ? 'selected' : ''}>인터넷(0507)</option>
-                                    <option value="070" ${info.fax1 == '070' ? 'selected' : ''}>인터넷(070)</option>
-                                    <option value="0303" ${info.fax1 == '0303' ? 'selected' : ''}>인터넷(0303)</option>
-                                    <option value="0504" ${info.fax1 == '0504' ? 'selected' : ''}>인터넷(0504)</option>
-                                    <option value="02" ${info.fax1 == '02' ? 'selected' : ''}>서울(02)</option>
-                                    <option value="051" ${info.fax1 == '051' ? 'selected' : ''}>부산(051)</option>
-                                    <option value="053" ${info.fax1 == '053' ? 'selected' : ''}>대구(053)</option>
-                                    <option value="032" ${info.fax1 == '032' ? 'selected' : ''}>인천(032)</option>
-                                    <option value="062" ${info.fax1 == '062' ? 'selected' : ''}>광주(062)</option>
-                                    <option value="042" ${info.fax1 == '042' ? 'selected' : ''}>대전(042)</option>
-                                    <option value="052" ${info.fax1 == '052' ? 'selected' : ''}>울산(052)</option>
-                                    <option value="044" ${info.fax1 == '044' ? 'selected' : ''}>세종(044)</option>
-                                    <option value="031" ${info.fax1 == '031' ? 'selected' : ''}>경기(031)</option>
-                                    <option value="033" ${info.fax1 == '033' ? 'selected' : ''}>강원(033)</option>
-                                    <option value="043" ${info.fax1 == '043' ? 'selected' : ''}>충북(043)</option>
-                                    <option value="041" ${info.fax1 == '041' ? 'selected' : ''}>충남(041)</option>
-                                    <option value="063" ${info.fax1 == '063' ? 'selected' : ''}>전북(063)</option>
-                                    <option value="061" ${info.fax1 == '061' ? 'selected' : ''}>전남(061)</option>
-                                    <option value="054" ${info.fax1 == '054' ? 'selected' : ''}>경북(054)</option>
-                                    <option value="055" ${info.fax1 == '055' ? 'selected' : ''}>경남(055)</option>
-                                    <option value="064" ${info.fax1 == '064' ? 'selected' : ''}>제주(064)</option>
+                                    <option value="">代表(なし)</option>
+                                    <option value="010" ${info.fax1 == '010' ? 'selected' : ''}>携帯電話(010)</option>
+                                    <option value="050" ${info.fax1 == '050' ? 'selected' : ''}>インターネット(050)</option>
+                                    <option value="0507" ${info.fax1 == '0507' ? 'selected' : ''}>インターネット(0507)</option>
+                                    <option value="070" ${info.fax1 == '070' ? 'selected' : ''}>インターネット(070)</option>
+                                    <option value="0303" ${info.fax1 == '0303' ? 'selected' : ''}>インターネット(0303)</option>
+                                    <option value="0504" ${info.fax1 == '0504' ? 'selected' : ''}>インターネット(0504)</option>
+                                    <option value="02" ${info.fax1 == '02' ? 'selected' : ''}>ソウル(02)</option>
+                                    <option value="051" ${info.fax1 == '051' ? 'selected' : ''}>釜山(051)</option>
+                                    <option value="053" ${info.fax1 == '053' ? 'selected' : ''}>大邱(053)</option>
+                                    <option value="032" ${info.fax1 == '032' ? 'selected' : ''}>仁川(032)</option>
+                                    <option value="062" ${info.fax1 == '062' ? 'selected' : ''}>光州(062)</option>
+                                    <option value="042" ${info.fax1 == '042' ? 'selected' : ''}>大田(042)</option>
+                                    <option value="052" ${info.fax1 == '052' ? 'selected' : ''}>蔚山(052)</option>
+                                    <option value="044" ${info.fax1 == '044' ? 'selected' : ''}>世宗(044)</option>
+                                    <option value="031" ${info.fax1 == '031' ? 'selected' : ''}>京畿(031)</option>
+                                    <option value="033" ${info.fax1 == '033' ? 'selected' : ''}>江原(033)</option>
+                                    <option value="043" ${info.fax1 == '043' ? 'selected' : ''}>忠北(043)</option>
+                                    <option value="041" ${info.fax1 == '041' ? 'selected' : ''}>忠南(041)</option>
+                                    <option value="063" ${info.fax1 == '063' ? 'selected' : ''}>全北(063)</option>
+                                    <option value="061" ${info.fax1 == '061' ? 'selected' : ''}>全南(061)</option>
+                                    <option value="054" ${info.fax1 == '054' ? 'selected' : ''}>慶北(054)</option>
+                                    <option value="055" ${info.fax1 == '055' ? 'selected' : ''}>慶南(055)</option>
+                                    <option value="064" ${info.fax1 == '064' ? 'selected' : ''}>済州(064)</option>
                                 </select> - 
                                 <input type="text" name="fax2" value="${info.fax2}" style="width: 40px;"> - <input type="text" name="fax3" value="${info.fax3}" style="width: 40px;">
                             </td>
                         </tr>
                         <tr>
-                            <th>업태</th>
+                            <th>業態</th>
                             <td><input type="text" name="bizType" value="${info.bizType}"></td>
-                            <th>종목</th>
+                            <th>種目</th>
                             <td><input type="text" name="bizItem" value="${info.bizItem}"></td>
                         </tr>
                     </table>
                 </div>
 
                 <div>
-                    <div class="section-title" style="margin-top:0;">담당자정보</div>
+                    <div class="section-title" style="margin-top:0;">担当者情報</div>
                     <table class="info-table">
-                        <tr><th style="width:30%;"><span class="req">*</span>성명</th><td><input type="text" name="contactName" value="${info.contactName}" style="width: 90%;"></td></tr>
+                        <tr><th style="width:30%;"><span class="req">*</span>氏名</th><td><input type="text" name="contactName" value="${info.contactName}" style="width: 90%;"></td></tr>
                         <tr>
-                            <th>부서</th>
+                            <th>部署</th>
                             <td>
                                 <select name="departmentId" style="width: 60%;">
-                                    <option value="">선택</option>
+                                    <option value="">選択</option>
                                     <c:forEach var="dept" items="${deptList}"><option value="${dept.id}" ${info.departmentId == dept.id ? 'selected' : ''}>${dept.name}</option></c:forEach>
                                 </select>
-                                <button type="button" class="btn-manage" onclick="openModal('deptModal')">관리</button>
+                                <button type="button" class="btn-manage" onclick="openModal('deptModal')">管理</button>
                             </td>
                         </tr>
                         <tr>
-                            <th>직위</th>
+                            <th>役職</th>
                             <td>
                                 <select name="positionId" style="width: 60%;">
-                                    <option value="">선택</option>
+                                    <option value="">選択</option>
                                     <c:forEach var="pos" items="${posList}"><option value="${pos.id}" ${info.positionId == pos.id ? 'selected' : ''}>${pos.name}</option></c:forEach>
                                 </select>
-                                <button type="button" class="btn-manage" onclick="openModal('posModal')">관리</button>
+                                <button type="button" class="btn-manage" onclick="openModal('posModal')">管理</button>
                             </td>
                         </tr>
                         <tr>
-                            <th>전화번호</th>
+                            <th>電話番号</th>
                             <td>
                                 <select name="cPhone1">
-                                    <option value="">선택</option>
-                                    <option value="010" ${info.cPhone1 == '010' ? 'selected' : ''}>휴대폰(010)</option>
-                                    <option value="050" ${info.cPhone1 == '050' ? 'selected' : ''}>인터넷(050)</option>
-                                    <option value="0507" ${info.cPhone1 == '0507' ? 'selected' : ''}>인터넷(0507)</option>
-                                    <option value="070" ${info.cPhone1 == '070' ? 'selected' : ''}>인터넷(070)</option>
-                                    <option value="0303" ${info.cPhone1 == '0303' ? 'selected' : ''}>인터넷(0303)</option>
-                                    <option value="0504" ${info.cPhone1 == '0504' ? 'selected' : ''}>인터넷(0504)</option>
-                                    <option value="02" ${info.cPhone1 == '02' ? 'selected' : ''}>서울(02)</option>
-                                    <option value="051" ${info.cPhone1 == '051' ? 'selected' : ''}>부산(051)</option>
-                                    <option value="053" ${info.cPhone1 == '053' ? 'selected' : ''}>대구(053)</option>
-                                    <option value="032" ${info.cPhone1 == '032' ? 'selected' : ''}>인천(032)</option>
-                                    <option value="062" ${info.cPhone1 == '062' ? 'selected' : ''}>광주(062)</option>
-                                    <option value="042" ${info.cPhone1 == '042' ? 'selected' : ''}>대전(042)</option>
-                                    <option value="052" ${info.cPhone1 == '052' ? 'selected' : ''}>울산(052)</option>
-                                    <option value="044" ${info.cPhone1 == '044' ? 'selected' : ''}>세종(044)</option>
-                                    <option value="031" ${info.cPhone1 == '031' ? 'selected' : ''}>경기(031)</option>
-                                    <option value="033" ${info.cPhone1 == '033' ? 'selected' : ''}>강원(033)</option>
-                                    <option value="043" ${info.cPhone1 == '043' ? 'selected' : ''}>충북(043)</option>
-                                    <option value="041" ${info.cPhone1 == '041' ? 'selected' : ''}>충남(041)</option>
-                                    <option value="063" ${info.cPhone1 == '063' ? 'selected' : ''}>전북(063)</option>
-                                    <option value="061" ${info.cPhone1 == '061' ? 'selected' : ''}>전남(061)</option>
-                                    <option value="054" ${info.cPhone1 == '054' ? 'selected' : ''}>경북(054)</option>
-                                    <option value="055" ${info.cPhone1 == '055' ? 'selected' : ''}>경남(055)</option>
-                                    <option value="064" ${info.cPhone1 == '064' ? 'selected' : ''}>제주(064)</option>
+                                    <option value="">選択</option>
+                                    <option value="010" ${info.cPhone1 == '010' ? 'selected' : ''}>携帯電話(010)</option>
+                                    <option value="050" ${info.cPhone1 == '050' ? 'selected' : ''}>インターネット(050)</option>
+                                    <option value="0507" ${info.cPhone1 == '0507' ? 'selected' : ''}>インターネット(0507)</option>
+                                    <option value="070" ${info.cPhone1 == '070' ? 'selected' : ''}>インターネット(070)</option>
+                                    <option value="0303" ${info.cPhone1 == '0303' ? 'selected' : ''}>インターネット(0303)</option>
+                                    <option value="0504" ${info.cPhone1 == '0504' ? 'selected' : ''}>インターネット(0504)</option>
+                                    <option value="02" ${info.cPhone1 == '02' ? 'selected' : ''}>ソウル(02)</option>
+                                    <option value="051" ${info.cPhone1 == '051' ? 'selected' : ''}>釜山(051)</option>
+                                    <option value="053" ${info.cPhone1 == '053' ? 'selected' : ''}>大邱(053)</option>
+                                    <option value="032" ${info.cPhone1 == '032' ? 'selected' : ''}>仁川(032)</option>
+                                    <option value="062" ${info.cPhone1 == '062' ? 'selected' : ''}>光州(062)</option>
+                                    <option value="042" ${info.cPhone1 == '042' ? 'selected' : ''}>大田(042)</option>
+                                    <option value="052" ${info.cPhone1 == '052' ? 'selected' : ''}>蔚山(052)</option>
+                                    <option value="044" ${info.cPhone1 == '044' ? 'selected' : ''}>世宗(044)</option>
+                                    <option value="031" ${info.cPhone1 == '031' ? 'selected' : ''}>京畿(031)</option>
+                                    <option value="033" ${info.cPhone1 == '033' ? 'selected' : ''}>江原(033)</option>
+                                    <option value="043" ${info.cPhone1 == '043' ? 'selected' : ''}>忠北(043)</option>
+                                    <option value="041" ${info.cPhone1 == '041' ? 'selected' : ''}>忠南(041)</option>
+                                    <option value="063" ${info.cPhone1 == '063' ? 'selected' : ''}>全北(063)</option>
+                                    <option value="061" ${info.cPhone1 == '061' ? 'selected' : ''}>全南(061)</option>
+                                    <option value="054" ${info.cPhone1 == '054' ? 'selected' : ''}>慶北(054)</option>
+                                    <option value="055" ${info.cPhone1 == '055' ? 'selected' : ''}>慶南(055)</option>
+                                    <option value="064" ${info.cPhone1 == '064' ? 'selected' : ''}>済州(064)</option>
                                 </select> - <input type="text" name="cPhone2" value="${info.cPhone2}" style="width: 40px;"> - <input type="text" name="cPhone3" value="${info.cPhone3}" style="width: 40px;">
                             </td>
                         </tr>
                         <tr>
-                            <th>휴대폰번호</th>
+                            <th>携帯電話番号</th>
                             <td>
                                 <select name="mobile1">
-                                    <option value="">선택</option>
+                                    <option value="">選択</option>
                                     <option value="010" ${info.mobile1 == '010' ? 'selected' : ''}>010</option>
                                     <option value="011" ${info.mobile1 == '011' ? 'selected' : ''}>011</option>
                                     <option value="016" ${info.mobile1 == '016' ? 'selected' : ''}>016</option>
@@ -259,84 +260,84 @@
                                 </select> - <input type="text" name="mobile2" value="${info.mobile2}" style="width: 40px;"> - <input type="text" name="mobile3" value="${info.mobile3}" style="width: 40px;">
                             </td>
                         </tr>
-                        <tr><th>이메일</th><td><input type="text" name="email" value="${info.email}" style="width: 90%;"></td></tr>
+                        <tr><th>メールアドレス</th><td><input type="text" name="email" value="${info.email}" style="width: 90%;"></td></tr>
                     </table>
                 </div>
             </div>
 
-            <!-- 🌟 급여지급정보 레이아웃 -->
-            <div class="section-title">급여지급정보</div>
+            <!-- 給与支給情報レイアウト -->
+            <div class="section-title">給与支給情報</div>
             <table class="info-table">
                 <tr>
-                    <th style="width: 15%;">급여 산정기간</th>
+                    <th style="width: 15%;">給与算定期間</th>
                     <td style="width: 35%;">
                         <select name="calc1MonthType" style="padding:4px;">
-                            <option value="">선택</option>
-                            <option value="P" ${info.calc1MonthType == 'P' ? 'selected' : ''}>전월</option>
-                            <option value="N" ${info.calc1MonthType == 'N' || info.calc1MonthType == null ? 'selected' : ''}>당월</option>
+                            <option value="">選択</option>
+                            <option value="P" ${info.calc1MonthType == 'P' ? 'selected' : ''}>前月</option>
+                            <option value="N" ${info.calc1MonthType == 'N' || info.calc1MonthType == null ? 'selected' : ''}>当月</option>
                         </select>
                         <select name="salaryCalc1" style="padding:4px;">
-                            <option value="">선택</option>
+                            <option value="">選択</option>
                             <c:forEach var="day" begin="1" end="31">
-                                <option value="${day}" ${info.salaryCalc1 == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}일</option>
+                                <option value="${day}" ${info.salaryCalc1 == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}日</option>
                             </c:forEach>
-                            <option value="0" ${info.salaryCalc1 != null && info.salaryCalc1 == 0 ? 'selected' : ''}>말일</option>
+                            <option value="0" ${info.salaryCalc1 != null && info.salaryCalc1 == 0 ? 'selected' : ''}>末日</option>
                         </select>
                         <span style="margin: 0 10px;">~</span>
                         <select name="calc2MonthType" style="padding:4px;">
-                            <option value="">선택</option>
-                            <option value="P" ${info.calc2MonthType == 'P' ? 'selected' : ''}>전월</option>
-                            <option value="N" ${info.calc2MonthType == 'N' || info.calc2MonthType == null ? 'selected' : ''}>당월</option>
+                            <option value="">選択</option>
+                            <option value="P" ${info.calc2MonthType == 'P' ? 'selected' : ''}>前月</option>
+                            <option value="N" ${info.calc2MonthType == 'N' || info.calc2MonthType == null ? 'selected' : ''}>当月</option>
                         </select>
                         <select name="salaryCalc2" style="padding:4px;">
-                            <option value="">선택</option>
+                            <option value="">選択</option>
                             <c:forEach var="day" begin="1" end="31">
-                                <option value="${day}" ${info.salaryCalc2 == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}일</option>
+                                <option value="${day}" ${info.salaryCalc2 == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}日</option>
                             </c:forEach>
-                            <option value="0" ${info.salaryCalc2 != null && info.salaryCalc2 == 0 ? 'selected' : ''}>말일</option>
+                            <option value="0" ${info.salaryCalc2 != null && info.salaryCalc2 == 0 ? 'selected' : ''}>末日</option>
                         </select>
                     </td>
                     
-                    <th style="width: 15%;">급여지급일</th>
+                    <th style="width: 15%;">給与支給日</th>
                     <td style="width: 35%;" colspan="3">
                         <select name="paymentMonthType" style="padding:4px;">
-                            <option value="0" ${info.paymentMonthType == '0' ? 'selected' : ''}>당월</option>
-                            <option value="1" ${info.paymentMonthType == '1' || info.paymentMonthType == null ? 'selected' : ''}>익월</option>
+                            <option value="0" ${info.paymentMonthType == '0' ? 'selected' : ''}>当月</option>
+                            <option value="1" ${info.paymentMonthType == '1' || info.paymentMonthType == null ? 'selected' : ''}>翌月</option>
                         </select>
                         <select name="salaryPaymentDate" style="padding:4px;">
-                            <option value="">선택</option>
+                            <option value="">選択</option>
                             <c:forEach var="day" begin="1" end="31">
-                                <option value="${day}" ${info.salaryPaymentDate == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}일</option>
+                                <option value="${day}" ${info.salaryPaymentDate == day ? 'selected' : ''}>${day < 10 ? '0' : ''}${day}日</option>
                             </c:forEach>
-                            <option value="0" ${info.salaryPaymentDate != null && info.salaryPaymentDate == 0 ? 'selected' : ''}>말일</option>
+                            <option value="0" ${info.salaryPaymentDate != null && info.salaryPaymentDate == 0 ? 'selected' : ''}>末日</option>
                         </select>
                     </td>
                 </tr>
                 <tr>
-                    <th>금융기관</th>
+                    <th>金融機関</th>
                     <td>
                         <select name="bankName" style="padding:4px;">
-                            <option value="">선택해주세요</option>
-                            <option value="국민은행" ${info.bankName == '국민은행' ? 'selected' : ''}>국민은행</option>
-                            <option value="기업은행" ${info.bankName == '기업은행' ? 'selected' : ''}>기업은행</option>
-                            <option value="농협은행" ${info.bankName == '농협은행' ? 'selected' : ''}>농협은행</option>
-                            <option value="신한은행" ${info.bankName == '신한은행' ? 'selected' : ''}>신한은행</option>
-                            <option value="우리은행" ${info.bankName == '우리은행' ? 'selected' : ''}>우리은행</option>
-                            <option value="하나은행" ${info.bankName == '하나은행' ? 'selected' : ''}>하나은행</option>
+                            <option value="">選択してください</option>
+                            <option value="국민은행" ${info.bankName == '국민은행' ? 'selected' : ''}>国民銀行</option>
+                            <option value="기업은행" ${info.bankName == '기업은행' ? 'selected' : ''}>企業銀行</option>
+                            <option value="농협은행" ${info.bankName == '농협은행' ? 'selected' : ''}>農協銀行</option>
+                            <option value="신한은행" ${info.bankName == '신한은행' ? 'selected' : ''}>新韓銀行</option>
+                            <option value="우리은행" ${info.bankName == '우리은행' ? 'selected' : ''}>ウリィ銀行</option>
+                            <option value="하나은행" ${info.bankName == '하나은행' ? 'selected' : ''}>ハナ銀行</option>
                         </select>
                     </td>
-                    <th>계좌번호</th>
+                    <th>口座番号</th>
                     <td><input type="text" name="accountNumber" value="${info.accountNumber}" style="width: 80%;"></td>
-                    <th>예금주</th>
+                    <th>口座名義人</th>
                     <td><input type="text" name="depositStocks" value="${info.depositStocks}"></td>
                 </tr>
                 <tr>
-                    <th>급여이체뱅킹</th>
+                    <th>給与振込バンキング</th>
                     <td colspan="5">
-                        <p style="color:#e74a3b; font-size:12px; margin:0 0 10px 0;">급여이체 서비스는 KB국민은행 기업뱅킹을 통해 이뤄지고 있습니다.</p>
+                        <p style="color:#e74a3b; font-size:12px; margin:0 0 10px 0;">給与振込サービスは、KB国民銀行の企業バンキングを通じて行われています。</p>
                         <div style="background:#fff9e6; padding:10px; border:1px solid #ffeeba; display:inline-block;">
-                            기업뱅킹 ID <input type="text" name="kbId" value="${info.kbId}"> Password <input type="password" name="kbPw" value="${info.kbPw}">
-                            <button type="button" class="btn-manage" style="margin-left: 10px;">바로 ERP 연계</button>
+                            企業バンキング ID <input type="text" name="kbId" value="${info.kbId}"> Password <input type="password" name="kbPw" value="${info.kbPw}">
+                            <button type="button" class="btn-manage" style="margin-left: 10px;">すぐにERP連携</button>
                         </div>
                     </td>
                 </tr>
@@ -344,24 +345,24 @@
 
             <div class="img-box-wrap">
                 <div>
-                    <div class="section-title" style="margin-top:0;">회사로고</div>
+                    <div class="section-title" style="margin-top:0;">会社ロゴ</div>
                     <div class="img-box">
                         <div class="img-placeholder">NO IMAGE</div>
-                        <div class="img-desc">로고는 가로 150px 썸네일로 생성됩니다.<br>투명 png 이미지 사용을 권장합니다.<br><br><button type="button" class="btn-manage">등록</button> <button type="button" class="btn-gray">삭제</button></div>
+                        <div class="img-desc">ロゴは横幅150pxのサムネイルで生成されます。<br>透明なPNG画像の使用を推奨します。<br><br><button type="button" class="btn-manage">登録</button> <button type="button" class="btn-gray">削除</button></div>
                     </div>
                 </div>
                 <div>
-                    <div class="section-title" style="margin-top:0;">회사도장</div>
+                    <div class="section-title" style="margin-top:0;">会社印</div>
                     <div class="img-box">
                         <div class="img-placeholder">NO IMAGE</div>
-                        <div class="img-desc">가로 150px 썸네일, png 파일 권장합니다.<br>무료도장 제공 : stamp.yesform.com<br><br><button type="button" class="btn-manage">등록</button> <button type="button" class="btn-gray">삭제</button></div>
+                        <div class="img-desc">横幅150pxのサムネイル、PNGファイルを推奨します。<br>無料印鑑提供：stamp.yesform.com<br><br><button type="button" class="btn-manage">登録</button> <button type="button" class="btn-gray">削除</button></div>
                     </div>
                 </div>
             </div>
 
             <div class="bottom-btns">
-                <button type="submit" class="btn-save">저장</button>
-                <button type="button" class="btn-cancel" onclick="cancelEdit()">취소</button>
+                <button type="submit" class="btn-save">保存</button>
+                <button type="button" class="btn-cancel" onclick="cancelEdit()">キャンセル</button>
             </div>
         </form>
     </div>
@@ -375,25 +376,25 @@
 
     <div id="deptModal" class="modal-bg">
         <div class="modal-content">
-            <h3>부서 설정하기</h3>
+            <h3>部署設定</h3>
             <div class="item-list">
-                <c:forEach var="dept" items="${deptList}"><div class="item-row"><span>${dept.name}</span><span><a onclick="manageItem('dept', 'edit', ${dept.id}, '${dept.name}')">수정</a> | <a onclick="manageItem('dept', 'delete', ${dept.id}, '${dept.name}')" style="color: #e74a3b;">삭제</a></span></div></c:forEach>
-                <div class="add-input-row" id="deptAddRow"><input type="text" id="deptNewName" placeholder="새 부서명"><span><a class="save-link" onclick="saveNewItem('dept')">저장</a> | <a class="cancel-link" onclick="hideAddRow('dept')">취소</a></span></div>
-                <div class="add-btn" id="deptAddBtn" onclick="showAddRow('dept')">+ 추가하기</div>
+                <c:forEach var="dept" items="${deptList}"><div class="item-row"><span>${dept.name}</span><span><a onclick="manageItem('dept', 'edit', ${dept.id}, '${dept.name}')">修正</a> | <a onclick="manageItem('dept', 'delete', ${dept.id}, '${dept.name}')" style="color: #e74a3b;">削除</a></span></div></c:forEach>
+                <div class="add-input-row" id="deptAddRow"><input type="text" id="deptNewName" placeholder="新しい部署名"><span><a class="save-link" onclick="saveNewItem('dept')">保存</a> | <a class="cancel-link" onclick="hideAddRow('dept')">キャンセル</a></span></div>
+                <div class="add-btn" id="deptAddBtn" onclick="showAddRow('dept')">+ 追加する</div>
             </div>
-            <button class="modal-close-btn" onclick="closeModal('deptModal')">닫기</button>
+            <button class="modal-close-btn" onclick="closeModal('deptModal')">閉じる</button>
         </div>
     </div>
 
     <div id="posModal" class="modal-bg">
         <div class="modal-content">
-            <h3>직위 설정하기</h3>
+            <h3>役職設定</h3>
             <div class="item-list">
-                <c:forEach var="pos" items="${posList}"><div class="item-row"><span>${pos.name}</span><span><a onclick="manageItem('pos', 'edit', ${pos.id}, '${pos.name}')">수정</a> | <a onclick="manageItem('pos', 'delete', ${pos.id}, '${pos.name}')" style="color: #e74a3b;">삭제</a></span></div></c:forEach>
-                <div class="add-input-row" id="posAddRow"><input type="text" id="posNewName" placeholder="새 직위명"><span><a class="save-link" onclick="saveNewItem('pos')">저장</a> | <a class="cancel-link" onclick="hideAddRow('pos')">취소</a></span></div>
-                <div class="add-btn" id="posAddBtn" onclick="showAddRow('pos')">+ 추가하기</div>
+                <c:forEach var="pos" items="${posList}"><div class="item-row"><span>${pos.name}</span><span><a onclick="manageItem('pos', 'edit', ${pos.id}, '${pos.name}')">修正</a> | <a onclick="manageItem('pos', 'delete', ${pos.id}, '${pos.name}')" style="color: #e74a3b;">削除</a></span></div></c:forEach>
+                <div class="add-input-row" id="posAddRow"><input type="text" id="posNewName" placeholder="新しい役職名"><span><a class="save-link" onclick="saveNewItem('pos')">保存</a> | <a class="cancel-link" onclick="hideAddRow('pos')">キャンセル</a></span></div>
+                <div class="add-btn" id="posAddBtn" onclick="showAddRow('pos')">+ 追加する</div>
             </div>
-            <button class="modal-close-btn" onclick="closeModal('posModal')">닫기</button>
+            <button class="modal-close-btn" onclick="closeModal('posModal')">閉じる</button>
         </div>
     </div>
 </body>

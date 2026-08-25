@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>사원 명부 (Employee List)</title>
+<title>社員名簿 (Employee List)</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
@@ -14,13 +14,12 @@
 <style>
     body { margin: 0; background-color: #f8f9fa; font-family: sans-serif; }
     
-    /* 🌟 사이드바를 없애고 가운데 정렬된 넓은 단일 박스로 변경! */
     .wrap { max-width: 1200px; margin: 0 auto; background-color: white; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
     .container { padding: 40px; box-sizing: border-box; }
     
     .section-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #333; border-bottom: 2px solid #4e73df; padding-bottom: 10px; }
     
-    /* 상단 컨트롤 영역 (검색창, 갯수 선택) */
+    /* 上部コントロール領域 (検索窓、件数選択) */
     .top-controls { display: flex; justify-content: flex-end; margin-bottom: 15px; }
     .top-controls select { padding: 5px; font-size: 13px; border: 1px solid #ccc; outline: none; cursor: pointer; }
     
@@ -28,7 +27,6 @@
     th, td { border: 1px solid #ddd; padding: 12px 5px; font-size: 14px; }
     th { background-color: #f4f6f9; color: #333; font-weight: bold; }
     
-    /* 마우스 올렸을 때 클릭할 수 있다는 느낌(포인터, 색상변화) 주기 */
     .clickable-row { cursor: pointer; }
     .clickable-row:hover { background-color: #f1f6ff; }
     
@@ -37,10 +35,10 @@
     .btn-blue { background-color: #3b71ca; }
     .btn-gray { background-color: #9e9e9e; }
     .btn-green { background-color: #14a44d; }
-    .btn-orange { background-color: #f6c23e; color: #fff; } /* 퇴직 버튼 색상 */
+    .btn-orange { background-color: #f6c23e; color: #fff; } /* 退職ボタンの色 */
 </style>
 <script>
-    // 전체 선택/해제 기능
+    // 全体選択/解除機能
     function toggleAll(source) {
         let checkboxes = document.getElementsByName('empIds');
         for(let i=0; i<checkboxes.length; i++) {
@@ -48,46 +46,39 @@
         }
     }
 
-    // 선택 삭제 전 경고창
+    // 選択削除前の警告窓
     function confirmDelete() {
         let checked = document.querySelectorAll('input[name="empIds"]:checked');
         if(checked.length === 0) {
-            alert("삭제할 사원을 1명 이상 선택해주세요.");
+            alert("削除する社員を1名以上選択してください。");
             return false;
         }
-        return confirm("선택한 사원 정보를 삭제하시겠습니까?\n(관련된 모든 부가정보도 함께 삭제됩니다.)");
+        return confirm("選択した社員情報を削除しますか？\n(関連するすべての付加情報も一緒に削除されます。)");
     }
 
-    // 갯수 선택 드롭다운 변경 시 URL 이동 함수
+    // 件数選択ドロップダウン変更時のURL移動関数
     function changeLimit(selectObj) {
         let limit = selectObj.value;
         location.href = '<%=request.getContextPath()%>/employee/list.do?limit=' + limit;
     }
 
-    // 🌟 퇴직 처리 페이지로 이동하는 마법의 함수!
+    // 退職処理ページへ移動する関数
     function processRetirement() {
         let checked = document.querySelectorAll('input[name="empIds"]:checked');
         
         if (checked.length === 0) {
-            alert("퇴직 처리할 사원을 선택해주세요.");
+            alert("退職処理する社員を選択してください。");
             return;
         }
         if (checked.length > 1) {
-            alert("퇴직 처리는 한 번에 1명씩만 가능합니다. 한 명만 선택해주세요.");
+            alert("退職処理は一度に1名ずつのみ可能です。1名だけ選択してください。");
             return;
         }
         
         let empId = checked[0].value;
         
-        // 방금 저희가 만든 사원정보 2페이지의 '퇴직' 탭으로 사원번호를 쥐고 바로 넘어갑니다!
         location.href = '<%=request.getContextPath()%>/employee/register2.do?employeeId=' + empId + '&tab=retirement';
         
-        /* 
-        💡 만약, 사원정보 2페이지가 아니라 직접 만드신 퇴직 전용 페이지(employeeRetirement.jsp)로 
-           보내고 싶으시다면 위 location.href 코드를 지우고 아래 코드를 쓰시면 됩니다!
-        
-        location.href = '<%=request.getContextPath()%>/employee/retirement.do?searchEmpId=' + empId;
-        */
     }
 </script>
 </head>
@@ -98,15 +89,15 @@
     
     <div class="wrap">
         <div class="container">
-            <div class="section-title">사원 명부</div>
+            <div class="section-title">社員名簿</div>
             
-            <!-- 상단 몇개씩 보기 드롭다운 -->
+            <!-- 上部件数表示ドロップダウン -->
             <div class="top-controls">
                 <select name="limit" onchange="changeLimit(this)">
-                    <option value="10" ${limit == 10 ? 'selected' : ''}>10개씩 보기</option>
-                    <option value="30" ${limit == 30 ? 'selected' : ''}>30개씩 보기</option>
-                    <option value="50" ${limit == 50 ? 'selected' : ''}>50개씩 보기</option>
-                    <option value="100" ${limit == 100 ? 'selected' : ''}>100개씩 보기</option>
+                    <option value="10" ${limit == 10 ? 'selected' : ''}>10件ずつ表示</option>
+                    <option value="30" ${limit == 30 ? 'selected' : ''}>30件ずつ表示</option>
+                    <option value="50" ${limit == 50 ? 'selected' : ''}>50件ずつ表示</option>
+                    <option value="100" ${limit == 100 ? 'selected' : ''}>100件ずつ表示</option>
                 </select>
             </div>
             
@@ -115,19 +106,19 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
-                            <th>사원번호</th>
-                            <th>이름</th>
-                            <th>부서</th>
-                            <th>직위</th>
-                            <th>고용형태</th>
-                            <th>재직상태</th>
-                            <th>입사일</th>
+                            <th>社員番号</th>
+                            <th>氏名</th>
+                            <th>部署</th>
+                            <th>役職</th>
+                            <th>雇用形態</th>
+                            <th>在職状態</th>
+                            <th>入社日</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:if test="${empty employeeList}">
                             <tr>
-                                <td colspan="8" style="padding: 40px;">등록된 사원이 없습니다.</td>
+                                <td colspan="8" style="padding: 40px;">登録された社員がいません。</td>
                             </tr>
                         </c:if>
                         
@@ -142,11 +133,11 @@
                                 <td style="font-weight: bold;">${emp.koreanName}</td>
                                 <td>${emp.departmentName != null ? emp.departmentName : '-'}</td>
                                 <td>${emp.positionName != null ? emp.positionName : '-'}</td>
-                                <td>${emp.employmentType}</td>
+                                <td>${emp.employmentType == '정규직' ? '正社員' : (emp.employmentType == '계약직' ? '契約社員' : (emp.employmentType == '인턴' ? 'インターン' : emp.employmentType))}</td>
                                 <td>
-                                    <!-- 퇴사자는 빨간색으로 눈에 띄게 표시해줍니다 -->
+                                    <!-- 退社者は赤色で目立つように表示 -->
                                     <span style="color: ${emp.status == '재직' ? 'blue' : (emp.status == '퇴사' ? 'red' : 'black')}; font-weight: bold;">
-                                        ${emp.status}
+                                        ${emp.status == '재직' ? '在職' : (emp.status == '퇴사' ? '退社' : emp.status)}
                                     </span>
                                 </td>
                                 <td><fmt:formatDate value="${emp.hireDate}" pattern="yyyy-MM-dd"/></td>
@@ -155,13 +146,13 @@
                     </tbody>
                 </table>
 
-                <!-- 🌟 하단 버튼 영역에 [퇴직 처리] 버튼을 추가했습니다! -->
+                <!-- 下部ボタン領域に [退職処理] ボタンを追加 -->
                 <div class="btn-wrap">
-                    <button type="button" class="btn-blue" onclick="location.href='<%=request.getContextPath()%>/employee/register.do'">신규사원 등록</button>
-                    <button type="button" class="btn-blue" onclick="alert('일괄등록 기능은 준비중입니다.');">신규사원 일괄등록</button>
-                    <button type="submit" class="btn-gray">선택 삭제</button>
-                    <button type="button" class="btn-orange" onclick="processRetirement()">퇴직 처리</button>
-                    <button type="button" class="btn-green" onclick="alert('엑셀 다운로드 기능은 준비중입니다.');">엑셀 다운로드</button>
+                    <button type="button" class="btn-blue" onclick="location.href='<%=request.getContextPath()%>/employee/register.do'">新規社員登録</button>
+                    <button type="button" class="btn-blue" onclick="alert('一括登録機能は準備中です。');">新規社員一括登録</button>
+                    <button type="submit" class="btn-gray">選択削除</button>
+                    <button type="button" class="btn-orange" onclick="processRetirement()">退職処理</button>
+                    <button type="button" class="btn-green" onclick="alert('Excelダウンロード機能は準備中です。');">Excelダウンロード</button>
                 </div>
             </form>
         </div>

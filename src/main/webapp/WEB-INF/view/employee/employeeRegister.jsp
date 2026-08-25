@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>사원 신규 등록 / 상세</title>
+<title>社員新規登録 / 詳細</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
@@ -36,42 +36,42 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 	<div class="wrap">
 		<div class="sidebar">
 <div style="background: white; padding: 15px; border: 1px solid #ccc; text-align: center; margin-bottom: 20px;">
-    <img src="<%=request.getContextPath()%>/images/default_profile.png" alt="사진" style="width: 80px; height: 100px; background: #eee;">
+    <img src="<%=request.getContextPath()%>/images/default_profile.png" alt="写真" style="width: 80px; height: 100px; background: #eee;">
     
-    <!-- 사원번호 띄워주는 코드 -->
+    <!-- 社員番号を表示するコード -->
     <c:choose>
         <c:when test="${not empty emp.employeeId}">
-            <p style="margin: 10px 0 0 0; font-weight: bold; font-size: 15px; color: #0056b3;">사원번호: ${emp.employeeId}</p>
+            <p style="margin: 10px 0 0 0; font-weight: bold; font-size: 15px; color: #0056b3;">社員番号: ${emp.employeeId}</p>
         </c:when>
         <c:otherwise>
-            <p style="margin: 10px 0 0 0; font-weight: bold; font-size: 14px; color: #e74a3b;">[신규 사원 등록]</p>
+            <p style="margin: 10px 0 0 0; font-weight: bold; font-size: 14px; color: #e74a3b;">[新規社員登録]</p>
         </c:otherwise>
     </c:choose>
     
 </div>
-			<h3>사원정보 1</h3>
+			<h3>社員情報 1</h3>
 			<div class="menu-grid">
-				<button type="button" class="menu-btn" onclick="location.href='#account'">급여<br>4대 보험</button>
-				<button type="button" class="menu-btn" onclick="location.href='#dependents'">부양가족</button>
-				<button type="button" class="menu-btn" onclick="location.href='#degree'">학력</button>
-				<button type="button" class="menu-btn" onclick="location.href='#career'">경력</button>
-				<button type="button" class="menu-btn" onclick="location.href='#military'">병역</button>
+				<button type="button" class="menu-btn" onclick="location.href='#account'">給与<br>4大保険</button>
+				<button type="button" class="menu-btn" onclick="location.href='#dependents'">扶養家族</button>
+				<button type="button" class="menu-btn" onclick="location.href='#degree'">学歴</button>
+				<button type="button" class="menu-btn" onclick="location.href='#career'">経歴</button>
+				<button type="button" class="menu-btn" onclick="location.href='#military'">兵役</button>
 			</div>
 
-			<h3>사원정보 2</h3>
+			<h3>社員情報 2</h3>
 			<div class="menu-grid">
-				<button type="button" class="menu-btn" onclick="moveToPage2('cert')">자격 면허</button>
-				<button type="button" class="menu-btn" onclick="moveToPage2('training')">교육 훈련</button>
-				<button type="button" class="menu-btn" onclick="moveToPage2('reward')">상벌</button>
-				<button type="button" class="menu-btn" onclick="moveToPage2('appointment')">발령</button>
-				<button type="button" class="menu-btn" onclick="moveToPage2('referrer')">추천 신원보증</button>
-				<button type="button" class="menu-btn" onclick="moveToPage2('retirement')">퇴직</button>
+				<button type="button" class="menu-btn" onclick="moveToPage2('cert')">資格・免許</button>
+				<button type="button" class="menu-btn" onclick="moveToPage2('training')">教育訓練</button>
+				<button type="button" class="menu-btn" onclick="moveToPage2('reward')">賞罰</button>
+				<button type="button" class="menu-btn" onclick="moveToPage2('appointment')">発令</button>
+				<button type="button" class="menu-btn" onclick="moveToPage2('referrer')">推薦・身元保証</button>
+				<button type="button" class="menu-btn" onclick="moveToPage2('retirement')">退職</button>
 			</div>
 		</div>
 
 		<div class="container">
-			<h2>사원 정보 등록 / 상세조회</h2>
-			<p style="color: red; font-size: 12px;">* 표시는 필수입력 항목입니다.</p>
+			<h2>社員情報登録 / 詳細照会</h2>
+			<p style="color: red; font-size: 12px;">* 印は必須入力項目です。</p>
 
 			<iframe name="hidden_iframe" style="display: none;"></iframe>
 
@@ -79,48 +79,48 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 				<input type="hidden" name="companyId" value="1"> 
 				<input type="hidden" name="personId" value="1">
 <input type="hidden" id="hiddenEmpId" name="employeeId" value="${emp.employeeId}">
-				<div class="section-title">기본 정보</div>
+				<div class="section-title">基本情報</div>
 				<table>
 					<tr>
-						<th>* 한글 성명</th>
+						<th>* 氏名（ハングル）</th>
 						<td><input type="text" name="koreanName" value="${emp.koreanName}" required></td>
-						<th>영문 성명</th>
+						<th>英文氏名</th>
 						<td><input type="text" name="englishName" value="${emp.englishName}"></td>
 					</tr>
 					<tr>
-						<th>* 고용 형태</th>
+						<th>* 雇用形態</th>
 						<td><select name="employmentType" required>
-								<option value="정규직" ${emp.employmentType == '정규직' ? 'selected' : ''}>정규직</option>
-								<option value="계약직" ${emp.employmentType == '계약직' ? 'selected' : ''}>계약직</option>
-								<option value="인턴" ${emp.employmentType == '인턴' ? 'selected' : ''}>인턴</option>
+								<option value="정규직" ${emp.employmentType == '정규직' ? 'selected' : ''}>正社員</option>
+								<option value="계약직" ${emp.employmentType == '계약직' ? 'selected' : ''}>契約社員</option>
+								<option value="인턴" ${emp.employmentType == '인턴' ? 'selected' : ''}>インターン</option>
 						</select></td>
-						<th>* 재직 상태</th>
+						<th>* 在職状態</th>
 						<td><select name="status" required>
-								<option value="재직" ${emp.status == '재직' ? 'selected' : ''}>재직</option>
-								<option value="휴직" ${emp.status == '휴직' ? 'selected' : ''}>휴직</option>
-								<option value="퇴사" ${emp.status == '퇴사' ? 'selected' : ''}>퇴사</option>
+								<option value="재직" ${emp.status == '재직' ? 'selected' : ''}>在職</option>
+								<option value="휴직" ${emp.status == '휴직' ? 'selected' : ''}>休職</option>
+								<option value="퇴사" ${emp.status == '퇴사' ? 'selected' : ''}>退社</option>
 						</select></td>
 					</tr>
 					<tr>
-						<th>* 입사일</th>
+						<th>* 入社日</th>
 						<td><input type="date" name="hireDate" value="<fmt:formatDate value='${emp.hireDate}' pattern='yyyy-MM-dd'/>" required></td>
-						<th>퇴사일</th>
+						<th>退社日</th>
 						<td><input type="date" name="resignationDate" value="<fmt:formatDate value='${emp.resignationDate}' pattern='yyyy-MM-dd'/>"></td>
 					</tr>
 					<tr>
-						<th>* 부서</th>
+						<th>* 部署</th>
 						<td>
 							<select name="departmentId" required>
-								<option value="">선택</option>
+								<option value="">選択</option>
 								<c:forEach var="dept" items="${deptList}">
 									<option value="${dept.id}" ${emp.departmentId == dept.id ? 'selected' : ''}>${dept.name}</option>
 								</c:forEach>
 							</select>
 						</td>
-						<th>* 직위</th>
+						<th>* 役職</th>
 						<td>
 							<select name="positionId" required>
-								<option value="">선택</option>
+								<option value="">選択</option>
 								<c:forEach var="pos" items="${posList}">
 									<option value="${pos.id}" ${emp.positionId == pos.id ? 'selected' : ''}>${pos.name}</option>
 								</c:forEach>
@@ -128,62 +128,62 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 						</td>
 					</tr>
 					<tr>
-						<th>내/외국인</th>
+						<th>内国人/外国人</th>
 						<td>
-							<input type="radio" name="foreignOrDomestic" value="내국인" ${emp == null || emp.foreignOrDomestic == '내국인' ? 'checked' : ''}> 내국인 
-							<input type="radio" name="foreignOrDomestic" value="외국인" ${emp != null && emp.foreignOrDomestic == '외국인' ? 'checked' : ''}> 외국인
+							<input type="radio" name="foreignOrDomestic" value="내국인" ${emp == null || emp.foreignOrDomestic == '내국인' ? 'checked' : ''}> 内国人 
+							<input type="radio" name="foreignOrDomestic" value="외국인" ${emp != null && emp.foreignOrDomestic == '외국인' ? 'checked' : ''}> 外国人
 						</td>
-						<th>* 주민등록번호</th>
+						<th>* 住民登録番号</th>
 						<td>
-							<input type="text" name="residentNumber1" value="${emp.residentNumber1}" maxlength="6" style="width: 30%;" placeholder="앞 6자리" required> - 
-							<input type="password" name="residentNumber2" value="${emp.residentNumber2}" maxlength="7" style="width: 30%;" placeholder="뒤 7자리" required>
+							<input type="text" name="residentNumber1" value="${emp.residentNumber1}" maxlength="6" style="width: 30%;" placeholder="前6桁" required> - 
+							<input type="password" name="residentNumber2" value="${emp.residentNumber2}" maxlength="7" style="width: 30%;" placeholder="後7桁" required>
 						</td>
 					</tr>
 					<tr>
-						<th>주소</th>
+						<th>住所</th>
 						<td colspan="3"><input type="text" name="address" value="${emp.address}" style="width: 95%;"></td>
 					</tr>
 					<tr>
-						<th>자택 전화번호</th>
+						<th>自宅電話番号</th>
 						<td><input type="text" name="telPhone" value="${emp.telPhone}"></td>
-						<th>휴대폰 번호</th>
+						<th>携帯電話番号</th>
 						<td><input type="text" name="mobile" value="${emp.mobile}"></td>
 					</tr>
 					<tr>
-						<th>* 이메일</th>
+						<th>* メールアドレス</th>
 						<td><input type="email" name="email" value="${emp.email}" required></td>
 						<th>SNS</th>
 						<td><input type="text" name="sns" value="${emp.sns}"></td>
 					</tr>
 					<tr>
-						<th>기타 상세</th>
+						<th>その他詳細</th>
 						<td colspan="3"><textarea name="otherDetails" rows="3" style="width: 95%; padding: 5px;">${emp.otherDetails}</textarea></td>
 					</tr>
 				</table>
 
-				<!-- 급여 계좌 정보 -->
-				<div class="section-title" id="account">급여 계좌 정보</div>
+				<!-- 給与口座情報 -->
+				<div class="section-title" id="account">給与口座情報</div>
 				<table>
 					<tr>
-						<th>* 급여(기본급/일급)</th>
+						<th>* 給与(基本給/日給)</th>
 						<td colspan="3">
-							<input type="number" name="basicPay" value="${emp.basicPay}" placeholder="예: 3000000" style="width: 30%;" required> 
-							<span style="font-size: 13px; color: #666; margin-left: 5px;">원 (숫자만 입력)</span>
+							<input type="number" name="basicPay" value="${emp.basicPay}" placeholder="例: 3000000" style="width: 30%;" required> 
+							<span style="font-size: 13px; color: #666; margin-left: 5px;">ウォン (数字のみ入力)</span>
 						</td>
 					</tr>
 					<tr>
-						<th>은행명</th>
-						<td><input type="text" name="bankName" value="${account.bankName}" placeholder="예: 국민은행"></td>
-						<th>계좌번호</th>
-						<td><input type="text" name="accountNumber" value="${account.accountNumber}" placeholder="- 제외하고 입력"></td>
+						<th>銀行名</th>
+						<td><input type="text" name="bankName" value="${account.bankName}" placeholder="例: 国民銀行"></td>
+						<th>口座番号</th>
+						<td><input type="text" name="accountNumber" value="${account.accountNumber}" placeholder="- を除いて入力"></td>
 					</tr>
 					<tr>
-						<th>예금주</th>
+						<th>口座名義人</th>
 						<td colspan="3"><input type="text" name="depositStocks" value="${account.depositStocks}" style="width: 36%;"></td>
 					</tr>
 				</table>
 
-				<!-- 보험 정보 -->
+				<!-- 保険情報 -->
 				<c:set var="chkNps" value="" /><c:set var="chkHealth" value="" /><c:set var="chkEmp" value="" /><c:set var="chkInd" value="" />
 				<c:set var="insNum" value="" /><c:set var="insAmt" value="" /><c:set var="insStart" value="" /><c:set var="insEnd" value="" /><c:set var="insRem" value="" />
 
@@ -204,39 +204,39 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 					<c:set var="chkNps" value="checked" /><c:set var="chkHealth" value="checked" /><c:set var="chkEmp" value="checked" /><c:set var="chkInd" value="checked" />
 				</c:if>
 
-				<div class="section-title">보험 정보</div>
+				<div class="section-title">保険情報</div>
 				<table>
 					<tr>
-						<th>* 4대 보험</th>
+						<th>* 4大保険</th>
 						<td colspan="3">
-							<label style="margin-right: 15px; cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="국민연금" ${chkNps} style="width: auto;"> 국민연금</label>
-							<label style="margin-right: 15px; cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="건강보험" ${chkHealth} style="width: auto;"> 건강보험</label>
-							<label style="margin-right: 15px; cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="고용보험" ${chkEmp} style="width: auto;"> 고용보험</label>
-							<label style="cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="산재보험" ${chkInd} style="width: auto;"> 산재보험</label>
+							<label style="margin-right: 15px; cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="국민연금" ${chkNps} style="width: auto;"> 国民年金</label>
+							<label style="margin-right: 15px; cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="건강보험" ${chkHealth} style="width: auto;"> 健康保険</label>
+							<label style="margin-right: 15px; cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="고용보험" ${chkEmp} style="width: auto;"> 雇用保険</label>
+							<label style="cursor: pointer;"><input type="checkbox" name="insuranceAgency" value="산재보험" ${chkInd} style="width: auto;"> 労災保険</label>
 						</td>
 					</tr>
 					<tr>
-						<th>보험 번호</th>
-						<td><input type="text" name="insuranceNumber" value="${insNum}" placeholder="- 제외하고 입력"></td>
-						<th>보험 가입 금액</th>
-						<td><input type="number" name="insuranceAmount" value="${insAmt}" placeholder="숫자만 입력"></td>
+						<th>保険番号</th>
+						<td><input type="text" name="insuranceNumber" value="${insNum}" placeholder="- を除いて入力"></td>
+						<th>保険加入金額</th>
+						<td><input type="number" name="insuranceAmount" value="${insAmt}" placeholder="数字のみ入力"></td>
 					</tr>
 					<tr>
-						<th>가입일(시작일)</th>
+						<th>加入日(開始日)</th>
 						<td><input type="date" name="insuranceStartDate" value="${insStart}"></td>
-						<th>만료일(종료일)</th>
+						<th>満了日(終了日)</th>
 						<td><input type="date" name="insuranceEndDate" value="${insEnd}"></td>
 					</tr>
 					<tr>
-						<th>비고</th>
+						<th>備考</th>
 						<td colspan="3"><input type="text" name="remarks4" value="${insRem}" style="width: 95%;"></td>
 					</tr>
 				</table>
 
-				<!-- 가족 사항 -->
-				<div class="section-title" id="dependents">* 가족 사항<button type="button" class="add-btn" onclick="addDependentRow()">+ 가족 추가</button></div>
+				<!-- 家族事項 -->
+				<div class="section-title" id="dependents">* 家族事項<button type="button" class="add-btn" onclick="addDependentRow()">+ 家族追加</button></div>
 				<table id="dependentTable">
-					<tr><th style="width: 15%;">* 관계</th><th style="width: 20%;">* 성명</th><th style="width: 15%;">내/외국인</th><th style="width: 20%;">주민번호 앞자리</th><th style="width: 20%;">주민번호 뒷자리</th><th style="width: 10%;">삭제</th></tr>
+					<tr><th style="width: 15%;">* 続柄</th><th style="width: 20%;">* 氏名</th><th style="width: 15%;">内国人/外国人</th><th style="width: 20%;">住民番号 前半</th><th style="width: 20%;">住民番号 後半</th><th style="width: 10%;">削除</th></tr>
 					<c:if test="${not empty depList}">
 						<c:forEach var="dep" items="${depList}">
 							<tr>
@@ -244,31 +244,31 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 								<td style="text-align: center;"><input type="text" name="parentsName" value="${dep.parentsName}" style="width: 90%;"></td>
 								<td style="text-align: center;">
 									<select name="foreignOrDomestic1" style="width: 90%;">
-										<option value="내국인" ${dep.foreignOrDomestic1 == '내국인' ? 'selected' : ''}>내국인</option>
-										<option value="외국인" ${dep.foreignOrDomestic1 == '외국인' ? 'selected' : ''}>외국인</option>
+										<option value="내국인" ${dep.foreignOrDomestic1 == '내국인' ? 'selected' : ''}>内国人</option>
+										<option value="외국인" ${dep.foreignOrDomestic1 == '외국인' ? 'selected' : ''}>外国人</option>
 									</select>
 								</td>
 								<td style="text-align: center;"><input type="text" name="parentsNumber1" value="${dep.parentsNumber1}" maxlength="6" style="width: 90%;"></td>
 								<td style="text-align: center;"><input type="password" name="parentsNumber2" value="${dep.parentsNumber2}" maxlength="7" style="width: 90%;"></td>
-								<td style="text-align: center;"><button type="button" class="del-btn" onclick="deleteRow(this, 'dependentTable')">X 삭제</button></td>
+								<td style="text-align: center;"><button type="button" class="del-btn" onclick="deleteRow(this, 'dependentTable')">X 削除</button></td>
 							</tr>
 						</c:forEach>
 					</c:if>
 				</table>
 
-				<!-- 학력 사항 -->
-				<div class="section-title" id="degree">학력 사항<button type="button" class="add-btn" style="background-color: #f6c23e;" onclick="addDegreeRow()">+ 학력 추가</button></div>
+				<!-- 学歴事項 -->
+				<div class="section-title" id="degree">学歴事項<button type="button" class="add-btn" style="background-color: #f6c23e;" onclick="addDegreeRow()">+ 学歴追加</button></div>
 				<table id="degreeTable">
-					<tr><th style="width: 15%;">졸업구분</th><th style="width: 25%;">학교명</th><th style="width: 20%;">입학일</th><th style="width: 20%;">졸업일</th><th style="width: 15%;">전공</th><th style="width: 10%;">수료상태</th><th style="width: 10%;">삭제</th></tr>
+					<tr><th style="width: 15%;">卒業区分</th><th style="width: 25%;">学校名</th><th style="width: 20%;">入学日</th><th style="width: 20%;">卒業日</th><th style="width: 15%;">専攻</th><th style="width: 10%;">修了状態</th><th style="width: 10%;">削除</th></tr>
 					<c:if test="${not empty degList}">
 						<c:forEach var="deg" items="${degList}">
 							<tr>
 								<td style="text-align: center;">
 									<select name="graduate" style="width: 90%;">
-										<option value="고졸" ${deg.graduate == '고졸' ? 'selected' : ''}>고졸</option>
-										<option value="전문대졸" ${deg.graduate == '전문대졸' ? 'selected' : ''}>전문대졸</option>
-										<option value="대졸" ${deg.graduate == '대졸' ? 'selected' : ''}>대졸</option>
-										<option value="대학원졸" ${deg.graduate == '대학원졸' ? 'selected' : ''}>대학원졸</option>
+										<option value="고졸" ${deg.graduate == '고졸' ? 'selected' : ''}>高卒</option>
+										<option value="전문대졸" ${deg.graduate == '전문대졸' ? 'selected' : ''}>専門大卒</option>
+										<option value="대졸" ${deg.graduate == '대졸' ? 'selected' : ''}>大卒</option>
+										<option value="대학원졸" ${deg.graduate == '대학원졸' ? 'selected' : ''}>大学院卒</option>
 									</select>
 								</td>
 								<td style="text-align: center;"><input type="text" name="schoolName" value="${deg.schoolName}" style="width: 90%;"></td>
@@ -277,21 +277,21 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 								<td style="text-align: center;"><input type="text" name="major" value="${deg.major}" style="width: 90%;"></td>
 								<td style="text-align: center;">
 									<select name="completion" style="width: 90%;">
-										<option value="졸업" ${deg.completion == '졸업' ? 'selected' : ''}>졸업</option>
-										<option value="수료" ${deg.completion == '수료' ? 'selected' : ''}>수료</option>
-										<option value="중퇴" ${deg.completion == '중퇴' ? 'selected' : ''}>중퇴</option>
+										<option value="졸업" ${deg.completion == '졸업' ? 'selected' : ''}>卒業</option>
+										<option value="수료" ${deg.completion == '수료' ? 'selected' : ''}>修了</option>
+										<option value="중퇴" ${deg.completion == '중퇴' ? 'selected' : ''}>中退</option>
 									</select>
 								</td>
-								<td style="text-align: center;"><button type="button" class="del-btn" onclick="deleteRow(this, 'degreeTable')">X 삭제</button></td>
+								<td style="text-align: center;"><button type="button" class="del-btn" onclick="deleteRow(this, 'degreeTable')">X 削除</button></td>
 							</tr>
 						</c:forEach>
 					</c:if>
 				</table>
 
-				<!-- 🌟 경력 사항 (페이지 1로 이동) -->
-				<div class="section-title" id="career">경력 사항<button type="button" class="add-btn" style="background-color: #4e73df;" onclick="addCareerRow()">+ 경력 추가</button></div>
+				<!-- 経歴事項 (ページ1へ移動) -->
+				<div class="section-title" id="career">経歴事項<button type="button" class="add-btn" style="background-color: #4e73df;" onclick="addCareerRow()">+ 経歴追加</button></div>
 				<table id="careerTable">
-					<tr><th style="width: 20%;">회사명</th><th style="width: 15%;">입사일자</th><th style="width: 15%;">퇴사일자</th><th style="width: 15%;">직급</th><th style="width: 25%;">담당업무</th><th style="width: 10%;">삭제</th></tr>
+					<tr><th style="width: 20%;">会社名</th><th style="width: 15%;">入社日</th><th style="width: 15%;">退社日</th><th style="width: 15%;">職級</th><th style="width: 25%;">担当業務</th><th style="width: 10%;">削除</th></tr>
 					<c:if test="${not empty careerList}">
 						<c:forEach var="c" items="${careerList}">
 							<tr>
@@ -300,35 +300,35 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 								<td style="text-align: center;"><input type="date" name="endDate" value="<fmt:formatDate value='${c.endDate}' pattern='yyyy-MM-dd'/>" style="width: 90%;"></td>
 								<td style="text-align: center;"><input type="text" name="finalPosition" value="${c.finalPosition}" style="width: 90%;"></td>
 								<td style="text-align: center;"><input type="text" name="responsibilities" value="${c.responsibilities}" style="width: 90%;"></td>
-								<td style="text-align: center;"><button type="button" class="del-btn" onclick="deleteRow(this, 'careerTable')">X 삭제</button></td>
+								<td style="text-align: center;"><button type="button" class="del-btn" onclick="deleteRow(this, 'careerTable')">X 削除</button></td>
 							</tr>
 						</c:forEach>
 					</c:if>
 				</table>
 
-				<!-- 병역 사항 -->
-				<div class="section-title" id="military">병역 사항<button type="button" class="add-btn" style="background-color: #36b9cc;" onclick="addMilitaryRow()">+ 병역 추가</button></div>
+				<!-- 兵役事項 -->
+				<div class="section-title" id="military">兵役事項<button type="button" class="add-btn" style="background-color: #36b9cc;" onclick="addMilitaryRow()">+ 兵役追加</button></div>
 				<table id="militaryTable">
-					<tr><th style="width: 10%;">병역구분</th><th style="width: 10%;">군별</th><th style="width: 15%;">복무시작일</th><th style="width: 15%;">복무종료일</th><th style="width: 15%;">최종계급</th><th style="width: 15%;">병과</th><th style="width: 12%;">면제사유</th><th style="width: 8%;">삭제</th></tr>
+					<tr><th style="width: 10%;">兵役区分</th><th style="width: 10%;">軍別</th><th style="width: 15%;">服務開始日</th><th style="width: 15%;">服務終了日</th><th style="width: 15%;">最終階級</th><th style="width: 15%;">兵科</th><th style="width: 12%;">免除事由</th><th style="width: 8%;">削除</th></tr>
 					<c:if test="${not empty milList}">
 						<c:forEach var="mil" items="${milList}">
 							<tr>
 								<td style="text-align: center;">
 									<select name="serviceType" style="width:90%;">
-										<option value="">선택</option>
-										<option value="필" ${mil.serviceType == '필' ? 'selected' : ''}>필</option>
-										<option value="미필" ${mil.serviceType == '미필' ? 'selected' : ''}>미필</option>
-										<option value="면제" ${mil.serviceType == '면제' ? 'selected' : ''}>면제</option>
+										<option value="">選択</option>
+										<option value="필" ${mil.serviceType == '필' ? 'selected' : ''}>兵役済</option>
+										<option value="미필" ${mil.serviceType == '미필' ? 'selected' : ''}>未済</option>
+										<option value="면제" ${mil.serviceType == '면제' ? 'selected' : ''}>免除</option>
 									</select>
 								</td>
 								<td style="text-align: center;">
 									<select name="branch" style="width:90%;">
-										<option value="">선택</option>
-										<option value="육군" ${mil.branch == '육군' ? 'selected' : ''}>육군</option>
-										<option value="해군" ${mil.branch == '해군' ? 'selected' : ''}>해군</option>
-										<option value="공군" ${mil.branch == '공군' ? 'selected' : ''}>공군</option>
-										<option value="해병대" ${mil.branch == '해병대' ? 'selected' : ''}>해병대</option>
-										<option value="기타" ${mil.branch == '기타' ? 'selected' : ''}>기타</option>
+										<option value="">選択</option>
+										<option value="육군" ${mil.branch == '육군' ? 'selected' : ''}>陸軍</option>
+										<option value="해군" ${mil.branch == '해군' ? 'selected' : ''}>海軍</option>
+										<option value="공군" ${mil.branch == '공군' ? 'selected' : ''}>空軍</option>
+										<option value="해병대" ${mil.branch == '해병대' ? 'selected' : ''}>海兵隊</option>
+										<option value="기타" ${mil.branch == '기타' ? 'selected' : ''}>その他</option>
 									</select>
 								</td>
 								<td style="text-align: center;"><input type="date" name="servicePeriod1" value="<fmt:formatDate value='${mil.servicePeriod1}' pattern='yyyy-MM-dd'/>" style="width: 90%;"></td>
@@ -336,15 +336,15 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 								<td style="text-align: center;"><input type="text" name="finalRank" value="${mil.finalRank}" style="width: 90%;"></td>
 								<td style="text-align: center;"><input type="text" name="department1" value="${mil.department1}" style="width: 90%;"></td>
 								<td style="text-align: center;"><input type="text" name="exemptionReason" value="${mil.exemptionReason}" style="width: 90%;"></td>
-								<td style="text-align: center;"><button type="button" class="del-btn" onclick="deleteRow(this, 'militaryTable')">X 삭제</button></td>
+								<td style="text-align: center;"><button type="button" class="del-btn" onclick="deleteRow(this, 'militaryTable')">X 削除</button></td>
 							</tr>
 						</c:forEach>
 					</c:if>
 				</table>
 
 				<div style="text-align: center; max-width: 900px; margin-top: 20px;">
-					<button type="submit" style="padding: 10px 30px; background-color: #4e73df; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">저장</button>
-					<button type="reset" style="padding: 10px 30px; background-color: #a5a5a5; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px; font-size: 16px;">취소</button>
+					<button type="submit" style="padding: 10px 30px; background-color: #4e73df; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">保存</button>
+					<button type="reset" style="padding: 10px 30px; background-color: #a5a5a5; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px; font-size: 16px;">キャンセル</button>
 				</div>
 			</form>
 		</div>
@@ -362,12 +362,12 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 			var table = document.getElementById("dependentTable");
 			var row = table.insertRow(-1);
 			var cell1 = row.insertCell(0); var cell2 = row.insertCell(1); var cell3 = row.insertCell(2); var cell4 = row.insertCell(3); var cell5 = row.insertCell(4); var cell6 = row.insertCell(5);
-			cell1.innerHTML = '<input type="text" name="relationship" style="width: 90%;" placeholder="부, 모, 배우자 등">';
+			cell1.innerHTML = '<input type="text" name="relationship" style="width: 90%;" placeholder="父、母、配偶者など">';
 			cell2.innerHTML = '<input type="text" name="parentsName" style="width: 90%;">';
-			cell3.innerHTML = '<select name="foreignOrDomestic1" style="width: 90%;"><option value="내국인">내국인</option><option value="외국인">외국인</option></select>';
+			cell3.innerHTML = '<select name="foreignOrDomestic1" style="width: 90%;"><option value="내국인">内国人</option><option value="외국인">外国人</option></select>';
 			cell4.innerHTML = '<input type="text" name="parentsNumber1" maxlength="6" style="width: 90%;">';
 			cell5.innerHTML = '<input type="password" name="parentsNumber2" maxlength="7" style="width: 90%;">';
-			cell6.innerHTML = '<button type="button" class="del-btn" onclick="deleteRow(this, \'dependentTable\')">X 삭제</button>';
+			cell6.innerHTML = '<button type="button" class="del-btn" onclick="deleteRow(this, \'dependentTable\')">X 削除</button>';
 			for(var i=0; i<6; i++) { row.cells[i].style.textAlign = "center"; }
 		}
 
@@ -375,13 +375,13 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 			var table = document.getElementById("degreeTable");
 			var row = table.insertRow(-1);
 			var cell1 = row.insertCell(0); var cell2 = row.insertCell(1); var cell3 = row.insertCell(2); var cell4 = row.insertCell(3); var cell5 = row.insertCell(4); var cell6 = row.insertCell(5); var cell7 = row.insertCell(6);
-			cell1.innerHTML = '<select name="graduate" style="width: 90%;"><option value="고졸">고졸</option><option value="전문대졸">전문대졸</option><option value="대졸">대졸</option><option value="대학원졸">대학원졸</option></select>';
-			cell2.innerHTML = '<input type="text" name="schoolName" style="width: 90%;" placeholder="학교명 입력">';
+			cell1.innerHTML = '<select name="graduate" style="width: 90%;"><option value="고졸">高卒</option><option value="전문대졸">専門大卒</option><option value="대졸">大卒</option><option value="대학원졸">大学院卒</option></select>';
+			cell2.innerHTML = '<input type="text" name="schoolName" style="width: 90%;" placeholder="学校名を入力">';
 			cell3.innerHTML = '<input type="date" name="admissionDate" style="width: 90%;">';
 			cell4.innerHTML = '<input type="date" name="graduationDate" style="width: 90%;">';
 			cell5.innerHTML = '<input type="text" name="major" style="width: 90%;">';
-			cell6.innerHTML = '<select name="completion" style="width: 90%;"><option value="졸업">졸업</option><option value="수료">수료</option><option value="중퇴">중퇴</option></select>';
-			cell7.innerHTML = '<button type="button" class="del-btn" onclick="deleteRow(this, \'degreeTable\')">X 삭제</button>';
+			cell6.innerHTML = '<select name="completion" style="width: 90%;"><option value="졸업">卒業</option><option value="수료">修了</option><option value="중퇴">中退</option></select>';
+			cell7.innerHTML = '<button type="button" class="del-btn" onclick="deleteRow(this, \'degreeTable\')">X 削除</button>';
 			for(var i=0; i<7; i++) { row.cells[i].style.textAlign = "center"; }
 		}
 
@@ -393,7 +393,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 					+ '<td><input type="date" name="endDate" style="width: 90%;"></td>'
 					+ '<td><input type="text" name="finalPosition" style="width: 90%;"></td>'
 					+ '<td><input type="text" name="responsibilities" style="width: 90%;"></td>'
-					+ '<td><button type="button" class="del-btn" onclick="deleteRow(this, \'careerTable\')">X 삭제</button></td>';
+					+ '<td><button type="button" class="del-btn" onclick="deleteRow(this, \'careerTable\')">X 削除</button></td>';
 			row.innerHTML = html;
 			for(var i=0; i<row.cells.length; i++) { row.cells[i].style.textAlign = "center"; }
 		}
@@ -401,14 +401,14 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 		function addMilitaryRow() {
 			var table = document.getElementById("militaryTable");
 			var row = table.insertRow(-1);
-			var html = '<td><select name="serviceType" style="width:90%;"><option value="">선택</option><option value="필">필</option><option value="미필">미필</option><option value="면제">면제</option></select></td>'
-					+ '<td><select name="branch" style="width:90%;"><option value="">선택</option><option value="육군">육군</option><option value="해군">해군</option><option value="공군">공군</option><option value="해병대">해병대</option><option value="기타">기타</option></select></td>'
+			var html = '<td><select name="serviceType" style="width:90%;"><option value="">選択</option><option value="필">兵役済</option><option value="미필">未済</option><option value="면제">免除</option></select></td>'
+					+ '<td><select name="branch" style="width:90%;"><option value="">選択</option><option value="육군">陸軍</option><option value="해군">海軍</option><option value="공군">空軍</option><option value="해병대">海兵隊</option><option value="기타">その他</option></select></td>'
 					+ '<td><input type="date" name="servicePeriod1" style="width: 90%;"></td>'
 					+ '<td><input type="date" name="servicePeriod2" style="width: 90%;"></td>'
 					+ '<td><input type="text" name="finalRank" style="width: 90%;"></td>'
 					+ '<td><input type="text" name="department1" style="width: 90%;"></td>'
 					+ '<td><input type="text" name="exemptionReason" style="width: 90%;"></td>'
-					+ '<td><button type="button" class="del-btn" onclick="deleteRow(this, \'militaryTable\')">X 삭제</button></td>';
+					+ '<td><button type="button" class="del-btn" onclick="deleteRow(this, \'militaryTable\')">X 削除</button></td>';
 			row.innerHTML = html;
 			for(var i=0; i<row.cells.length; i++) { row.cells[i].style.textAlign = "center"; }
 		}
@@ -418,7 +418,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 			if (document.getElementById(tableId).rows.length > 2) { 
 				row.parentNode.removeChild(row); 
 			} else { 
-				alert("최소 1줄은 입력란이 필요합니다."); 
+				alert("最低1行は入力欄が必要です。"); 
 			}
 		}
 
@@ -426,7 +426,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 
 		function validateForm() {
 		    if (isSubmitting) {
-		        alert("현재 저장 중입니다. 잠시만 기다려주세요.");
+		        alert("現在保存中です。しばらくお待ちください。");
 		        return false;
 		    }
 
@@ -438,7 +438,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 		            hasDependent = true; break;
 		        }
 		    }
-		    if (!hasDependent) { alert("가족 사항을 최소 1명 이상 입력해 주세요. (관계 및 성명 필수)"); return false; }
+		    if (!hasDependent) { alert("家族事項を最低1名以上入力してください。（続柄および氏名は必須）"); return false; }
 
 		    isSubmitting = true;
 		    setTimeout(function() { isSubmitting = false; }, 3000); 
@@ -448,7 +448,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 		function moveToPage2(tab) {
 			const empId = document.getElementById("hiddenEmpId").value;
 			if (empId) { location.href = "register2.do?employeeId=" + empId + "&tab=" + tab; } 
-			else { alert("필수 입력란을 모두 입력하고 맨 아래의 [저장] 버튼을 눌러 DB에 등록한 후에만 부가정보 메뉴로 이동할 수 있습니다."); }
+			else { alert("必須入力欄をすべて入力し、一番下の[保存]ボタンを押してDBに登録した後にのみ、付加情報メニューに移動できます。"); }
 		}
 	</script>
 </body>
