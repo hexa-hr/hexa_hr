@@ -17,7 +17,7 @@ public class RetirementDao {
 				+ "       e.hire_date, e.resignation_date, a.bank_name, a.account_number " + "FROM employee e "
 				+ "LEFT JOIN department d ON e.department_id = d.department_id "
 				+ "LEFT JOIN position p ON e.position_id = p.position_id "
-				+ "LEFT JOIN employee_salary_account a ON e.account_id = a.account_id " + "WHERE e.status = '退職' "
+				+ "LEFT JOIN employee_salary_account a ON e.account_id = a.account_id " + "WHERE e.status = '퇴직' "
 				+ "ORDER BY e.resignation_date DESC";
 
 		List<RetirementVO> list = new ArrayList<>();

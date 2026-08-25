@@ -349,7 +349,7 @@ public class AttendanceDao {
 		return list;
 	}
 
-	// 5. 체크박스 조건에 따른 동적 검색 쿼리 (JSON 문자열 반환)
+	// 5. 체크박스 조건에 따른 동적 검색 쿼리 (JSON 문자열 반환) - 나(에스더)
 	public String searchAttendanceDetailsJson(Connection conn, java.util.Map<String, String> params)
 			throws SQLException {
 		StringBuilder sql = new StringBuilder();
@@ -362,22 +362,34 @@ public class AttendanceDao {
 				.append("LEFT JOIN department d ON e.department_id = d.department_id ")
 				.append("LEFT JOIN position p ON e.position_id = p.position_id ")
 				.append("LEFT JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id ")
-				.append("WHERE 1=1 ");
+				// [요청하신 부분] 근태그룹과 휴가항목 테이블을 명시적으로 조인합니다!
+				.append("LEFT JOIN attendance_group g ON t.attendance_group_id = g.attendance_group_id ")
+				.append("LEFT JOIN vacation_type v ON t.vacation_type_id = v.vacation_type_id ").append("WHERE 1=1 ");
 
-		// 동적 WHERE 조건 추가 (체크박스가 선택된 항목만 params에 들어옴)
-		if (params.containsKey("inputDate"))
+		// 동적 WHERE 조건 추가 (빈 문자열이 아닐 때만 쿼리 적용)
+		if (params.containsKey("inputDate") && !params.get("inputDate").trim().isEmpty())
 			sql.append(" AND TO_CHAR(a.input_date, 'YYYY-MM-DD') = ? ");
-		if (params.containsKey("startDate"))
+		if (params.containsKey("startDate") && !params.get("startDate").trim().isEmpty())
 			sql.append(" AND TO_CHAR(a.start_date, 'YYYY-MM-DD') >= ? ");
-		if (params.containsKey("endDate"))
+		if (params.containsKey("endDate") && !params.get("endDate").trim().isEmpty())
 			sql.append(" AND TO_CHAR(a.end_date, 'YYYY-MM-DD') <= ? ");
-		if (params.containsKey("deptId"))
+		if (params.containsKey("deptId") && !params.get("deptId").trim().isEmpty())
 			sql.append(" AND e.department_id = ? ");
-		if (params.containsKey("empName"))
+		if (params.containsKey("empName") && !params.get("empName").trim().isEmpty())
 			sql.append(" AND e.korean_name LIKE ? ");
-		if (params.containsKey("attTypeId"))
+
+		// [수정된 부분 1] 조인된 근태그룹 테이블(g)을 기준으로 검색
+		if (params.containsKey("attGroupId") && !params.get("attGroupId").trim().isEmpty())
+			sql.append(" AND g.attendance_group_id = ? ");
+
+		if (params.containsKey("attTypeId") && !params.get("attTypeId").trim().isEmpty())
 			sql.append(" AND a.attendance_type_id = ? ");
-		if (params.containsKey("summary"))
+
+		// [수정된 부분 2] 조인된 휴가항목 테이블(v)을 기준으로 검색
+		if (params.containsKey("vacTypeId") && !params.get("vacTypeId").trim().isEmpty())
+			sql.append(" AND v.vacation_type_id = ? ");
+
+		if (params.containsKey("summary") && !params.get("summary").trim().isEmpty())
 			sql.append(" AND a.summary LIKE ? ");
 
 		sql.append("ORDER BY a.input_date DESC, a.attendance_id DESC");
@@ -388,19 +400,28 @@ public class AttendanceDao {
 		try (PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
 			int idx = 1;
 			// 조건 값 세팅
-			if (params.containsKey("inputDate"))
+			if (params.containsKey("inputDate") && !params.get("inputDate").trim().isEmpty())
 				pstmt.setString(idx++, params.get("inputDate"));
-			if (params.containsKey("startDate"))
+			if (params.containsKey("startDate") && !params.get("startDate").trim().isEmpty())
 				pstmt.setString(idx++, params.get("startDate"));
-			if (params.containsKey("endDate"))
+			if (params.containsKey("endDate") && !params.get("endDate").trim().isEmpty())
 				pstmt.setString(idx++, params.get("endDate"));
-			if (params.containsKey("deptId"))
+			if (params.containsKey("deptId") && !params.get("deptId").trim().isEmpty())
 				pstmt.setInt(idx++, Integer.parseInt(params.get("deptId")));
-			if (params.containsKey("empName"))
+			if (params.containsKey("empName") && !params.get("empName").trim().isEmpty())
 				pstmt.setString(idx++, "%" + params.get("empName") + "%");
-			if (params.containsKey("attTypeId"))
+
+			// 파라미터 바인딩
+			if (params.containsKey("attGroupId") && !params.get("attGroupId").trim().isEmpty())
+				pstmt.setInt(idx++, Integer.parseInt(params.get("attGroupId")));
+
+			if (params.containsKey("attTypeId") && !params.get("attTypeId").trim().isEmpty())
 				pstmt.setInt(idx++, Integer.parseInt(params.get("attTypeId")));
-			if (params.containsKey("summary"))
+
+			if (params.containsKey("vacTypeId") && !params.get("vacTypeId").trim().isEmpty())
+				pstmt.setInt(idx++, Integer.parseInt(params.get("vacTypeId")));
+
+			if (params.containsKey("summary") && !params.get("summary").trim().isEmpty())
 				pstmt.setString(idx++, "%" + params.get("summary") + "%");
 
 			try (ResultSet rs = pstmt.executeQuery()) {
@@ -433,20 +454,19 @@ public class AttendanceDao {
 
 	// 5. 사원별 휴가일수 목록 조회 [유진]
 	public List<Map<String, Object>> selectEmployeeVacationList(Connection conn, int vacationTypeId)
-		throws SQLException {
+			throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		String sql = "SELECT e.employee_id, e.account_id, e.company_id, e.person_id, e.employment_type, "
-			+ "e.korean_name, e.english_name, e.hire_date, e.resignation_date, e.department_id, e.position_id, "
-			+ "e.foreign_or_domestic, e.resident_number1, e.resident_number2, e.address, e.tel_phone, "
-			+ "e.mobile, e.email, e.sns, e.other_details, e.status, NVL(e.basic_pay, 0) AS basic_pay, "
-			+ "d.department_name, p.position_name, v.vacation_value "
-			+ "FROM employee e "
-			+ "LEFT JOIN department d ON e.department_id = d.department_id "
-			+ "LEFT JOIN position p ON e.position_id = p.position_id "
-			+ "LEFT JOIN vacation_days v ON e.employee_id = v.employee_id AND v.vacation_type_id = ? "
-			+ "ORDER BY e.employee_id ASC";
+				+ "e.korean_name, e.english_name, e.hire_date, e.resignation_date, e.department_id, e.position_id, "
+				+ "e.foreign_or_domestic, e.resident_number1, e.resident_number2, e.address, e.tel_phone, "
+				+ "e.mobile, e.email, e.sns, e.other_details, e.status, NVL(e.basic_pay, 0) AS basic_pay, "
+				+ "d.department_name, p.position_name, v.vacation_value " + "FROM employee e "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id "
+				+ "LEFT JOIN position p ON e.position_id = p.position_id "
+				+ "LEFT JOIN vacation_days v ON e.employee_id = v.employee_id AND v.vacation_type_id = ? "
+				+ "ORDER BY e.employee_id ASC";
 
 		try {
 			pstmt = conn.prepareStatement(sql);
@@ -483,16 +503,13 @@ public class AttendanceDao {
 
 	// 6. 사원별 휴가일수 저장[cite: 1] [유진]
 	public void saveEmployeeVacationDays(Connection conn, int vacationTypeId, int employeeId, int days)
-		throws SQLException {
+			throws SQLException {
 
 		PreparedStatement pstmt = null;
-		String sql = "MERGE INTO vacation_days v "
-			+ "USING DUAL ON (v.employee_id = ? AND v.vacation_type_id = ?) "
-			+ "WHEN MATCHED THEN "
-			+ "  UPDATE SET v.vacation_value = ? "
-			+ "WHEN NOT MATCHED THEN "
-			+ "  INSERT (vacation_days_id, employee_id, vacation_type_id, vacation_value) "
-			+ "  VALUES ((SELECT NVL(MAX(vacation_days_id), 0) + 1 FROM vacation_days), ?, ?, ?)";
+		String sql = "MERGE INTO vacation_days v " + "USING DUAL ON (v.employee_id = ? AND v.vacation_type_id = ?) "
+				+ "WHEN MATCHED THEN " + "  UPDATE SET v.vacation_value = ? " + "WHEN NOT MATCHED THEN "
+				+ "  INSERT (vacation_days_id, employee_id, vacation_type_id, vacation_value) "
+				+ "  VALUES ((SELECT NVL(MAX(vacation_days_id), 0) + 1 FROM vacation_days), ?, ?, ?)";
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, employeeId);
@@ -586,7 +603,7 @@ public class AttendanceDao {
 
 	// [추가] 2. 수정 시 자기 자신 제외하고 이름 중복 확인 [유진 코드]
 	public boolean isDuplicateNameForUpdate(Connection conn, int attendanceTypeId, String attendanceTypeName)
-		throws SQLException {
+			throws SQLException {
 		String sql = "SELECT COUNT(*) FROM attendance_type WHERE attendance_type_name = ? AND attendance_type_id != ?";
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setString(1, attendanceTypeName);

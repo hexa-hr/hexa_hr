@@ -100,10 +100,11 @@ input[type="number"] {
 			<tr>
 				<th>勤怠項目</th>
 				<td><select id="attendanceType" name="attendanceType">
-						<option value="" data-has-vacation="false">選択してください。</option>
+						<option value="" data-has-vacation="false" data-unit="">選択してください。</option>
 						<!-- サーバーから渡される勤怠項目リスト(attendanceList)を反復 -->
 						<c:forEach var="att" items="${attendanceList}">
-							<option value="${att.attendanceTypeId}"
+							<!-- [수정] data-unit="${att.unit}" 속성 추가 -->
+							<option value="${att.attendanceTypeId}" data-unit="${att.unit}"
 								data-has-vacation="${not empty att.vacationTypeId ? 'true' : 'false'}"
 								data-vacation-name="${att.vacationTypeName}"
 								data-start="<fmt:formatDate value='${att.applyPeriod1}' pattern='yyyy-MM-dd'/>"
@@ -127,9 +128,11 @@ input[type="number"] {
 			</tr>
 
 			<tr>
-				<th>勤怠日数</th>
+				<!-- [수정] 텍스트 변경을 위해 th에 id 부여 -->
+				<th id="attendanceLabelTh">勤怠日数</th>
 				<td><input type="number" id="attendanceDays"
-					name="attendanceDays" min="0" step="0.5"> 日
+					name="attendanceDays" min="0" step="0.5"> <!-- [수정] 단위를 동적으로 바꾸기 위해 span으로 감싸기 -->
+					<span id="unitText">日</span>
 					<button type="button" class="btn-blue">休暇日数現状</button></td>
 			</tr>
 			<tr>
@@ -155,13 +158,17 @@ input[type="number"] {
 
 	<script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 今日の日付を求めて「入力日」に表示
+    // 今日の日付を求めて「入力日」に表示 (오류 방지를 위해 주석 처리하거나 해당 엘리먼트가 있으면 유지)
+    /* 
     const currentDateElement = document.getElementById('currentDate');
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // 月は0から始まるため+1、1桁の場合は前に「0」を付ける
-    const day = String(today.getDate()).padStart(2, '0');
-    currentDateElement.textContent = `${year}-${month}-${day}`;
+    if(currentDateElement) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        currentDateElement.textContent = `${year}-${month}-${day}`;
+    }
+    */
 
     // 既存変数の宣言
     const attendanceForm = document.getElementById('attendanceForm');
@@ -171,9 +178,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const endDate = document.getElementById('endDate');
     const btnReset = document.getElementById('btnReset');
     
-    // リフレッシュ休暇許容範囲の日付
-    const minRange = "2017-01-01";
-    const maxRange = "2017-12-31";
+    // [추가] 단위 변경을 위한 변수
+    const unitText = document.getElementById('unitText');
+    const attendanceLabelTh = document.getElementById('attendanceLabelTh');
 
     function updateFormState() {
         // 現在選択されている<option>タグを取得します。
@@ -184,12 +191,25 @@ document.addEventListener('DOMContentLoaded', function() {
         const vName = selectedOption.getAttribute('data-vacation-name');
         const vStart = selectedOption.getAttribute('data-start');
         const vEnd = selectedOption.getAttribute('data-end');
+        const vUnit = selectedOption.getAttribute('data-unit'); // [추가] 단위 가져오기
+
+        // [추가] 단위에 따른 텍스트 변경 (DB에 한국어 '시간/일' 또는 일본어 '時間/日' 로 저장될 경우 모두 대응)
+        if (vUnit === '시간' || vUnit === '時間') {
+            unitText.textContent = '時間';
+            attendanceLabelTh.textContent = '勤怠時間'; // '근태시간'
+        } else if (vUnit === '일' || vUnit === '日') {
+            unitText.textContent = '日';
+            attendanceLabelTh.textContent = '勤怠日数'; // '근태일수'
+        } else {
+            unitText.textContent = '日'; // 기본값
+            attendanceLabelTh.textContent = '勤怠日数';
+        }
 
         // 選択した勤怠項目に連結された休暇がある場合
         if (hasVacation && vStart && vEnd) {
             rewardVacationRow.style.display = ''; // 行を表示
             
-            // 画面テキストの変更（例：何とか休暇 2026-01-01 ~ 2026-12-31）
+            // 画面テキストの変更
             document.getElementById('appliedStartDate').textContent = vName + " " + vStart;
             document.getElementById('appliedEndDate').textContent = vEnd;
             
@@ -229,6 +249,10 @@ document.addEventListener('DOMContentLoaded', function() {
         startDate.removeAttribute('max');
         endDate.removeAttribute('min');
         endDate.removeAttribute('max');
+        
+        // 초기화 시 텍스트 복구
+        unitText.textContent = '日';
+        attendanceLabelTh.textContent = '勤怠日数';
     });
 
     updateFormState();
