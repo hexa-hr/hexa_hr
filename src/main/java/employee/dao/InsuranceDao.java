@@ -50,10 +50,10 @@ public class InsuranceDao {
 		}
 	}
 
-public List<EmployeeInsurance> selectByEmployeeId(
-		Connection conn, 
-		Integer employeeId, 
-		Date settlementStartDate, 
+	public List<EmployeeInsurance> selectByEmployeeId(
+		Connection conn,
+		Integer employeeId,
+		Date settlementStartDate,
 		Date settlementEndDate) throws SQLException {
 
 		String sql = "SELECT insurance_agency, NVL(insurance_amount, 0) AS insurance_amount "
@@ -74,10 +74,10 @@ public List<EmployeeInsurance> selectByEmployeeId(
 			try (ResultSet rs = pstmt.executeQuery()) {
 				while (rs.next()) {
 					EmployeeInsurance insurance = new EmployeeInsurance(
-<rs.getString("insurance_agency"), 
-					rs.getLong("insurance_amount"));
-					
-				result.add(insurance);
+						rs.getString("insurance_agency"),
+						rs.getLong("insurance_amount"));
+
+					result.add(insurance);
 				}
 			}
 		}
