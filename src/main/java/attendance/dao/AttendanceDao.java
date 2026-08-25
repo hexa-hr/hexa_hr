@@ -542,7 +542,7 @@ public class AttendanceDao {
 		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, "
 				+ "d.department_name, p.position_name, e.basic_pay " + "FROM employee e "
 				+ "LEFT JOIN department d ON e.department_id = d.department_id "
-				+ "LEFT JOIN position p ON e.position_id = p.position_id " + "WHERE e.employment_type = '日雇い' " // <--
+				+ "LEFT JOIN position p ON e.position_id = p.position_id " + "WHERE e.employment_type = '일용직' " // <--
 																												// 요렇게
 				// 일용직만
 				// 필터링!

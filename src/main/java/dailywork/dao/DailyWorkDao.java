@@ -16,7 +16,7 @@ import dailywork.model.DailyWorkVO;
 
 public class DailyWorkDao {
 
-	// 日雇い勤務記録登録 (INSERT)[cite: 24]
+	// 日雇い勤務記録登録 (INSERT)
 	public int insertDailyWork(Connection conn, DailyWorkVO vo) throws SQLException {
 		String sql = "INSERT INTO DAILY_WORK (work_id, employee_id, work_date, field_or_project_id, daily_wage, payment_rate, income_tax, local_tax, actual_payment) "
 				+ "VALUES ((SELECT NVL(MAX(work_id), 0) + 1 FROM DAILY_WORK), ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -34,11 +34,11 @@ public class DailyWorkDao {
 		}
 	}
 
-	// 1. リスト照会 (モーダル用) - ジョインして現場名(name)を取得します[cite: 24].
+	// 1. リスト照会 (モーダル用) - ジョインして現場名(name)を取得します
 	public List<java.util.Map<String, Object>> selectDailyWorkList(Connection conn, int empId, String yearMonth)
 			throws SQLException {
 
-		// p.nameを明示的に取得し、取り出しやすいようにAS proj_nameエイリアスを付けます[cite: 24].
+		// p.nameを明示的に取得し、取り出しやすいようにAS proj_nameエイリアスを付けます
 		String sql = "SELECT d.work_id, d.work_date, d.field_or_project_id, p.name AS proj_name, d.daily_wage, d.payment_rate, d.income_tax, d.local_tax, d.actual_payment "
 				+ "FROM DAILY_WORK d "
 				+ "LEFT JOIN FIELD_OR_PROJECT p ON d.field_or_project_id = p.field_or_project_id "
@@ -56,10 +56,10 @@ public class DailyWorkDao {
 					map.put("workDate", rs.getDate("work_date"));
 					map.put("fieldProjectId", rs.getInt("field_or_project_id"));
 
-					// DBから取得したproj_name(実際にはp.name)を安全に取り出します[cite: 24].
+					// DBから取得したproj_name(実際にはp.name)を安全に取り出します
 					String pName = rs.getString("proj_name");
-					// 現場データが存在すればその名前を入れ、現場が削除されて見つからない場合は「削除された現場」と表示します[cite: 24].
-					map.put("projectName", (pName != null && !pName.trim().isEmpty()) ? pName : "削除された現場");
+					// 現場データが存在すればその名前を入れ、現場が削除されて見つからない場合は「삭제된 현장」と表示します
+					map.put("projectName", (pName != null && !pName.trim().isEmpty()) ? pName : "삭제된 현장");
 
 					map.put("dailyWage", rs.getLong("daily_wage"));
 					map.put("paymentRate", rs.getDouble("payment_rate"));
@@ -74,7 +74,7 @@ public class DailyWorkDao {
 		return list;
 	}
 
-	// 2. 修正 (UPDATE) - SaveHandlerから呼び出されます[cite: 24]
+	// 2. 修正 (UPDATE) - SaveHandlerから呼び出されます
 	public int updateDailyWork(Connection conn, dailywork.model.DailyWorkVO vo) throws SQLException {
 		String sql = "UPDATE DAILY_WORK SET work_date=?, field_or_project_id=?, daily_wage=?, payment_rate=?, income_tax=?, local_tax=?, actual_payment=? WHERE work_id=?";
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -90,7 +90,7 @@ public class DailyWorkDao {
 		}
 	}
 
-	// 3. 削除 (DELETE)[cite: 24]
+	// 3. 削除 (DELETE)
 	public int deleteDailyWork(Connection conn, int workId) throws SQLException {
 		String sql = "DELETE FROM DAILY_WORK WHERE work_id=?";
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -99,17 +99,17 @@ public class DailyWorkDao {
 		}
 	}
 
-	// 4. 月別勤務要約照会 (月別照会カレンダー用)[cite: 24]
+	// 4. 月別勤務要約照会 (月別照会カレンダー用)
 	public List<DailyWorkMonthlyVO> selectMonthlySummary(Connection conn, String yearMonth) throws SQLException {
 		String sql = "SELECT " + "    'No-' || e.employee_id AS emp_no, " + "    e.korean_name, "
-				+ "    NVL(d.department_name, '未配属') AS dept_name, "
+				+ "    NVL(d.department_name, '미배정') AS dept_name, "
 				+ "    LISTAGG(TO_CHAR(dw.work_date, 'FMDD'), ',') WITHIN GROUP (ORDER BY dw.work_date) AS work_days, "
 				+ "    COUNT(dw.work_id) AS total_work_days, " + "    NVL(SUM(dw.income_tax), 0) AS total_income_tax, "
 				+ "    NVL(SUM(dw.local_tax), 0) AS total_local_tax, "
 				+ "    NVL(SUM(dw.actual_payment), 0) AS total_actual_payment " + "FROM employee e "
 				+ "LEFT JOIN daily_work dw ON e.employee_id = dw.employee_id "
 				+ "                       AND TO_CHAR(dw.work_date, 'YYYY-MM') = ? "
-				+ "LEFT JOIN department d ON e.department_id = d.department_id " + "WHERE e.employment_type = '日雇い' "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id " + "WHERE e.employment_type = '일용직' "
 				+ "GROUP BY e.employee_id, e.korean_name, d.department_name " + "ORDER BY e.employee_id";
 
 		List<DailyWorkMonthlyVO> list = new ArrayList<>();
@@ -127,21 +127,21 @@ public class DailyWorkDao {
 		return list;
 	}
 
-	// 5. 詳細照会マルチ条件検索 (動的検索ロジック)[cite: 24]
+	// 5. 詳細照会マルチ条件検索 (動的検索ロジック)
 	public List<Map<String, Object>> selectDailyWorkDetailList(Connection conn, String startDate, String endDate,
 			String empName, String deptId, String projectId) throws SQLException {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT d.work_date, 'No-' || e.employee_id AS emp_no, e.korean_name, ");
-		sql.append("       NVL(dp.department_name, '未配属') AS dept_name, ");
-		sql.append("       NVL(p.name, '削除された現場') AS proj_name, ");
+		sql.append("       NVL(dp.department_name, '미배정') AS dept_name, ");
+		sql.append("       NVL(p.name, '삭제된 현장') AS proj_name, ");
 		sql.append("       d.daily_wage, d.payment_rate, d.income_tax, d.local_tax, d.actual_payment ");
 		sql.append("FROM DAILY_WORK d ");
 		sql.append("JOIN EMPLOYEE e ON d.employee_id = e.employee_id ");
 		sql.append("LEFT JOIN DEPARTMENT dp ON e.department_id = dp.department_id ");
 		sql.append("LEFT JOIN FIELD_OR_PROJECT p ON d.field_or_project_id = p.field_or_project_id ");
-		sql.append("WHERE e.employment_type = '日雇い' ");
+		sql.append("WHERE e.employment_type = '일용직' ");
 
-		// チェックされた条件のみクエリに動的追加[cite: 24]
+		// チェックされた条件のみクエリに動的追加
 		if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
 			sql.append("AND d.work_date BETWEEN TO_DATE('" + startDate + "', 'YYYY-MM-DD') AND TO_DATE('" + endDate
 					+ "', 'YYYY-MM-DD') ");
@@ -151,7 +151,7 @@ public class DailyWorkDao {
 		}
 
 		if (deptId != null && !deptId.isEmpty()) {
-			// [修正された部分] 名前の誤った検索コードを削除し、部署IDで正確に検索するように原状復帰！[cite: 24]
+			// [修正された部分] 名前の誤った検索コードを削除し、部署IDで正確に検索するように原状復帰！
 			sql.append("AND e.department_id = " + deptId + " ");
 		}
 
@@ -181,7 +181,7 @@ public class DailyWorkDao {
 		return list;
 	}
 
-	// 日雇い給与入力用 - 精算期間内の社員別勤務記録照会[cite: 24]
+	// 日雇い給与入力用 - 精算期間内の社員別勤務記録照会
 	public List<DailyWorkPayrollRow> selectPayrollRows(Connection conn, int employeeId, Date settlementStartDate,
 			Date settlementEndDate) throws SQLException {
 
