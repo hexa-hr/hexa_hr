@@ -13,7 +13,7 @@ import employee.model.Certification;
 import employee.model.Guarantor;
 import employee.model.LanguageAbility;
 import employee.model.Referrer;
-import employee.model.Retirement;
+// 🌟 Retirement import 제거됨
 import employee.model.RewardPenalty;
 import employee.model.Training;
 import employee.service.EmployeeRegister2Service;
@@ -138,7 +138,7 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 		}
 
 		// 신원보증
-		// 🌟 연락처(guaPeriod) 및 숨겨진 보증기간 파라미터 수집 추가
+		// 🌟 연락처(guaPeriod) 및 숨겨진 보증기간 파라미터 수집 유지
 		String[] guaNames = request.getParameterValues("guaName");
 		String[] guaRels = request.getParameterValues("guaRelation");
 		String[] guaRrns = request.getParameterValues("guaRrn");
@@ -159,19 +159,12 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 			}
 		}
 
-		// 퇴직
-		Retirement retirement = null;
-		String retType = request.getParameter("retirementType");
-		if (retType != null && !retType.trim().isEmpty()) {
-			retirement = new Retirement(
-				employeeId, retType, parseDate(request.getParameter("retirementDate")),
-				request.getParameter("retirementReason"), request.getParameter("retirementContact"),
-				parseLong(request.getParameter("severancePay")));
-		}
+		// 🌟 퇴직(Retirement) 파라미터 조회 및 객체 생성 로직 제거됨
 
 		try {
+			// 🌟 service 호출 시 마지막 인자였던 retirement 제거됨
 			service.register2(employeeId, certList, langList, trainingList, rewardList,
-				apptList, referrerList, guarantorList, retirement);
+				apptList, referrerList, guarantorList);
 			response.setContentType("text/html; charset=UTF-8");
 			response.getWriter().println("<script>parent.alert('社員付加情報が正常に保存されました。');</script>");
 			return null;

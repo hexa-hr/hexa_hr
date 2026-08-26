@@ -12,7 +12,7 @@ import employee.dao.EmployeeDao;
 import employee.dao.GuarantorDao;
 import employee.dao.LanguageAbilityDao;
 import employee.dao.ReferrerDao;
-import employee.dao.RetirementDao;
+// 🌟 RetirementDao import 제거됨
 import employee.dao.RewardPenaltyDao;
 import employee.dao.TrainingDao;
 import employee.model.Appointment;
@@ -20,7 +20,7 @@ import employee.model.Certification;
 import employee.model.Guarantor;
 import employee.model.LanguageAbility;
 import employee.model.Referrer;
-import employee.model.Retirement;
+// 🌟 Retirement import 제거됨
 import employee.model.RewardPenalty;
 import employee.model.Training;
 import jdbc.JdbcUtil;
@@ -35,14 +35,15 @@ public class EmployeeRegister2Service {
 	private AppointmentDao apptDao = new AppointmentDao();
 	private ReferrerDao referrerDao = new ReferrerDao();
 	private GuarantorDao guarantorDao = new GuarantorDao();
-	private RetirementDao retirementDao = new RetirementDao();
+	// 🌟 RetirementDao 필드 제거됨
 	private EmployeeDao employeeDao = new EmployeeDao();
 
+	// 🌟 매개변수 마지막의 Retirement retirement 제거됨
 	public void register2(Integer employeeId,
 		List<Certification> certList, List<LanguageAbility> langList,
 		List<Training> trainingList, List<RewardPenalty> rewardList,
 		List<Appointment> apptList, List<Referrer> referrerList,
-		List<Guarantor> guarantorList, Retirement retirement) {
+		List<Guarantor> guarantorList) {
 
 		Connection conn = null;
 		try {
@@ -56,7 +57,7 @@ public class EmployeeRegister2Service {
 			deleteOldData(conn, "appointment", employeeId);
 			deleteOldData(conn, "referrer", employeeId);
 			deleteOldData(conn, "guarantor", employeeId);
-			deleteOldData(conn, "retirement", employeeId);
+			// 🌟 retirement delete 처리 제거됨
 
 			if (certList != null)
 				for (Certification c : certList)
@@ -80,10 +81,7 @@ public class EmployeeRegister2Service {
 				for (Guarantor g : guarantorList)
 					guarantorDao.insert(conn, g);
 
-			if (retirement != null && retirement.getRetirementType() != null
-				&& !retirement.getRetirementType().isEmpty()) {
-				retirementDao.insert(conn, retirement);
-			}
+			// 🌟 retirement insert 조건문 제거됨
 
 			conn.commit();
 		} catch (SQLException e) {
@@ -102,7 +100,6 @@ public class EmployeeRegister2Service {
 		}
 	}
 
-	// 🌟 조회용 Connection 누수 해결 (try-with-resources 사용)
 	public List<Certification> getCertifications(int employeeId) throws SQLException {
 		try (Connection conn = ConnectionProvider.getConnection()) {
 			return certificationDao.selectAllByEmployeeId(conn, employeeId);
@@ -145,11 +142,7 @@ public class EmployeeRegister2Service {
 		}
 	}
 
-	public Retirement getRetirement(int employeeId) throws SQLException {
-		try (Connection conn = ConnectionProvider.getConnection()) {
-			return retirementDao.selectByEmployeeId(conn, employeeId);
-		}
-	}
+	// 🌟 getRetirement 메서드 전체 제거됨
 
 	public List<Map<String, Object>> getDepartments() throws SQLException {
 		try (Connection conn = ConnectionProvider.getConnection()) {

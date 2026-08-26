@@ -26,7 +26,6 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 .menu-btn:hover { background-color: #555; }
 .add-btn { float: right; padding: 4px 12px; background-color: #4e73df; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold; }
 .add-btn:hover { background-color: #2e59d9; }
-/* 🌟 변경 포인트: 삭제 버튼 색상을 캔슬 버튼과 동일한 #a5a5a5(회색)로 변경 */
 .del-btn { background-color: #a5a5a5; color: white; border: none; border-radius: 3px; cursor: pointer; padding: 4px 8px; font-size: 12px; }
 .del-btn:hover { background-color: #999999; }
 </style>
@@ -67,7 +66,8 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 				<button type="button" class="menu-btn" onclick="moveToPage2('reward')">賞罰</button>
 				<button type="button" class="menu-btn" onclick="moveToPage2('appointment')">発令</button>
 				<button type="button" class="menu-btn" onclick="moveToPage2('referrer')">推薦・身元保証</button>
-				<button type="button" class="menu-btn" onclick="moveToPage2('retirement')">退職</button>
+				<!-- 🌟 변경 포인트: 이제 2페이지 탭이 아닌, 실제 퇴직 화면 함수로 연결 -->
+				<button type="button" class="menu-btn" onclick="moveToRetirement()">退職</button>
 			</div>
 		</div>
 
@@ -105,9 +105,10 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 						<td><input type="date" name="hireDate" value="<fmt:formatDate value='${emp.hireDate}' pattern='yyyy-MM-dd'/>" required></td>
 						<th>退社日</th>
 						<td>
+							<!-- 🌟 변경 포인트: 클릭 시 실제 퇴직처리 화면으로 이동하도록 수정 -->
 							<input type="text" name="resignationDate" value="<fmt:formatDate value='${emp.resignationDate}' pattern='yyyy-MM-dd'/>" 
 							       readonly style="background-color: #eeeeee; cursor: pointer;" 
-							       onclick="alert('退職処理は該当ページでは行えません。\n[社員情報 2page 退職]欄をご利用ください。');">
+							       onclick="moveToRetirement();">
 						</td>
 					</tr>
 					<tr>
@@ -350,16 +351,6 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 	</div>
 
 	<script>
-		var deptOptions = '<option value="">選択</option>';
-		<c:forEach var="dept" items="${deptList}">
-			deptOptions += '<option value="${dept.id}">${dept.name}</option>';
-		</c:forEach>
-
-		var posOptions = '<option value="">選択</option>';
-		<c:forEach var="pos" items="${posList}">
-			posOptions += '<option value="${pos.id}">${pos.name}</option>';
-		</c:forEach>
-
 		window.onload = function() { 
 			<c:if test="${empty depList}"> addDependentRow(); </c:if>
 			<c:if test="${empty degList}"> addDegreeRow(); </c:if>
@@ -455,6 +446,16 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 			if (empId) { location.href = "<%=request.getContextPath()%>/employee/register2.do?employeeId=" + empId + "#" + tab; } 
 			else { alert("必須入力欄をすべて入力し、一番下の[保存]ボタンを押してDBに登録した後にのみ、付加情報メニューに移動できます。"); }
 		}
+
+        // 🌟 변경 포인트: 실제 퇴직처리 화면으로 이동하는 함수 추가
+        function moveToRetirement() {
+            const empId = document.getElementById("hiddenEmpId").value;
+            if (empId) {
+                location.href = "<%=request.getContextPath()%>/employee/retirement.do?employeeId=" + empId;
+            } else {
+                alert("必須入力欄をすべて入力し、保存した後に利用できます。");
+            }
+        }
 	</script>
 </body>
 </html>

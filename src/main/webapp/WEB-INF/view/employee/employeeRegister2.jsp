@@ -68,10 +68,10 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 
 			<h3>社員情報 2</h3>
 			<div class="menu-grid">
-				<a href="#cert" class="menu-btn">資格・免許</a> <a href="#training"
-					class="menu-btn">教育訓練</a> <a href="#reward" class="menu-btn">賞罰</a>
-				<a href="#appointment" class="menu-btn">発令</a> <a href="#referrer"
-					class="menu-btn">推薦・身元保証</a> <a href="#retirement" class="menu-btn">退職</a>
+				<a href="#cert" class="menu-btn">資格・免許</a> <a href="#training" class="menu-btn">教育訓練</a>
+				<a href="#reward" class="menu-btn">賞罰</a> <a href="#appointment" class="menu-btn">発令</a>
+				<!-- 🌟 퇴직 메뉴 앵커 제거됨 -->
+				<a href="#referrer" class="menu-btn" style="grid-column: 1 / span 2;">推薦・身元保証</a>
 			</div>
 		</div>
 
@@ -359,7 +359,6 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 					<c:if test="${not empty guaList}">
 						<c:forEach var="gua" items="${guaList}">
 							<tr>
-								<!-- 🌟 보증 시작일, 종료일 데이터 보존용 hidden input 추가 -->
 								<td>
 									<input type="hidden" name="guaStartDate" value="<fmt:formatDate value='${gua.guaranteeDate}' pattern='yyyy-MM-dd'/>">
 									<input type="hidden" name="guaEndDate" value="<fmt:formatDate value='${gua.guaranteeExpirationDate}' pattern='yyyy-MM-dd'/>">
@@ -379,40 +378,7 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 						</c:forEach>
 					</c:if>
 				</table>
-
-				<!-- 6. 퇴직 -->
-				<div class="section-title" id="retirement">退職情報</div>
-				<table>
-					<tr>
-						<th>退職区分</th>
-						<td><select name="retirementType" style="width: 80%;">
-								<option value="">選択</option>
-								<option value="정년퇴직"
-									${retirement.retirementType == '정년퇴직' ? 'selected' : ''}>定年退職</option>
-								<option value="자진퇴사"
-									${retirement.retirementType == '자진퇴사' ? 'selected' : ''}>自己都合退社</option>
-								<option value="권고사직"
-									${retirement.retirementType == '권고사직' ? 'selected' : ''}>勧奨退職</option>
-						</select></td>
-						<th>退職日</th>
-						<td><input type="date" name="retirementDate"
-							value="<fmt:formatDate value='${retirement.retirementDate}' pattern='yyyy-MM-dd'/>"></td>
-					</tr>
-					<tr>
-						<th>退職事由</th>
-						<td colspan="3"><input type="text" name="retirementReason"
-							value="${retirement.retirementReason}" style="width: 95%;"></td>
-					</tr>
-					<tr>
-						<th>退職後の連絡先</th>
-						<td><input type="text" name="retirementContact"
-							value="${retirement.retirementContact}" style="width: 80%;"></td>
-						<th>退職金(ウォン)</th>
-						<td><input type="number" name="severancePay"
-							value="${retirement.severancePay}"
-							style="width: 80%; padding: 4px;"></td>
-					</tr>
-				</table>
+                <!-- 🌟 6. 퇴직 정보 테이블 전체 영역 제거됨 -->
 
 				<div
 					style="text-align: center; margin-top: 50px; margin-bottom: 50px;">
@@ -475,7 +441,6 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 			} else if (tableId === 'referrerTable') {
 				html = '<td><input type="text" name="referrerName"></td><td><input type="text" name="referrerRelationship"></td><td><input type="text" name="referrerCompanyName"></td><td><input type="text" name="referrerPosition"></td><td><input type="text" name="referrerPhoneNumber"></td>';
 			} else if (tableId === 'guarantorTable') {
-				// 🌟 추가버튼 누를 때도 빈 숨김 input이 생성되도록 맞춤
 				html = '<td><input type="hidden" name="guaStartDate" value=""><input type="hidden" name="guaEndDate" value=""><input type="text" name="guaName"></td><td><input type="text" name="guaRelation"></td><td><input type="text" name="guaRrn" placeholder="[住民登録番号入力]"></td><td><input type="number" name="guaAmount"></td><td><input type="text" name="guaPeriod" placeholder="連絡先"></td>';
 			}
 
