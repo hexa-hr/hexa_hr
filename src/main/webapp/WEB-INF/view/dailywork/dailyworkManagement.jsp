@@ -16,143 +16,208 @@
 	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
+/* 1. 전체 레이아웃 (공통) */
 body {
-	font-family: 'Malgun Gothic', dotum, sans-serif;
-	font-size: 13px;
-	color: #333;
-	margin: 0;
-	background-color: #f5f5f5;
+    margin: 0;
+    min-width: 1400px;
+    font-family: 'Malgun Gothic', sans-serif;
+    color: #333;
 }
 
+/* 2. 컨테이너 영역 */
 .container {
-	display: flex;
-	gap: 30px;
-	background: #fff;
-	padding: 20px;
-	border-radius: 5px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 30px;
+    padding: 30px 40px; /* 여백 통일 */
+    background-color: white; /* 테이블 영역 흰색 강조 */
+    box-sizing: border-box;
+    align-items: flex-start;
 }
 
+/* 3. 좌/우 패널 레이아웃 분할 */
 .left-panel {
-	flex: 6;
-	overflow-y: auto;
-	max-height: 600px;
+    flex: 6;
+    padding: 20px;
+    box-sizing: border-box;
+    /* overflow-y: auto; 와 max-height는 필요시 추가 (현재는 자연스러운 스크롤 유도를 위해 제거) */
 }
 
 .right-panel {
-	flex: 4;
-	border-left: 1px solid #ddd;
-	padding-left: 30px;
+    flex: 4;
+    background: #f4f4f4; /* 폼 영역 배경색 톤 통일 */
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
 }
 
+/* 4. 타이틀 영역 */
+h2 {
+    font-size: 22px; /* 타이틀 크기 통일 */
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 2px solid #4e73df; /* 파란색 밑줄 통일 */
+    padding-bottom: 10px;
+}
+
+/* 5. 데이터 테이블 스타일 (왼쪽 패널) */
 table {
-	width: 100%;
-	border-collapse: collapse;
-	text-align: center;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 th, td {
-	border: 1px solid #e2e2e2;
-	padding: 10px;
+    border: 1px solid #ccc; /* 테두리 색상 통일 */
+    padding: 10px;
+    font-size: 14px;
+    white-space: nowrap; /* 셀 내용 줄바꿈 방지 */
 }
 
 th {
-	background-color: #f4f4f4;
+    background-color: #f8f9fa; /* 헤더 배경색 통일 */
+    color: #333;
+    font-weight: bold;
 }
 
-.selected-row {
-	background-color: #e8f0fe !important;
-	font-weight: bold;
+td {
+    background-color: white;
 }
 
-.btn-blue {
-	background-color: #5c7cba;
-	color: white;
-	border: none;
-	padding: 4px 8px;
-	cursor: pointer;
-	border-radius: 3px;
-	font-size: 12px;
+/* 클릭/선택 가능한 행(Row) 하이라이트 */
+.selected-row td {
+    background-color: #f1f5f9 !important; /* 호버/선택 색상 통일 */
+    font-weight: bold;
 }
 
-.btn-reset {
-	background-color: #999;
-	color: white;
-	border: none;
-	padding: 6px 15px;
-	border-radius: 3px;
-	cursor: pointer;
-}
-
-.btn-submit {
-	background-color: #5c7cba;
-	color: white;
-	border: none;
-	padding: 6px 20px;
-	border-radius: 3px;
-	cursor: pointer;
+/* 6. 폼 테이블 스타일 (오른쪽 패널) */
+.form-table {
+    margin-top: 15px;
+    border-collapse: collapse;
 }
 
 .form-table th {
-	width: 120px;
-	text-align: left;
-	background-color: #fbfbfb;
+    width: 130px;
+    text-align: left;
+    background-color: transparent;
+    border: none;
+    padding: 10px 0;
 }
 
 .form-table td {
-	text-align: left;
+    text-align: left;
+    border: none;
+    padding: 10px 0;
+    background-color: transparent;
 }
 
-.form-table input[type="text"], .form-table input[type="date"],
-	.form-table select {
-	padding: 4px;
-	border: 1px solid #ccc;
-	width: 150px;
-	text-align: right;
+/* 입력 필드 공통 */
+.form-table input[type="text"], .form-table input[type="date"], .form-table select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+    width: 180px; /* 기존 150px에서 입력 여유 확보 */
+    text-align: right;
+    box-sizing: border-box;
 }
 
-.auto-calc-row {
-	background-color: #ffffe0;
+.form-table select {
+    text-align: left;
 }
 
+.auto-calc-row th, .auto-calc-row td {
+    background-color: transparent; /* 기존 노란색 제거하여 깔끔하게 톤 통일 */
+}
+
+/* 입력/자동계산 강조 텍스트 */
 .text-red {
-	color: #d9534f;
+    color: #e74a3b !important; /* 시스템 붉은색 통일 */
+    font-weight: bold;
 }
 
+/* 7. 버튼 영역 (공통 톤앤매너) */
+.btn-blue {
+    background-color: #4e73df; /* 파란색 통일 */
+    color: white !important;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: bold;
+}
+.btn-blue:hover { background-color: #2e59d9; }
+
+.btn-reset {
+    background-color: #a5a5a5; /* 회색 보조 버튼 통일 */
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 5px;
+}
+.btn-reset:hover { background-color: #858796; }
+
+.btn-submit {
+    background-color: #4e73df;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.btn-submit:hover { background-color: #2e59d9; }
+
+/* 8. 모달 팝업 스타일 (이전 모달과 통일) */
 .modal-overlay {
-	display: none;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0, 0, 0, 0.5);
-	z-index: 100;
-	justify-content: center;
-	align-items: center;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-content {
-	background: white;
-	padding: 20px;
-	border-radius: 8px;
-	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    background: white;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
+/* 모달 내 프로젝트 리스트 */
 .project-list-ul {
-	list-style: none;
-	padding: 0;
-	max-height: 200px;
-	overflow-y: auto;
-	border: 1px solid #ccc;
-	margin-bottom: 10px;
+    list-style: none;
+    padding: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+    background-color: #f8f9fa;
 }
 
 .project-list-ul li {
-	padding: 8px;
-	border-bottom: 1px solid #eee;
-	display: flex;
-	justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+.project-list-ul li:last-child {
+    border-bottom: none;
 }
 </style>
 </head>

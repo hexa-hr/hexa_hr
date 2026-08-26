@@ -26,160 +26,197 @@ if (request.getAttribute("defaultEndDate") == null) {
 	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
+/* 1. 전체 레이아웃 (1, 2페이지와 통일) */
 body {
-	font-family: sans-serif;
-	color: #333;
-	margin: 0;
+    margin: 0;
+    min-width: 1400px;
+    background-color: #f8f9fa;
+    font-family: 'Malgun Gothic', sans-serif;
 }
 
-.page-header {
-	margin-bottom: 20px;
-}
-
-.page-header h1 {
-	font-size: 24px;
-	margin-bottom: 5px;
-}
-
-.page-header p {
-	font-size: 14px;
-	color: #666;
-	margin: 0;
+.wrap {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
 }
 
 .container {
-	display: flex;
-	gap: 30px;
-	align-items: flex-start;
-	margin-bottom: 40px;
-	min-width: 1100px;
+    padding: 30px 40px;
+    font-family: sans-serif;
+    flex: 1;
+    box-sizing: border-box;
+    background-color: white;
+    display: flex;
+    gap: 30px;
 }
 
+/* 2. 페이지 헤더 (컨테이너 안으로 들어가게 구조를 변경할 수도 있으나, CSS로만 처리) */
+.page-header {
+    background-color: white;
+    padding: 30px 40px 10px 40px;
+}
+
+.page-header h1 {
+    font-size: 22px; /* 타이틀 크기 통일 */
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.page-header p {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
+
+/* 3. 테이블 및 폼 레이아웃 */
 .table-section {
-	flex: 1.2;
+    flex: 1.2;
 }
 
 .form-section {
-	flex: 1;
-	background: #f9f9f9;
-	padding: 20px;
-	border: 1px solid #ddd;
+    flex: 1;
+    background: #f4f4f4; /* 사이드바와 동일한 배경색 톤 */
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
 }
 
+h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    border-bottom: 2px solid #4e73df;
+    padding-bottom: 5px;
+}
+
+/* 4. 테이블 스타일 (1, 2페이지와 완벽 동일) */
 table {
-	width: 100%;
-	border-collapse: collapse;
-	text-align: center;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 14px;
+    white-space: nowrap;
+    text-align: center;
 }
 
 th {
-	border: 1px solid #ccc;
-	padding: 10px;
-	font-size: 14px;
-	background: #eee;
-}
-
-td {
-	border: 1px solid #ccc;
-	padding: 0;
-	font-size: 14px;
+    background-color: #f8f9fa;
 }
 
 td a {
-	text-decoration: none;
-	color: inherit;
-	display: block;
-	padding: 10px;
-	width: 100%;
-	box-sizing: border-box;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 tr:hover {
-	background-color: #f1f5f9;
+    background-color: #f1f5f9;
 }
 
+/* 5. 폼 입력 영역 */
 .form-group {
-	margin-bottom: 15px;
+    margin-bottom: 15px;
 }
 
 .form-group label {
-	display: block;
-	font-weight: bold;
-	margin-bottom: 5px;
-	font-size: 14px;
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #333;
 }
 
-.form-group input[type="text"], .form-group input[type="date"],
-	.form-group select {
-	width: 100%;
-	padding: 8px;
-	box-sizing: border-box;
+.form-group input[type="text"], .form-group input[type="date"], .form-group select {
+    width: 100%;
+    padding: 5px; /* 높이 통일 */
+    border: 1px solid #ccc;
+    box-sizing: border-box;
 }
 
 .date-range {
-	display: flex;
-	align-items: center;
-	gap: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .group-input-group {
-	display: flex;
-	gap: 5px;
+    display: flex;
+    gap: 5px;
 }
 
 .group-input-group select {
-	flex: 1;
+    flex: 1;
 }
 
 .radio-group label {
-	font-weight: normal;
-	margin-right: 15px;
-	cursor: pointer;
+    font-weight: normal;
+    margin-right: 15px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
 .section-divider {
-	border: 0;
-	border-top: 2px solid #ccc;
-	margin: 40px 0;
+    border: 0;
+    border-top: 1px solid #ddd; /* 선명도 조절 */
+    margin: 0 40px; /* 좌우 여백 확보 */
 }
 
+/* 6. 버튼 스타일 (이전 페이지들과 톤 통일) */
 .btn-group {
-	display: flex;
-	gap: 8px;
-	margin-top: 20px;
-	justify-content: center;
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    justify-content: center;
 }
 
 .btn {
-	padding: 8px 18px;
-	border: none;
-	border-radius: 6px;
-	cursor: pointer;
-	font-size: 14px;
-	font-weight: bold;
-	color: #fff;
-	text-decoration: none;
-	display: inline-block;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .btn-primary {
-	background-color: #3b82f6;
+    background-color: #4e73df; /* 메인 파란색으로 통일 */
+}
+.btn-primary:hover {
+    background-color: #2e59d9;
 }
 
 .btn-secondary {
-	background-color: #9ca3af;
+    background-color: #a5a5a5; /* 메인 회색으로 통일 */
+}
+.btn-secondary:hover {
+    background-color: #858796;
 }
 
 .btn-manage {
-	display: inline-block;
-	width: auto;
-	padding: 5px 12px;
-	background: #4e73df;
-	color: #fff !important;
-	text-decoration: none;
-	border-radius: 4px;
-	font-size: 12px;
-	font-weight: bold;
+    display: inline-block;
+    width: auto;
+    padding: 4px 10px;
+    background: #4e73df;
+    color: #fff !important;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+}
+.btn-manage:hover {
+    background-color: #2e59d9;
 }
 </style>
 </head>

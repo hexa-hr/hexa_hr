@@ -5,9 +5,14 @@
 <head>
 <meta charset="UTF-8">
 <title>勤怠グループ管理</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
+
 <style>
-    body { font-family: 'malgun gothic', sans-serif; padding: 20px; color: #333; margin: 0; }
-    .manage-box { width: 280px; margin: 0 auto; text-align: left; }
+    body { font-family: 'malgun gothic', sans-serif; color: #333; margin: 0; min-width: 1400px;}
+    .manage-box { width: 280px; padding: 20px; margin: 0 auto; text-align: left; }
     .manage-box h2 { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #444; margin-top: 0; }
     .group-container { border: 1px solid #dcdcdc; border-bottom: none; background: #fff; max-height: 250px; overflow-y: auto; }
     .group-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 14px; }
@@ -24,6 +29,9 @@
 </style>
 </head>
 <body>
+
+<jsp:include page="/WEB-INF/view/include/header.jsp" />
+<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 <div class="manage-box">
     <h2>勤怠グループ管理</h2>
