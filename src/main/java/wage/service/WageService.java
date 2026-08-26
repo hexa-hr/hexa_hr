@@ -12,14 +12,14 @@ import wage.dao.WageTypeDao;
 
 public class WageService {
 	private static final List<String> PROTECTED_WAGE_NAMES = Arrays.asList(
-		"기본급", "국민연금", "건강보험", "장기요양보험", "고용보험", "소득세", "지방소득세");
+		"基本給", "国民年金", "健康保険", "介護保険", "雇用保険", "所得税", "住民税");
 	private WageTypeDao wageTypeDao = new WageTypeDao();
 
 	public List<WageType> getWageTypeList() {
 		try (Connection conn = ConnectionProvider.getConnection()) {
 			return wageTypeDao.selectAll(conn);
 		} catch (SQLException e) {
-			throw new RuntimeException("급여항목 목록 조회 오류", e);
+			throw new RuntimeException("給与項目一覧の照会エラー", e);
 		}
 	}
 
@@ -50,7 +50,7 @@ public class WageService {
 			// 1. 이름 중복 체크
 			boolean isDuplicate = wageTypeDao.isDuplicateName(conn, wageType.getWageTypeName());
 			if (isDuplicate) {
-				throw new RuntimeException("이미 존재하는 지급/공제 항목 이름입니다.");
+				throw new RuntimeException("既に存在する支払/控除項目の名前です。");
 			}
 			// 2. 신규 등록
 			wageTypeDao.insert(conn, wageType);
@@ -67,7 +67,7 @@ public class WageService {
 				// 원래 이름이 보호 대상 시스템 항목이고, 입력된 이름이 기존과 다를 경우 (이름을 변경하려고 할 때)
 				if (PROTECTED_WAGE_NAMES.contains(origin.getWageTypeName())) {
 					if (!origin.getWageTypeName().equals(wageType.getWageTypeName())) {
-						throw new RuntimeException("시스템 기본 항목(" + origin.getWageTypeName() + ")의 이름은 수정할 수 없습니다.");
+						throw new RuntimeException("システムの基本項目(" + origin.getWageTypeName() + ")의 이름은 수정할 수 없습니다.");
 					}
 				}
 			}
@@ -76,7 +76,7 @@ public class WageService {
 			boolean isDuplicate = wageTypeDao.isDuplicateNameForUpdate(conn, wageType.getWageTypeId(),
 				wageType.getWageTypeName());
 			if (isDuplicate) {
-				throw new RuntimeException("이미 존재하는 지급/공제 항목 이름입니다.");
+				throw new RuntimeException("既に存在する支払/控除項目の名前です。");
 			}
 
 			// 3. 수정 실행[cite: 10]
@@ -93,17 +93,17 @@ public class WageService {
 				String name = w.getWageTypeName();
 				String itemType = w.getItemType();
 
-				if (("P".equals(itemType) || itemType == null) && "기본급".equals(name)) {
-					System.out.println("서버 차단: 기본급은 삭제할 수 없습니다.");
+				if (("P".equals(itemType) || itemType == null) && "基本給".equals(name)) {
+					System.out.println("サーバーのブロック：基本給は削除できません。");
 					return 0;
 				}
 
 				if ("D".equals(itemType)) {
 					List<String> fixedDeductions = Arrays.asList(
-						"국민연금", "건강보험", "장기요양보험", "고용보험",
-						"소득세", "지방소득세", "사업소득", "일용급여");
+						"国民年金", "健康保険", "介護保険", "雇用保険",
+						"所得税", "住民税", "事業所得", "日雇給与");
 					if (fixedDeductions.contains(name)) {
-						System.out.println("서버 차단: 필수 공제항목(" + name + ")은 삭제할 수 없습니다.");
+						System.out.println("サーバーのブロック：必須の控除項目（" + name + "）は削除できません。");
 						return 0;
 					}
 				}
@@ -123,9 +123,9 @@ public class WageService {
 		String type = w.getAttendanceOrLumpsum();
 		String content = w.getAttendanceOrLumpsumContent();
 
-		if (type != null && !type.isEmpty() && !type.equals("일괄지급")) {
+		if (type != null && !type.isEmpty() && !type.equals("一括支給")) {
 			content = type;
-			type = "근태연결";
+			type = "勤怠連動";
 		}
 
 		return new WageType(
