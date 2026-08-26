@@ -3,6 +3,7 @@ package employee.command;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +14,6 @@ import employee.model.Career;
 import employee.model.Degree;
 import employee.model.Dependents;
 import employee.model.Employee;
-import employee.model.EmployeeSalaryAccount;
 import employee.model.Insurance;
 import employee.model.MilitaryService;
 import employee.service.EmployeeRegisterService;
@@ -35,7 +35,6 @@ public class EmployeeRegisterHandler implements CommandHandler {
 				Employee emp = registerService.getEmployee(employeeId);
 				request.setAttribute("emp", emp);
 				request.setAttribute("depList", registerService.getDependents(employeeId));
-				request.setAttribute("account", registerService.getAccount(employeeId));
 				request.setAttribute("degList", registerService.getDegrees(employeeId));
 				request.setAttribute("insList", registerService.getInsurances(employeeId));
 				request.setAttribute("careerList", registerService.getCareers(employeeId));
@@ -51,7 +50,41 @@ public class EmployeeRegisterHandler implements CommandHandler {
 		if (request.getMethod().equalsIgnoreCase("POST")) {
 			request.setCharacterEncoding("UTF-8");
 
-			// 🌟 1. JSP에서 name="employeeId" 로 보낸 사원번호 받기!
+			// 🌟 1. 서버사이드 필수값 검증 (4대 보험 포함)
+			String koreanName = request.getParameter("koreanName");
+			String employmentType = request.getParameter("employmentType");
+			String hireDateStr = request.getParameter("hireDate");
+			String basicPayStr = request.getParameter("basicPay");
+			String[] insuranceAgencies = request.getParameterValues("insuranceAgency");
+
+			response.setContentType("text/html; charset=UTF-8");
+			PrintWriter out = response.getWriter();
+
+			if (koreanName == null || koreanName.trim().isEmpty() ||
+				employmentType == null || employmentType.trim().isEmpty() ||
+				hireDateStr == null || hireDateStr.trim().isEmpty() ||
+				basicPayStr == null || basicPayStr.trim().isEmpty()) {
+
+				out.println("<script>parent.alert('エラー：必須項目（氏名、雇用形態、入社日、基本給）が入力されていません。');</script>");
+				out.flush();
+				return null;
+			}
+
+			// 🌟 4대 보험 필수 검증 추가
+			if (insuranceAgencies == null || insuranceAgencies.length == 0) {
+				out.println("<script>parent.alert('エラー：必須項目（4大保険）が1つ以上選択されていません。');</script>");
+				out.flush();
+				return null;
+			}
+
+			// 허용된 고용형태인지 검증
+			List<String> validEmpTypes = Arrays.asList("정규직", "계약직", "파견직", "위촉직", "임시직", "일용직");
+			if (!validEmpTypes.contains(employmentType)) {
+				out.println("<script>parent.alert('エラー：無効な雇用形態です。正しい雇用形態を選択してください。');</script>");
+				out.flush();
+				return null;
+			}
+
 			Integer employeeId = null;
 			String empIdStr = request.getParameter("employeeId");
 			if (empIdStr != null && !empIdStr.trim().isEmpty()) {
@@ -63,20 +96,15 @@ public class EmployeeRegisterHandler implements CommandHandler {
 			Integer departmentId = parseInt(request.getParameter("departmentId"));
 			Integer positionId = parseInt(request.getParameter("positionId"));
 
-			// 🌟 2. Employee 객체 생성 시 첫 번째 자리에 employeeId 삽입
 			Employee employee = new Employee(
-				employeeId, null, companyId, personId, request.getParameter("employmentType"),
-				request.getParameter("koreanName"), request.getParameter("englishName"),
-				parseDate(request.getParameter("hireDate")), parseDate(request.getParameter("resignationDate")),
+				employeeId, null, companyId, personId, employmentType,
+				koreanName, request.getParameter("englishName"),
+				parseDate(hireDateStr), parseDate(request.getParameter("resignationDate")),
 				departmentId, positionId, request.getParameter("foreignOrDomestic"),
 				request.getParameter("residentNumber1"), request.getParameter("residentNumber2"),
 				request.getParameter("address"), request.getParameter("telPhone"), request.getParameter("mobile"),
 				request.getParameter("email"), request.getParameter("sns"), request.getParameter("otherDetails"),
-				request.getParameter("status"), parseLong(request.getParameter("basicPay")));
-
-			EmployeeSalaryAccount account = new EmployeeSalaryAccount(
-				null, companyId, request.getParameter("bankName"), request.getParameter("accountNumber"),
-				request.getParameter("depositStocks"), 0, 0, 0, "", "", "");
+				null, parseLong(basicPayStr));
 
 			String[] relationships = request.getParameterValues("relationship");
 			String[] parentsNames = request.getParameterValues("parentsName");
@@ -112,20 +140,21 @@ public class EmployeeRegisterHandler implements CommandHandler {
 				}
 			}
 
-			String[] insuranceAgencies = request.getParameterValues("insuranceAgency");
 			String insuranceNumber = request.getParameter("insuranceNumber");
 			String insuranceAmountStr = request.getParameter("insuranceAmount");
 			Long insuranceAmount = (insuranceAmountStr != null && !insuranceAmountStr.trim().isEmpty())
 				? Long.parseLong(insuranceAmountStr.trim()) : null;
-			Date insuranceStartDate = parseDate(request.getParameter("insuranceStartDate"));
-			Date insuranceEndDate = parseDate(request.getParameter("insuranceEndDate"));
+			Date insuranceStartDate = null;
+			Date insuranceEndDate = null;
 			String remarks4 = request.getParameter("remarks4");
+
+			List<String> validInsurances = Arrays.asList("국민연금", "건강보험", "장기요양보험", "고용보험");
 
 			List<Insurance> insuranceList = new ArrayList<>();
 			if (insuranceAgencies != null) {
 				for (String agency : insuranceAgencies) {
-					if (agency != null && !agency.trim().isEmpty()) {
-						insuranceList.add(new Insurance(null, null, agency, insuranceNumber, insuranceAmount,
+					if (agency != null && validInsurances.contains(agency.trim())) {
+						insuranceList.add(new Insurance(null, null, agency.trim(), insuranceNumber, insuranceAmount,
 							insuranceStartDate, insuranceEndDate, remarks4));
 					}
 				}
@@ -169,14 +198,13 @@ public class EmployeeRegisterHandler implements CommandHandler {
 				}
 			}
 
-			response.setContentType("text/html; charset=UTF-8");
-			PrintWriter out = response.getWriter();
-
 			try {
-				Integer newEmpId = registerService.register(employee, account, dependentsList, degreeList,
+				Integer newEmpId = registerService.register(employee, dependentsList, degreeList,
 					insuranceList, careerList, militaryList);
+
+				// 🌟 변경 포인트: 자동 페이지 이동 제거, 알림창만 띄움
 				out.println(
-					"<script>parent.alert('사원정보 1이 성공적으로 저장되었습니다.'); parent.document.getElementById('hiddenEmpId').value = '"
+					"<script>parent.alert('社員情報が登録されました。'); parent.document.getElementById('hiddenEmpId').value = '"
 						+ newEmpId + "';</script>");
 				out.flush();
 				return null;
@@ -185,7 +213,7 @@ public class EmployeeRegisterHandler implements CommandHandler {
 				String errMsg = (e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
 				if (errMsg != null)
 					errMsg = errMsg.replace("'", "\\'").replace("\n", " ");
-				out.println("<script>parent.alert('사원 등록 실패: " + errMsg + "');</script>");
+				out.println("<script>parent.alert('登録失敗: " + errMsg + "');</script>");
 				out.flush();
 				return null;
 			}

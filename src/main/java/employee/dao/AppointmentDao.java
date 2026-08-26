@@ -37,13 +37,15 @@ public class AppointmentDao {
 		}
 	}
 
-	// 🌟 새로 추가
+	// 🌟 7단계 적용: 파라미터로 받은 conn을 직접 사용하도록 수정 (Connection 누수 차단)
 	public List<Appointment> selectAllByEmployeeId(Connection conn, int employeeId) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		List<Appointment> result = new ArrayList<>();
 		try {
-			pstmt = prepareStatement("SELECT * FROM appointment WHERE employee_id = ? ORDER BY appointment_id ASC");
+			// 🌟 변경 포인트: conn.prepareStatement() 사용
+			pstmt = conn
+				.prepareStatement("SELECT * FROM appointment WHERE employee_id = ? ORDER BY appointment_id ASC");
 			pstmt.setInt(1, employeeId);
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
@@ -57,10 +59,5 @@ public class AppointmentDao {
 			JdbcUtil.close(rs);
 			JdbcUtil.close(pstmt);
 		}
-	}
-
-	// 헬퍼 메서드용 내부 처리
-	private PreparedStatement prepareStatement(String sql) throws SQLException {
-		return jdbc.connection.ConnectionProvider.getConnection().prepareStatement(sql);
 	}
 }
