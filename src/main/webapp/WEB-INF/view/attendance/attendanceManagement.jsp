@@ -18,154 +18,219 @@
 	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
+/* 1. 전체 레이아웃 (공통) */
 body {
-	font-family: 'Malgun Gothic', dotum, sans-serif;
-	font-size: 13px;
-	color: #333;
-	margin: 0;
-	background-color: #f5f5f5;
+    margin: 0;
+    min-width: 1400px;
+    background-color: white; /* 전체 배경색 통일 */
+    font-family: 'Malgun Gothic', sans-serif;
+    color: #333;
 }
 
-/* Layout */
+/* 2. 컨테이너 영역 */
 .container {
-	display: flex;
-	gap: 30px;
-	background: #fff;
-	padding: 20px;
-	border-radius: 5px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 30px;
+    padding: 30px 40px; /* 좌우 여백을 본문과 통일 */
+    background-color: transparent; /* 배경색은 body를 따르거나, 필요시 투명 */
+    box-sizing: border-box;
+    align-items: flex-start;
 }
 
+/* 3. 좌/우 패널 레이아웃 분할 */
 .left-panel {
-	flex: 6;
-	overflow-y: auto;
-	max-height: 600px;
+    flex: 6;
+    background-color: white; /* 테이블 영역 흰색 강조 */
+    padding: 20px;
+    box-sizing: border-box;
+    /* overflow-y: auto; 와 max-height는 화면 전체 스크롤을 고려해 제거하거나 필요시 유지 */
 }
 
 .right-panel {
-	flex: 4;
-	border-left: 1px solid #ddd;
-	padding-left: 30px;
+    flex: 4;
+    background: #f4f4f4; /* 폼 영역을 사이드바/설정폼과 동일한 배경색 톤으로 변경 */
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
 }
 
-/* Table Styles */
+/* 4. 타이틀 영역 (이전 페이지들과 완벽 동일) */
+h2 {
+    font-size: 22px; /* 다른 페이지의 h1, section-title 크기와 통일 */
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 2px solid #4e73df; /* 파란색 밑줄 통일 */
+    padding-bottom: 10px;
+}
+
+/* 5. 데이터 테이블 스타일 (왼쪽 패널 - 사원명부 스타일과 동일) */
 table {
-	width: 100%;
-	border-collapse: collapse;
-	text-align: center;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 th, td {
-	border: 1px solid #e2e2e2;
-	padding: 10px;
+    border: 1px solid #ccc; /* 테두리 색상 통일 */
+    padding: 10px;
+    font-size: 14px;
+    white-space: nowrap; /* 셀 내용 줄바꿈 방지 */
 }
 
 th {
-	background-color: #f4f4f4;
+    background-color: #f8f9fa; /* 헤더 배경색 통일 */
+    color: #333;
+    font-weight: bold;
 }
 
-.selected-row {
-	background-color: #e8f0fe !important;
-	font-weight: bold;
+td {
+    background-color: white;
 }
 
-/* Button Styles */
-.btn-manage {
-	background: white;
-	border: 1px solid #ccc;
-	padding: 4px 8px;
-	cursor: pointer;
-	border-radius: 3px;
-	font-size: 12px;
+/* 클릭/선택 가능한 행(Row) 하이라이트 */
+.selected-row td {
+    background-color: #f1f5f9 !important; /* 다른 테이블 호버/선택 색상과 통일 (#e8f0fe -> #f1f5f9) */
+    font-weight: bold;
 }
 
-.btn-manage:hover {
-	background: #eee;
+/* 6. 폼 테이블 스타일 (오른쪽 패널) */
+.form-table {
+    margin-top: 15px;
 }
 
-.btn-delete {
-	background: #ff4d4f;
-	color: white;
-	border: none;
-	padding: 4px 8px;
-	cursor: pointer;
-	border-radius: 3px;
-	font-size: 12px;
-}
-
-.btn-delete:hover {
-	background: #ff7875;
-}
-
-.btn-submit {
-	background-color: #5c7cba;
-	color: white;
-	border: none;
-	padding: 6px 20px;
-	border-radius: 3px;
-	cursor: pointer;
-}
-
-.btn-reset {
-	background-color: #999;
-	color: white;
-	border: none;
-	padding: 6px 15px;
-	border-radius: 3px;
-	cursor: pointer;
-}
-
-/* Modal Styles */
-.modal-overlay {
-	display: none;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0, 0, 0, 0.5);
-	z-index: 100;
-	justify-content: center;
-	align-items: center;
-}
-
-.modal-content {
-	background: white;
-	width: 850px;
-	padding: 20px;
-	border-radius: 8px;
-	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-	font-size: 18px;
-	font-weight: bold;
-	margin-bottom: 15px;
-	display: flex;
-	justify-content: space-between;
-}
-
-.btn-close-modal {
-	cursor: pointer;
-	font-size: 20px;
-	background: none;
-	border: none;
-}
-
-/* Form Styles */
 .form-table th {
-	width: 120px;
-	text-align: left;
-	background-color: #fbfbfb;
+    width: 120px;
+    text-align: left;
+    background-color: transparent; /* 폼 영역 배경색(#f4f4f4)과 자연스럽게 어울리도록 투명 처리 */
+    border: none; /* 폼 안쪽은 선 없이 깔끔하게 */
+    padding: 8px 0;
 }
 
 .form-table td {
-	text-align: left;
+    text-align: left;
+    border: none;
+    padding: 8px 0;
+    background-color: transparent;
 }
 
+/* 입력 필드 (이전 폼 스타일과 통일) */
 input[type="date"], input[type="text"], input[type="number"], select {
-	padding: 3px;
-	border: 1px solid #ccc;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+input[type="number"] { width: 100px; } /* 숫자는 폭 고정 */
+
+/* 7. 버튼 영역 (공통 톤앤매너) */
+.btn-manage {
+    background: #4e73df; /* 파란색 메인 버튼 통일 */
+    color: white !important;
+    border: none;
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.btn-manage:hover {
+    background: #2e59d9;
+}
+
+.btn-delete {
+    background: #a5a5a5; /* 회색 서브 버튼으로 톤다운 통일 (너무 튀는 빨간색 방지, 모달에서 사용됨) */
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.btn-delete:hover {
+    background: #858796;
+}
+
+/* 폼 하단 제출/초기화 버튼 */
+.btn-submit {
+    background-color: #4e73df;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-submit:hover {
+    background-color: #2e59d9;
+}
+
+.btn-reset {
+    background-color: #a5a5a5;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.btn-reset:hover {
+    background-color: #858796;
+}
+
+/* 8. 모달 팝업 스타일 */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* 네비게이션(1000) 위로 올라오도록 조정 */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    width: 850px;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid #4e73df; /* 모달 타이틀도 파란 줄 통일 */
+    padding-bottom: 10px;
+}
+
+.btn-close-modal {
+    cursor: pointer;
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: #999;
+}
+.btn-close-modal:hover {
+    color: #333;
 }
 </style>
 </head>

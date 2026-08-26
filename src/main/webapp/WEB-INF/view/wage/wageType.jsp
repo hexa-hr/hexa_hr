@@ -18,208 +18,207 @@
 
 <style>
 body {
-	font-family: 'Malgun Gothic', sans-serif;
-	color: #333;
-	margin: 0;
+    margin: 0;
+    min-width: 1400px;
+    font-family: 'Malgun Gothic', sans-serif;
+    background-color: white;
 }
 
 .page-header {
-	margin-bottom: 25px;
+    padding: 30px 40px 10px 40px;
+    margin-bottom: 20px;
 }
 
 .page-header h1 {
-	font-size: 22px;
-	margin: 0 0 5px 0;
-	display: flex;
-	align-items: center;
-	gap: 8px;
+    font-size: 22px;
+    margin: 0 0 10px 0;
+    color: #333;
 }
 
 .page-header p {
-	font-size: 13px;
-	color: #666;
-	margin: 0;
-}
-
-.section-title {
-	font-size: 16px;
-	font-weight: bold;
-	margin-bottom: 12px;
-}
-
-.section-title .count {
-	font-size: 13px;
-	color: #888;
-	font-weight: normal;
+    font-size: 14px;
+    color: #666;
+    margin: 0;
 }
 
 .container {
-	display: flex;
-	gap: 30px;
-	align-items: flex-start;
-	min-width: 1100px;
-	margin-bottom: 40px;
-}
-
-.section-divider {
-	border: 0;
-	border-top: 1px solid #cbd5e1;
-	margin: 40px 0;
+    padding: 0 40px;
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    background-color: transparent;
 }
 
 .table-section {
-	flex: 1.3;
-}
-
-table.data-table {
-	width: 100%;
-	border-collapse: collapse;
-	text-align: center;
-	font-size: 13px;
-}
-
-table.data-table th {
-	background-color: #f8fafc;
-	border: 1px solid #e2e8f0;
-	padding: 10px 6px;
-	color: #475569;
-	font-weight: bold;
-}
-
-table.data-table td {
-	border: 1px solid #e2e8f0;
-	padding: 0;
-}
-
-table.data-table td a {
-	display: block;
-	padding: 10px 6px;
-	color: inherit;
-	text-decoration: none;
-	width: 100%;
-	box-sizing: border-box;
-}
-
-table.data-table tr:hover {
-	background-color: #f1f5f9;
-}
-
-.badge-use {
-	display: inline-block;
-	width: 16px;
-	height: 16px;
-	background-color: #f43f5e;
-	color: #fff;
-	font-size: 10px;
-	font-weight: bold;
-	line-height: 16px;
-	border-radius: 3px;
-}
-
-.badge-off {
-	display: inline-block;
-	width: 16px;
-	height: 16px;
-	background-color: #60a5fa;
-	color: #fff;
-	font-size: 10px;
-	font-weight: bold;
-	line-height: 16px;
-	border-radius: 3px;
+    flex: 1.2;
+    background-color: white;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .form-section {
-	flex: 1;
-	border-top: 2px solid #333;
-	padding-top: 10px;
+    flex: 1;
+    background: #f4f4f4;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
 }
 
-.form-table {
-	width: 100%;
-	border-collapse: collapse;
+.section-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    border-bottom: 2px solid #4e73df;
+    padding-bottom: 5px;
 }
 
-.form-table th {
-	text-align: left;
-	padding: 10px 8px;
-	font-size: 13px;
-	font-weight: bold;
-	color: #444;
-	width: 30%;
-	vertical-align: middle;
+.section-title .count {
+    font-size: 13px;
+    color: #888;
+    font-weight: normal;
 }
 
-.form-table td {
-	padding: 10px 8px;
-	font-size: 13px;
-	border-bottom: 1px solid #eee;
+table.data-table, table.form-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
 }
 
-.input-text {
-	width: 100%;
-	padding: 6px 8px;
-	border: 1px solid #cbd5e1;
-	border-radius: 3px;
-	box-sizing: border-box;
-	font-size: 13px;
+table.data-table th, table.data-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 14px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+table.data-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #333;
+}
+
+table.data-table td a {
+    display: block;
+    padding: 10px;
+    color: inherit;
+    text-decoration: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+table.data-table tr:hover {
+    background-color: #f1f5f9;
+}
+
+.badge-use {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-color: #4e73df;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 16px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.badge-off {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-color: #a5a5a5;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 16px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+table.form-table th {
+    text-align: left;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    width: 30%;
+    vertical-align: middle;
+}
+
+table.form-table td {
+    padding: 10px;
+    font-size: 14px;
+}
+
+.input-text, .select-box {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+    font-size: 14px;
 }
 
 .input-text:disabled {
-	background-color: #f1f5f9;
-	color: #94a3b8;
-	cursor: not-allowed;
-}
-
-.select-box {
-	width: 100%;
-	padding: 6px 8px;
-	border: 1px solid #cbd5e1;
-	border-radius: 3px;
-	font-size: 13px;
+    background-color: #eee;
+    color: #999;
+    cursor: not-allowed;
 }
 
 .radio-label {
-	margin-right: 15px;
-	cursor: pointer;
+    margin-right: 15px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
 .lump-sum-row {
-	display: none;
+    display: none;
+}
+
+.section-divider {
+    border: 0;
+    border-top: 1px solid #ddd;
+    margin: 10px 40px 30px 40px;
 }
 
 .btn-group {
-	display: flex;
-	gap: 8px;
-	justify-content: center;
-	margin-top: 25px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 25px;
 }
 
 .btn {
-	padding: 8px 18px;
-	border: none;
-	border-radius: 4px;
-	font-size: 13px;
-	font-weight: bold;
-	cursor: pointer;
-	color: #fff;
-	text-decoration: none;
-	display: inline-block;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #fff;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .btn-blue {
-	background-color: #3b82f6;
+    background-color: #4e73df;
 }
 
 .btn-blue:hover {
-	background-color: #2563eb;
+    background-color: #2e59d9;
 }
 
 .btn-gray {
-	background-color: #64748b;
+    background-color: #a5a5a5;
 }
 
 .btn-gray:hover {
-	background-color: #475569;
+    background-color: #858796;
 }
 </style>
 </head>
@@ -229,7 +228,7 @@ table.data-table tr:hover {
 	<jsp:include page="/WEB-INF/view/include/nav.jsp" />
 
 	<div class="page-header">
-		<h1>💰 給与項目設定</h1>
+		<h1>給与項目設定</h1>
 		<p>給与に関連する支給および控除項目を設定するメニューです。会社の状況に合わせて設定できます。</p>
 	</div>
 

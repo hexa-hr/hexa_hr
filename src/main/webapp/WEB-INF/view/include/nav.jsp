@@ -4,6 +4,7 @@
 <style>
 .nav-container {
 	font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+    min-width: 1400px;
 }
 
 /* 1뎁스 (아이콘 메뉴) */
@@ -22,7 +23,7 @@
 	text-decoration: none;
 	color: #333333;
 	font-size: 12px;
-	width: 100px;
+	width: 120px;
 	transition: color 0.2s;
 }
 
@@ -70,7 +71,7 @@
 	display: none;
 	position: absolute;
 	background-color: #ffffff;
-	min-width: 180px;
+	min-width: 190px;
 	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
 	z-index: 1000;
 	border-top: 3px solid #10b981; /* 초록색 테두리 */
@@ -99,49 +100,49 @@
 <div class="nav-container">
     <!-- 1뎁스: 퀵 링크 아이콘 메뉴 -->
     <div class="icon-menu-bar">
-        <a href="${pageContext.request.contextPath}/index.jsp" class="icon-menu-item"> 
+        <a href="${pageContext.request.contextPath}/employee/userInfo.do" class="icon-menu-item"> 
             <i class="fa-solid fa-house" style="color: #34d399;"></i> 
             <span>HOME</span>
         </a> 
         
         <a href="${pageContext.request.contextPath}/employee/register.do" class="icon-menu-item"> 
             <i class="fa-solid fa-user-plus"></i>
-            <span>사원등록</span>
+            <span>社員登録</span>
         </a> 
 
         <a href="${pageContext.request.contextPath}/employee/list.do" class="icon-menu-item"> 
             <i class="fa-solid fa-users"></i>
-            <span>사원현황</span>
+            <span>社員状況</span>
         </a> 
         
         <a href="${pageContext.request.contextPath}/attendance/manage.do" class="icon-menu-item"> 
             <i class="fa-solid fa-calendar-check"></i>
-            <span>근태기록/관리</span>
+            <span>勤怠記録・管理</span>
         </a> 
         
         <a href="${pageContext.request.contextPath}/vacationList.do" class="icon-menu-item"> 
             <i class="fa-solid fa-calendar-minus"></i> 
-            <span>휴가조회</span>
+            <span>休暇照会</span>
         </a> 
         
         <a href="${pageContext.request.contextPath}/wage/paymentInput.do"  class="icon-menu-item"> 
             <i class="fa-solid fa-calculator"></i> 
-            <span>급여입력/관리</span>
+            <span>給与入力・管理</span>
         </a> 
         
         <a href="${pageContext.request.contextPath}/wage/dailyPaymentInput.do" class="icon-menu-item"> 
             <i class="fa-solid fa-hard-hat"></i> 
-            <span>급여입력(일용직)</span>
+            <span>給与入力（日雇い）</span>
         </a> 
         
         <a href="${pageContext.request.contextPath}/wage/ledger.do" class="icon-menu-item"> 
             <i class="fa-solid fa-file-invoice-dollar"></i> 
-            <span>급여대장</span>
+            <span>給与台帳</span>
         </a> 
         
         <a href="${pageContext.request.contextPath}/wage/employeeHistory.do" class="icon-menu-item"> 
             <i class="fa-solid fa-money-check-dollar"></i> 
-            <span>사원별급여내역</span>
+            <span>社員別給与明細</span>
         </a>
     </div>
 
@@ -149,66 +150,66 @@
     <div class="text-menu-bar">
         <!-- 기본환경 설정 -->
         <div class="text-menu-item">
-            <a href="#">기본환경 설정 <i class="fa-solid fa-caret-down"></i></a>
+            <a href="#">基本環境設定 <i class="fa-solid fa-caret-down"></i></a>
             <div class="dropdown-content">
-                <a href="${pageContext.request.contextPath}/index.jsp">사용자 정보</a> 
-                <a href="${pageContext.request.contextPath}/employee/register.do">사원 등록</a> 
-                <a href="${pageContext.request.contextPath}/vacationTypeSetting.do">휴가/근태 설정</a> 
-                <a href="${pageContext.request.contextPath}/wageTypeSetting.do">급여항목 설정</a>
+                <a href="${pageContext.request.contextPath}/employee/userInfo.do">ユーザー情報</a> 
+                <a href="${pageContext.request.contextPath}/employee/register.do">社員登録</a> 
+                <a href="${pageContext.request.contextPath}/vacationTypeSetting.do">休暇・勤怠設定</a> 
+                <a href="${pageContext.request.contextPath}/wageTypeSetting.do">給与項目設定</a>
             </div>
         </div>
 
         <!-- 인사관리 -->
         <div class="text-menu-item">
-            <a href="#">인사관리 <i class="fa-solid fa-caret-down"></i></a>
+            <a href="#">人事管理 <i class="fa-solid fa-caret-down"></i></a>
             <div class="dropdown-content">
-                <a href="${pageContext.request.contextPath}/employee/list.do">사원현황/관리</a>
+                <a href="${pageContext.request.contextPath}/employee/list.do">従業員状況・管理</a>
             </div>
         </div>
 
         <!-- 근태관리 -->
         <div class="text-menu-item">
-            <a href="#">근태관리 <i class="fa-solid fa-caret-down"></i></a>
+            <a href="#">勤怠管理 <i class="fa-solid fa-caret-down"></i></a>
             <div class="dropdown-content">
-                <a href="${pageContext.request.contextPath}/attendance/manage.do">근태기록/관리</a>
-                <a href="${pageContext.request.contextPath}/attendance/monthly.do">근태조회</a> 
-                <a href="${pageContext.request.contextPath}/vacationList.do">휴가조회</a>
-                <a href="${pageContext.request.contextPath}/dailywork/manage.do">일용직 근무기록/관리</a>
-                <a href="${pageContext.request.contextPath}/dailywork/monthly.do">일용직 근무 조회</a>
+                <a href="${pageContext.request.contextPath}/attendance/manage.do">勤怠記録・管理</a>
+                <a href="${pageContext.request.contextPath}/attendance/monthly.do">勤怠照会</a> 
+                <a href="${pageContext.request.contextPath}/vacationList.do">休暇照会</a>
+                <a href="${pageContext.request.contextPath}/dailywork/manage.do">日雇い勤務記録・管理</a>
+                <a href="${pageContext.request.contextPath}/dailywork/monthly.do">日雇い勤務照会</a>
             </div>
         </div>
 
         <!-- 급여관리 -->
         <div class="text-menu-item">
-            <a href="#">급여관리 <i class="fa-solid fa-caret-down"></i></a>
+            <a href="#">給与管理 <i class="fa-solid fa-caret-down"></i></a>
             <div class="dropdown-content">
-                <a href="${pageContext.request.contextPath}/wage/paymentInput.do">급여 입력/관리</a> 
-                <a href="${pageContext.request.contextPath}/wage/dailyPaymentInput.do">급여 입력/관리(일용직)</a> 
-                <a href="${pageContext.request.contextPath}/wage/ledger.do">급여대장</a> 
-                <a href="${pageContext.request.contextPath}/wage/employeeHistory.do">사원별 급여내역</a> 
-                <a href="${pageContext.request.contextPath}/wage/itemLedger.do">항목별 대장</a> 
-                <a href="${pageContext.request.contextPath}/wage/insuranceDeduction.do">4대 보험 공제내역</a> 
+                <a href="${pageContext.request.contextPath}/wage/paymentInput.do">給与入力・管理</a> 
+                <a href="${pageContext.request.contextPath}/wage/dailyPaymentInput.do">給与入力・管理（日雇い）</a> 
+                <a href="${pageContext.request.contextPath}/wage/ledger.do">給与台帳</a> 
+                <a href="${pageContext.request.contextPath}/wage/employeeHistory.do">社員別給与明細</a> 
+                <a href="${pageContext.request.contextPath}/wage/itemLedger.do">項目別台帳</a> 
+                <a href="${pageContext.request.contextPath}/wage/insuranceDeduction.do">社会保険控除明細</a> 
             </div>
         </div>
 
         <!-- 급여통계 -->
         <div class="text-menu-item">
-            <a href="#">급여통계 <i class="fa-solid fa-caret-down"></i></a>
+            <a href="#">給与統計 <i class="fa-solid fa-caret-down"></i></a>
             <div class="dropdown-content">
-                <a href="${pageContext.request.contextPath}/wage/yearlyTotalStatistics.do">연도별 전체급여 통계</a> 
-                <a href="${pageContext.request.contextPath}/wage/monthlyTotalStatistics.do">월별 전체급여 통계</a>
-                <a href="${pageContext.request.contextPath}/wage/yearlyPersonalStatistics.do">연도별 개인연봉 통계</a> 
-                <a href="${pageContext.request.contextPath}/wage/monthlyPersonalStatistics.do">월별 개인급여 통계</a>
-                <a href="${pageContext.request.contextPath}/wage/itemCompositionStatistics.do">급여항목 구성 통계</a>
+                <a href="${pageContext.request.contextPath}/wage/yearlyTotalStatistics.do">年度別全体給与統計</a> 
+                <a href="${pageContext.request.contextPath}/wage/monthlyTotalStatistics.do">月別全体給与統計</a>
+                <a href="${pageContext.request.contextPath}/wage/yearlyPersonalStatistics.do">年度別個人年収統計</a> 
+                <a href="${pageContext.request.contextPath}/wage/monthlyPersonalStatistics.do">月別個人給与統計</a>
+                <a href="${pageContext.request.contextPath}/wage/itemCompositionStatistics.do">給与項目構成統計</a>
             </div>
         </div>
 
         <!-- 퇴직관리 -->
         <div class="text-menu-item">
-            <a href="#">퇴직관리 <i class="fa-solid fa-caret-down"></i></a>
+            <a href="#">退職管理 <i class="fa-solid fa-caret-down"></i></a>
             <div class="dropdown-content">
-                <a href="${pageContext.request.contextPath}/employee/retirement.do">사원 퇴직처리</a> 
-                <a href="#" style="color: #34d399;" onclick="alert('현재 개발/QA 준비 중인 기능입니다.'); return false;">퇴직급여 입력/관리</a>
+                <a href="${pageContext.request.contextPath}/employee/retirement.do">社員退職処理</a> 
+                <a href="${pageContext.request.contextPath}/retirement/manage.do">退職給与入力・管理</a>
             </div>
         </div>
     </div>

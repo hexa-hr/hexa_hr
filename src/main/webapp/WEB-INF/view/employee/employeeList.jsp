@@ -12,31 +12,116 @@
 <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
-    body { margin: 0; background-color: #f8f9fa; font-family: sans-serif; }
-    
-    .wrap { max-width: 1200px; margin: 0 auto; background-color: white; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-    .container { padding: 40px; box-sizing: border-box; }
-    
-    .section-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #333; border-bottom: 2px solid #4e73df; padding-bottom: 10px; }
-    
-    /* 上部コントロール領域 (検索窓、件数選択) */
-    .top-controls { display: flex; justify-content: flex-end; margin-bottom: 15px; }
-    .top-controls select { padding: 5px; font-size: 13px; border: 1px solid #ccc; outline: none; cursor: pointer; }
-    
-    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; text-align: center; }
-    th, td { border: 1px solid #ddd; padding: 12px 5px; font-size: 14px; }
-    th { background-color: #f4f6f9; color: #333; font-weight: bold; }
-    
-    .clickable-row { cursor: pointer; }
-    .clickable-row:hover { background-color: #f1f6ff; }
-    
-    .btn-wrap { text-align: center; margin-top: 20px; }
-    .btn-wrap button { padding: 10px 20px; border: none; border-radius: 4px; color: white; font-weight: bold; font-size: 14px; cursor: pointer; margin: 0 5px; }
-    .btn-blue { background-color: #3b71ca; }
-    .btn-gray { background-color: #9e9e9e; }
-    .btn-green { background-color: #14a44d; }
-    .btn-orange { background-color: #f6c23e; color: #fff; } /* 退職ボタンの色 */
+body { 
+    margin: 0; 
+    min-width: 1400px; 
+    background-color: #f8f9fa; 
+    font-family: 'Malgun Gothic', sans-serif; 
+    color: #333;
+}
+
+.wrap { 
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.container { 
+    padding: 30px 40px; 
+    flex: 1; 
+    box-sizing: border-box; 
+    background-color: white;
+}
+
+.section-title { 
+    font-size: 22px;
+    font-weight: bold; 
+    margin-top: 0; 
+    margin-bottom: 20px; 
+    color: #333; 
+    border-bottom: 2px solid #4e73df;
+    padding-bottom: 10px; 
+}
+
+.top-controls { 
+    display: flex; 
+    justify-content: flex-end; 
+    margin-bottom: 15px; 
+}
+
+.top-controls select { 
+    padding: 6px 10px; 
+    font-size: 13px; 
+    border: 1px solid #ccc; 
+    border-radius: 3px;
+    outline: none; 
+    cursor: pointer; 
+}
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-bottom: 30px; 
+    text-align: center; 
+}
+
+th, td { 
+    border: 1px solid #ccc;
+    padding: 10px; 
+    font-size: 14px; 
+    white-space: nowrap;
+}
+
+th { 
+    background-color: #f8f9fa;
+    color: #333; 
+    font-weight: bold; 
+}
+
+.clickable-row { 
+    cursor: pointer; 
+}
+
+.clickable-row:hover { 
+    background-color: #f1f5f9;
+}
+
+.btn-wrap { 
+    text-align: center; 
+    margin-top: 20px; 
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-wrap button { 
+    padding: 8px 18px;
+    border: none; 
+    border-radius: 3px;
+    color: white; 
+    font-weight: bold; 
+    font-size: 14px; 
+    cursor: pointer; 
+    display: inline-block;
+}
+
+.btn-blue { background-color: #4e73df; }
+.btn-blue:hover { background-color: #2e59d9; }
+
+.btn-gray { background-color: #a5a5a5; }
+.btn-gray:hover { background-color: #858796; }
+
+.btn-green { background-color: #1cc88a; }
+.btn-green:hover { background-color: #17a673; }
+
+.btn-orange { background-color: #f6c23e; color: #fff; }
+.btn-orange:hover { background-color: #dda20a; }
+
+.status-active { color: #4e73df; font-weight: bold; }
+.status-resigned { color: #e74a3b; font-weight: bold; }
+.status-other { color: #333; font-weight: bold; }
 </style>
+
 <script>
     // 全体選択/解除機能
     function toggleAll(source) {
@@ -133,11 +218,11 @@
                                 <td style="font-weight: bold;">${emp.koreanName}</td>
                                 <td>${emp.departmentName != null ? emp.departmentName : '-'}</td>
                                 <td>${emp.positionName != null ? emp.positionName : '-'}</td>
-                                <td>${emp.employmentType == '정규직' ? '正社員' : (emp.employmentType == '계약직' ? '契約社員' : (emp.employmentType == '인턴' ? 'インターン' : emp.employmentType))}</td>
+                                <td>${emp.employmentType == '정규직' ? '정규직' : (emp.employmentType == '계약직' ? '계약직' : (emp.employmentType == '인턴' ? '인턴' : emp.employmentType))}</td>
                                 <td>
                                     <!-- 退社者は赤色で目立つように表示 -->
-                                    <span style="color: ${emp.status == '재직' ? 'blue' : (emp.status == '퇴사' ? 'red' : 'black')}; font-weight: bold;">
-                                        ${emp.status == '재직' ? '在職' : (emp.status == '퇴사' ? '退社' : emp.status)}
+                                    <span style="color: ${emp.status == '재직' ? 'blue' : (emp.status == '퇴직' ? 'red' : 'black')}; font-weight: bold;">
+                                        ${emp.status == '재직' ? '재직' : (emp.status == '퇴직' ? '퇴직' : emp.status)}
                                     </span>
                                 </td>
                                 <td><fmt:formatDate value="${emp.hireDate}" pattern="yyyy-MM-dd"/></td>

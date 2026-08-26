@@ -35,20 +35,10 @@
 </head>
 <body>
 
-    <!-- 1. 헤더 영역 -->
     <jsp:include page="/WEB-INF/view/include/header.jsp" />
 
     <!-- 2. 네비게이션 영역 -->
     <jsp:include page="/WEB-INF/view/include/nav.jsp" />
     
-    <jsp:include page="/WEB-INF/view/employee/userInfo.jsp" />
-
-    <!-- 3. 본문 컨텐츠 영역 -->
-    <!-- <div class="content-area">
-        해당 페이지의 실제 내용(예: 대시보드, 폼, 테이블 등)이 여기에 들어갑니다.
-        <h2>메인 대시보드</h2>
-        <p>인사급여 관리 시스템 메인 화면입니다.</p>
-    </div>
- -->
 </body>
 </html>

@@ -11,8 +11,8 @@
 <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
-    body { font-family: 'Malgun Gothic', sans-serif; background-color: #f8f9fa; margin: 0; }
-    .wrap { max-width: 1300px; margin: 0 auto; background-color: white; padding: 40px; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+    body { font-family: 'Malgun Gothic', sans-serif; background-color: #f8f9fa; margin: 0; min-width: 1400px; }
+    .wrap { margin: 0 auto; background-color: white; padding: 40px; }
     h2 { font-size: 22px; color: #333; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 30px; }
     
     .grid-container { display: grid; grid-template-columns: 6fr 4fr; gap: 30px; }
@@ -20,7 +20,7 @@
     
     .info-table { width: 100%; border-top: 2px solid #4e73df; border-collapse: collapse; text-align: left; font-size: 13px; }
     .info-table th { background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd; width: 20%; color: #333; text-align: center;}
-    .info-table td { padding: 8px 10px; border: 1px solid #ddd; }
+    .info-table td { padding: 8px 10px; border: 1px solid #ddd; white-space: nowrap; }
     
     .info-table input[type="text"], .info-table input[type="password"], .info-table select, .info-table input[type="number"] { padding: 4px; border: 1px solid #ccc; outline: none; }
     .req { color: #e74a3b; margin-right: 3px; font-weight: bold; }
@@ -82,6 +82,9 @@
 </script>
 </head>
 <body>
+
+    <jsp:include page="/WEB-INF/view/include/header.jsp" />
+    <jsp:include page="/WEB-INF/view/include/nav.jsp" />
     
     <div class="wrap">
         <h2>ユーザー情報</h2>

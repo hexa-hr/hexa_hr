@@ -4,6 +4,11 @@
 
 <style>
 
+.header-container {
+    font-family: 'Malgun Gothic', sans-serif;
+    min-width: 1400px;
+}
+
 .top-header {
 	background-color: #2b2b2b; /* 검은색 배경 */
 	color: #ffffff;
@@ -11,7 +16,6 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: 10px 20px;
-	font-family: 'Malgun Gothic', sans-serif;
 }
 
 .top-header .logo-area h1 {
@@ -64,18 +68,19 @@
 }
 </style>
 
-<div class="top-header">
-    <div class="logo-area">
-        <!-- 로고 이미지가 있다면 <img> 태그 사용, 여기서는 텍스트로 임시 대체 -->
-        <h1>
-            HEXA.HR <span>인사&급여관리</span>
-        </h1>
-    </div>
-
-    <div class="user-menu">
-        <span><strong>고객</strong>님 무료체험회원 입니다.</span> <a href="#"
-            class="btn-shortcut"><i class="fa-solid fa-plus"></i>
-            즐겨찾기</a> <a href="#" class="btn-install"><i
-            class="fa-solid fa-plus"></i> 바로가기 설치</a>
+<div class="header-container">
+    <div class="top-header">
+        <div class="logo-area">
+            <!-- 로고 이미지가 있다면 <img> 태그 사용, 여기서는 텍스트로 임시 대체 -->
+            <h1>
+                HEXA.HR <span>人事＆給与管理</span>
+            </h1>
+        </div>
+    
+        <div class="user-menu">
+            <span><strong>お客</strong>様は無料体験会員です。</span> <a href="#"
+                class="btn-shortcut"><i class="fa-solid fa-plus"></i>お気に入り</a> 
+                <a href="#" class="btn-install"><i class="fa-solid fa-plus"></i> インストール</a>
+        </div>
     </div>
 </div>

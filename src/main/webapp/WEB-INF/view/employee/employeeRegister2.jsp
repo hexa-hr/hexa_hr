@@ -12,20 +12,89 @@
 <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
-body { margin: 0; }
-.wrap { display: flex; align-items: flex-start; }
-.sidebar { width: 280px; padding: 20px; background-color: #f4f4f4; border-right: 1px solid #ddd; height: 100vh; position: sticky; top: 0; box-sizing: border-box; }
-.container { padding: 20px; font-family: sans-serif; flex: 1; box-sizing: border-box; }
-.section-title { font-size: 18px; font-weight: bold; margin-top: 30px; margin-bottom: 10px; color: #333; border-bottom: 2px solid #4e73df; padding-bottom: 5px; max-width: 900px; }
-table { border-collapse: collapse; width: 100%; max-width: 900px; margin-bottom: 20px; }
-th, td { border: 1px solid #ccc; padding: 10px; font-size: 14px; }
-th { background-color: #f8f9fa; width: 15%; text-align: left; }
-input[type="text"], input[type="password"], input[type="date"], input[type="email"], input[type="number"], select { padding: 5px; width: 80%; }
+body { 
+    margin: 0; 
+    min-width: 1400px; 
+    background-color: #f8f9fa;
+}
+
+.wrap { 
+    display: flex; 
+    align-items: flex-start;
+    width: 100%; 
+}
+
+.sidebar { 
+    width: 280px; 
+    padding: 20px; 
+    background-color: #f4f4f4; 
+    border-right: 1px solid #ddd; 
+    height: 100vh; 
+    position: sticky; 
+    top: 0; 
+    box-sizing: border-box; 
+    flex-shrink: 0; 
+}
+
+.container { 
+    padding: 30px 40px; 
+    font-family: sans-serif; 
+    flex: 1; 
+    box-sizing: border-box; 
+    background-color: white;
+}
+
+.section-title { 
+    font-size: 18px; 
+    font-weight: bold; 
+    margin-top: 30px; 
+    margin-bottom: 10px; 
+    color: #333; 
+    border-bottom: 2px solid #4e73df; 
+    padding-bottom: 5px;
+}
+
+table { 
+    border-collapse: collapse; 
+    width: 100%; 
+    margin-bottom: 20px;
+}
+
+th, td { 
+    border: 1px solid #ccc; 
+    padding: 10px; 
+    font-size: 14px; 
+    white-space: nowrap;
+}
+
+th { 
+    background-color: #f8f9fa; 
+    text-align: left;
+}
+
+input[type="text"], input[type="password"], input[type="date"], input[type="email"], input[type="number"], select { 
+    padding: 5px; 
+    width: 90%;
+    box-sizing: border-box; 
+}
+
 .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
 .menu-btn { background-color: #666; color: white; padding: 12px 5px; text-align: center; border-radius: 3px; cursor: pointer; text-decoration: none; font-size: 13px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; height: 45px; width: 100%; box-sizing: border-box; font-family: inherit; }
 .menu-btn:hover { background-color: #555; }
-.add-btn { float: right; padding: 3px 8px; font-size: 12px; background-color: #1cc88a; color: white; border: none; border-radius: 3px; cursor: pointer; }
-.del-btn { background-color: #e74a3b; color: white; border: none; border-radius: 3px; cursor: pointer; padding: 4px 8px; font-size: 12px; }
+.add-btn { float: right; padding: 4px 10px; font-size: 12px; background-color: #1cc88a; color: white; border: none; border-radius: 3px; cursor: pointer; }
+.del-btn { background-color: #e74a3b; color: white; border: none; border-radius: 3px; cursor: pointer; padding: 4px 8px; font-size: 12px; font-weight: bold; }
+
+.btn-delete-selected {
+    float: right; 
+    padding: 4px 10px; 
+    font-size: 12px; 
+    background-color: #e74a3b; 
+    color: white; 
+    border: none; 
+    border-radius: 3px; 
+    cursor: pointer; 
+    margin-right: 5px;
+}
 </style>
 </head>
 <body>
@@ -36,7 +105,8 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 	<div class="wrap">
 		<div class="sidebar">
 <div style="background: white; padding: 15px; border: 1px solid #ccc; text-align: center; margin-bottom: 20px;">
-    <img src="<%=request.getContextPath()%>/images/default_profile.png" alt="写真" style="width: 80px; height: 100px; background: #eee;">
+    <!-- <img src="<%=request.getContextPath()%>/images/default_profile.png" alt="写真" style="width: 80px; height: 100px; background: #eee;"> -->
+    <div style="display: inline-block; width: 80px; height: 100px; background: #eee;"></div>
     
     <!-- 社員番号を表示するコード -->
     <c:choose>

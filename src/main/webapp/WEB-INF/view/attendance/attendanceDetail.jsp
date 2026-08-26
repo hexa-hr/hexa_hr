@@ -16,158 +16,169 @@
 	href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
+/* 1. 전체 레이아웃 (공통) */
 body {
-	font-family: 'Malgun Gothic', sans-serif;
-	font-size: 13px;
-	color: #333;
-	margin: 0;
-	background-color: #f5f5f5;
+    margin: 0;
+    min-width: 1400px;
+    background-color: #f8f9fa;
+    font-family: 'Malgun Gothic', sans-serif;
+    color: #333;
 }
 
 .container {
-	background: #fff;
-	padding: 20px;
-	border-radius: 5px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	min-height: 600px;
+    padding: 30px 40px; 
+    background-color: white; 
+    box-sizing: border-box;
+    min-height: 600px;
 }
 
-/* 上部タイトルおよびタブ領域 */
+/* 2. 타이틀 영역 */
 .page-header {
-	display: flex;
-	align-items: center;
-	gap: 15px;
-	margin-bottom: 20px;
-	border-bottom: 1px solid #eee;
-	padding-bottom: 15px;
-}
-
-.page-title-icon {
-	font-size: 35px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 .page-title-text h1 {
-	margin: 0;
-	font-size: 22px;
-	color: #333;
-	letter-spacing: -1px;
+    font-size: 22px; 
+    font-weight: bold;
+    margin: 0;
+    color: #333;
 }
 
-.page-title-text p {
-	margin: 5px 0 0 0;
-	font-size: 13px;
-	color: #777;
-}
-
+/* 3. 탭 메뉴 영역 */
 .tab-menu {
-	display: flex;
-	gap: 5px;
-	margin-bottom: 20px;
-	border-bottom: 2px solid #ddd;
-	padding-bottom: 10px;
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #4e73df; 
+    padding-bottom: 10px;
 }
 
 .tab-btn {
-	padding: 10px 30px;
-	font-size: 14px;
-	font-weight: bold;
-	border: none;
-	cursor: pointer;
-	border-radius: 4px;
+    padding: 10px 30px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    border-radius: 3px 3px 0 0;
 }
 
+/* 액티브 탭 (메인 파란색) */
 .tab-active {
-	background-color: #599b9a;
-	color: white;
-} /* アクティブタブ (青緑色) */
+    background-color: #4e73df;
+    color: white;
+}
+/* 비액티브 탭 (서브 회색) */
 .tab-inactive {
-	background-color: #a5a5a5;
-	color: white;
-} /* 非アクティブタブ (灰色) */
+    background-color: #a5a5a5;
+    color: white;
+}
 .tab-inactive:hover {
-	background-color: #888;
+    background-color: #858796;
 }
 
-/* レイアウトパネル */
+/* 4. 레이아웃 패널 분할 */
 .content-wrap {
-	display: flex;
-	gap: 20px;
+    display: flex;
+    gap: 30px; /* 패널 간격 여유롭게 조정 */
+    align-items: flex-start;
 }
 
-/* 左側フィルターパネル */
+/* 5. 좌측 필터 패널 (설정 폼과 동일한 느낌으로 변경) */
 .filter-panel {
-	flex: 0 0 300px;
-	border-right: 2px solid #333;
-	padding-right: 20px;
+    flex: 0 0 320px; /* 너비 약간 확대 */
+    background: #f4f4f4; /* 폼 영역 배경색 톤 통일 */
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    box-sizing: border-box;
 }
 
 .filter-table {
-	width: 100%;
-	border-collapse: collapse;
+    width: 100%;
+    border-collapse: collapse;
 }
 
 .filter-table td {
-	padding: 10px 5px;
-	border-bottom: 1px solid #eee;
-	vertical-align: middle;
+    padding: 8px 5px;
+    border-bottom: 1px dashed #ccc; /* 선을 좀 더 연하게 */
+    vertical-align: middle;
+    font-size: 14px;
+    white-space: nowrap;
+}
+.filter-table tr:last-child td {
+    border-bottom: none;
 }
 
-.filter-table input[type="text"], .filter-table input[type="date"],
-	.filter-table select {
-	width: 100%;
-	padding: 4px;
-	box-sizing: border-box;
-	border: 1px solid #ccc;
+.filter-table input[type="text"], .filter-table input[type="date"], .filter-table select {
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 13px;
 }
 
+/* 버튼 래퍼 */
 .btn-wrap {
-	display: flex;
-	gap: 10px;
-	margin-top: 20px;
-	justify-content: center;
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    justify-content: center;
 }
 
 .btn-search {
-	background-color: #e5502c;
-	color: #fff;
-	border: none;
-	padding: 8px 20px;
-	cursor: pointer;
-	border-radius: 3px;
-	font-weight: bold;
+    background-color: #4e73df; /* 검색 버튼 파란색 통일 */
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 14px;
 }
+.btn-search:hover { background-color: #2e59d9; }
 
 .btn-all {
-	background-color: #999;
-	color: #fff;
-	border: none;
-	padding: 8px 20px;
-	cursor: pointer;
-	border-radius: 3px;
-	font-weight: bold;
+    background-color: #a5a5a5; /* 전체보기 버튼 회색 통일 */
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 14px;
 }
+.btn-all:hover { background-color: #858796; }
 
-/* 右側結果パネル */
+/* 6. 우측 결과 패널 (데이터 테이블 디자인 공통 적용) */
 .result-panel {
-	flex: 1;
-	overflow-x: auto;
+    flex: 1;
+    overflow-x: auto; /* 내용이 넘칠 경우 자체 스크롤 생성 */
 }
 
 .result-table {
-	width: 100%;
-	border-collapse: collapse;
-	text-align: center;
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
 }
 
 .result-table th, .result-table td {
-	border: 1px solid #ddd;
-	padding: 8px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 14px;
+    white-space: nowrap; /* 셀 내용 꺾임 방지 */
 }
 
 .result-table th {
-	background-color: #f4f8fe;
-	color: #333;
-	font-weight: bold;
+    background-color: #f8f9fa; /* 헤더 배경색 공통 적용 */
+    color: #333;
+    font-weight: bold;
+}
+
+.result-table tbody tr:hover {
+    background-color: #f1f5f9; /* 행 호버 색상 통일 */
 }
 </style>
 </head>
