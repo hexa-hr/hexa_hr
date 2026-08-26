@@ -20,7 +20,6 @@
 body {
     margin: 0;
     min-width: 1400px;
-    background-color: white; /* 테이블 영역 흰색 강조 */
     font-family: 'Malgun Gothic', sans-serif;
     color: #333;
 }
@@ -30,7 +29,7 @@ body {
     display: flex;
     gap: 30px;
     padding: 30px 40px; /* 여백 통일 */
-    background-color: transparent;
+    background-color: white; /* 테이블 영역 흰색 강조 */
     box-sizing: border-box;
     align-items: flex-start;
 }

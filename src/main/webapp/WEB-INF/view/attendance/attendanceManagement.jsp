@@ -32,7 +32,7 @@ body {
     display: flex;
     gap: 30px;
     padding: 30px 40px; /* 좌우 여백을 본문과 통일 */
-    background-color: transparent; /* 배경색은 body를 따르거나, 필요시 투명 */
+    background-color: white;
     box-sizing: border-box;
     align-items: flex-start;
 }
@@ -40,10 +40,8 @@ body {
 /* 3. 좌/우 패널 레이아웃 분할 */
 .left-panel {
     flex: 6;
-    background-color: white; /* 테이블 영역 흰색 강조 */
     padding: 20px;
     box-sizing: border-box;
-    /* overflow-y: auto; 와 max-height는 화면 전체 스크롤을 고려해 제거하거나 필요시 유지 */
 }
 
 .right-panel {

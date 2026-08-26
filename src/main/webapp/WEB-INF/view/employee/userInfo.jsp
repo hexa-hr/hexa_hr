@@ -12,7 +12,7 @@
 
 <style>
     body { font-family: 'Malgun Gothic', sans-serif; background-color: #f8f9fa; margin: 0; min-width: 1400px; }
-    .wrap { margin: 0 auto; background-color: white; padding: 40px; }
+    .wrap { margin: 0 auto; background-color: white; padding: 40px; white-space: nowrap;}
     h2 { font-size: 22px; color: #333; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 30px; }
     
     .grid-container { display: grid; grid-template-columns: 6fr 4fr; gap: 30px; }
