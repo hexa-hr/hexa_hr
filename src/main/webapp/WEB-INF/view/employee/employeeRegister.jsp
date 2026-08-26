@@ -66,7 +66,6 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 				<button type="button" class="menu-btn" onclick="moveToPage2('reward')">賞罰</button>
 				<button type="button" class="menu-btn" onclick="moveToPage2('appointment')">発令</button>
 				<button type="button" class="menu-btn" onclick="moveToPage2('referrer')">推薦・身元保証</button>
-				<!-- 🌟 변경 포인트: 이제 2페이지 탭이 아닌, 실제 퇴직 화면 함수로 연결 -->
 				<button type="button" class="menu-btn" onclick="moveToRetirement()">退職</button>
 			</div>
 		</div>
@@ -80,7 +79,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 			<form action="<%=request.getContextPath()%>/employee/register.do" method="post" target="hidden_iframe" onsubmit="return validateForm();">
 				<input type="hidden" name="companyId" value="1"> 
 				<input type="hidden" name="personId" value="1">
-<input type="hidden" id="hiddenEmpId" name="employeeId" value="${emp.employeeId}">
+				<input type="hidden" id="hiddenEmpId" name="employeeId" value="${emp.employeeId}">
 				<div class="section-title">基本情報</div>
 				<table>
 					<tr>
@@ -105,7 +104,6 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 						<td><input type="date" name="hireDate" value="<fmt:formatDate value='${emp.hireDate}' pattern='yyyy-MM-dd'/>" required></td>
 						<th>退社日</th>
 						<td>
-							<!-- 🌟 변경 포인트: 클릭 시 실제 퇴직처리 화면으로 이동하도록 수정 -->
 							<input type="text" name="resignationDate" value="<fmt:formatDate value='${emp.resignationDate}' pattern='yyyy-MM-dd'/>" 
 							       readonly style="background-color: #eeeeee; cursor: pointer;" 
 							       onclick="moveToRetirement();">
@@ -436,6 +434,49 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
                 return false;
             }
 
+            // 🌟 [추가된 유효성 검사] 보험 기간 역전 방지
+            var insInputs = document.querySelectorAll('input[name="insuranceStartDate"], input[name="insuranceEndDate"]');
+            // 만약 개별 id가 없다면 name 속성으로 직접 비교
+            var insStart = document.querySelector('input[name="insuranceStartDate"]');
+            var insEnd = document.querySelector('input[name="insuranceEndDate"]');
+            if (insStart && insEnd && insStart.value && insEnd.value && insStart.value > insEnd.value) {
+                alert("保険の加入日(開始日)は満了日(終了日)より後であってはなりません。");
+                return false;
+            }
+
+            // 🌟 [추가된 유효성 검사] 학력 사항 (입학일 > 졸업일 방지)
+            var degreeRows = document.querySelectorAll("#degreeTable tr");
+            for (var i = 1; i < degreeRows.length; i++) {
+                var admDate = degreeRows[i].querySelector('input[name="admissionDate"]');
+                var gradDate = degreeRows[i].querySelector('input[name="graduationDate"]');
+                if (admDate && gradDate && admDate.value && gradDate.value && admDate.value > gradDate.value) {
+                    alert("学歴事項の入学日は卒業日より後であってはなりません。");
+                    return false;
+                }
+            }
+
+            // 🌟 [추가된 유효성 검사] 경력 사항 (입사일 > 퇴사일 방지)
+            var careerRows = document.querySelectorAll("#careerTable tr");
+            for (var i = 1; i < careerRows.length; i++) {
+                var startDate = careerRows[i].querySelector('input[name="startDate"]');
+                var endDate = careerRows[i].querySelector('input[name="endDate"]');
+                if (startDate && endDate && startDate.value && endDate.value && startDate.value > endDate.value) {
+                    alert("経歴事項の入社日は退社日より後であってはなりません。");
+                    return false;
+                }
+            }
+
+            // 🌟 [추가된 유효성 검사] 병역 사항 (복무시작일 > 복무종료일 방지)
+            var militaryRows = document.querySelectorAll("#militaryTable tr");
+            for (var i = 1; i < militaryRows.length; i++) {
+                var sPeriod1 = militaryRows[i].querySelector('input[name="servicePeriod1"]');
+                var sPeriod2 = militaryRows[i].querySelector('input[name="servicePeriod2"]');
+                if (sPeriod1 && sPeriod2 && sPeriod1.value && sPeriod2.value && sPeriod1.value > sPeriod2.value) {
+                    alert("兵役事項の服務開始日は服務終了日より後であってはなりません。");
+                    return false;
+                }
+            }
+
 		    isSubmitting = true;
 		    setTimeout(function() { isSubmitting = false; }, 3000); 
 		    return true;
@@ -447,7 +488,6 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 			else { alert("必須入力欄をすべて入力し、一番下の[保存]ボタンを押してDBに登録した後にのみ、付加情報メニューに移動できます。"); }
 		}
 
-        // 🌟 변경 포인트: 실제 퇴직처리 화면으로 이동하는 함수 추가
         function moveToRetirement() {
             const empId = document.getElementById("hiddenEmpId").value;
             if (empId) {

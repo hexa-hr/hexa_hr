@@ -70,7 +70,6 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 			<div class="menu-grid">
 				<a href="#cert" class="menu-btn">資格・免許</a> <a href="#training" class="menu-btn">教育訓練</a>
 				<a href="#reward" class="menu-btn">賞罰</a> <a href="#appointment" class="menu-btn">発令</a>
-				<!-- 🌟 퇴직 메뉴 앵커 제거됨 -->
 				<a href="#referrer" class="menu-btn" style="grid-column: 1 / span 2;">推薦・身元保証</a>
 			</div>
 		</div>
@@ -79,7 +78,7 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 			<iframe name="hidden_iframe" style="display: none;"></iframe>
 			<form
 				action="<%=request.getContextPath()%>/employee/register2_process.do"
-				method="post" target="hidden_iframe">
+				method="post" target="hidden_iframe" onsubmit="return validateForm2();">
 				<input type="hidden" name="employeeId" value="${employeeId}">
 
 				<!-- 1. 자격·면허 & 어학능력 -->
@@ -378,7 +377,6 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 						</c:forEach>
 					</c:if>
 				</table>
-                <!-- 🌟 6. 퇴직 정보 테이블 전체 영역 제거됨 -->
 
 				<div
 					style="text-align: center; margin-top: 50px; margin-bottom: 50px;">
@@ -477,6 +475,20 @@ input[type="text"], input[type="date"], input[type="password"], input[type="numb
 			}
 			table.querySelector('th input[type="checkbox"]').checked = false;
 		}
+
+        // 🌟 [추가된 유효성 검사 함수] 교육훈련 기간 역전 방지
+        function validateForm2() {
+            var trainingRows = document.querySelectorAll("#trainingTable tr");
+            for (var i = 1; i < trainingRows.length; i++) {
+                var tStart = trainingRows[i].querySelector('input[name="trainingStartDate"]');
+                var tEnd = trainingRows[i].querySelector('input[name="trainingEndDate"]');
+                if (tStart && tEnd && tStart.value && tEnd.value && tStart.value > tEnd.value) {
+                    alert("教育訓練の開始日は終了日より後であってはなりません。");
+                    return false;
+                }
+            }
+            return true;
+        }
 	</script>
 </body>
 </html>
