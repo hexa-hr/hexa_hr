@@ -1,86 +1,64 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
+<!-- 폰트 및 아이콘 라이브러리 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
+    /* 전체 기본 설정 (헤더에서 공통 적용) */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+        font-family: 'Noto Sans JP', 'Malgun Gothic', sans-serif; 
+        background-color: #f4f6f9; 
+    }
+    
+    .header-container {
+        width: 100%; 
+        min-width: 1400px;
+    }
 
-.header-container {
-    font-family: 'Malgun Gothic', sans-serif;
-    min-width: 1400px;
-}
-
-.top-header {
-	background-color: #2b2b2b; /* 검은색 배경 */
-	color: #ffffff;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 10px 20px;
-}
-
-.top-header .logo-area h1 {
-	margin: 0;
-	font-size: 24px;
-	color: #fff;
-}
-
-.top-header .logo-area span {
-	color: #10b981; /* 글자 옆 초록색 포인트 색상 */
-	font-weight: normal;
-	font-size: 18px;
-}
-
-.top-header .user-menu {
-	display: flex;
-	align-items: center;
-	font-size: 13px;
-}
-
-.top-header .user-menu span {
-	margin-right: 15px;
-}
-
-.top-header .user-menu a {
-	color: #cccccc;
-	text-decoration: none;
-	margin-left: 10px;
-	margin-right: 10px;
-}
-
-.top-header .user-menu a:hover {
-	color: #ffffff;
-}
-
-.top-header .user-menu .btn-shortcut {
-	background-color: #ff4d4d; /* 붉은색 버튼 */
-	color: white;
-	padding: 3px 8px;
-	border-radius: 3px;
-	margin-left: 5px;
-}
-
-.top-header .user-menu .btn-install {
-	background-color: #ff9900; /* 오렌지색 버튼 */
-	color: white;
-	padding: 3px 8px;
-	border-radius: 3px;
-	margin-left: 5px;
-}
+    /* 다크 그라데이션 탑 바 */
+    .top-bar { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        background: linear-gradient(180deg, #4f4f4f 0%, #1f1f1f 100%); 
+        padding: 10px 24px; 
+        color: #ffffff; 
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3); 
+    }
+    
+    .logo-group { display: flex; align-items: baseline; gap: 12px; }
+    .logo-en { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 24px; color: #ffffff; }
+    .logo-jp { font-weight: 700; font-size: 15px; color: #5bc0de; }
+    
+    .top-right { display: flex; align-items: center; gap: 16px; }
+    .user-status { font-size: 13px; color: #cccccc; }
+    .user-status strong { color: #ffffff; }
+    
+    .btn { 
+        padding: 6px 14px; border: none; border-radius: 4px; font-weight: bold; 
+        font-size: 13px; cursor: pointer; color: #fff; display: flex; 
+        align-items: center; gap: 6px; white-space: nowrap; text-decoration: none;
+    }
+    .btn-favorite { background-color: #e74c3c; }
+    .btn-install { background-color: #f39c12; }
+    .btn:hover { filter: brightness(1.1); }
 </style>
 
 <div class="header-container">
-    <div class="top-header">
-        <div class="logo-area">
-            <!-- 로고 이미지가 있다면 <img> 태그 사용, 여기서는 텍스트로 임시 대체 -->
-            <h1>
-                HEXA.HR <span>人事＆給与管理</span>
-            </h1>
+    <div class="top-bar">
+        <div class="logo-group">
+            <span class="logo-en">HEXA.HR</span>
+            <span class="logo-jp">人事＆給与管理</span>
         </div>
-    
-        <div class="user-menu">
-            <span><strong>お客</strong>様は無料体験会員です。</span> <a href="#"
-                class="btn-shortcut"><i class="fa-solid fa-plus"></i>お気に入り</a> 
-                <a href="#" class="btn-install"><i class="fa-solid fa-plus"></i> インストール</a>
+        <div class="top-right">
+            <span class="user-status"><strong>お客様</strong>は無料体験会員です。</span>
+            <a href="#" class="btn btn-favorite"><i class="fa-solid fa-plus"></i> お気に入り</a>
+            <a href="#" class="btn btn-install"><i class="fa-solid fa-plus"></i> インストール</a>
         </div>
     </div>
 </div>
