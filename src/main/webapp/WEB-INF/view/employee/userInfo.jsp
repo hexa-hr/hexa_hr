@@ -28,6 +28,7 @@ body {
 	display: flex;
 	align-items: flex-start;
 	width: 100%;
+    white-space: nowrap;
 }
 
 .container {
@@ -72,6 +73,7 @@ body {
 
 .info-table {
 	width: 100%;
+    table-layout: fixed;
 	border-collapse: collapse;
 	text-align: left;
 	font-size: 14px;
@@ -94,6 +96,17 @@ body {
 
 .info-table td {
 	background-color: #fff;
+}
+
+/* 테이블 내부 입력창 튀어나감 방지 */
+.info-table td input, 
+.info-table td select {
+    max-width: 100%; /* 입력창이 셀 너비를 넘지 못하게 강제 축소 */
+}
+
+/* 전화번호 등 요소가 많을 때 자동으로 아래로 줄바꿈 */
+.info-table td > div {
+    flex-wrap: wrap; 
 }
 
 .info-table input[type="text"], .info-table input[type="password"],
@@ -384,7 +397,7 @@ body {
 								<th style="width: 25%;"><span class="req">*</span>代表者役職/代表者</th>
 								<td>
 									<input type="text" name="repTitle" value="${info.repTitle != null ? info.repTitle : '대표이사'}" style="width: 70px;"> 
-									/ <input type="text" name="repName" value="${info.repName}" style="width: 100px;">
+									/ <input type="text" name="repName" value="${info.repName}" style="width: 90px;">
 								</td>
 							</tr>
 							<tr>
@@ -409,74 +422,74 @@ body {
 									</div>
 								</td>
 							</tr>
-							<tr>
-								<th><span class="req">*</span>電話番号</th>
-								<td>
-									<div style="display: flex; align-items: center; gap: 5px;">
-										<select name="phone1" style="width: auto;">
-											<option value="">代表(なし)</option>
-											<option value="010" ${info.phone1 == '010' ? 'selected' : ''}>携帯電話(010)</option>
-											<option value="050" ${info.phone1 == '050' ? 'selected' : ''}>インターネット(050)</option>
-											<option value="0507" ${info.phone1 == '0507' ? 'selected' : ''}>インターネット(0507)</option>
-											<option value="070" ${info.phone1 == '070' ? 'selected' : ''}>インターネット(070)</option>
-											<option value="0303" ${info.phone1 == '0303' ? 'selected' : ''}>インターネット(0303)</option>
-											<option value="0504" ${info.phone1 == '0504' ? 'selected' : ''}>インターネット(0504)</option>
-											<option value="02" ${info.phone1 == '02' ? 'selected' : ''}>ソウル(02)</option>
-											<option value="051" ${info.phone1 == '051' ? 'selected' : ''}>釜山(051)</option>
-											<option value="053" ${info.phone1 == '053' ? 'selected' : ''}>大邱(053)</option>
-											<option value="032" ${info.phone1 == '032' ? 'selected' : ''}>仁川(032)</option>
-											<option value="062" ${info.phone1 == '062' ? 'selected' : ''}>光州(062)</option>
-											<option value="042" ${info.phone1 == '042' ? 'selected' : ''}>大田(042)</option>
-											<option value="052" ${info.phone1 == '052' ? 'selected' : ''}>蔚山(052)</option>
-											<option value="044" ${info.phone1 == '044' ? 'selected' : ''}>世宗(044)</option>
-											<option value="031" ${info.phone1 == '031' ? 'selected' : ''}>京畿(031)</option>
-											<option value="033" ${info.phone1 == '033' ? 'selected' : ''}>江原(033)</option>
-											<option value="043" ${info.phone1 == '043' ? 'selected' : ''}>忠北(043)</option>
-											<option value="041" ${info.phone1 == '041' ? 'selected' : ''}>忠南(041)</option>
-											<option value="063" ${info.phone1 == '063' ? 'selected' : ''}>全北(063)</option>
-											<option value="061" ${info.phone1 == '061' ? 'selected' : ''}>全南(061)</option>
-											<option value="054" ${info.phone1 == '054' ? 'selected' : ''}>慶北(054)</option>
-											<option value="055" ${info.phone1 == '055' ? 'selected' : ''}>慶南(055)</option>
-											<option value="064" ${info.phone1 == '064' ? 'selected' : ''}>済州(064)</option>
-										</select> - 
-										<input type="text" name="phone2" value="${info.phone2}" style="width: 50px;"> - 
-										<input type="text" name="phone3" value="${info.phone3}" style="width: 50px;">
-									</div>
-								</td>
-								<th>FAX番号</th>
-								<td>
-									<div style="display: flex; align-items: center; gap: 5px;">
-										<select name="fax1" style="width: auto;">
-											<option value="">代表(なし)</option>
-											<option value="010" ${info.fax1 == '010' ? 'selected' : ''}>携帯電話(010)</option>
-											<option value="050" ${info.fax1 == '050' ? 'selected' : ''}>インターネット(050)</option>
-											<option value="0507" ${info.fax1 == '0507' ? 'selected' : ''}>インターネット(0507)</option>
-											<option value="070" ${info.fax1 == '070' ? 'selected' : ''}>インターネット(070)</option>
-											<option value="0303" ${info.fax1 == '0303' ? 'selected' : ''}>インターネット(0303)</option>
-											<option value="0504" ${info.fax1 == '0504' ? 'selected' : ''}>インターネット(0504)</option>
-											<option value="02" ${info.fax1 == '02' ? 'selected' : ''}>ソウル(02)</option>
-											<option value="051" ${info.fax1 == '051' ? 'selected' : ''}>釜山(051)</option>
-											<option value="053" ${info.fax1 == '053' ? 'selected' : ''}>大邱(053)</option>
-											<option value="032" ${info.fax1 == '032' ? 'selected' : ''}>仁川(032)</option>
-											<option value="062" ${info.fax1 == '062' ? 'selected' : ''}>光州(062)</option>
-											<option value="042" ${info.fax1 == '042' ? 'selected' : ''}>大田(042)</option>
-											<option value="052" ${info.fax1 == '052' ? 'selected' : ''}>蔚山(052)</option>
-											<option value="044" ${info.fax1 == '044' ? 'selected' : ''}>世宗(044)</option>
-											<option value="031" ${info.fax1 == '031' ? 'selected' : ''}>京畿(031)</option>
-											<option value="033" ${info.fax1 == '033' ? 'selected' : ''}>江原(033)</option>
-											<option value="043" ${info.fax1 == '043' ? 'selected' : ''}>忠北(043)</option>
-											<option value="041" ${info.fax1 == '041' ? 'selected' : ''}>忠南(041)</option>
-											<option value="063" ${info.fax1 == '063' ? 'selected' : ''}>全北(063)</option>
-											<option value="061" ${info.fax1 == '061' ? 'selected' : ''}>全南(061)</option>
-											<option value="054" ${info.fax1 == '054' ? 'selected' : ''}>慶北(054)</option>
-											<option value="055" ${info.fax1 == '055' ? 'selected' : ''}>慶南(055)</option>
-											<option value="064" ${info.fax1 == '064' ? 'selected' : ''}>済州(064)</option>
-										</select> - 
-										<input type="text" name="fax2" value="${info.fax2}" style="width: 50px;"> - 
-										<input type="text" name="fax3" value="${info.fax3}" style="width: 50px;">
-									</div>
-								</td>
-							</tr>
+                            <tr>
+                            	<th><span class="req">*</span>電話番号</th>
+                            	<td>
+                            		<div style="display: flex; align-items: center; gap: 3px; flex-wrap: nowrap;">
+                            			<select name="phone1" style="flex: 1.2; min-width: 0; padding: 6px 2px;">
+                            				<option value="">代表(なし)</option>
+                            				<option value="010" ${info.phone1 == '010' ? 'selected' : ''}>携帯電話(010)</option>
+                            				<option value="050" ${info.phone1 == '050' ? 'selected' : ''}>インターネット(050)</option>
+                            				<option value="0507" ${info.phone1 == '0507' ? 'selected' : ''}>インターネット(0507)</option>
+                            				<option value="070" ${info.phone1 == '070' ? 'selected' : ''}>インターネット(070)</option>
+                            				<option value="0303" ${info.phone1 == '0303' ? 'selected' : ''}>インターネット(0303)</option>
+                            				<option value="0504" ${info.phone1 == '0504' ? 'selected' : ''}>インターネット(0504)</option>
+                            				<option value="02" ${info.phone1 == '02' ? 'selected' : ''}>ソウル(02)</option>
+                            				<option value="051" ${info.phone1 == '051' ? 'selected' : ''}>釜山(051)</option>
+                            				<option value="053" ${info.phone1 == '053' ? 'selected' : ''}>大邱(053)</option>
+                            				<option value="032" ${info.phone1 == '032' ? 'selected' : ''}>仁川(032)</option>
+                            				<option value="062" ${info.phone1 == '062' ? 'selected' : ''}>光州(062)</option>
+                            				<option value="042" ${info.phone1 == '042' ? 'selected' : ''}>大田(042)</option>
+                            				<option value="052" ${info.phone1 == '052' ? 'selected' : ''}>蔚山(052)</option>
+                            				<option value="044" ${info.phone1 == '044' ? 'selected' : ''}>世宗(044)</option>
+                            				<option value="031" ${info.phone1 == '031' ? 'selected' : ''}>京畿(031)</option>
+                            				<option value="033" ${info.phone1 == '033' ? 'selected' : ''}>江原(033)</option>
+                            				<option value="043" ${info.phone1 == '043' ? 'selected' : ''}>忠北(043)</option>
+                            				<option value="041" ${info.phone1 == '041' ? 'selected' : ''}>忠南(041)</option>
+                            				<option value="063" ${info.phone1 == '063' ? 'selected' : ''}>全北(063)</option>
+                            				<option value="061" ${info.phone1 == '061' ? 'selected' : ''}>全南(061)</option>
+                            				<option value="054" ${info.phone1 == '054' ? 'selected' : ''}>慶北(054)</option>
+                            				<option value="055" ${info.phone1 == '055' ? 'selected' : ''}>慶南(055)</option>
+                            				<option value="064" ${info.phone1 == '064' ? 'selected' : ''}>済州(064)</option>
+                            			</select> - 
+                            			<input type="text" name="phone2" value="${info.phone2}" style="flex: 1; min-width: 0; text-align: center; padding: 6px 2px;"> - 
+                            			<input type="text" name="phone3" value="${info.phone3}" style="flex: 1; min-width: 0; text-align: center; padding: 6px 2px;">
+                            		</div>
+                            	</td>
+                            	<th>FAX番号</th>
+                            	<td>
+                            		<div style="display: flex; align-items: center; gap: 3px; flex-wrap: nowrap;">
+                            			<select name="fax1" style="flex: 1.2; min-width: 0; padding: 6px 2px;">
+                            				<option value="">代表(なし)</option>
+                            				<option value="010" ${info.fax1 == '010' ? 'selected' : ''}>携帯電話(010)</option>
+                            				<option value="050" ${info.fax1 == '050' ? 'selected' : ''}>インターネット(050)</option>
+                            				<option value="0507" ${info.fax1 == '0507' ? 'selected' : ''}>インターネット(0507)</option>
+                            				<option value="070" ${info.fax1 == '070' ? 'selected' : ''}>インターネット(070)</option>
+                            				<option value="0303" ${info.fax1 == '0303' ? 'selected' : ''}>インターネット(0303)</option>
+                            				<option value="0504" ${info.fax1 == '0504' ? 'selected' : ''}>インターネット(0504)</option>
+                            				<option value="02" ${info.fax1 == '02' ? 'selected' : ''}>ソウル(02)</option>
+                            				<option value="051" ${info.fax1 == '051' ? 'selected' : ''}>釜山(051)</option>
+                            				<option value="053" ${info.fax1 == '053' ? 'selected' : ''}>大邱(053)</option>
+                            				<option value="032" ${info.fax1 == '032' ? 'selected' : ''}>仁川(032)</option>
+                            				<option value="062" ${info.fax1 == '062' ? 'selected' : ''}>光州(062)</option>
+                            				<option value="042" ${info.fax1 == '042' ? 'selected' : ''}>大田(042)</option>
+                            				<option value="052" ${info.fax1 == '052' ? 'selected' : ''}>蔚山(052)</option>
+                            				<option value="044" ${info.fax1 == '044' ? 'selected' : ''}>世宗(044)</option>
+                            				<option value="031" ${info.fax1 == '031' ? 'selected' : ''}>京畿(031)</option>
+                            				<option value="033" ${info.fax1 == '033' ? 'selected' : ''}>江原(033)</option>
+                            				<option value="043" ${info.fax1 == '043' ? 'selected' : ''}>忠北(043)</option>
+                            				<option value="041" ${info.fax1 == '041' ? 'selected' : ''}>忠南(041)</option>
+                            				<option value="063" ${info.fax1 == '063' ? 'selected' : ''}>全北(063)</option>
+                            				<option value="061" ${info.fax1 == '061' ? 'selected' : ''}>全南(061)</option>
+                            				<option value="054" ${info.fax1 == '054' ? 'selected' : ''}>慶北(054)</option>
+                            				<option value="055" ${info.fax1 == '055' ? 'selected' : ''}>慶南(055)</option>
+                            				<option value="064" ${info.fax1 == '064' ? 'selected' : ''}>済州(064)</option>
+                            			</select> - 
+                            			<input type="text" name="fax2" value="${info.fax2}" style="flex: 1; min-width: 0; text-align: center; padding: 6px 2px;"> - 
+                            			<input type="text" name="fax3" value="${info.fax3}" style="flex: 1; min-width: 0; text-align: center; padding: 6px 2px;">
+                            		</div>
+                            	</td>
+                            </tr>
 							<tr>
 								<th>業態</th>
 								<td><input type="text" name="bizType" value="${info.bizType}"></td>
@@ -525,7 +538,7 @@ body {
 								<th>電話番号</th>
 								<td>
 									<div style="display: flex; align-items: center; gap: 5px;">
-										<select name="cPhone1" style="width: auto;">
+										<select name="cPhone1" style="width: 110px;">
 											<option value="">選択</option>
 											<option value="010" ${info.cPhone1 == '010' ? 'selected' : ''}>携帯電話(010)</option>
 											<option value="050" ${info.cPhone1 == '050' ? 'selected' : ''}>インターネット(050)</option>
@@ -560,7 +573,7 @@ body {
 								<th>携帯電話番号</th>
 								<td>
 									<div style="display: flex; align-items: center; gap: 5px;">
-										<select name="mobile1" style="width: auto;">
+										<select name="mobile1" style="width: 110px;">
 											<option value="">選択</option>
 											<option value="010" ${info.mobile1 == '010' ? 'selected' : ''}>010</option>
 											<option value="011" ${info.mobile1 == '011' ? 'selected' : ''}>011</option>
