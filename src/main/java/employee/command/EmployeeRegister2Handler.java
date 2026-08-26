@@ -25,7 +25,7 @@ public class EmployeeRegister2Handler implements CommandHandler {
 				request.setAttribute("employeeId", employeeId);
 				request.setAttribute("tab", tab);
 
-				// 🌟 2페이지 필수 조회 데이터 전달
+				// 🌟 2페이지 필수 조회 데이터 전달 (퇴직 정보 조회 제거됨)
 				request.setAttribute("certList", register2Service.getCertifications(employeeId));
 				request.setAttribute("langList", register2Service.getLanguageAbilities(employeeId));
 				request.setAttribute("trainingList", register2Service.getTrainings(employeeId));
@@ -33,7 +33,6 @@ public class EmployeeRegister2Handler implements CommandHandler {
 				request.setAttribute("apptList", register2Service.getAppointments(employeeId));
 				request.setAttribute("refList", register2Service.getReferrers(employeeId));
 				request.setAttribute("guaList", register2Service.getGuarantors(employeeId));
-				request.setAttribute("retirement", register2Service.getRetirement(employeeId));
 			}
 
 			// 🌟 발령 테이블 부서/직위 드롭다운용 리스트 전달

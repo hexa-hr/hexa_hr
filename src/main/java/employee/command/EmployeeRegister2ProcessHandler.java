@@ -13,7 +13,7 @@ import employee.model.Certification;
 import employee.model.Guarantor;
 import employee.model.LanguageAbility;
 import employee.model.Referrer;
-import employee.model.Retirement;
+// 🌟 Retirement import 제거됨
 import employee.model.RewardPenalty;
 import employee.model.Training;
 import employee.service.EmployeeRegister2Service;
@@ -138,39 +138,39 @@ public class EmployeeRegister2ProcessHandler implements CommandHandler {
 		}
 
 		// 신원보증
+		// 🌟 연락처(guaPeriod) 및 숨겨진 보증기간 파라미터 수집 유지
 		String[] guaNames = request.getParameterValues("guaName");
 		String[] guaRels = request.getParameterValues("guaRelation");
 		String[] guaRrns = request.getParameterValues("guaRrn");
 		String[] guaAmounts = request.getParameterValues("guaAmount");
+		String[] guaPeriods = request.getParameterValues("guaPeriod");
+		String[] guaStartDates = request.getParameterValues("guaStartDate");
+		String[] guaEndDates = request.getParameterValues("guaEndDate");
 		List<Guarantor> guarantorList = new ArrayList<>();
+
 		if (guaNames != null) {
 			for (int i = 0; i < guaNames.length; i++) {
 				if (guaNames[i] != null && !guaNames[i].trim().isEmpty()) {
 					guarantorList.add(new Guarantor(null, employeeId, guaNames[i], safeGet(guaRels, i),
-						safeGet(guaRrns, i), parseLong(safeGet(guaAmounts, i)), null, null, null));
+						safeGet(guaRrns, i), parseLong(safeGet(guaAmounts, i)),
+						parseDate(safeGet(guaStartDates, i)), parseDate(safeGet(guaEndDates, i)),
+						safeGet(guaPeriods, i)));
 				}
 			}
 		}
 
-		// 퇴직
-		Retirement retirement = null;
-		String retType = request.getParameter("retirementType");
-		if (retType != null && !retType.trim().isEmpty()) {
-			retirement = new Retirement(
-				employeeId, retType, parseDate(request.getParameter("retirementDate")),
-				request.getParameter("retirementReason"), request.getParameter("retirementContact"),
-				parseLong(request.getParameter("severancePay")));
-		}
+		// 🌟 퇴직(Retirement) 파라미터 조회 및 객체 생성 로직 제거됨
 
 		try {
+			// 🌟 service 호출 시 마지막 인자였던 retirement 제거됨
 			service.register2(employeeId, certList, langList, trainingList, rewardList,
-				apptList, referrerList, guarantorList, retirement);
+				apptList, referrerList, guarantorList);
 			response.setContentType("text/html; charset=UTF-8");
-			response.getWriter().println("<script>parent.alert('사원 부가정보가 성공적으로 저장되었습니다.');</script>");
+			response.getWriter().println("<script>parent.alert('社員付加情報が正常に保存されました。');</script>");
 			return null;
 		} catch (Exception e) {
 			response.setContentType("text/html; charset=UTF-8");
-			response.getWriter().println("<script>parent.alert('등록 실패: " + e.getMessage() + "');</script>");
+			response.getWriter().println("<script>parent.alert('登録失敗: " + e.getMessage() + "');</script>");
 			return null;
 		}
 	}

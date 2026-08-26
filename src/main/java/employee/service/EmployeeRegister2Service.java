@@ -12,7 +12,7 @@ import employee.dao.EmployeeDao;
 import employee.dao.GuarantorDao;
 import employee.dao.LanguageAbilityDao;
 import employee.dao.ReferrerDao;
-import employee.dao.RetirementDao;
+// 🌟 RetirementDao import 제거됨
 import employee.dao.RewardPenaltyDao;
 import employee.dao.TrainingDao;
 import employee.model.Appointment;
@@ -20,7 +20,7 @@ import employee.model.Certification;
 import employee.model.Guarantor;
 import employee.model.LanguageAbility;
 import employee.model.Referrer;
-import employee.model.Retirement;
+// 🌟 Retirement import 제거됨
 import employee.model.RewardPenalty;
 import employee.model.Training;
 import jdbc.JdbcUtil;
@@ -35,21 +35,21 @@ public class EmployeeRegister2Service {
 	private AppointmentDao apptDao = new AppointmentDao();
 	private ReferrerDao referrerDao = new ReferrerDao();
 	private GuarantorDao guarantorDao = new GuarantorDao();
-	private RetirementDao retirementDao = new RetirementDao();
+	// 🌟 RetirementDao 필드 제거됨
 	private EmployeeDao employeeDao = new EmployeeDao();
 
+	// 🌟 매개변수 마지막의 Retirement retirement 제거됨
 	public void register2(Integer employeeId,
 		List<Certification> certList, List<LanguageAbility> langList,
 		List<Training> trainingList, List<RewardPenalty> rewardList,
 		List<Appointment> apptList, List<Referrer> referrerList,
-		List<Guarantor> guarantorList, Retirement retirement) {
+		List<Guarantor> guarantorList) {
 
 		Connection conn = null;
 		try {
 			conn = ConnectionProvider.getConnection();
 			conn.setAutoCommit(false);
 
-			// 🌟 [핵심 해결책!] 기존에 저장되어 있던 이 사원의 부가정보를 싹 다 지웁니다.
 			deleteOldData(conn, "certification", employeeId);
 			deleteOldData(conn, "language_ability", employeeId);
 			deleteOldData(conn, "training", employeeId);
@@ -57,9 +57,8 @@ public class EmployeeRegister2Service {
 			deleteOldData(conn, "appointment", employeeId);
 			deleteOldData(conn, "referrer", employeeId);
 			deleteOldData(conn, "guarantor", employeeId);
-			deleteOldData(conn, "retirement", employeeId);
+			// 🌟 retirement delete 처리 제거됨
 
-			// 🌟 화면에서 넘어온 최신 데이터로 다시 깔끔하게 INSERT 합니다.
 			if (certList != null)
 				for (Certification c : certList)
 					certificationDao.insert(conn, c);
@@ -82,10 +81,7 @@ public class EmployeeRegister2Service {
 				for (Guarantor g : guarantorList)
 					guarantorDao.insert(conn, g);
 
-			if (retirement != null && retirement.getRetirementType() != null
-				&& !retirement.getRetirementType().isEmpty()) {
-				retirementDao.insert(conn, retirement);
-			}
+			// 🌟 retirement insert 조건문 제거됨
 
 			conn.commit();
 		} catch (SQLException e) {
@@ -96,7 +92,6 @@ public class EmployeeRegister2Service {
 		}
 	}
 
-	// 🌟 여러 DAO를 열어서 수정하는 번거로움을 없애주는 마법의 삭제 공통 메서드
 	private void deleteOldData(Connection conn, String tableName, int employeeId) throws SQLException {
 		String sql = "DELETE FROM " + tableName + " WHERE employee_id = ?";
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -106,42 +101,58 @@ public class EmployeeRegister2Service {
 	}
 
 	public List<Certification> getCertifications(int employeeId) throws SQLException {
-		return certificationDao.selectAllByEmployeeId(ConnectionProvider.getConnection(), employeeId);
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			return certificationDao.selectAllByEmployeeId(conn, employeeId);
+		}
 	}
 
 	public List<LanguageAbility> getLanguageAbilities(int employeeId) throws SQLException {
-		return languageDao.selectAllByEmployeeId(ConnectionProvider.getConnection(), employeeId);
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			return languageDao.selectAllByEmployeeId(conn, employeeId);
+		}
 	}
 
 	public List<Training> getTrainings(int employeeId) throws SQLException {
-		return trainingDao.selectAllByEmployeeId(ConnectionProvider.getConnection(), employeeId);
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			return trainingDao.selectAllByEmployeeId(conn, employeeId);
+		}
 	}
 
 	public List<RewardPenalty> getRewardPenalties(int employeeId) throws SQLException {
-		return rewardDao.selectAllByEmployeeId(ConnectionProvider.getConnection(), employeeId);
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			return rewardDao.selectAllByEmployeeId(conn, employeeId);
+		}
 	}
 
 	public List<Appointment> getAppointments(int employeeId) throws SQLException {
-		return apptDao.selectAllByEmployeeId(ConnectionProvider.getConnection(), employeeId);
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			return apptDao.selectAllByEmployeeId(conn, employeeId);
+		}
 	}
 
 	public List<Referrer> getReferrers(int employeeId) throws SQLException {
-		return referrerDao.selectAllByEmployeeId(ConnectionProvider.getConnection(), employeeId);
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			return referrerDao.selectAllByEmployeeId(conn, employeeId);
+		}
 	}
 
 	public List<Guarantor> getGuarantors(int employeeId) throws SQLException {
-		return guarantorDao.selectAllByEmployeeId(ConnectionProvider.getConnection(), employeeId);
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			return guarantorDao.selectAllByEmployeeId(conn, employeeId);
+		}
 	}
 
-	public Retirement getRetirement(int employeeId) throws SQLException {
-		return retirementDao.selectByEmployeeId(ConnectionProvider.getConnection(), employeeId);
-	}
+	// 🌟 getRetirement 메서드 전체 제거됨
 
 	public List<Map<String, Object>> getDepartments() throws SQLException {
-		return employeeDao.selectDepartments(ConnectionProvider.getConnection());
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			return employeeDao.selectDepartments(conn);
+		}
 	}
 
 	public List<Map<String, Object>> getPositions() throws SQLException {
-		return employeeDao.selectPositions(ConnectionProvider.getConnection());
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			return employeeDao.selectPositions(conn);
+		}
 	}
 }

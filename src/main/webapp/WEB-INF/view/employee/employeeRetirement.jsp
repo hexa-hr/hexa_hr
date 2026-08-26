@@ -256,6 +256,7 @@
         location.href = '<%=request.getContextPath()%>/employee/retirement.do?statusFilter=' + selectObj.value;
     }
 
+    // モーダルウィンドウを表示
     function openModal(row) {
         const empId = row.dataset.id;
         const status = row.dataset.status;
@@ -263,6 +264,9 @@
         const date = row.dataset.date;
         const reason = row.dataset.reason;
         const contact = row.dataset.contact;
+
+        // 🌟 [추가] 해당 행의 입사일 값(7번째 셀)을 읽어와서 저장
+        window.selectedEmpHireDate = row.querySelector('td:nth-child(7)').innerText.trim();
 
         document.getElementById('modalEmpId').value = empId;
         const modal = document.getElementById('retirementModal');
@@ -303,6 +307,23 @@
 
     function closeModal() {
         document.getElementById('retirementModal').style.display = 'none';
+    }
+
+    // 🌟 [추가된 유효성 검사 함수] 퇴직일이 입사일보다 빠른지 검증
+    function validateRetirementForm() {
+        const action = document.getElementById('modalAction').value;
+        if (action === 'save') {
+            const hireDate = window.selectedEmpHireDate; // 'YYYY-MM-DD'
+            const retireDate = document.getElementById('modalDate').value;
+
+            if (hireDate && retireDate && hireDate !== '-') {
+                if (retireDate < hireDate) {
+                    alert("退職日は入社日より前であってはなりません。");
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 </script>
 </head>
@@ -409,12 +430,8 @@
     <!-- 隠されているモーダルポップアップウィンドウ -->
     <div id="retirementModal" class="modal-bg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">退職者退職処理</h3>
-                <button type="button" onclick="closeModal()" style="background: none; border: none; font-size: 20px; color: #999; cursor: pointer;">×</button>
-            </div>
-            
-            <form action="<%=request.getContextPath()%>/employee/retirement_process.do" method="post">
+            <h3 id="modalTitle">退職者退職処理</h3>
+            <form action="<%=request.getContextPath()%>/employee/retirement_process.do" method="post" onsubmit="return validateRetirementForm();">
                 <input type="hidden" name="employeeId" id="modalEmpId">
                 <input type="hidden" name="action" id="modalAction" value="save">
                 
