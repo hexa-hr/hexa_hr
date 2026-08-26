@@ -8,248 +8,257 @@
 <title>社員退職処理</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
 <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
 <link rel="shortcut icon" type="image/x-icon" href="${pageContext.request.contextPath}/favicon.ico">
 
 <style>
-	/* 1. 전체 레이아웃 (공통) */
-	body {
-		margin: 0;
-		min-width: 1400px;
-		background-color: #f8f9fa;
-		font-family: 'Malgun Gothic', sans-serif;
-		color: #333;
-	}
+/* 1. 전체 레이아웃 (공통) */
+body {
+	margin: 0;
+	min-width: 1400px;
+	background-color: #f8f9fa;
+	font-family: 'Malgun Gothic', sans-serif;
+	color: #333;
+}
 
-	.wrap {
-		display: flex;
-		align-items: flex-start;
-		width: 100%;
-	}
+.wrap {
+	display: flex;
+	align-items: flex-start;
+	width: 100%;
+}
 
-	.container {
-		padding: 30px 40px;
-		background-color: white;
-		box-sizing: border-box;
-		flex: 1;
-		min-height: 600px;
-		min-width: 0;
-	}
+.container {
+	padding: 30px 40px;
+	background-color: white;
+	box-sizing: border-box;
+	flex: 1;
+	min-height: 600px;
+	min-width: 0;
+}
 
-	/* 2. 타이틀 영역 */
-	.page-header {
-		margin-bottom: 10px;
-	}
+/* 2. 타이틀 영역 */
+.page-header {
+	margin-bottom: 10px;
+}
 
-	.page-header h1 {
-		font-size: 22px;
-		font-weight: bold;
-		margin: 0;
-		color: #333;
-		border-bottom: 2px solid #4e73df;
-		padding-bottom: 10px;
-	}
+.page-header h1 {
+	font-size: 22px;
+	font-weight: bold;
+	margin: 0;
+	color: #333;
+	border-bottom: 2px solid #4e73df;
+	padding-bottom: 10px;
+}
 
-	.page-desc {
-		font-size: 14px;
-		color: #666;
-		margin: 0 0 20px 0;
-	}
+.page-desc {
+	font-size: 14px;
+	color: #666;
+	margin: 0 0 20px 0;
+}
 
-	/* 3. 상단 검색 폼 영역 */
-	.filter-bar {
-		background: #f4f4f4;
-		padding: 15px 20px;
-		border: 1px solid #ddd;
-		border-radius: 3px;
-		margin-bottom: 25px;
-		box-sizing: border-box;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
+/* 3. 상단 검색 폼 영역 */
+.filter-bar {
+	background: #f4f4f4;
+	padding: 15px 20px;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	margin-bottom: 25px;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
 
-	.search-left {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-	}
+.search-left {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
 
-	.filter-bar select, .filter-bar input[type="text"] {
-		padding: 6px 10px;
-		border: 1px solid #ccc;
-		border-radius: 3px;
-		font-size: 14px;
-		outline: none;
-	}
+.filter-bar select, .filter-bar input[type="text"] {
+	padding: 6px 10px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	font-size: 14px;
+	outline: none;
+}
 
-	.filter-bar select { width: 120px; }
+.filter-bar select { width: 120px; }
 
-	.btn-search {
-		background-color: #4e73df;
-		color: white;
-		border: none;
-		border-radius: 3px;
-		padding: 6px 16px;
-		cursor: pointer;
-		font-weight: bold;
-		font-size: 14px;
-	}
-	.btn-search:hover { background-color: #2e59d9; }
+.btn-search {
+	background-color: #4e73df;
+	color: white;
+	border: none;
+	border-radius: 3px;
+	padding: 6px 16px;
+	cursor: pointer;
+	font-weight: bold;
+	font-size: 14px;
+}
+.btn-search:hover { background-color: #2e59d9; }
 
-	.btn-view-all {
-		background-color: #a5a5a5;
-		color: white;
-		border: none;
-		border-radius: 3px;
-		padding: 6px 16px;
-		cursor: pointer;
-		font-weight: bold;
-		font-size: 14px;
-	}
-	.btn-view-all:hover { background-color: #858796; }
+.btn-view-all {
+	background-color: #a5a5a5;
+	color: white;
+	border: none;
+	border-radius: 3px;
+	padding: 6px 16px;
+	cursor: pointer;
+	font-weight: bold;
+	font-size: 14px;
+}
+.btn-view-all:hover { background-color: #858796; }
 
-	/* 4. 데이터 테이블 스타일 */
-	.table-container {
-		width: 100%;
-		overflow-x: auto;
-	}
+/* 4. 데이터 테이블 스타일 */
+.table-container {
+	width: 100%;
+	overflow-x: auto;
+}
 
-	table.data-table {
-		width: 100%;
-		border-collapse: collapse;
-		text-align: center;
-		background: white;
-		margin-bottom: 30px;
-	}
+table.data-table {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: center;
+	background: white;
+	margin-bottom: 30px;
+}
 
-	table.data-table th, table.data-table td {
-		border: 1px solid #ccc;
-		padding: 10px 12px;
-		font-size: 14px;
-		white-space: nowrap;
-	}
+table.data-table th, table.data-table td {
+	border: 1px solid #ccc;
+	padding: 10px 12px;
+	font-size: 14px;
+	white-space: nowrap;
+}
 
-	table.data-table th {
-		background-color: #f8f9fa;
-		color: #333;
-		font-weight: bold;
-	}
+table.data-table th {
+	background-color: #f8f9fa;
+	color: #333;
+	font-weight: bold;
+}
 
-	table.data-table tbody tr {
-		cursor: pointer;
-	}
+table.data-table tbody tr {
+	cursor: pointer;
+}
 
-	table.data-table tbody tr:hover td {
-		background-color: #f1f5f9;
-	}
+table.data-table tbody tr:hover td {
+	background-color: #f1f5f9;
+}
 
-	.link-blue { color: #4e73df; text-decoration: none; font-weight: bold; }
-	.status-retire { color: #e74a3b; font-weight: bold; }
-	
-	.icon-box { 
-		display: inline-block; 
-		width: 22px; 
-		height: 22px; 
-		line-height: 22px; 
-		text-align: center; 
-		border-radius: 3px; 
-		font-weight: bold; 
-		font-size: 12px; 
-		color: white; 
-	}
-	.icon-x { background-color: #a5a5a5; } 
-	.icon-o { background-color: #e74a3b; } 
+.link-blue { color: #4e73df; font-weight: bold; }
+.status-retire { color: #e74a3b; font-weight: bold; }
 
-	/* 5. 모달 팝업 CSS */
-	.modal-bg { 
-		display: none; 
-		position: fixed; 
-		top: 0; 
-		left: 0; 
-		width: 100%; 
-		height: 100%; 
-		background: rgba(0, 0, 0, 0.45); 
-		z-index: 1000; 
-	}
-	
-	.modal-content { 
-		position: absolute; 
-		top: 50%; 
-		left: 50%; 
-		transform: translate(-50%, -50%); 
-		background: white; 
-		padding: 30px; 
-		border-radius: 5px; 
-		width: 450px; 
-		box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
-		box-sizing: border-box;
-	}
-	
-	.modal-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 20px;
-		border-bottom: 2px solid #4e73df;
-		padding-bottom: 8px;
-	}
+.icon-box { 
+	display: inline-block; 
+	width: 22px; 
+	height: 22px; 
+	line-height: 22px; 
+	text-align: center; 
+	border-radius: 3px; 
+	font-weight: bold; 
+	font-size: 12px; 
+	color: white; 
+}
+.icon-x { background-color: #a5a5a5; } 
+.icon-o { background-color: #e74a3b; } 
 
-	.modal-header h3 { 
-		margin: 0; 
-		font-size: 18px; 
-		color: #333; 
-	}
+/* 5. 모달 팝업 CSS */
+.modal-bg { 
+	display: none; 
+	position: fixed; 
+	top: 0; 
+	left: 0; 
+	width: 100%; 
+	height: 100%; 
+	background: rgba(0, 0, 0, 0.45); 
+	z-index: 1000; 
+}
 
-	.modal-table { 
-		width: 100%; 
-		text-align: left; 
-		margin-bottom: 20px; 
-		border-collapse: collapse;
-	}
-	
-	.modal-table th, .modal-table td { 
-		border: 1px solid #ccc; 
-		padding: 10px; 
-		font-size: 14px;
-	}
-	
-	.modal-table th { 
-		background-color: #f8f9fa; 
-		width: 35%; 
-		color: #333;
-		font-weight: bold;
-	}
-	
-	.modal-table input, .modal-table select { 
-		width: 100%; 
-		padding: 6px 10px; 
-		border: 1px solid #ccc; 
-		border-radius: 3px;
-		box-sizing: border-box;
-		outline: none;
-	}
-	
-	.modal-btns { 
-		text-align: center; 
-		margin-top: 20px; 
-	}
-	
-	.btn-save { background-color: #4e73df; color: white; padding: 8px 25px; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;}
-	.btn-save:hover { background-color: #2e59d9; }
+.modal-content { 
+	position: absolute; 
+	top: 50%; 
+	left: 50%; 
+	transform: translate(-50%, -50%); 
+	background: white; 
+	padding: 30px; 
+	border-radius: 5px; 
+	width: 450px; 
+	box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+	box-sizing: border-box;
+}
 
-	.btn-cancel { background-color: #e74a3b; color: white; padding: 8px 25px; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;}
-	.btn-cancel:hover { background-color: #c0392b; }
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+	border-bottom: 2px solid #4e73df;
+	padding-bottom: 8px;
+}
 
-	.btn-close { background-color: #a5a5a5; color: white; padding: 8px 15px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px; font-weight: bold;}
-	.btn-close:hover { background-color: #858796; }
-	
-	/* 6. 페이지네이션 CSS */
-	.pagination { text-align: center; margin-top: 30px; }
-	.pagination a { display: inline-block; padding: 6px 12px; margin: 0 2px; border: 1px solid #ccc; color: #333; text-decoration: none; border-radius: 3px; font-size: 14px;}
-	.pagination a.active { background-color: #4e73df; color: white; border: 1px solid #4e73df; font-weight: bold; }
-	.pagination a:hover:not(.active) { background-color: #f1f1f1; }
+.modal-header h3 { 
+	margin: 0; 
+	font-size: 18px; 
+	color: #333; 
+}
+
+.modal-header button {
+	background: none;
+	border: none;
+	font-size: 24px;
+	color: #999;
+	padding: 0;
+	cursor: pointer;
+}
+.modal-header button:hover { color: #333; }
+
+.modal-table { 
+	width: 100%; 
+	text-align: left; 
+	margin-bottom: 20px; 
+	border-collapse: collapse;
+}
+
+.modal-table th, .modal-table td { 
+	border: 1px solid #ccc; 
+	padding: 10px; 
+	font-size: 14px;
+}
+
+.modal-table th { 
+	background-color: #f8f9fa; 
+	width: 35%; 
+	color: #333;
+	font-weight: bold;
+}
+
+.modal-table input, .modal-table select { 
+	width: 100%; 
+	padding: 6px 10px; 
+	border: 1px solid #ccc; 
+	border-radius: 3px;
+	box-sizing: border-box;
+	outline: none;
+}
+
+.modal-btns { 
+	text-align: center; 
+	margin-top: 20px; 
+}
+
+.btn-save { background-color: #4e73df; color: white; padding: 8px 25px; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;}
+.btn-save:hover { background-color: #2e59d9; }
+
+.btn-cancel { background-color: #e74a3b; color: white; padding: 8px 25px; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;}
+.btn-cancel:hover { background-color: #c0392b; }
+
+.btn-close { background-color: #a5a5a5; color: white; padding: 8px 15px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px; font-weight: bold;}
+.btn-close:hover { background-color: #858796; }
+
+/* 6. 페이지네이션 CSS */
+.pagination { text-align: center; margin-top: 30px; }
+.pagination a { display: inline-block; padding: 6px 12px; margin: 0 2px; border: 1px solid #ccc; color: #333; text-decoration: none; border-radius: 3px; font-size: 14px;}
+.pagination a.active { background-color: #4e73df; color: white; border: 1px solid #4e73df; font-weight: bold; }
+.pagination a:hover:not(.active) { background-color: #f1f1f1; }
 </style>
 <script>
     function changeFilter(selectObj) {
@@ -356,7 +365,7 @@
                 </div>
             </div>
 
-            <!-- データテーブル -->
+            <!-- 데이터 테이블 -->
             <div class="table-container">
                 <table class="data-table">
                     <thead>
@@ -409,7 +418,7 @@
                 </table>
             </div>
 
-            <!-- ページング処理領域 -->
+            <!-- 페이지네이션 영역 -->
             <div class="pagination">
                 <c:if test="${startPage > 1}">
                     <a href="?page=${startPage - 1}&statusFilter=${statusFilter}">前へ</a>
@@ -427,10 +436,14 @@
         </div>
     </div>
 
-    <!-- 隠されているモーダルポップアップウィンドウ -->
+    <!-- 숨겨진 모달 팝업 창 -->
     <div id="retirementModal" class="modal-bg">
         <div class="modal-content">
-            <h3 id="modalTitle">退職者退職処理</h3>
+            <div class="modal-header">
+                <h3 id="modalTitle">退職者退職処理</h3>
+                <button type="button" onclick="closeModal()">×</button>
+            </div>
+            
             <form action="<%=request.getContextPath()%>/employee/retirement_process.do" method="post" onsubmit="return validateRetirementForm();">
                 <input type="hidden" name="employeeId" id="modalEmpId">
                 <input type="hidden" name="action" id="modalAction" value="save">

@@ -183,6 +183,14 @@ input[type="text"], input[type="number"] {
 	text-align: center !important;
 }
 
+/* 산정 기간 인풋 칸이 좁아서 튀어나가는 현상 방지용 CSS */
+#salaryListBody td.text-center {
+	min-width: 230px;
+}
+#salaryListBody input[type="text"] {
+	padding: 6px 4px;
+}
+
 .text-red {
 	color: #e74a3b !important;
 	font-weight: bold;
@@ -311,8 +319,8 @@ input[type="text"], input[type="number"] {
 							<c:forEach begin="1" end="4">
 								<tr>
 									<td class="text-center">
-										<input type="text" class="text-center" style="width: 42%;" readonly> ~ 
-										<input type="text" class="text-center" style="width: 42%;" readonly>
+										<input type="text" class="text-center" style="width: 45%;" readonly> ~ 
+										<input type="text" class="text-center" style="width: 45%;" readonly>
 									</td>
 									<td><input type="number" class="text-center calc-days" value="0" readonly></td>
 									<td><input type="text" class="calc-amount" value="0" readonly></td>
@@ -531,8 +539,8 @@ input[type="text"], input[type="number"] {
 					const tr = document.createElement('tr');
 					tr.innerHTML = `
 						<td class="text-center">
-							<input type="text" value="\${p.startDate}" class="text-center" style="width: 42%;" readonly> ~ 
-							<input type="text" value="\${p.endDate}" class="text-center" style="width: 42%;" readonly>
+							<input type="text" value="\${p.startDate}" class="text-center" style="width: 45%; padding: 6px 4px;" readonly> ~ 
+							<input type="text" value="\${p.endDate}" class="text-center" style="width: 45%; padding: 6px 4px;" readonly>
 						</td>
 						<td><input type="number" class="text-center calc-days" value="\${p.days}" oninput="updateSalaryTotals()"></td>
 						<td><input type="text" class="calc-amount" value="\${p.amount.toLocaleString()}" oninput="formatAndTotal(this)"></td>
