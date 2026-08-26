@@ -246,7 +246,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="emai
 						<td><input type="text" name="resignationDate"
 							value="<fmt:formatDate value='${emp.resignationDate}' pattern='yyyy-MM-dd'/>"
 							readonly style="background-color: #eeeeee; cursor: pointer;"
-							onclick="alert('退職日の設定はここでは行えません。\n(퇴직일 설정은 여기서 할 수 없습니다.)');">
+							onclick="alert('退職日の設定はここでは行えません。');">
 						</td>
 					</tr>
 					<tr>
