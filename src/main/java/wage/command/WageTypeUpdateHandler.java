@@ -67,7 +67,8 @@ public class WageTypeUpdateHandler implements CommandHandler {
 			taxFreeName);
 
 		try {
-			wageService.updateWageType(wageType);
+			// 💡 updateWageType 대신 기존에 존재하는 modifyWageType을 호출하도록 변경합니다.
+			wageService.modifyWageType(wageType);
 		} catch (RuntimeException e) {
 			String errorMessage = e.getMessage();
 			if (errorMessage == null || errorMessage.trim().isEmpty()) {
