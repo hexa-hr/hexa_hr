@@ -536,7 +536,7 @@ table.form-table td {
 		// 支給項目削除前の警告ウィンドウ機能
 		function confirmWageDelete(wageName) {
 			if (wageName === '기본급') {
-				alert('기본급は必須項目であるため削除できません。');
+				alert('基本給は必須項目であるため削除できません。');
 				return false;
 			}
 			return confirm('本当に削除しますか？');
