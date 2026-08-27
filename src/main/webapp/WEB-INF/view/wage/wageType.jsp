@@ -246,8 +246,8 @@ table.form-table td {
 						<th style="width: 27%;">課税有無</th>
 						<th style="width: 15%;">非課税限度額</th>
 						<th style="width: 10%;">端数処理</th>
-						<th style="width: 20%;">勤怠連動/일괄지급</th>
-						<th style="width: 10%;">사용有無</th>
+						<th style="width: 20%;">勤怠連動/一括支給</th>
+						<th style="width: 10%;">使用有無</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -341,7 +341,7 @@ table.form-table td {
 						<th>端数処理</th>
 						<td><select name="numberCut" class="select-box">
 								<option value="없음"
-									${empty param.numberCut || param.numberCut == '없음' ? 'selected' : ''}>없음</option>
+									${empty param.numberCut || param.numberCut == '없음' ? 'selected' : ''}>なし</option>
 								<option value="1원 단위"
 									${param.numberCut == '1원 단위' || param.numberCut == '원' ? 'selected' : ''}>1원 단위</option>
 								<option value="10원 단위"
@@ -352,7 +352,7 @@ table.form-table td {
 					</tr>
 					<tr>
 						<tr>
-						<th>勤怠連動/일괄지급</th>
+						<th>勤怠連動/一括支給</th>
 						<td><select name="attendanceOrLumpsum"
 							id="attendanceOrLumpsumSelect" class="select-box"
 							onchange="toggleLumpSum()">
@@ -383,7 +383,7 @@ table.form-table td {
 					</tr>
 
 					<tr class="lump-sum-row" id="lumpSumRow">
-						<th>일괄지급額</th>
+						<th>一括支給額</th>
 						<td><input type="text" id="lumpSumInput"
 							name="attendanceOrLumpsumContent"
 							value="${param.attendanceOrLumpsum == '일괄지급' ? param.attendanceOrLumpsumContent : ''}"
@@ -392,7 +392,7 @@ table.form-table td {
 					</tr>
 
 					<tr>
-						<th>사용有無</th>
+						<th>使用有無</th>
 						<td><label class="radio-label"> <input type="radio"
 								name="usage" value="Y"
 								${empty param.usage || param.usage == 'Y' ? 'checked' : ''}>
@@ -488,7 +488,7 @@ table.form-table td {
 						<th>端数処理</th>
 						<td><select name="numberCut" class="select-box">
 								<option value="없음"
-									${empty param.numberCut || param.numberCut == '없음' ? 'selected' : ''}>없음</option>
+									${empty param.numberCut || param.numberCut == '없음' ? 'selected' : ''}>なし</option>
 								<option value="1원 단위"
 									${param.numberCut == '1원 단위' || param.numberCut == '1원 단위' ? 'selected' : ''}>1원 단위</option>
 								<option value="10원 단위"
@@ -504,7 +504,7 @@ table.form-table td {
 							class="input-text" placeholder="備考入力"></td>
 					</tr>
 					<tr>
-						<th>사용有無</th>
+						<th>使用有無</th>
 						<td><label class="radio-label"> <input type="radio"
 								name="usage" value="Y"
 								${empty param.usage || param.usage == 'Y' ? 'checked' : ''}>

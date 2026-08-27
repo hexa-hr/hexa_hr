@@ -67,7 +67,7 @@ public class WageService {
 				// 원래 이름이 보호 대상 시스템 항목이고, 입력된 이름이 기존과 다를 경우 (이름을 변경하려고 할 때)
 				if (PROTECTED_WAGE_NAMES.contains(origin.getWageTypeName())) {
 					if (!origin.getWageTypeName().equals(wageType.getWageTypeName())) {
-						throw new RuntimeException("システムの基本項目(" + origin.getWageTypeName() + ")の名前은 변경할 수 없습니다.");
+						throw new RuntimeException("システムの基本項目(" + origin.getWageTypeName() + ")의 이름은 변경할 수 없습니다.");
 					}
 				}
 			}
