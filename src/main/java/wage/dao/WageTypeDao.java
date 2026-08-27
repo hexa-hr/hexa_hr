@@ -140,7 +140,7 @@ public class WageTypeDao {
 		}
 	}
 
-	// 지급 또는 공제 구분별 목록 조회 (item_type: 'WAGE' 또는 'DEDUCTION')
+	// 지급 또는 공제 구분별 목록 조회 (item_type: 'P' 또는 'D')
 	public List<WageType> selectByType(Connection conn, String itemType) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

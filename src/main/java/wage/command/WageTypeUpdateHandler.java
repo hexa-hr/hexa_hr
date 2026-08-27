@@ -15,14 +15,12 @@ public class WageTypeUpdateHandler implements CommandHandler {
 	public String process(HttpServletRequest req, HttpServletResponse res) throws Exception {
 		req.setCharacterEncoding("UTF-8");
 
-		// PK 식별자 확인
 		String wageTypeIdStr = req.getParameter("wageTypeId");
-		if (wageTypeIdStr == null || wageTypeIdStr.trim().isEmpty()) {
-			res.sendRedirect(req.getContextPath() + "/wageTypeSetting.do");
-			return null;
+		Integer wageTypeId = null;
+		if (wageTypeIdStr != null && !wageTypeIdStr.trim().isEmpty()) {
+			wageTypeId = Integer.parseInt(wageTypeIdStr.trim());
 		}
 
-		Integer wageTypeId = Integer.parseInt(wageTypeIdStr.trim());
 		String wageTypeName = req.getParameter("wageTypeName");
 		String taxableYn = req.getParameter("taxableYn");
 		String itemType = req.getParameter("itemType");
@@ -37,11 +35,24 @@ public class WageTypeUpdateHandler implements CommandHandler {
 			}
 		}
 
-		String attendanceOrLumpsumContent = req.getParameter("attendanceOrLumpsumContent");
 		String numberCut = req.getParameter("numberCut");
-		String attendanceOrLumpsum = req.getParameter("attendanceOrLumpsum");
 		String usage = req.getParameter("usage");
 		String taxFreeName = req.getParameter("taxFreeName");
+
+		// 💡 수정 시에도 동일한 분기 로직 적용
+		String selectedOption = req.getParameter("attendanceOrLumpsum");
+		String rawLumpsumContent = req.getParameter("attendanceOrLumpsumContent");
+
+		String attendanceOrLumpsum = "";
+		String attendanceOrLumpsumContent = "";
+
+		if ("일괄지급".equals(selectedOption)) {
+			attendanceOrLumpsum = "일괄지급";
+			attendanceOrLumpsumContent = rawLumpsumContent;
+		} else if (selectedOption != null && !selectedOption.trim().isEmpty()) {
+			attendanceOrLumpsum = "근태연동";
+			attendanceOrLumpsumContent = selectedOption;
+		}
 
 		WageType wageType = new WageType(
 			wageTypeId,
@@ -55,20 +66,17 @@ public class WageTypeUpdateHandler implements CommandHandler {
 			taxFreeLimit,
 			taxFreeName);
 
-		// 수정 처리
 		try {
+			// 💡 updateWageType 대신 기존에 존재하는 modifyWageType을 호출하도록 변경합니다.
 			wageService.modifyWageType(wageType);
 		} catch (RuntimeException e) {
 			String errorMessage = e.getMessage();
 			if (errorMessage == null || errorMessage.trim().isEmpty()) {
-				errorMessage = "이미 존재하는 지급/공제 항목 이름입니다.";
+				errorMessage = "수정 중 오류가 발생했습니다.";
 			}
 			req.getSession().setAttribute("errorMessage", errorMessage);
-			res.sendRedirect(req.getContextPath() + "/wageTypeSetting.do");
-			return null;
 		}
 
-		// 목록 화면으로 이동
 		res.sendRedirect(req.getContextPath() + "/wageTypeSetting.do");
 		return null;
 	}

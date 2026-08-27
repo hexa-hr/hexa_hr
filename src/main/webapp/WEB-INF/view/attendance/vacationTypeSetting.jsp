@@ -266,8 +266,8 @@ tr:hover {
 				<input type="hidden" name="vacationTypeId"
 					value="${param.selectedVacationId}" />
 				<div class="form-group">
-					<label>휴가항목</label> <input type="text" name="vacationTypeName"
-						value="${param.vacationTypeName}" placeholder="휴가항목을 입력해주세요.">
+					<label>休暇項目</label> <input type="text" name="vacationTypeName"
+						value="${param.vacationTypeName}" placeholder="休暇項目を入力してください。">
 				</div>
 				<div class="form-group">
 					<label>適用期間</label>
@@ -360,8 +360,8 @@ tr:hover {
 						value="${param.attName}" placeholder="勤怠項目を入力してください。">
 				</div>
 				<div class="form-group">
-					<label>단위</label> <select name="unit">
-						<option value="">선택하세요</option>
+					<label>単位</label> <select name="unit">
+						<option value="">選択してください</option>
 						<option value="일" ${param.attUnit == '일' ? 'selected' : ''}>일</option>
 						<option value="시간" ${param.attUnit == '시간' ? 'selected' : ''}>시간</option>
 					</select>

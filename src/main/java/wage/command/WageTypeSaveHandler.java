@@ -31,15 +31,26 @@ public class WageTypeSaveHandler implements CommandHandler {
 			}
 		}
 
-		String attendanceOrLumpsumContent = req.getParameter("attendanceOrLumpsumContent");
 		String numberCut = req.getParameter("numberCut");
-		String attendanceOrLumpsum = req.getParameter("attendanceOrLumpsum");
 		String usage = req.getParameter("usage");
-
-		// 비과세 항목명 수신 처리
 		String taxFreeName = req.getParameter("taxFreeName");
 
-		// DTO 객체 생성 (wageTypeId는 Auto Increment 또는 DB 시퀀스 처리)
+		// 💡 핵심: 근태연결 vs 일괄지급 데이터 매핑 분기 처리
+		String selectedOption = req.getParameter("attendanceOrLumpsum"); // 셀렉트박스 선택값
+		String rawLumpsumContent = req.getParameter("attendanceOrLumpsumContent"); // 일괄지급액 입력값
+
+		String attendanceOrLumpsum = "";
+		String attendanceOrLumpsumContent = "";
+
+		if ("일괄지급".equals(selectedOption)) {
+			attendanceOrLumpsum = "일괄지급";
+			attendanceOrLumpsumContent = rawLumpsumContent; // 금액
+		} else if (selectedOption != null && !selectedOption.trim().isEmpty()) {
+			attendanceOrLumpsum = "근태연동"; // 대분류 고정
+			attendanceOrLumpsumContent = selectedOption; // 상세 근태명 (예: 잔업 등)
+		}
+
+		// DTO 객체 생성
 		WageType wageType = new WageType(
 			null,
 			wageTypeName,
@@ -57,7 +68,7 @@ public class WageTypeSaveHandler implements CommandHandler {
 		} catch (RuntimeException e) {
 			String errorMessage = e.getMessage();
 			if (errorMessage == null || errorMessage.trim().isEmpty()) {
-				errorMessage = "이미 존재하는 지급/공제 항목 이름입니다.";
+				errorMessage = "既に存在する支払/控除項目の名前です。";
 			}
 			req.getSession().setAttribute("errorMessage", errorMessage);
 			res.sendRedirect(req.getContextPath() + "/wageTypeSetting.do");
@@ -68,5 +79,4 @@ public class WageTypeSaveHandler implements CommandHandler {
 		res.sendRedirect(req.getContextPath() + "/wageTypeSetting.do");
 		return null;
 	}
-
 }
