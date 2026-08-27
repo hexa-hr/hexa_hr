@@ -42,11 +42,11 @@ public class WageTypeSaveHandler implements CommandHandler {
 		String attendanceOrLumpsum = "";
 		String attendanceOrLumpsumContent = "";
 
-		if ("一括支給".equals(selectedOption)) {
-			attendanceOrLumpsum = "一括支給";
+		if ("일괄지급".equals(selectedOption)) {
+			attendanceOrLumpsum = "일괄지급";
 			attendanceOrLumpsumContent = rawLumpsumContent; // 금액
 		} else if (selectedOption != null && !selectedOption.trim().isEmpty()) {
-			attendanceOrLumpsum = "勤怠連動"; // 대분류 고정
+			attendanceOrLumpsum = "근태연동"; // 대분류 고정
 			attendanceOrLumpsumContent = selectedOption; // 상세 근태명 (예: 잔업 등)
 		}
 

@@ -335,19 +335,19 @@ table.form-table td {
 							name="taxFreeLimit"
 							value="${empty param.taxFreeLimit ? 0 : param.taxFreeLimit}"
 							class="input-text" style="width: 80%; text-align: right;">
-							ウォン</td>
+							원</td>
 					</tr>
 					<tr>
 						<th>端数処理</th>
 						<td><select name="numberCut" class="select-box">
 								<option value="없음"
 									${empty param.numberCut || param.numberCut == '없음' ? 'selected' : ''}>없음</option>
-								<option value="1ウォン単位"
-									${param.numberCut == '1ウォン単位' || param.numberCut == 'ウォン' ? 'selected' : ''}>1ウォン単位</option>
-								<option value="10ウォン単位"
-									${param.numberCut == '10ウォン単位' || param.numberCut == '10ウォン単位' ? 'selected' : ''}>10ウォン単位</option>
-								<option value="100ウォン単位"
-									${param.numberCut == '100ウォン単位' ? 'selected' : ''}>100ウォン単位</option>
+								<option value="1원 단위"
+									${param.numberCut == '1원 단위' || param.numberCut == '원' ? 'selected' : ''}>1원 단위</option>
+								<option value="10원 단위"
+									${param.numberCut == '10원 단위' || param.numberCut == '10원 단위' ? 'selected' : ''}>10원 단위</option>
+								<option value="100원 단위"
+									${param.numberCut == '100원 단위' ? 'selected' : ''}>100원 단위</option>
 						</select></td>
 					</tr>
 					<tr>
@@ -388,7 +388,7 @@ table.form-table td {
 							name="attendanceOrLumpsumContent"
 							value="${param.attendanceOrLumpsum == '일괄지급' ? param.attendanceOrLumpsumContent : ''}"
 							class="input-text" style="width: 80%; text-align: right;"
-							placeholder="金額入力"> ウォン</td>
+							placeholder="金額入力"> 원</td>
 					</tr>
 
 					<tr>
@@ -489,12 +489,12 @@ table.form-table td {
 						<td><select name="numberCut" class="select-box">
 								<option value="없음"
 									${empty param.numberCut || param.numberCut == '없음' ? 'selected' : ''}>없음</option>
-								<option value="1ウォン単位"
-									${param.numberCut == '1ウォン単位' || param.numberCut == '1ウォン単位' ? 'selected' : ''}>1ウォン単位</option>
-								<option value="10ウォン単位"
-									${param.numberCut == '10ウォン単位' || param.numberCut == '10ウォン単位' ? 'selected' : ''}>10ウォン単位</option>
-								<option value="100ウォン単位"
-									${param.numberCut == '100ウォン単位' || param.numberCut == '100ウォン単位' ? 'selected' : ''}>100ウォン単位</option>
+								<option value="1원 단위"
+									${param.numberCut == '1원 단위' || param.numberCut == '1원 단위' ? 'selected' : ''}>1원 단위</option>
+								<option value="10원 단위"
+									${param.numberCut == '10원 단위' || param.numberCut == '10원 단위' ? 'selected' : ''}>10원 단위</option>
+								<option value="100원 단위"
+									${param.numberCut == '100원 단위' || param.numberCut == '100원 단위' ? 'selected' : ''}>100원 단위</option>
 						</select></td>
 					</tr>
 					<tr>

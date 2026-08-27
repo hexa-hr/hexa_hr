@@ -46,11 +46,11 @@ public class WageTypeUpdateHandler implements CommandHandler {
 		String attendanceOrLumpsum = "";
 		String attendanceOrLumpsumContent = "";
 
-		if ("一括支給".equals(selectedOption)) {
-			attendanceOrLumpsum = "一括支給";
+		if ("일괄지급".equals(selectedOption)) {
+			attendanceOrLumpsum = "일괄지급";
 			attendanceOrLumpsumContent = rawLumpsumContent;
 		} else if (selectedOption != null && !selectedOption.trim().isEmpty()) {
-			attendanceOrLumpsum = "勤怠連動";
+			attendanceOrLumpsum = "근태연동";
 			attendanceOrLumpsumContent = selectedOption;
 		}
 
