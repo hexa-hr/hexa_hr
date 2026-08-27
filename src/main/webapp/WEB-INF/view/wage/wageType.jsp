@@ -246,8 +246,8 @@ table.form-table td {
 						<th style="width: 27%;">課税有無</th>
 						<th style="width: 15%;">非課税限度額</th>
 						<th style="width: 10%;">端数処理</th>
-						<th style="width: 20%;">勤怠連動/一括支給</th>
-						<th style="width: 10%;">使用有無</th>
+						<th style="width: 20%;">勤怠連動/일괄지급</th>
+						<th style="width: 10%;">사용有無</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -270,10 +270,10 @@ table.form-table td {
 										<fmt:formatNumber value="${wage.taxFreeLimit}" pattern="#,##0" />
 									</c:if>
 							</a></td>
-							<td><a href="${wageUrl}">${empty wage.numberCut ? 'なし' : wage.numberCut}</a></td>
+							<td><a href="${wageUrl}">${empty wage.numberCut ? '없음' : wage.numberCut}</a></td>
 							<td><a href="${wageUrl}"> <c:choose>
-										<c:when test="${wage.attendanceOrLumpsum eq '一括支給'}">
-											一括支給_<fmt:formatNumber
+										<c:when test="${wage.attendanceOrLumpsum eq '일괄지급'}">
+											일괄지급_<fmt:formatNumber
 												value="${wage.attendanceOrLumpsumContent}" pattern="#,##0" />
 										</c:when>
 										<c:otherwise>
@@ -340,8 +340,8 @@ table.form-table td {
 					<tr>
 						<th>端数処理</th>
 						<td><select name="numberCut" class="select-box">
-								<option value="なし"
-									${empty param.numberCut || param.numberCut == 'なし' ? 'selected' : ''}>なし</option>
+								<option value="없음"
+									${empty param.numberCut || param.numberCut == '없음' ? 'selected' : ''}>없음</option>
 								<option value="1ウォン単位"
 									${param.numberCut == '1ウォン単位' || param.numberCut == 'ウォン' ? 'selected' : ''}>1ウォン単位</option>
 								<option value="10ウォン単位"
@@ -351,54 +351,55 @@ table.form-table td {
 						</select></td>
 					</tr>
 					<tr>
-						<th>勤怠連動/一括支給</th>
+						<tr>
+						<th>勤怠連動/일괄지급</th>
 						<td><select name="attendanceOrLumpsum"
 							id="attendanceOrLumpsumSelect" class="select-box"
 							onchange="toggleLumpSum()">
 								<option value="">選択してください。</option>
-								<option value="有給休暇"
-									${param.attendanceOrLumpsum == '有給休暇' ? 'selected' : ''}>有給休暇</option>
-								<option value="半休"
-									${param.attendanceOrLumpsum == '半休' ? 'selected' : ''}>半休</option>
-								<option value="遅刻"
-									${param.attendanceOrLumpsum == '遅刻' ? 'selected' : ''}>遅刻</option>
-								<option value="早退"
-									${param.attendanceOrLumpsum == '早退' ? 'selected' : ''}>早退</option>
-								<option value="外出"
-									${param.attendanceOrLumpsum == '外出' ? 'selected' : ''}>外出</option>
-								<option value="休日出勤"
-									${param.attendanceOrLumpsum == '休日出勤' ? 'selected' : ''}>休日出勤</option>
-								<option value="残業"
-									${param.attendanceOrLumpsum == '残業' ? 'selected' : ''}>残業</option>
-								<option value="リフレッシュ休暇"
-									${param.attendanceOrLumpsum == 'リフレッシュ休暇' ? 'selected' : ''}>リフレッシュ休暇</option>
-								<option value="深夜勤務"
-									${param.attendanceOrLumpsum == '深夜勤務' ? 'selected' : ''}>深夜勤務</option>
-								<option value="慶弔休暇"
-									${param.attendanceOrLumpsum == '慶弔休暇' ? 'selected' : ''}>慶弔休暇</option>
-								<option value="一括支給"
-									${param.attendanceOrLumpsum == '一括支給' ? 'selected' : ''}>一括支給</option>
+								<option value="연차"
+									${param.attendanceOrLumpsumContent == '연차' || param.attendanceOrLumpsum == '연차' ? 'selected' : ''}>연차</option>
+								<option value="반차"
+									${param.attendanceOrLumpsumContent == '반차' || param.attendanceOrLumpsum == '반차' ? 'selected' : ''}>반차</option>
+								<option value="지각"
+									${param.attendanceOrLumpsumContent == '지각' || param.attendanceOrLumpsum == '지각' ? 'selected' : ''}>지각</option>
+								<option value="조퇴"
+									${param.attendanceOrLumpsumContent == '조퇴' || param.attendanceOrLumpsum == '조퇴' ? 'selected' : ''}>조퇴</option>
+								<option value="외근"
+									${param.attendanceOrLumpsumContent == '외근' || param.attendanceOrLumpsum == '외근' ? 'selected' : ''}>외근</option>
+								<option value="휴일근무"
+									${param.attendanceOrLumpsumContent == '휴일근무' || param.attendanceOrLumpsum == '휴일근무' ? 'selected' : ''}>휴일근무</option>
+								<option value="연장근무"
+									${param.attendanceOrLumpsumContent == '연장근무' || param.attendanceOrLumpsum == '연장근무' ? 'selected' : ''}>연장근무</option>
+								<option value="포상휴가"
+									${param.attendanceOrLumpsumContent == '포상휴가' || param.attendanceOrLumpsum == '포상휴가' ? 'selected' : ''}>포상휴가</option>
+								<option value="야간근무"
+									${param.attendanceOrLumpsumContent == '야간근무' || param.attendanceOrLumpsum == '야간근무' ? 'selected' : ''}>야간근무</option>
+								<option value="청원휴가"
+									${param.attendanceOrLumpsumContent == '청원휴가' || param.attendanceOrLumpsum == '청원휴가' ? 'selected' : ''}>청원휴가</option>
+								<option value="일괄지급"
+									${param.attendanceOrLumpsum == '일괄지급' ? 'selected' : ''}>일괄지급</option>
 						</select></td>
 					</tr>
 
 					<tr class="lump-sum-row" id="lumpSumRow">
-						<th>一括支給額</th>
+						<th>일괄지급額</th>
 						<td><input type="text" id="lumpSumInput"
 							name="attendanceOrLumpsumContent"
-							value="${param.attendanceOrLumpsum == '一括支給' ? param.attendanceOrLumpsumContent : ''}"
+							value="${param.attendanceOrLumpsum == '일괄지급' ? param.attendanceOrLumpsumContent : ''}"
 							class="input-text" style="width: 80%; text-align: right;"
 							placeholder="金額入力"> ウォン</td>
 					</tr>
 
 					<tr>
-						<th>使用有無</th>
+						<th>사용有無</th>
 						<td><label class="radio-label"> <input type="radio"
 								name="usage" value="Y"
 								${empty param.usage || param.usage == 'Y' ? 'checked' : ''}>
-								使用
+								사용
 						</label> <label class="radio-label"> <input type="radio"
 								name="usage" value="N" ${param.usage == 'N' ? 'checked' : ''}>
-								使用しない
+								사용안함
 						</label></td>
 					</tr>
 				</table>
@@ -443,7 +444,7 @@ table.form-table td {
 							value="wageTypeSetting.do?selectedDedId=${ded.wageTypeId}&dedName=${ded.wageTypeName}&numberCut=${ded.numberCut}&usage=${ded.usage}&calcMethod=${ded.attendanceOrLumpsumContent}&note=${ded.taxFreeName}" />
 						<tr>
 							<td><a href="${dedUrl}">${ded.wageTypeName}</a></td>
-							<td><a href="${dedUrl}">${empty ded.numberCut ? 'なし' : ded.numberCut}</a></td>
+							<td><a href="${dedUrl}">${empty ded.numberCut ? '없음' : ded.numberCut}</a></td>
 							<td><a href="${dedUrl}"> <c:choose>
 										<c:when test="${ded.usage == 'Y'}">
 											<span class="badge-use">O</span>
@@ -486,8 +487,8 @@ table.form-table td {
 					<tr>
 						<th>端数処理</th>
 						<td><select name="numberCut" class="select-box">
-								<option value="なし"
-									${empty param.numberCut || param.numberCut == 'なし' ? 'selected' : ''}>なし</option>
+								<option value="없음"
+									${empty param.numberCut || param.numberCut == '없음' ? 'selected' : ''}>없음</option>
 								<option value="1ウォン単位"
 									${param.numberCut == '1ウォン単位' || param.numberCut == '1ウォン単位' ? 'selected' : ''}>1ウォン単位</option>
 								<option value="10ウォン単位"
@@ -499,18 +500,18 @@ table.form-table td {
 					<tr>
 						<th>備考</th>
 						<td><input type="text" name="taxFreeName"
-							value="${empty param.note ? '基本項目' : param.note}"
+							value="${empty param.note ? '기본항목' : param.note}"
 							class="input-text" placeholder="備考入力"></td>
 					</tr>
 					<tr>
-						<th>使用有無</th>
+						<th>사용有無</th>
 						<td><label class="radio-label"> <input type="radio"
 								name="usage" value="Y"
 								${empty param.usage || param.usage == 'Y' ? 'checked' : ''}>
-								使用
+								사용
 						</label> <label class="radio-label"> <input type="radio"
 								name="usage" value="N" ${param.usage == 'N' ? 'checked' : ''}>
-								使用しない
+								사용안함
 						</label></td>
 					</tr>
 				</table>
@@ -534,8 +535,8 @@ table.form-table td {
 	<script>
 		// 支給項目削除前の警告ウィンドウ機能
 		function confirmWageDelete(wageName) {
-			if (wageName === '基本給') {
-				alert('基本給は必須項目であるため削除できません。');
+			if (wageName === '기본급') {
+				alert('기본급は必須項目であるため削除できません。');
 				return false;
 			}
 			return confirm('本当に削除しますか？');
@@ -544,8 +545,8 @@ table.form-table td {
 		// 控除項目削除前の警告ウィンドウ機能
 		function confirmDeductDelete(dedName) {
 			const fixedItems = [
-				'国民年金', '健康保険', '介護保険', '雇用保険', 
-				'所得税', '住民税', '事業所得', '日雇給与'
+				'국민연금', '건강보험', '장기요양보험', '고용보험', 
+				'소득세', '지방소득세', '사업소득', '일용급여'
 			];
 			
 			if (fixedItems.includes(dedName)) {
@@ -580,7 +581,7 @@ table.form-table td {
 			const lumpSumRow = document.getElementById('lumpSumRow');
 			const lumpSumInput = document.getElementById('lumpSumInput');
 
-			if (selectVal === '一括支給') {
+			if (selectVal === '일괄지급') {
 				lumpSumRow.style.display = 'table-row';
 			} else {
 				lumpSumRow.style.display = 'none';

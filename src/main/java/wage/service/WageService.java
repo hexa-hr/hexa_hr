@@ -134,4 +134,19 @@ public class WageService {
 			w.getTaxableYn(), w.getTaxFreeLimit(), w.getTaxFreeName());
 	}
 
+	public void updateWageType(WageType wageType) {
+		try (Connection conn = ConnectionProvider.getConnection()) {
+			WageTypeDao dao = new WageTypeDao();
+
+			// 수정 시 이름 중복 체크가 필요하다면 아래와 같이 검증 로직 추가 가능
+			if (dao.isDuplicateNameForUpdate(conn, wageType.getWageTypeId(), wageType.getWageTypeName())) {
+				throw new RuntimeException("이미 존재하는 지급/공제 항목 이름입니다.");
+			}
+
+			dao.update(conn, wageType); // WageTypeDao의 update 메서드 호출[cite: 6]
+		} catch (SQLException e) {
+			throw new RuntimeException("급여 항목 수정 실패: " + e.getMessage(), e);
+		}
+	}
+
 }
