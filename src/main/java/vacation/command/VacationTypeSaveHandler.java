@@ -1,0 +1,78 @@
+package vacation.command;
+
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import mvc.command.CommandHandler;
+import vacation.model.VacationType;
+import vacation.service.VacationTypeService;
+
+public class VacationTypeSaveHandler implements CommandHandler {
+
+	private VacationTypeService vacationService = new VacationTypeService();
+
+	@Override
+	public String process(HttpServletRequest req, HttpServletResponse res) throws Exception {
+		if (req.getMethod().equalsIgnoreCase("GET")) {
+			res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
+			return null;
+		}
+
+		// 1. パラメータ受信
+		String vacationTypeName = req.getParameter("vacationTypeName");
+		String applyPeriod1 = req.getParameter("applyPeriod1");
+		String applyPeriod2 = req.getParameter("applyPeriod2");
+		String usage = req.getParameter("usage");
+
+		// 2. 入力値検証
+		Map<String, Boolean> errors = new HashMap<>();
+		req.setAttribute("errors", errors);
+
+		if (vacationTypeName == null || vacationTypeName.trim().isEmpty()) {
+			errors.put("vacationTypeName", Boolean.TRUE);
+		}
+		if (applyPeriod1 == null || applyPeriod1.trim().isEmpty() ||
+			applyPeriod2 == null || applyPeriod2.trim().isEmpty()) {
+			errors.put("applyPeriod", Boolean.TRUE);
+		}
+
+		// 検証エラー時、元のページに戻る
+		if (!errors.isEmpty()) {
+			req.setAttribute("vacationList", vacationService.getVacationList());
+			return "/WEB-INF/view/attendance/vacationTypeSetting.jsp"; // 作成したJSPパスを指定
+		}
+
+		// VacationTypeSaveHandler.java 内部の process メソッド部分
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+		VacationType vacation = new VacationType();
+		vacation.setVacationTypeName(vacationTypeName);
+		vacation.setApplyPeriod1(sdf.parse(applyPeriod1));
+		vacation.setApplyPeriod2(sdf.parse(applyPeriod2));
+		vacation.setUsage(usage != null ? usage : "Y");
+
+		try {
+			// 重複例外発生箇所
+			vacationService.addVacationType(vacation);
+		} catch (RuntimeException e) {
+			String errorMessage = e.getMessage();
+			if (e.getCause() != null && e.getCause().getMessage() != null) {
+				errorMessage = e.getCause().getMessage();
+			}
+
+			// 👉 [修正] requestではなく session にエラーメッセージを保存
+			req.getSession().setAttribute("errorMessage", errorMessage);
+
+			// 👉 [修正] setting.doへリダイレクト後、終了
+			res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
+			return null;
+		}
+
+		res.sendRedirect(req.getContextPath() + "/vacationTypeSetting.do");
+		return null;
+	}
+}

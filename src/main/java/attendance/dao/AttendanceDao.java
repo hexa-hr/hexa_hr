@@ -1,5 +1,632 @@
 package attendance.dao;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import attendance.model.AttendanceVO;
+import attendance.model.EmployeeVO;
+import employee.model.Employee;
+import jdbc.JdbcUtil;
+import master.model.AttendanceType;
+
 public class AttendanceDao {
 
+	// Integer로 변환하는 헬퍼 메서드
+	private Integer getInteger(ResultSet rs, String columnName) throws SQLException {
+		Object obj = rs.getObject(columnName);
+		if (obj == null)
+			return null;
+		if (obj instanceof Number) {
+			return ((Number) obj).intValue();
+		}
+		return Integer.parseInt(obj.toString());
+	}
+
+	private Long getLong(ResultSet rs, String columnName) throws SQLException {
+
+		Object value = rs.getObject(columnName);
+
+		if (value == null) {
+			return null;
+		}
+
+		if (value instanceof Number) {
+
+			return ((Number) value).longValue();
+		}
+
+		return Long.valueOf(value.toString());
+	}
+
+	// 1. 전체 목록 조회
+	public List<AttendanceType> selectAll(Connection conn) throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			// 쿼리 변경: a."USAGE" 와 v.usage 를 모두 가져오도록 별칭(AS) 적용
+			pstmt = conn.prepareStatement("SELECT a.attendance_type_id, a.attendance_type_name, a.unit, "
+					+ "a.attendance_group_id, a.vacation_type_id, a.\"USAGE\" AS att_usage, "
+					+ "v.vacation_type_name, v.apply_period1, v.apply_period2, v.usage AS vac_usage "
+					+ "FROM attendance_type a "
+					+ "LEFT JOIN vacation_type v ON a.vacation_type_id = v.vacation_type_id "
+					+ "ORDER BY a.attendance_type_id ASC");
+			rs = pstmt.executeQuery();
+			List<AttendanceType> list = new ArrayList<>();
+			while (rs.next()) {
+				Integer groupId = rs.getObject("attendance_group_id") != null ? rs.getInt("attendance_group_id") : null;
+				Integer vacationId = rs.getObject("vacation_type_id") != null ? rs.getInt("vacation_type_id") : null;
+
+				// 별칭으로 가져온 att_usage 세팅
+				AttendanceType att = new AttendanceType(rs.getInt("attendance_type_id"),
+						rs.getString("attendance_type_name"), rs.getString("unit"), groupId, vacationId,
+						rs.getString("att_usage"));
+
+				att.setVacationTypeName(rs.getString("vacation_type_name"));
+				att.setApplyPeriod1(rs.getDate("apply_period1"));
+				att.setApplyPeriod2(rs.getDate("apply_period2"));
+
+				// [추가] 휴가 사용여부 세팅
+				att.setVacationUsage(rs.getString("vac_usage"));
+
+				list.add(att);
+			}
+			return list;
+		} finally {
+			JdbcUtil.close(rs);
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// 1. 전체 사원 목록 조회 (JOIN department, position) - 나(에스더) 코드
+	public List<EmployeeVO> selectAllEmployees(Connection conn) throws SQLException {
+		// 쿼리에 e.basic_pay 추가
+		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, "
+				+ "d.department_name, p.position_name, e.basic_pay " + "FROM employee e "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id "
+				+ "LEFT JOIN position p ON e.position_id = p.position_id " + "ORDER BY e.employee_id ASC";
+
+		List<EmployeeVO> list = new ArrayList<>();
+		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				EmployeeVO vo = new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
+						rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name"));
+
+				vo.setBasicPay(rs.getLong("basic_pay"));
+				list.add(vo);
+			}
+		}
+		return list;
+	}
+
+	// 2. 근태항목 추가 (Insert) - 유진님 코드
+	public void insert(Connection conn, AttendanceType att) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql = "INSERT INTO attendance_type (attendance_type_id, attendance_type_name, unit, attendance_group_id, vacation_type_id, \"USAGE\") "
+				+ "VALUES ((SELECT NVL(MAX(attendance_type_id), 0) + 1 FROM attendance_type), ?, ?, ?, ?, ?)";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, att.getAttendanceTypeName());
+			pstmt.setString(2, att.getUnit());
+
+			if (att.getAttendanceGroupId() != null) {
+				pstmt.setInt(3, att.getAttendanceGroupId());
+			} else {
+				pstmt.setNull(3, java.sql.Types.INTEGER);
+			}
+
+			if (att.getVacationTypeId() != null) {
+				pstmt.setInt(4, att.getVacationTypeId());
+			} else {
+				pstmt.setNull(4, java.sql.Types.INTEGER);
+			}
+
+			pstmt.setString(5, att.getUsage());
+			pstmt.executeUpdate();
+		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// 2. 특정 사원의 근태 기록 조회 (모달용) - 나(에스더) 코드
+	public List<AttendanceVO> selectAttendanceByEmpId(Connection conn, int employeeId) throws SQLException {
+		String sql = "SELECT a.attendance_id, a.employee_id, a.input_date, "
+				+ "t.attendance_type_name, a.start_date, a.end_date, " + "a.attendance_days, a.amount, a.summary "
+				+ "FROM attendance a " + "JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id "
+				+ "WHERE a.employee_id = ? " + "ORDER BY a.input_date DESC, a.attendance_id DESC";
+
+		List<AttendanceVO> list = new ArrayList<>();
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, employeeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					AttendanceVO vo = new AttendanceVO();
+					vo.setAttendanceId(rs.getInt("attendance_id"));
+					vo.setEmployeeId(rs.getInt("employee_id"));
+					vo.setInputDate(rs.getDate("input_date"));
+					vo.setAttendanceTypeName(rs.getString("attendance_type_name"));
+					vo.setStartDate(rs.getDate("start_date"));
+					vo.setEndDate(rs.getDate("end_date"));
+					vo.setAttendanceDays(rs.getDouble("attendance_days"));
+					vo.setAmount(rs.getInt("amount"));
+					vo.setSummary(rs.getString("summary"));
+					list.add(vo);
+				}
+			}
+		}
+		return list;
+	}
+
+	// 3. 근태항목 수정 (Update) - 유진님 코드
+	public void update(Connection conn, AttendanceType att) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql = "UPDATE attendance_type "
+				+ "SET attendance_type_name = ?, unit = ?, attendance_group_id = ?, vacation_type_id = ?, \"USAGE\" = ? "
+				+ "WHERE attendance_type_id = ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, att.getAttendanceTypeName());
+			pstmt.setString(2, att.getUnit());
+
+			if (att.getAttendanceGroupId() != null) {
+				pstmt.setInt(3, att.getAttendanceGroupId());
+			} else {
+				pstmt.setNull(3, java.sql.Types.INTEGER);
+			}
+
+			if (att.getVacationTypeId() != null) {
+				pstmt.setInt(4, att.getVacationTypeId());
+			} else {
+				pstmt.setNull(4, java.sql.Types.INTEGER);
+			}
+
+			pstmt.setString(5, att.getUsage());
+			pstmt.setInt(6, att.getAttendanceTypeId());
+			pstmt.executeUpdate();
+		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// 3. 근태 기록 저장 (신규 등록) - 나(에스더) 코드
+	public int insertAttendance(Connection conn, AttendanceVO vo) throws SQLException {
+		String sql = "INSERT INTO attendance (attendance_id, employee_id, input_date, attendance_type_id, "
+				+ "start_date, end_date, attendance_days, amount, summary) "
+				+ "VALUES (attendance_seq.NEXTVAL, ?, SYSDATE, ?, ?, ?, ?, ?, ?)";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, vo.getEmployeeId());
+			pstmt.setInt(2, vo.getAttendanceTypeId());
+			pstmt.setDate(3, vo.getStartDate());
+			pstmt.setDate(4, vo.getEndDate());
+			pstmt.setDouble(5, vo.getAttendanceDays());
+			pstmt.setInt(6, vo.getAmount());
+			pstmt.setString(7, vo.getSummary());
+			return pstmt.executeUpdate();
+		}
+	}
+
+	// 3. 근태 기록 수정 (UPDATE) - 나(에스더) 코드 추가
+	public int updateAttendance(Connection conn, AttendanceVO vo) throws SQLException {
+		String sql = "UPDATE attendance SET " + "attendance_type_id = ?, " + "start_date = ?, " + "end_date = ?, "
+				+ "attendance_days = ?, " + "amount = ?, " + "summary = ? " + "WHERE attendance_id = ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, vo.getAttendanceTypeId());
+			pstmt.setDate(2, vo.getStartDate()); // java.sql.Date로 처리됨
+			pstmt.setDate(3, vo.getEndDate());
+			pstmt.setDouble(4, vo.getAttendanceDays());
+			pstmt.setInt(5, vo.getAmount());
+			pstmt.setString(6, vo.getSummary());
+			pstmt.setInt(7, vo.getAttendanceId());
+
+			return pstmt.executeUpdate();
+		}
+	}
+
+	// 4. 근태항목 삭제 (Delete) - 유진님 코드
+	public void delete(Connection conn, int attendanceTypeId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql = "DELETE FROM attendance_type WHERE attendance_type_id = ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, attendanceTypeId);
+			pstmt.executeUpdate();
+		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// 4. 근태 기록 삭제 (attendance_id 기준) - 나(에스더) 코드
+	public int deleteAttendance(Connection conn, int attendanceId) throws SQLException {
+		String sql = "DELETE FROM attendance WHERE attendance_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, attendanceId);
+			return pstmt.executeUpdate();
+		}
+	}
+
+	// 5. 월별 전체 사원 근태 기록 조회 (YYYY-MM 기준)
+	public List<AttendanceVO> selectMonthlyAttendance(Connection conn, String yearMonth) throws SQLException {
+		String sql = "SELECT a.attendance_id, a.employee_id, a.input_date, "
+				+ "t.attendance_type_name, a.start_date, a.end_date, " + "a.attendance_days, a.amount, a.summary "
+				+ "FROM attendance a " + "JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id "
+				+ "WHERE TO_CHAR(a.start_date, 'YYYY-MM') <= ? " + "AND TO_CHAR(a.end_date, 'YYYY-MM') >= ? "
+				+ "ORDER BY a.employee_id ASC, a.start_date ASC";
+
+		List<AttendanceVO> list = new ArrayList<>();
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, yearMonth);
+			pstmt.setString(2, yearMonth);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					AttendanceVO vo = new AttendanceVO();
+					vo.setAttendanceId(rs.getInt("attendance_id"));
+					vo.setEmployeeId(rs.getInt("employee_id"));
+					vo.setInputDate(rs.getDate("input_date"));
+					vo.setAttendanceTypeName(rs.getString("attendance_type_name"));
+					vo.setStartDate(rs.getDate("start_date"));
+					vo.setEndDate(rs.getDate("end_date"));
+					vo.setAttendanceDays(rs.getDouble("attendance_days"));
+					vo.setAmount(rs.getInt("amount"));
+					vo.setSummary(rs.getString("summary"));
+					list.add(vo);
+				}
+			}
+		}
+		return list;
+	}
+
+	// ==========================================================
+	// [상세 조회용] 드롭다운 데이터 불러오기 및 동적 검색 메서드 추가
+	// ==========================================================
+
+	// 1. 부서 목록 조회
+	public List<java.util.Map<String, String>> getDepartments(Connection conn) throws SQLException {
+		List<java.util.Map<String, String>> list = new java.util.ArrayList<>();
+		String sql = "SELECT department_id, department_name FROM department ORDER BY department_id";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				java.util.Map<String, String> map = new java.util.HashMap<>();
+				map.put("id", rs.getString("department_id"));
+				map.put("name", rs.getString("department_name"));
+				list.add(map);
+			}
+		}
+		return list;
+	}
+
+	// 2. 근태그룹 목록 조회
+	public List<java.util.Map<String, String>> getAttendanceGroups(Connection conn) throws SQLException {
+		List<java.util.Map<String, String>> list = new java.util.ArrayList<>();
+		// 실제 DB 컬럼명으로 수정 완료
+		String sql = "SELECT attendance_group_id, attendance_group_name FROM attendance_group ORDER BY attendance_group_id";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				java.util.Map<String, String> map = new java.util.HashMap<>();
+				map.put("id", rs.getString("attendance_group_id"));
+				map.put("name", rs.getString("attendance_group_name"));
+				list.add(map);
+			}
+		}
+		return list;
+	}
+
+	// 3. 근태항목 목록 조회
+	public List<java.util.Map<String, String>> getAttendanceTypes(Connection conn) throws SQLException {
+		List<java.util.Map<String, String>> list = new java.util.ArrayList<>();
+		String sql = "SELECT attendance_type_id, attendance_type_name FROM attendance_type ORDER BY attendance_type_id";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				java.util.Map<String, String> map = new java.util.HashMap<>();
+				map.put("id", rs.getString("attendance_type_id"));
+				map.put("name", rs.getString("attendance_type_name"));
+				list.add(map);
+			}
+		}
+		return list;
+	}
+
+	// 4. 휴가항목 목록 조회
+	public List<java.util.Map<String, String>> getVacationTypes(Connection conn) throws SQLException {
+		List<java.util.Map<String, String>> list = new java.util.ArrayList<>();
+		// 실제 DB 컬럼명으로 수정 완료
+		String sql = "SELECT vacation_type_id, vacation_type_name FROM vacation_type ORDER BY vacation_type_id";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				java.util.Map<String, String> map = new java.util.HashMap<>();
+				map.put("id", rs.getString("vacation_type_id"));
+				map.put("name", rs.getString("vacation_type_name"));
+				list.add(map);
+			}
+		}
+		return list;
+	}
+
+	// 5. 체크박스 조건에 따른 동적 검색 쿼리 (JSON 문자열 반환) - 나(에스더)
+	public String searchAttendanceDetailsJson(Connection conn, java.util.Map<String, String> params)
+			throws SQLException {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT TO_CHAR(a.input_date, 'YYYY-MM-DD') as input_date, ")
+				.append("e.employment_type, e.korean_name, d.department_name, p.position_name, ")
+				.append("t.attendance_type_name, ")
+				.append("TO_CHAR(a.start_date, 'YY-MM-DD') || ' ~ ' || TO_CHAR(a.end_date, 'YY-MM-DD') as att_period, ")
+				.append("a.attendance_days, NVL(a.amount, 0) as amount, NVL(a.summary, '') as summary ")
+				.append("FROM attendance a ").append("JOIN employee e ON a.employee_id = e.employee_id ")
+				.append("LEFT JOIN department d ON e.department_id = d.department_id ")
+				.append("LEFT JOIN position p ON e.position_id = p.position_id ")
+				.append("LEFT JOIN attendance_type t ON a.attendance_type_id = t.attendance_type_id ")
+				// [요청하신 부분] 근태그룹과 휴가항목 테이블을 명시적으로 조인합니다!
+				.append("LEFT JOIN attendance_group g ON t.attendance_group_id = g.attendance_group_id ")
+				.append("LEFT JOIN vacation_type v ON t.vacation_type_id = v.vacation_type_id ").append("WHERE 1=1 ");
+
+		// 동적 WHERE 조건 추가 (빈 문자열이 아닐 때만 쿼리 적용)
+		if (params.containsKey("inputDate") && !params.get("inputDate").trim().isEmpty())
+			sql.append(" AND TO_CHAR(a.input_date, 'YYYY-MM-DD') = ? ");
+		if (params.containsKey("startDate") && !params.get("startDate").trim().isEmpty())
+			sql.append(" AND TO_CHAR(a.start_date, 'YYYY-MM-DD') >= ? ");
+		if (params.containsKey("endDate") && !params.get("endDate").trim().isEmpty())
+			sql.append(" AND TO_CHAR(a.end_date, 'YYYY-MM-DD') <= ? ");
+		if (params.containsKey("deptId") && !params.get("deptId").trim().isEmpty())
+			sql.append(" AND e.department_id = ? ");
+		if (params.containsKey("empName") && !params.get("empName").trim().isEmpty())
+			sql.append(" AND e.korean_name LIKE ? ");
+
+		// [수정된 부분 1] 조인된 근태그룹 테이블(g)을 기준으로 검색
+		if (params.containsKey("attGroupId") && !params.get("attGroupId").trim().isEmpty())
+			sql.append(" AND g.attendance_group_id = ? ");
+
+		if (params.containsKey("attTypeId") && !params.get("attTypeId").trim().isEmpty())
+			sql.append(" AND a.attendance_type_id = ? ");
+
+		// [수정된 부분 2] 조인된 휴가항목 테이블(v)을 기준으로 검색
+		if (params.containsKey("vacTypeId") && !params.get("vacTypeId").trim().isEmpty())
+			sql.append(" AND v.vacation_type_id = ? ");
+
+		if (params.containsKey("summary") && !params.get("summary").trim().isEmpty())
+			sql.append(" AND a.summary LIKE ? ");
+
+		sql.append("ORDER BY a.input_date DESC, a.attendance_id DESC");
+
+		StringBuilder json = new StringBuilder();
+		json.append("[");
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
+			int idx = 1;
+			// 조건 값 세팅
+			if (params.containsKey("inputDate") && !params.get("inputDate").trim().isEmpty())
+				pstmt.setString(idx++, params.get("inputDate"));
+			if (params.containsKey("startDate") && !params.get("startDate").trim().isEmpty())
+				pstmt.setString(idx++, params.get("startDate"));
+			if (params.containsKey("endDate") && !params.get("endDate").trim().isEmpty())
+				pstmt.setString(idx++, params.get("endDate"));
+			if (params.containsKey("deptId") && !params.get("deptId").trim().isEmpty())
+				pstmt.setInt(idx++, Integer.parseInt(params.get("deptId")));
+			if (params.containsKey("empName") && !params.get("empName").trim().isEmpty())
+				pstmt.setString(idx++, "%" + params.get("empName") + "%");
+
+			// 파라미터 바인딩
+			if (params.containsKey("attGroupId") && !params.get("attGroupId").trim().isEmpty())
+				pstmt.setInt(idx++, Integer.parseInt(params.get("attGroupId")));
+
+			if (params.containsKey("attTypeId") && !params.get("attTypeId").trim().isEmpty())
+				pstmt.setInt(idx++, Integer.parseInt(params.get("attTypeId")));
+
+			if (params.containsKey("vacTypeId") && !params.get("vacTypeId").trim().isEmpty())
+				pstmt.setInt(idx++, Integer.parseInt(params.get("vacTypeId")));
+
+			if (params.containsKey("summary") && !params.get("summary").trim().isEmpty())
+				pstmt.setString(idx++, "%" + params.get("summary") + "%");
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				boolean first = true;
+				while (rs.next()) {
+					if (!first)
+						json.append(",");
+					json.append("{").append("\"inputDate\":\"").append(rs.getString("input_date")).append("\",")
+							.append("\"empType\":\"")
+							.append(rs.getString("employment_type") == null ? "" : rs.getString("employment_type"))
+							.append("\",").append("\"empName\":\"").append(rs.getString("korean_name")).append("\",")
+							.append("\"deptName\":\"")
+							.append(rs.getString("department_name") == null ? "" : rs.getString("department_name"))
+							.append("\",").append("\"positionName\":\"")
+							.append(rs.getString("position_name") == null ? "" : rs.getString("position_name"))
+							.append("\",").append("\"attTypeName\":\"")
+							.append(rs.getString("attendance_type_name") == null ? ""
+									: rs.getString("attendance_type_name"))
+							.append("\",").append("\"attPeriod\":\"").append(rs.getString("att_period")).append("\",")
+							.append("\"attDays\":\"").append(rs.getDouble("attendance_days")).append("\",")
+							.append("\"amount\":\"").append(String.format("%,d", rs.getInt("amount"))).append("\",")
+							.append("\"summary\":\"").append(rs.getString("summary")).append("\"}");
+					first = false;
+				}
+			}
+		}
+		json.append("]");
+		return json.toString();
+	}
+
+	// 5. 사원별 휴가일수 목록 조회 [유진]
+	public List<Map<String, Object>> selectEmployeeVacationList(Connection conn, int vacationTypeId)
+			throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		String sql = "SELECT e.employee_id, e.account_id, e.company_id, e.person_id, e.employment_type, "
+				+ "e.korean_name, e.english_name, e.hire_date, e.resignation_date, e.department_id, e.position_id, "
+				+ "e.foreign_or_domestic, e.resident_number1, e.resident_number2, e.address, e.tel_phone, "
+				+ "e.mobile, e.email, e.sns, e.other_details, e.status, NVL(e.basic_pay, 0) AS basic_pay, "
+				+ "d.department_name, p.position_name, v.vacation_value " + "FROM employee e "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id "
+				+ "LEFT JOIN position p ON e.position_id = p.position_id "
+				+ "LEFT JOIN vacation_days v ON e.employee_id = v.employee_id AND v.vacation_type_id = ? "
+				+ "ORDER BY e.employee_id ASC";
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, vacationTypeId);
+			rs = pstmt.executeQuery();
+
+			List<Map<String, Object>> list = new ArrayList<>();
+			while (rs.next()) {
+				Employee emp = new Employee(rs.getInt("employee_id"), getInteger(rs, "account_id"),
+						getInteger(rs, "company_id"), getInteger(rs, "person_id"), rs.getString("employment_type"),
+						rs.getString("korean_name"), rs.getString("english_name"), rs.getDate("hire_date"),
+						rs.getDate("resignation_date"), getInteger(rs, "department_id"), getInteger(rs, "position_id"),
+						rs.getString("foreign_or_domestic"), rs.getString("resident_number1"),
+						rs.getString("resident_number2"), rs.getString("address"), rs.getString("tel_phone"),
+						rs.getString("mobile"), rs.getString("email"), rs.getString("sns"),
+						rs.getString("other_details"), rs.getString("status"), getLong(rs, "basic_pay"));
+
+				Integer days = getInteger(rs, "vacation_value"); // vacation_value 가져오기
+				int vacationDays = (days != null) ? days : 0;
+
+				Map<String, Object> map = new HashMap<>();
+				map.put("emp", emp);
+				map.put("departmentName", rs.getString("department_name"));
+				map.put("positionName", rs.getString("position_name"));
+				map.put("attendanceDays", vacationDays); // 뷰단에서 쓰는 키 이름에 맞춤 (또는 vacationDays)
+				list.add(map);
+			}
+			return list;
+		} finally {
+			JdbcUtil.close(rs);
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// 6. 사원별 휴가일수 저장[cite: 1] [유진]
+	public void saveEmployeeVacationDays(Connection conn, int vacationTypeId, int employeeId, int days)
+			throws SQLException {
+
+		PreparedStatement pstmt = null;
+		String sql = "MERGE INTO vacation_days v " + "USING DUAL ON (v.employee_id = ? AND v.vacation_type_id = ?) "
+				+ "WHEN MATCHED THEN " + "  UPDATE SET v.vacation_value = ? " + "WHEN NOT MATCHED THEN "
+				+ "  INSERT (vacation_days_id, employee_id, vacation_type_id, vacation_value) "
+				+ "  VALUES ((SELECT NVL(MAX(vacation_days_id), 0) + 1 FROM vacation_days), ?, ?, ?)";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, employeeId);
+			pstmt.setInt(2, vacationTypeId);
+			pstmt.setInt(3, days);
+			pstmt.setInt(4, employeeId);
+			pstmt.setInt(5, vacationTypeId);
+			pstmt.setInt(6, days);
+			pstmt.executeUpdate();
+		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// 선택된 사원의 휴가일수 삭제 (수정)[cite: 1] [유진]
+	public void deleteEmployeeVacationDays(Connection conn, int vacationTypeId, int employeeId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql = "DELETE FROM vacation_days WHERE employee_id = ? AND vacation_type_id = ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, employeeId);
+			pstmt.setInt(2, vacationTypeId);
+			pstmt.executeUpdate();
+		} finally {
+			JdbcUtil.close(pstmt);
+		}
+	}
+
+	// 급여 연동용 - 사원별 근태연결 수당 합계 조회
+	public long selectLinkedAllowanceAmount(Connection conn, int employeeId, String attendanceTypeName,
+			Date settlementStartDate, Date settlementEndDate) throws SQLException {
+
+		String sql = "SELECT NVL(SUM(NVL(a.amount, 0)), 0) AS total_amount " + "FROM attendance a "
+				+ "JOIN attendance_type t " + "ON a.attendance_type_id = t.attendance_type_id "
+				+ "WHERE a.employee_id = ? " + "AND t.attendance_type_name = ? " + "AND a.start_date BETWEEN ? AND ?";
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, employeeId);
+			pstmt.setString(2, attendanceTypeName);
+			pstmt.setDate(3, settlementStartDate);
+			pstmt.setDate(4, settlementEndDate);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				if (rs.next()) {
+					return rs.getLong("total_amount");
+				}
+			}
+		}
+
+		return 0L;
+	}
+
+	// 일용직 사원만 조회 (employment_type이 '일용직'인 경우) -나(에스더)코드
+	public List<EmployeeVO> selectDailyWorkers(Connection conn) throws SQLException {
+		// 쿼리에 e.basic_pay 추가
+		String sql = "SELECT e.employee_id, e.employment_type, e.korean_name, "
+				+ "d.department_name, p.position_name, e.basic_pay " + "FROM employee e "
+				+ "LEFT JOIN department d ON e.department_id = d.department_id "
+				+ "LEFT JOIN position p ON e.position_id = p.position_id " + "WHERE e.employment_type = '일용직' "// 다시
+																												// 칸고쿠고
+
+				+ "ORDER BY e.employee_id ASC";
+
+		List<EmployeeVO> list = new ArrayList<>();
+		try (PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				EmployeeVO vo = new EmployeeVO(rs.getInt("employee_id"), rs.getString("employment_type"),
+						rs.getString("korean_name"), rs.getString("department_name"), rs.getString("position_name"));
+
+				vo.setBasicPay(rs.getLong("basic_pay"));
+				list.add(vo);
+			}
+		}
+		return list;
+	}
+
+	// [추가] 1. 신규 등록 시 이름 중복 확인 [유진 코드]
+	public boolean isDuplicateName(Connection conn, String attendanceTypeName) throws SQLException {
+		String sql = "SELECT COUNT(*) FROM attendance_type WHERE attendance_type_name = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, attendanceTypeName);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next())
+					return rs.getInt(1) > 0;
+			}
+		}
+		return false;
+	}
+
+	// [추가] 2. 수정 시 자기 자신 제외하고 이름 중복 확인 [유진 코드]
+	public boolean isDuplicateNameForUpdate(Connection conn, int attendanceTypeId, String attendanceTypeName)
+			throws SQLException {
+		String sql = "SELECT COUNT(*) FROM attendance_type WHERE attendance_type_name = ? AND attendance_type_id != ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, attendanceTypeName);
+			pstmt.setInt(2, attendanceTypeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next())
+					return rs.getInt(1) > 0;
+			}
+		}
+		return false;
+	}
+
+	// vacation_type_id를 이용해 실제 attendance_type_id를 찾아오는 메서드 [유진]
+	private int getActualAttendanceTypeId(Connection conn, int vacationTypeId) throws SQLException {
+		String sql = "SELECT attendance_type_id FROM attendance_type WHERE vacation_type_id = ?";
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, vacationTypeId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt("attendance_type_id");
+				}
+			}
+		}
+		throw new SQLException("해당 휴가항목에 매핑된 근태항목이 없습니다. (vacation_type_id: " + vacationTypeId + ")");
+	}
 }
